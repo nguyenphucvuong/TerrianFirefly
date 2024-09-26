@@ -14,10 +14,6 @@ const ShareButtonComponent = (infoButton) => {
         infoButton.url,
         infoButton.text,
     ];
-
-
-
-
     const SharePop = () => {
         return isRow ? (
             <ButtonsComponent isPressable
