@@ -15,39 +15,6 @@ import EventRouter from './eventRouter';
 const HomeTab = () => {
   const inset = useSafeAreaInsets();
 
-  const AnimatedView = Animated.createAnimatedComponent(View);
-
-  // const animatedValue = React.useRef(new Animated.Value(0)).current;
-
-  const showAnimated = React.useRef(new Animated.Value(0)).current;
-  const hideAnimated = React.useRef(new Animated.Value(0)).current;
-  const showAnimatedSearch = React.useRef(new Animated.Value(0)).current;
-  const hideAnimatedSearch = React.useRef(new Animated.Value(0)).current;
-
-  const toggleExpand = (e) => {
-    // setExpanded(!expanded);
-    Animated.timing(showAnimated, {
-      toValue: e === 2 ? -100 : 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-    Animated.timing(hideAnimated, {
-      toValue: e === 2 ? 0 : 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-
-    Animated.timing(showAnimatedSearch, {
-      toValue: e === 2 ? 0 : -50,
-      duration: 100,
-      useNativeDriver: true,
-    }).start();
-    Animated.timing(hideAnimatedSearch, {
-      toValue: e === 2 ? 1 : 0,
-      duration: 100,
-      useNativeDriver: true,
-    }).start();
-  };
 
   return (
     <>
@@ -86,11 +53,7 @@ const HomeTab = () => {
         </TouchableOpacity>
       </View>
       <Tab.Navigator
-        screenListeners={{
-          state: (e) => {
-            toggleExpand(e.data.state.index);
-          },
-        }}
+
         style={{ paddingTop: inset.top }}
         screenOptions={{
           tabBarLabelStyle: {
@@ -132,6 +95,7 @@ const HomeTab = () => {
           component={HomeScreen}
           options={{ title: 'Trang Chủ' }}
         />
+
 
         {/* <Tab.Screen
           name="eventTab"

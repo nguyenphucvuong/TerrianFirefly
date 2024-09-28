@@ -20,14 +20,14 @@ import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtC
 // import { AvatarEx } from '../component'
 // import RowComponent from '../RowComponent';
 
-const PictureScreen = () => {
+const PictureScreen = ({ navigation }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
     const { Data, Select } = route.params;
 
     const DataLength = Object.keys(Data).length;
     const inset = useSafeAreaInsets();
-    const navigation = useNavigation();
+    //const navigation = useNavigation();
 
     const handleIndex = num => {
         setIndex(num.nativeEvent.position + 1);

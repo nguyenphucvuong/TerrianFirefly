@@ -8,8 +8,6 @@ import PostViewComponent from "../component/PostViewComponent";
 const HomeScreen = () => {
 
   return (
-
-
     <ScrollView
       style={[{
       }]}
@@ -28,6 +26,6 @@ const HomeScreen = () => {
   );
 };
 
-export default React.memo(HomeScreen);
+export default HomeScreen;
 
 

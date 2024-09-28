@@ -15,156 +15,157 @@ import ShareButtonComponent from './shareBox/ShareButtonComponent';
 
 const MoreOptionPostComponent = () => {
 
-    // const [isVisible, setIsVisible] = useState(false);
-    let isVisible = false;
+    const [isVisible, setIsVisible] = useState(false);
+    // let isVisible = false;
     const translateY = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
     // const translateY = useRef(new Animated.Value(0)).current; // Start offscreen
 
 
     const handleShowInput = () => {
-        // setIsVisible(true);
-        isVisible = !isVisible;
+
+        // isVisible = !isVisible;
         Animated.timing(translateY, {
             toValue: 0,
-            duration: 300,
+            duration: 400,
             useNativeDriver: true,
-            easing: Easing.inOut(Easing.ease),
-        }).start();
-        console.log(isVisible)
+        }).start(setIsVisible(true));
     };
 
     const handleHideInput = () => {
-        isVisible = !isVisible
+        ;
+        // isVisible = !isVisible
         Animated.timing(translateY, {
             toValue: appInfo.heightWindows,
-            duration: 300,
+            duration: 400,
             useNativeDriver: true,
-            easing: Easing.inOut(Easing.ease),
-        }).start();
+        }).start(() => setIsVisible(false));
     };
-    const modalShow = () => {
-        <ModalPop
-            visible={isVisible}
-            transparent={true}
-            onRequestClose={handleHideInput}>
-            <Animated.View style={[styles.animatedContainer, { transform: [{ translateY }] }]}>
-                <RowComponent width={"100%"} height={"auto"} style={{
-                    // backgroundColor: "pink",
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}>
-                    <ButtonsComponent isButton onPress={handleHideInput}>
-                        <Image
-                            // eslint-disable-next-line no-undef
-                            source={require('../../assets/close_icon.png')}
-                            style={{
-                                height: 30,
-                                width: 30,
-                            }}
-                        />
-                    </ButtonsComponent>
-                    <Text style={{
-                        flex: 1,
-                        color: "gray",
-                        textAlign: "center",
-                        paddingRight: 30,
-                        // backgroundColor: 'pink',
-                        fontSize: 17,
-                        fontWeight: "bold",
-                    }}>
-                        Chia Sẻ Đến
-                    </Text>
-                </RowComponent>
 
-                <RowComponent width={"100%"} height={"auto"}
-                    style={{
-                        borderBottomWidth: 1,
-                        borderBottomColor: "rgba(0,0,0,0.1)",
-                        paddingVertical: 10,
+    const ModalShow = () => {
+        return (
+            <ModalPop
+                visible={isVisible}
+                transparent={true}
+                onRequestClose={handleHideInput}>
+                <Animated.View style={[styles.animatedContainer, { transform: [{ translateY }] }]}>
+                    <RowComponent width={"100%"} height={"auto"} style={{
+                        // backgroundColor: "pink",
+                        alignItems: "center",
+                        justifyContent: "center",
                     }}>
-                    <ScrollView
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        scrollEnabled={true}
-                        style={{
+                        <ButtonsComponent isButton onPress={handleHideInput}>
+                            <Image
+                                // eslint-disable-next-line no-undef
+                                source={require('../../assets/close_icon.png')}
+                                style={{
+                                    height: 30,
+                                    width: 30,
+                                }}
+                            />
+                        </ButtonsComponent>
+                        <Text style={{
+                            flex: 1,
+                            color: "gray",
+                            textAlign: "center",
+                            paddingRight: 30,
+                            // backgroundColor: 'pink',
+                            fontSize: 17,
+                            fontWeight: "bold",
                         }}>
-                        {/* Discord */}
-                        <ShareButtonComponent
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Discord"}
-                            onPress={() => console.log("Discord")} />
-                        {/* Facebook */}
-                        <ShareButtonComponent
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Facebook"}
-                            onPress={() => console.log("Facebook")} />
-                        {/* Twitter */}
-                        <ShareButtonComponent
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Twitter"}
-                            onPress={() => console.log("Twitter")} />
-                        {/* Reddit */}
-                        <ShareButtonComponent
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Reddit"}
-                            onPress={() => console.log("Reddit")} />
-                    </ScrollView>
-                </RowComponent>
-                <RowComponent width={"100%"} height={"auto"}
-                    style={{
-                        borderBottomWidth: 1,
-                        borderBottomColor: "rgba(0,0,0,0.1)",
-                    }}>
-                    <ScrollView
-                        horizontal={false}
-                        showsHorizontalScrollIndicator={false}
-                        scrollEnabled={true}
+                            Chia Sẻ Đến
+                        </Text>
+                    </RowComponent>
+
+                    <RowComponent width={"100%"} height={"auto"}
                         style={{
+                            borderBottomWidth: 1,
+                            borderBottomColor: "rgba(0,0,0,0.1)",
+                            paddingVertical: 10,
                         }}>
-                        {/* Discord */}
-                        <ShareButtonComponent
-                            isRow
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Discord"}
-                            onPress={() => console.log("Discord")} />
-                        {/* Facebook */}
-                        <ShareButtonComponent
-                            isRow
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Facebook"}
-                            onPress={() => console.log("Facebook")} />
-                        {/* Twitter */}
-                        <ShareButtonComponent
-                            isRow
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Twitter"}
-                            onPress={() => console.log("Twitter")} />
-                        {/* Reddit */}
-                        <ShareButtonComponent
-                            isRow
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Reddit"}
-                            onPress={() => console.log("Reddit")} />
-                        <ShareButtonComponent
-                            isRow
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Twitter"}
-                            onPress={() => console.log("Twitter")} />
-                        {/* Reddit */}
-                        <ShareButtonComponent
-                            isRow
-                            url={require('../../assets/discord_icon.png')}
-                            text={"Reddit"}
-                            onPress={() => console.log("Reddit")} />
-                    </ScrollView>
-                </RowComponent>
-            </Animated.View>
-        </ModalPop>
+                        <ScrollView
+                            horizontal={true}
+                            showsHorizontalScrollIndicator={false}
+                            scrollEnabled={true}
+                            style={{
+                            }}>
+                            {/* Discord */}
+                            <ShareButtonComponent
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Discord"}
+                                onPress={() => console.log("Discord")} />
+                            {/* Facebook */}
+                            <ShareButtonComponent
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Facebook"}
+                                onPress={() => console.log("Facebook")} />
+                            {/* Twitter */}
+                            <ShareButtonComponent
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Twitter"}
+                                onPress={() => console.log("Twitter")} />
+                            {/* Reddit */}
+                            <ShareButtonComponent
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Reddit"}
+                                onPress={() => console.log("Reddit")} />
+                        </ScrollView>
+                    </RowComponent>
+                    <RowComponent width={"100%"} height={"auto"}
+                        style={{
+                            borderBottomWidth: 1,
+                            borderBottomColor: "rgba(0,0,0,0.1)",
+                        }}>
+                        <ScrollView
+                            horizontal={false}
+                            showsHorizontalScrollIndicator={false}
+                            scrollEnabled={true}
+                            style={{
+                            }}>
+                            {/* Discord */}
+                            <ShareButtonComponent
+                                isRow
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Discord"}
+                                onPress={() => console.log("Discord")} />
+                            {/* Facebook */}
+                            <ShareButtonComponent
+                                isRow
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Facebook"}
+                                onPress={() => console.log("Facebook")} />
+                            {/* Twitter */}
+                            <ShareButtonComponent
+                                isRow
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Twitter"}
+                                onPress={() => console.log("Twitter")} />
+                            {/* Reddit */}
+                            <ShareButtonComponent
+                                isRow
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Reddit"}
+                                onPress={() => console.log("Reddit")} />
+                            <ShareButtonComponent
+                                isRow
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Twitter"}
+                                onPress={() => console.log("Twitter")} />
+                            {/* Reddit */}
+                            <ShareButtonComponent
+                                isRow
+                                url={require('../../assets/discord_icon.png')}
+                                text={"Reddit"}
+                                onPress={() => console.log("Reddit")} />
+                        </ScrollView>
+                    </RowComponent>
+                </Animated.View>
+            </ModalPop>
+        )
     }
 
-    useEffect(() => {
-        modalShow();
-    }, [isVisible])
+    // useEffect(() => {
+    //     modalShow();
+    // }, [isVisible])
 
     return (
         <>
@@ -184,11 +185,8 @@ const MoreOptionPostComponent = () => {
                     source={require('../../assets/dots_vertical-512.jpg')}
                     contentFit="cover" />
             </ButtonsComponent>
-
-            {modalShow()}
-
+            <ModalShow />
         </>
-
     )
 }
 

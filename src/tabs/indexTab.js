@@ -1,28 +1,47 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Image } from 'expo-image';
-
-
-import React from 'react'
-import { IndexRouter, EventTab, NewPost, NotiTab, PersonTab } from './'
-// import * from "";
+import React from 'react';
+import { EventTab, NewPost, NotiTab, PersonTab } from './';
+import HomeRouter from '../homeRouters/homeRouter';
+import { PictureScreen } from '../views';
+import HomeTab from '../homeRouters/homeTab';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
+const getRouteName = (route) => {
+    const routeName = getFocusedRouteNameFromRoute(route);
+    if (routeName == 'picture') {
+        return 'none';
+    }
+    return 'block';
+}
 
 const IndexTab = () => {
     return (
-        <Tab.Navigator screenOptions={{ headerShown: false }}>
+        <Tab.Navigator
+            initialRouteName='Home'
+            screenOptions={{
+                headerShown: false,
+                tabBarShowLabel: false,
+            }}>
             <Tab.Screen
                 name="Home"
-                component={IndexRouter}
-                options={{
+                component={HomeRouter}
+                options={({ route }) => ({
+                    tabBarStyle: {
+                        display: getRouteName(route),
+                    },
                     tabBarIcon: ({ focused }) => (
                         <Image
                             source={focused ? require('../../assets/bottomtabicons/homeC.png') : require('../../assets/bottomtabicons/home.png')}
-                            style={{ width: 25, height: 25 }} />
-                    )
-                }} />
+                            style={{ width: 25, height: 25 }}
+                        />
+                    ),
+                })}
+            />
             <Tab.Screen
                 name="Event"
                 component={EventTab}
@@ -30,9 +49,11 @@ const IndexTab = () => {
                     tabBarIcon: ({ focused }) => (
                         <Image
                             source={focused ? require('../../assets/bottomtabicons/eventC.png') : require('../../assets/bottomtabicons/event.png')}
-                            style={{ width: 25, height: 25 }} />
-                    )
-                }} />
+                            style={{ width: 25, height: 25 }}
+                        />
+                    ),
+                }}
+            />
             <Tab.Screen
                 name="NewPost"
                 component={NewPost}
@@ -40,9 +61,11 @@ const IndexTab = () => {
                     tabBarIcon: () => (
                         <Image
                             source={require('../../assets/bottomtabicons/plus.png')}
-                            style={{ width: 30, height: 30 }} />
-                    )
-                }} />
+                            style={{ width: 30, height: 30 }}
+                        />
+                    ),
+                }}
+            />
             <Tab.Screen
                 name="Noti"
                 component={NotiTab}
@@ -50,9 +73,11 @@ const IndexTab = () => {
                     tabBarIcon: ({ focused }) => (
                         <Image
                             source={focused ? require('../../assets/bottomtabicons/notiC.png') : require('../../assets/bottomtabicons/noti.png')}
-                            style={{ width: 25, height: 25 }} />
-                    )
-                }} />
+                            style={{ width: 25, height: 25 }}
+                        />
+                    ),
+                }}
+            />
             <Tab.Screen
                 name="Person"
                 component={PersonTab}
@@ -60,14 +85,13 @@ const IndexTab = () => {
                     tabBarIcon: ({ focused }) => (
                         <Image
                             source={focused ? require('../../assets/bottomtabicons/personC.png') : require('../../assets/bottomtabicons/person.png')}
-                            style={{ width: 25, height: 25 }} />
-                    )
-                }} />
-
+                            style={{ width: 25, height: 25 }}
+                        />
+                    ),
+                }}
+            />
         </Tab.Navigator>
-    )
-}
+    );
+};
 
-export default IndexTab
-
-const styles = StyleSheet.create({})
+export default IndexTab;
