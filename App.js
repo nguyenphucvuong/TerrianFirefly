@@ -14,6 +14,7 @@ const App = () => {
       <StatusBar barStyle={'default'} />
       {/* <IndexRouter /> */}
       <NavigationContainer >
+
         <IndexTab />
       </NavigationContainer >
 
