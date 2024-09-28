@@ -52,24 +52,9 @@ const HomeTab = () => {
   return (
     <>
       {/* Container */}
-      <AnimatedView
-        style={{
-          width: 50,
-          height: 50,
-          position: 'absolute',
-          right: 0,
-          top: inset.top,
-          zIndex: 999,
-          justifyContent: 'center',
-          alignItems: 'center',
-          transform: [{ translateY: showAnimatedSearch }],
-          opacity: hideAnimatedSearch,
-        }}
-      >
-        <Feather name="search" size={24} />
-      </AnimatedView>
 
-      <AnimatedView
+
+      <View
         style={{
           width: appInfo.widthWindows,
           height: 50,
@@ -78,12 +63,7 @@ const HomeTab = () => {
           left: 0,
           right: 0,
           zIndex: 999,
-          transform: [
-            {
-              translateY: showAnimated,
-            },
-          ],
-          opacity: hideAnimated,
+
         }}
       >
         {/* children */}
@@ -104,7 +84,7 @@ const HomeTab = () => {
           <View style={{ width: 10, height: 'auto' }} />
           <Text style={{ color: appcolor.textGray }}> Điểm danh</Text>
         </TouchableOpacity>
-      </AnimatedView>
+      </View>
       <Tab.Navigator
         screenListeners={{
           state: (e) => {
@@ -153,11 +133,11 @@ const HomeTab = () => {
           options={{ title: 'Trang Chủ' }}
         />
 
-        <Tab.Screen
+        {/* <Tab.Screen
           name="eventTab"
           component={EventRouter}
           options={{ title: 'Sự Kiện' }}
-        />
+        /> */}
       </Tab.Navigator>
     </>
   );
