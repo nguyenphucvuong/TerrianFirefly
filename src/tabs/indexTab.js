@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import React from 'react';
 
 import { EventTab, NewPost, NotiTab, PersonTab } from './';
-import HomeRouter from '../homeRouters/homeRouter';
+import IndexRouter from '../routers/indexRouter';
 
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
@@ -35,7 +35,7 @@ const IndexTab = () => {
             }}>
             <Tab.Screen
                 name="Home"
-                component={HomeRouter}
+                component={IndexRouter}
                 options={({ route }) => ({
                     tabBarStyle: {
                         display: getRouteName(route),
