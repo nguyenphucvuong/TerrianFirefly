@@ -1,12 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
 import { Image } from 'expo-image';
 import React from 'react';
+
 import { EventTab, NewPost, NotiTab, PersonTab } from './';
 import HomeRouter from '../homeRouters/homeRouter';
-import { PictureScreen } from '../views';
-import HomeTab from '../homeRouters/homeTab';
+
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
@@ -16,7 +15,7 @@ const getRouteName = (route) => {
     if (routeName == 'picture') {
         return 'none';
     }
-    return 'block';
+    return 'flex';
 }
 
 const IndexTab = () => {
@@ -26,6 +25,13 @@ const IndexTab = () => {
             screenOptions={{
                 headerShown: false,
                 tabBarShowLabel: false,
+                tabBarStyle: {
+                    position: "absolute",
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    overflow: 'hidden', // Đảm bảo không có phần thừa
+                },
+
             }}>
             <Tab.Screen
                 name="Home"
@@ -45,14 +51,15 @@ const IndexTab = () => {
             <Tab.Screen
                 name="Event"
                 component={EventTab}
-                options={{
+                options={({ route }) => ({
+
                     tabBarIcon: ({ focused }) => (
                         <Image
                             source={focused ? require('../../assets/bottomtabicons/eventC.png') : require('../../assets/bottomtabicons/event.png')}
                             style={{ width: 25, height: 25 }}
                         />
                     ),
-                }}
+                })}
             />
             <Tab.Screen
                 name="NewPost"

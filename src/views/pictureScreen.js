@@ -56,7 +56,6 @@ const PictureScreen = ({ navigation }) => {
             <PagerView style={{ flex: 1 }} initialPage={Select}
                 onPageSelected={handleIndex}>
                 {
-
                     Data.map((item, index) => (
                         <Image
                             key={index}
@@ -86,15 +85,12 @@ const PictureScreen = ({ navigation }) => {
 
                 <View style={{ height: "80%", flexDirection: "row" }}>
                     <View style={{ width: "80%", height: "100%", }} />
-
-
                     <View style={{ width: "20%", height: "100%", alignItems: 'center' }}>
                         <TouchableOpacity style={{ alignItems: "center", marginBottom: "10%" }}>
                             <Image source={{ uri: "https://avatars.githubusercontent.com/u/118148132?v=4" }}
                                 style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} />
                             <AndtDegisn name='pluscircle' color={appcolor.primary} size={17} style={{ width: 17, height: 17, backgroundColor: "white", borderRadius: 100, marginTop: "-15%" }} />
                         </TouchableOpacity>
-
                         <TouchableOpacity style={{ alignItems: "center" }}>
                             <AndtDegisn name='like1' color={"white"} size={30} />
                             <Text style={{ color: "white" }}>20</Text>
