@@ -5,6 +5,7 @@ const PersonTab = () => {
     return (
         <View>
             <Text>personTab</Text>
+            <Text>123</Text>
         </View>
     )
 }
