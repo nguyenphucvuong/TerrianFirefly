@@ -147,6 +147,14 @@ const AnimatedQuickCmtComponent = (info) => {
                         editable={false}
                     />
                 </Pressable>
+                {/* Quick Comment Box */}
+                <ModalPop
+                    visible={isVisible}
+                    transparent={true}
+                    onRequestClose={handleHideInput}
+                >
+                    <CmtBoxComponent translateY={translateY} handleHideInput={handleHideInput} />
+                </ModalPop>
 
             </RowComponent>
         </>

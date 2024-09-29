@@ -5,6 +5,7 @@ import { appInfo } from '../constains/appInfo'
 import RowComponent from './RowComponent';
 import { useNavigation } from '@react-navigation/native';
 import sizeImage from '../utils/sizeImage';
+import { Text, View } from 'react-native';
 
 const ImagesPostComponent = (imagesInfo) => {
     const navigation = useNavigation();
@@ -119,6 +120,72 @@ const ImagesPostComponent = (imagesInfo) => {
 
     }
 
+    const FourOrMoreImageContent = () => {
+        const MiniImgCount = () => {
+            return (
+                <RowComponent style={{
+                    position: "absolute",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    width: "auto",
+                    height: 15,
+                    right: 10,
+                    bottom: 10,
+                    borderRadius: 10,
+                    paddingHorizontal: "2%",
+                }}>
+                    <Image
+                        source={require("../../assets/bottomtabicons/mutiple-img-bursts.png")}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2 })}
+                        style={{
+                            width: 13,
+                            height: 13,
+                        }} />
+
+                    <Text style={{ marginLeft: 5, fontSize: 10, color: "white" }}>
+                        + {Data.length - 3}
+                    </Text>
+                </RowComponent>
+            )
+        }
+        return (
+            <RowComponent
+                maxHeight={appInfo.widthWindows * 0.6}
+                minHeight={imageHeight > 150 ? 150 : appInfo.widthWindows * 0.3}
+                style={{
+                    justifyContent: "space-between",
+                    overflow: "hidden",
+                    borderRadius: 10,
+                    height: imageHeight > 150 ? 150 : imageHeight,
+                }}>
+                <Image
+                    source={{ uri: Data[0] }}
+                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0 })}
+                    style={{
+                        width: "32%",
+                        height: "100%",
+                    }} />
+                <Image
+                    source={{ uri: Data[1] }}
+                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1 })}
+                    style={{
+                        width: "33%",
+                        height: "100%",
+                    }} />
+                <Image
+                    source={{ uri: Data[2] }}
+                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2 })}
+                    style={{
+                        width: "32%",
+                        height: "100%",
+                    }} />
+                {Data.length > 3 ? <MiniImgCount /> : <></>}
+
+            </RowComponent>
+        );
+    }
+
     if (Data.length === 0) {
         return <></>
     } else if (Data.length === 1) {
@@ -126,7 +193,7 @@ const ImagesPostComponent = (imagesInfo) => {
     } else if (Data.length === 2 || Data.length === 3) {
         return <TwoOrThreeImageContent />
     } else {
-        return <></>
+        return <FourOrMoreImageContent />
     }
 
 }

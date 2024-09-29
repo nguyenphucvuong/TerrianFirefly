@@ -2,6 +2,7 @@ import { createStackNavigator } from "@react-navigation/stack"
 import { PictureScreen } from "../views"
 import HomeTab from "./homeTab"
 import React from "react"
+import { View } from "react-native"
 
 const Stack = createStackNavigator()
 
@@ -10,7 +11,9 @@ const HomeRouter = () => {
     return (
         <Stack.Navigator
             initialRouteName="homeRouter"
-            screenOptions={{ headerShown: false, }}>
+            screenOptions={{
+                headerShown: false,
+            }}>
             <Stack.Screen name='homeRouter' component={HomeTab} />
             <Stack.Screen
                 name='picture'

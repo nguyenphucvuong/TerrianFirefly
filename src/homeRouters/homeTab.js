@@ -33,7 +33,6 @@ const HomeTab = () => {
 
         }}
       >
-        {/* children */}
 
         <TouchableOpacity
           style={{
@@ -53,7 +52,6 @@ const HomeTab = () => {
         </TouchableOpacity>
       </View>
       <Tab.Navigator
-
         style={{ paddingTop: inset.top }}
         screenOptions={{
           tabBarLabelStyle: {
@@ -65,8 +63,10 @@ const HomeTab = () => {
           tabBarIndicatorStyle: {
             backgroundColor: appcolor.primary,
             width: 0.2,
-            height: 4,
-            borderRadius: 100,
+            height: 2.5,
+            borderRadius: 30,
+            alignSelf: 'center',  // Center the indicator under the tab
+            marginHorizontal: 'auto', // Ensure the indicator is centered horizontally
           },
           tabBarItemStyle: {
             width: 'auto',
@@ -95,13 +95,6 @@ const HomeTab = () => {
           component={HomeScreen}
           options={{ title: 'Trang Chủ' }}
         />
-
-
-        {/* <Tab.Screen
-          name="eventTab"
-          component={EventRouter}
-          options={{ title: 'Sự Kiện' }}
-        /> */}
       </Tab.Navigator>
     </>
   );
