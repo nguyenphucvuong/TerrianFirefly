@@ -23,6 +23,7 @@ const ButtonsComponent = (infoButton) => {
         onPress={onPress}
         onLongPress={onLongPress}
         activeOpacity={0.6}
+        delayLongPress={500}
         style={[{
           color: color,
         }, style && style]}
@@ -40,6 +41,7 @@ const ButtonsComponent = (infoButton) => {
         onPress={onPress}
         onLongPress={onLongPress}
         activeOpacity={0.6}
+        delayLongPress={500}
         style={[{
           color: color,
         }, style && style]}

@@ -45,9 +45,9 @@ const AnimatedQuickCmtComponent = (info) => {
         return length === 0 ? <></> : view;
     }
     const [isVisible, setIsVisible] = useState(false);
-    const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
+    // const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
     const translateY = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
-    const translateYEmoji = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
+    // const translateYEmoji = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
 
     const handleShowPop = () => {
         setIsVisible(true);
@@ -57,22 +57,21 @@ const AnimatedQuickCmtComponent = (info) => {
             useNativeDriver: true,
         }).start();
     };
-    const handleShowPopEmoji = () => {
-        setIsShowEmojiBox(true);
-        Animated.timing(translateYEmoji, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-        }).start();
-    };
+    // const handleShowPopEmoji = () => {
+    //     setIsShowEmojiBox(true);
+    //     Animated.timing(translateYEmoji, {
+    //         toValue: 0,
+    //         duration: 300,
+    //         useNativeDriver: true,
+    //     }).start();
+    // };
 
     const setFalse = () => {
         setIsVisible(false);
-        setIsShowEmojiBox(false);
+        // setIsShowEmojiBox(false);
     }
 
     const handleLikePressed = () => {
-
         handleShowPop();
     }
 
@@ -83,11 +82,11 @@ const AnimatedQuickCmtComponent = (info) => {
             duration: 300,
             useNativeDriver: true,
         }).start(setFalse());
-        Animated.timing(translateYEmoji, {
-            toValue: appInfo.heightWindows,
-            duration: 300,
-            useNativeDriver: true,
-        }).start(setFalse());
+        // Animated.timing(translateYEmoji, {
+        //     toValue: appInfo.heightWindows,
+        //     duration: 300,
+        //     useNativeDriver: true,
+        // }).start(setFalse());
     };
 
 
@@ -135,9 +134,8 @@ const AnimatedQuickCmtComponent = (info) => {
                 <CmtBoxComponent translateY={translateY} handleHideInput={handleHidePop} />
             </ModalPop>
 
-
             {/* Emoji Box */}
-            <ModalPop
+            {/* <ModalPop
                 visible={isShowEmojiBox}
                 transparent={true}
                 onRequestClose={handleHidePop}
@@ -186,16 +184,14 @@ const AnimatedQuickCmtComponent = (info) => {
                     </RowComponent>
                 </Animated.View >
 
-            </ModalPop>
-
-
-
+            </ModalPop> */}
 
             {/* Like, Comment, View */}
             <HandleIsEmpty
                 length={data.post.idPost.length}
                 view={
-                    <PostButton toggleExpand={toggleExpand} handleShowPopEmoji={handleShowPopEmoji} data={data} />
+                    // <PostButton toggleExpand={toggleExpand} handleShowPopEmoji={handleShowPopEmoji} data={data} />
+                    <PostButton toggleExpand={toggleExpand} data={data} handleShowPop={handleShowPop} />
                 }
             />
         </>

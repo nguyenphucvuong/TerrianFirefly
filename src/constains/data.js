@@ -14,9 +14,10 @@ const user = {
     userId: "1",
     userName: "Cá Voi",
     avatar: "https://vnn-imgs-a1.vgcloud.vn/vnreview.vn/image/11/44/57/1144578.jpg",
+    hashtag: [
+    ],
 };
-const post =
-{
+const post = {
     idPost: "1",
     idUser: "1",
     creatAt: " 1 giờ trước - Honkai",
@@ -44,11 +45,25 @@ const post =
     emoji: {
         like: "10",
         heart: "2",
-        laugh: "3",
+        laugh: "133",
         sad: "5",
     },
+    view: "12350",
+};
+const hashtagPost = {
+    idHashtag: "1",
+    idPost: "1",
 };
 
+const hashtag = {
+    idHashtag: "1",
+    hashtag: "Honkai Impact 3rd",
+};
+
+const hashtagUser = {
+    idHashtag: "1",
+    idUser: "1",
+};
 const emoji = {
     idPost: "1",
     userId: "1",
@@ -74,6 +89,9 @@ export const data = {
     user: user,
     emoji: emoji,
     comment: comment,
+    hashtag: hashtag,
+    hashtagPost: hashtagPost,
+    hashtagUser: hashtagUser,
     texts: texts,
-    text: text
+    text: text,
 }
