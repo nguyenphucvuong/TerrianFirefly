@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { PictureScreen } from "../views"
-import HomeTab from './homeTab';
+import HomeTab from '../tabs/homeTab';
 
 const Stack = createStackNavigator();
 

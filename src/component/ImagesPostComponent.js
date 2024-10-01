@@ -10,7 +10,7 @@ import { Text, View } from 'react-native';
 const ImagesPostComponent = (imagesInfo) => {
     const navigation = useNavigation();
 
-    const [Data] = [imagesInfo.Data];
+    const [Data] = [imagesInfo.Data.post.images];
     const [imageWidth, setImageWidth] = useState(0);
     const [imageHeight, setImageHeight] = useState(0);
 
@@ -65,14 +65,14 @@ const ImagesPostComponent = (imagesInfo) => {
                     }}>
                     <Image
                         source={{ uri: Data[0] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0, info: imagesInfo.Data })}
                         style={{
                             width: "49%",
                             height: "100%",
                         }} />
                     <Image
                         source={{ uri: Data[1] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1, info: imagesInfo.Data })}
                         style={{
                             width: "49%",
                             height: "100%",
@@ -94,21 +94,21 @@ const ImagesPostComponent = (imagesInfo) => {
                     }}>
                     <Image
                         source={{ uri: Data[0] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0, info: imagesInfo.Data })}
                         style={{
                             width: "32%",
                             height: "100%",
                         }} />
                     <Image
                         source={{ uri: Data[1] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1, info: imagesInfo.Data })}
                         style={{
                             width: "33%",
                             height: "100%",
                         }} />
                     <Image
                         source={{ uri: Data[2] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2, info: imagesInfo.Data })}
                         style={{
                             width: "32%",
                             height: "100%",
@@ -136,8 +136,8 @@ const ImagesPostComponent = (imagesInfo) => {
                     paddingHorizontal: "2%",
                 }}>
                     <Image
-                        source={require("../../assets/bottomtabicons/mutiple-img-bursts.png")}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2 })}
+                        source={require("../../assets/bottomtabIcons/mutiple-img-bursts.png")}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2, info: imagesInfo.Data })}
                         style={{
                             width: 13,
                             height: 13,
@@ -161,21 +161,21 @@ const ImagesPostComponent = (imagesInfo) => {
                 }}>
                 <Image
                     source={{ uri: Data[0] }}
-                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0 })}
+                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0, info: imagesInfo.Data })}
                     style={{
                         width: "32%",
                         height: "100%",
                     }} />
                 <Image
                     source={{ uri: Data[1] }}
-                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1 })}
+                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1, info: imagesInfo.Data })}
                     style={{
                         width: "33%",
                         height: "100%",
                     }} />
                 <Image
                     source={{ uri: Data[2] }}
-                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2 })}
+                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2, info: imagesInfo.Data })}
                     style={{
                         width: "32%",
                         height: "100%",

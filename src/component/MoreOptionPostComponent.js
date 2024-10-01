@@ -56,7 +56,7 @@ const MoreOptionPostComponent = () => {
                         <ButtonsComponent isButton onPress={handleHideInput}>
                             <Image
                                 // eslint-disable-next-line no-undef
-                                source={require('../../assets/close_icon.png')}
+                                source={require('../../assets/appIcons/close_icon.png')}
                                 style={{
                                     height: 30,
                                     width: 30,
@@ -90,22 +90,22 @@ const MoreOptionPostComponent = () => {
                             }}>
                             {/* Discord */}
                             <ShareButtonComponent
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Discord"}
                                 onPress={() => console.log("Discord")} />
                             {/* Facebook */}
                             <ShareButtonComponent
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Facebook"}
                                 onPress={() => console.log("Facebook")} />
                             {/* Twitter */}
                             <ShareButtonComponent
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Twitter"}
                                 onPress={() => console.log("Twitter")} />
                             {/* Reddit */}
                             <ShareButtonComponent
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Reddit"}
                                 onPress={() => console.log("Reddit")} />
                         </ScrollView>
@@ -124,36 +124,36 @@ const MoreOptionPostComponent = () => {
                             {/* Discord */}
                             <ShareButtonComponent
                                 isRow
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Discord"}
                                 onPress={() => console.log("Discord")} />
                             {/* Facebook */}
                             <ShareButtonComponent
                                 isRow
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Facebook"}
                                 onPress={() => console.log("Facebook")} />
                             {/* Twitter */}
                             <ShareButtonComponent
                                 isRow
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Twitter"}
                                 onPress={() => console.log("Twitter")} />
                             {/* Reddit */}
                             <ShareButtonComponent
                                 isRow
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Reddit"}
                                 onPress={() => console.log("Reddit")} />
                             <ShareButtonComponent
                                 isRow
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Twitter"}
                                 onPress={() => console.log("Twitter")} />
                             {/* Reddit */}
                             <ShareButtonComponent
                                 isRow
-                                url={require('../../assets/discord_icon.png')}
+                                url={require('../../assets/appIcons/discord_icon.png')}
                                 text={"Reddit"}
                                 onPress={() => console.log("Reddit")} />
                         </ScrollView>
@@ -182,7 +182,7 @@ const MoreOptionPostComponent = () => {
                         width: "100%",
                         height: "100%",
                     }}
-                    source={require('../../assets/dots_vertical-512.jpg')}
+                    source={require('../../assets/appIcons/dots_vertical-512.jpg')}
                     contentFit="cover" />
             </ButtonsComponent>
             <ModalShow />

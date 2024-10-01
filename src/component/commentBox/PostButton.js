@@ -8,7 +8,7 @@ import { StyleGlobal } from '../../styles/StyleGlobal'
 
 
 const PostButton = (infoBtn) => {
-    const [toggleExpand] = [infoBtn.toggleExpand];
+    const [toggleExpand, handleShowPopEmoji] = [infoBtn.toggleExpand, infoBtn.handleShowPopEmoji];
     return (
         <RowComponent
             height={40}
@@ -33,7 +33,7 @@ const PostButton = (infoBtn) => {
                             width: 20,
                             height: 20,
                         }}
-                        source={require('../../../assets/view_icon_outside.png')}
+                        source={require('../../../assets/appIcons/view-out-post.png')}
                         contentFit="cover"
                     />
                 </ButtonsComponent>
@@ -71,7 +71,7 @@ const PostButton = (infoBtn) => {
                                 width: 20,
                                 height: 20,
                             }}
-                            source={require('../../../assets/comment_icon_outside.png')}
+                            source={require('../../../assets/appIcons/comment-out-post.png')}
                             contentFit="cover"
                         />
                     </ButtonsComponent>
@@ -94,7 +94,7 @@ const PostButton = (infoBtn) => {
                     }}>
                     <ButtonsComponent
                         onPress={toggleExpand}
-                        onLongPress={() => console.log("long press")}
+                        onLongPress={handleShowPopEmoji}
                         isButton
                         style={{ marginRight: "2%", }}
                     ><Image
@@ -102,7 +102,7 @@ const PostButton = (infoBtn) => {
                                 width: 20,
                                 height: 20,
                             }}
-                            source={require('../../../assets/like_icon_outside.png')}
+                            source={require('../../../assets/appIcons/like-out-post.png')}
                             contentFit="cover"
                         /></ButtonsComponent>
                     <Text

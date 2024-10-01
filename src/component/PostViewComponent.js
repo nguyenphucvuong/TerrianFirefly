@@ -46,8 +46,8 @@ const PostViewComponent = () => {
                     height={appInfo.widthWindows / 5.7}
                     style={{ alignItems: "center" }}
                 >
-                    <SkeletonComponent isAvatar Data={data.state.avatar}>
-                        <AvatarEx size={40} round={30} url={data.state.avatar} />
+                    <SkeletonComponent isAvatar Data={data.user.avatar}>
+                        <AvatarEx size={40} round={30} url={data.user.avatar} />
                     </SkeletonComponent>
 
                     <View
@@ -58,13 +58,13 @@ const PostViewComponent = () => {
                             paddingLeft: "3%",
                         }}
                     >
-                        <SkeletonComponent Data={data.state.userId}>
-                            <Text style={StyleGlobal.textName}>Tai tồ</Text>
-                            <Text style={StyleGlobal.textInfo}>1 giờ trước • Honkai</Text>
+                        <SkeletonComponent Data={data.user.userId}>
+                            <Text style={StyleGlobal.textName}>{data.user.userName}</Text>
+                            <Text style={StyleGlobal.textInfo}>{data.post.creatAt}</Text>
                         </SkeletonComponent>
                     </View>
 
-                    <SkeletonComponent Data={data.state.userId} isButton>
+                    <SkeletonComponent Data={data.user.userId} isButton>
                         <ButtonsComponent isButton onPress={handleAd}
                             style={{
                                 borderColor: "rgba(121,141,218,1)",
@@ -82,7 +82,7 @@ const PostViewComponent = () => {
                         </ButtonsComponent>
                     </SkeletonComponent>
 
-                    <SkeletonComponent Data={data.state.userId} isButton>
+                    <SkeletonComponent Data={data.user.userId} isButton>
                         <View
                             style={{
                                 flex: 1,
@@ -144,7 +144,7 @@ const PostViewComponent = () => {
 
                 {/* Image Content */}
                 <HandleIsEmpty
-                    length={data.state.images.length}
+                    length={data.post.images.length}
                     view={
                         <RowComponent
                             minHeight={appInfo.widthWindows * 0.45}
@@ -154,16 +154,16 @@ const PostViewComponent = () => {
                             style={{
                                 marginTop: "2%",
                             }}>
-                            <ImagesPostComponent Data={data.state.images} />
+                            <ImagesPostComponent Data={data} />
                         </RowComponent>}
                 />
 
                 {/* Hashtag */}
                 <RowComponent
-                    height={data.state.hashtag.length === 0 ? 0 : 45}
+                    height={data.post.hashtag.length === 0 ? 0 : 45}
                     width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
                 >
-                    <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={data.state.hashtag} />
+                    <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={data.post.hashtag} />
                 </RowComponent >
 
                 <AnimatedQuickCmtComponent />

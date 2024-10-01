@@ -17,6 +17,7 @@ import ImageViewer from 'react-native-image-zoom-viewer';
 
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
+import { data } from '../constains/data'
 import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtComponent'
 // import { AvatarEx } from '../component'
 // import RowComponent from '../RowComponent';
@@ -24,7 +25,7 @@ import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtC
 const PictureScreen = ({ }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
-    const { Data, Select } = route.params;
+    const { Data, Select, info } = route.params;
 
     const DataLength = Object.keys(Data).length;
     const inset = useSafeAreaInsets();
@@ -81,7 +82,9 @@ const PictureScreen = ({ }) => {
                 onChange={(idx) => setIndex(idx)}
                 enableSwipeDown={true}
                 onSwipeDown={() => navigation.goBack()}
+                onLongPress={() => console.log('onLongPress')}
             />
+
             <View style={{ flex: 1, position: 'absolute', zIndex: 999, bottom: 0, right: 0, left: 0, height: 300 }}>
                 <LinearGradient
                     start={{ x: 0, y: 0.2 }} end={{ x: 0, y: 1 }}
@@ -101,7 +104,7 @@ const PictureScreen = ({ }) => {
                     <View style={{ width: "80%", height: "100%", }} />
                     <View style={{ width: "20%", height: "100%", alignItems: 'center' }}>
                         <TouchableOpacity style={{ alignItems: "center", marginBottom: "10%" }}>
-                            <Image source={{ uri: "https://avatars.githubusercontent.com/u/118148132?v=4" }}
+                            <Image source={{ uri: info.user.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
                                 style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} />
                             <AndtDegisn name='pluscircle' color={appcolor.primary} size={17} style={{ width: 17, height: 17, backgroundColor: "white", borderRadius: 100, marginTop: "-15%" }} />
                         </TouchableOpacity>
@@ -124,6 +127,7 @@ const PictureScreen = ({ }) => {
                 </View>
 
             </View>
+
         </View>
 
     )

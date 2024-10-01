@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image } from 'expo-image';
 import React from 'react';
 
-import { EventTab, NewPost, NotiTab, PersonTab } from './';
+import { EventTab, NewPostTab, NotiTab, PersonTab } from './';
 import IndexRouter from '../routers/indexRouter';
 
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
@@ -42,7 +42,7 @@ const IndexTab = () => {
                     },
                     tabBarIcon: ({ focused }) => (
                         <Image
-                            source={focused ? require('../../assets/bottomtabicons/homeC.png') : require('../../assets/bottomtabicons/home.png')}
+                            source={focused ? require('../../assets/bottomtabIcons/homeC.png') : require('../../assets/bottomtabIcons/home.png')}
                             style={{ width: 25, height: 25 }}
                         />
                     ),
@@ -55,19 +55,19 @@ const IndexTab = () => {
 
                     tabBarIcon: ({ focused }) => (
                         <Image
-                            source={focused ? require('../../assets/bottomtabicons/eventC.png') : require('../../assets/bottomtabicons/event.png')}
+                            source={focused ? require('../../assets/bottomtabIcons/eventC.png') : require('../../assets/bottomtabIcons/event.png')}
                             style={{ width: 25, height: 25 }}
                         />
                     ),
                 })}
             />
             <Tab.Screen
-                name="NewPost"
-                component={NewPost}
+                name="NewPostTab"
+                component={NewPostTab}
                 options={{
                     tabBarIcon: () => (
                         <Image
-                            source={require('../../assets/bottomtabicons/plus.png')}
+                            source={require('../../assets/bottomtabIcons/plus.png')}
                             style={{ width: 30, height: 30 }}
                         />
                     ),
@@ -79,7 +79,7 @@ const IndexTab = () => {
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <Image
-                            source={focused ? require('../../assets/bottomtabicons/notiC.png') : require('../../assets/bottomtabicons/noti.png')}
+                            source={focused ? require('../../assets/bottomtabIcons/notiC.png') : require('../../assets/bottomtabIcons/noti.png')}
                             style={{ width: 25, height: 25 }}
                         />
                     ),
@@ -91,7 +91,7 @@ const IndexTab = () => {
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <Image
-                            source={focused ? require('../../assets/bottomtabicons/personC.png') : require('../../assets/bottomtabicons/person.png')}
+                            source={focused ? require('../../assets/bottomtabIcons/personC.png') : require('../../assets/bottomtabIcons/person.png')}
                             style={{ width: 25, height: 25 }}
                         />
                     ),

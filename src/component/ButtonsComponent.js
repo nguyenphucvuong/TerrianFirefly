@@ -75,7 +75,7 @@ const ButtonsComponent = (infoButton) => {
               height: 15,
             }}
             // eslint-disable-next-line no-undef
-            source={require('../../assets/hashtag_icon.png')}
+            source={require('../../assets/appIcons/hashtag_icon.png')}
             contentFit="cover" />
           <Text
             style={{
