@@ -5,7 +5,7 @@ import { Image } from 'expo-image'
 import RowComponent from '../RowComponent'
 import ButtonsComponent from '../ButtonsComponent'
 import { StyleGlobal } from '../../styles/StyleGlobal'
-import { data } from '../../constains/data'
+// import { data } from '../../constains/data'
 import { ModalPop } from '../../modals'
 import { appInfo } from '../../constains/appInfo'
 import { clearLogEntriesAsync } from 'expo-updates'
@@ -23,29 +23,29 @@ const formatNumber = (num) => {
         return num.toString(); // số bình thường
     }
 };
-const PostButton = (infoBtn) => {
+const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji }) => {
     // const [toggleExpand, handleShowPopEmoji] = [infoBtn.toggleExpand, infoBtn.handleShowPopEmoji];
-    const [toggleExpand, handleShowPop] = [infoBtn.toggleExpand, infoBtn.handleShowPop];
+    // const [toggleExpand, handleShowPop] = [infoBtn.toggleExpand, infoBtn.handleShowPop];
 
-
-    const dataPostView = formatNumber(data.post.view);
+    // console.log(post.emoji)
+    const dataPostView = formatNumber(post.view);
     const dataPostCmt = null; // chưa có dữ liệu tạm thời để trống
-    const dataPostEmoji = formatNumber(Number(data.post.emoji.like) + Number(data.post.emoji.heart) + Number(data.post.emoji.laugh) + Number(data.post.emoji.sad));
+    const dataPostEmoji = formatNumber(Number(post.emoji.like) + Number(post.emoji.heart) + Number(post.emoji.laugh) + Number(post.emoji.sad));
     const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
 
     const translateYEmoji = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
 
     const [isPressLike, setIsPressLike] = useState(false);
     const checkUserLike = () => {
-        if (data.emoji.idPost == data.post.idPost && data.emoji.userId == data.user.idUser && data.emoji.idPost != null && data.emoji.userId != null) {
-            if ((Number(data.emoji.like) + Number(data.emoji.heart) + Number(data.emoji.laugh) + Number(data.emoji.sad)) > 0) {
+        if (emoji.idPost == post.idPost && emoji.userId == user.idUser && emoji.idPost != null && emoji.userId != null) {
+            if ((Number(emoji.like) + Number(emoji.heart) + Number(emoji.laugh) + Number(emoji.sad)) > 0) {
                 setIsPressLike(true);
             } else {
                 setIsPressLike(false);
             }
         }
         else {
-            console.log("asdasdasdsadasd");
+            // console.log("asdasdasdsadasd");
             setIsPressLike(false);
         }
     }
@@ -58,33 +58,33 @@ const PostButton = (infoBtn) => {
 
     const handlePressLike = () => {
         if (isPressLike) {
-            console.log("false");
-            if (data.emoji.heart === 1) {
-                data.emoji.heart = 0;
-                data.post.emoji.heart--;
-                console.log("heart", data.emoji.heart);
+            // console.log("false");
+            if (emoji.heart === 1) {
+                emoji.heart = 0;
+                post.emoji.heart--;
+                // console.log("heart", emoji.heart);
             }
-            else if (data.emoji.like === 1) {
-                data.emoji.like = 0;
-                data.post.emoji.like--;
-                console.log("like", data.emoji.like);
+            else if (emoji.like === 1) {
+                emoji.like = 0;
+                post.emoji.like--;
+                // console.log("like", emoji.like);
             }
-            else if (data.emoji.sad === 1) {
-                data.emoji.sad = 0;
-                data.post.emoji.sad;
-                console.log("sad", data.emoji.sad);
+            else if (emoji.sad === 1) {
+                emoji.sad = 0;
+                post.emoji.sad;
+                // console.log("sad", emoji.sad);
             }
-            else if (data.emoji.laugh === 1) {
-                data.emoji.laugh = 0;
-                data.post.emoji.laugh--;
-                console.log("laugh", data.emoji.laugh);
+            else if (emoji.laugh === 1) {
+                emoji.laugh = 0;
+                post.emoji.laugh--;
+                // console.log("laugh", emoji.laugh);
             }
             setIsPressLike(false);
         } else {
             console.log("true");
-            data.emoji.like = 1;
-            data.post.emoji.like++;
-            console.log("like", data.emoji.like);
+            emoji.like = 1;
+            post.emoji.like++;
+            // console.log("like", emoji.like);
             setIsPressLike(true);
         }
         toggleExpand();

@@ -25,7 +25,12 @@ import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtC
 const PictureScreen = ({ }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
-    const { Data, Select, info } = route.params;
+    const { Data, Select, User, emoji } = route.params;
+    console.log(data.user.avatar)
+
+    // console.log(User)
+    // console.log(Select)
+    // console.log(Data)
 
     const DataLength = Object.keys(Data).length;
     const inset = useSafeAreaInsets();
@@ -36,7 +41,7 @@ const PictureScreen = ({ }) => {
     }
 
     {/* Image Viewer Versoin 1 */ }
-    const imageUrls = Data.map((item) => ({ url: item }));
+    const imageUrls = Data.images.map((item) => ({ url: item }));
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
             {/* Tab Status Bar */}
@@ -104,7 +109,7 @@ const PictureScreen = ({ }) => {
                     <View style={{ width: "80%", height: "100%", }} />
                     <View style={{ width: "20%", height: "100%", alignItems: 'center' }}>
                         <TouchableOpacity style={{ alignItems: "center", marginBottom: "10%" }}>
-                            <Image source={{ uri: info.user.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
+                            <Image source={{ uri: User.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
                                 style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} />
                             <AndtDegisn name='pluscircle' color={appcolor.primary} size={17} style={{ width: 17, height: 17, backgroundColor: "white", borderRadius: 100, marginTop: "-15%" }} />
                         </TouchableOpacity>
@@ -123,7 +128,7 @@ const PictureScreen = ({ }) => {
                     </View>
                 </View>
                 <View style={{ height: "20%" }} >
-                    {<AnimatedQuickCmtComponent isNomal />}
+                    {<AnimatedQuickCmtComponent isNomal post={data.user} user={User} emoji={emoji} />}
                 </View>
 
             </View>

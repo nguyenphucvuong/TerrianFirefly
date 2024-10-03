@@ -9,17 +9,18 @@ import {
 import { ModalPop } from '../../modals'
 import CmtBoxComponent from './CmtBoxComponent';
 
-import { data } from '../../constains/data'
+// import { data } from '../../constains/data'
 import PostButton from './PostButton';
 import { Image } from 'expo-image';
 
 
 
-const AnimatedQuickCmtComponent = (info) => {
+const AnimatedQuickCmtComponent = ({ isNomal, post, user, emoji }) => {
     // const [expanded, setExpanded] = useState(false);
-    const [isNomal] = [info.isNomal];
+    // const [isNomal] = [info.isNomal];
     var expanded = false;
     const animation = useRef(new Animated.Value(0)).current;
+
 
 
     const toggleExpand = (() => {
@@ -103,7 +104,7 @@ const AnimatedQuickCmtComponent = (info) => {
                         alignContent: "center",
                         justifyContent: "center",
                     }}>
-                    <AvatarEx size={40} round={30} url={data.user.avatar} style={{ marginRight: "3%" }} />
+                    <AvatarEx size={40} round={30} url={user.avatar} style={{ marginRight: "3%" }} />
                     <Pressable
                         onPress={handleLikePressed}
                         style={{
@@ -188,10 +189,10 @@ const AnimatedQuickCmtComponent = (info) => {
 
             {/* Like, Comment, View */}
             <HandleIsEmpty
-                length={data.post.idPost.length}
+                length={post.idPost.length}
                 view={
                     // <PostButton toggleExpand={toggleExpand} handleShowPopEmoji={handleShowPopEmoji} data={data} />
-                    <PostButton toggleExpand={toggleExpand} data={data} handleShowPop={handleShowPop} />
+                    <PostButton toggleExpand={toggleExpand} post={post} user={user} emoji={emoji} handleShowPop={handleShowPop} />
                 }
             />
         </>
@@ -220,7 +221,7 @@ const AnimatedQuickCmtComponent = (info) => {
                     backgroundColor: "#D8D8D833",
                 }}
                 >
-                    <AvatarEx size={30} round={30} url={data.user.avatar} style={{ position: "relative", }} />
+                    <AvatarEx size={30} round={30} url={user.avatar} style={{ position: "relative", }} />
                     <View style={{ width: 10 }} />
                     <TextInput
                         placeholderTextColor={"white"}

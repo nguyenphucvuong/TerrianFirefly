@@ -19,7 +19,14 @@ import MoreOptionPostComponent from "./MoreOptionPostComponent";
 
 
 
-const PostViewComponent = () => {
+const PostViewComponent = ({ post, user, emoji }) => {
+    if (!post) {
+        return <></>;
+    }
+
+
+    const title = post?.title.substring(0, 120);
+    const content = post?.content.substring(0, 120);
 
 
     const HandleIsEmpty = (data) => {
@@ -46,8 +53,8 @@ const PostViewComponent = () => {
                     height={appInfo.widthWindows / 5.7}
                     style={{ alignItems: "center" }}
                 >
-                    <SkeletonComponent isAvatar Data={data.user.avatar}>
-                        <AvatarEx size={40} round={30} url={data.user.avatar} />
+                    <SkeletonComponent isAvatar Data={user.avatar}>
+                        <AvatarEx size={40} round={30} url={user.avatar} />
                     </SkeletonComponent>
 
                     <View
@@ -58,13 +65,13 @@ const PostViewComponent = () => {
                             paddingLeft: "3%",
                         }}
                     >
-                        <SkeletonComponent Data={data.user.userId}>
-                            <Text style={StyleGlobal.textName}>{data.user.userName}</Text>
-                            <Text style={StyleGlobal.textInfo}>{data.post.creatAt}</Text>
+                        <SkeletonComponent Data={user.userId}>
+                            <Text style={StyleGlobal.textName}>{user.userName}</Text>
+                            <Text style={StyleGlobal.textInfo}>{post?.createAt}</Text>
                         </SkeletonComponent>
                     </View>
 
-                    <SkeletonComponent Data={data.user.userId} isButton>
+                    <SkeletonComponent Data={user.userId} isButton>
                         <ButtonsComponent isButton onPress={handleAd}
                             style={{
                                 borderColor: "rgba(121,141,218,1)",
@@ -82,7 +89,7 @@ const PostViewComponent = () => {
                         </ButtonsComponent>
                     </SkeletonComponent>
 
-                    <SkeletonComponent Data={data.user.userId} isButton>
+                    <SkeletonComponent Data={user.userId} isButton>
                         <View
                             style={{
                                 flex: 1,
@@ -125,26 +132,26 @@ const PostViewComponent = () => {
 
                     }}>
 
-                    <SkeletonComponent Data={data.text}>
-                        <Text style={StyleGlobal.textTitleContent}>{data.text}</Text>
+                    <SkeletonComponent Data={title}>
+                        <Text style={StyleGlobal.textTitleContent}>{title}</Text>
                     </SkeletonComponent>
                 </RowComponent>
 
                 {/* Content */}
                 <RowComponent
-                    minHeight={data.texts ? 20 : 0}
-                    maxHeight={data.texts ? 35 : 0}
+                    minHeight={content ? 20 : 0}
+                    maxHeight={content ? 35 : 0}
                     style={{
                         flexDirection: "column",
 
                     }}>
-                    <HandleIsEmpty length={data.texts.length} view={<Text style={StyleGlobal.textContent}>{data.texts}</Text>} />
+                    <HandleIsEmpty length={content.length} view={<Text style={StyleGlobal.textContent}>{content}</Text>} />
 
                 </RowComponent>
 
                 {/* Image Content */}
                 <HandleIsEmpty
-                    length={data.post.images.length}
+                    length={post?.images.length}
                     view={
                         <RowComponent
                             minHeight={appInfo.widthWindows * 0.45}
@@ -154,19 +161,19 @@ const PostViewComponent = () => {
                             style={{
                                 marginTop: "2%",
                             }}>
-                            <ImagesPostComponent Data={data} />
+                            <ImagesPostComponent post={post} user={user} emoji={emoji} />
                         </RowComponent>}
                 />
 
                 {/* Hashtag */}
                 <RowComponent
-                    height={data.post.hashtag.length === 0 ? 0 : 45}
+                    height={post?.hashtag.length === 0 ? 0 : 45}
                     width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
                 >
-                    <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={data.post.hashtag} />
+                    <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
                 </RowComponent >
 
-                <AnimatedQuickCmtComponent />
+                <AnimatedQuickCmtComponent post={post} user={user} emoji={emoji} />
 
             </View>
         </View >
