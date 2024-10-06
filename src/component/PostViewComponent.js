@@ -16,7 +16,7 @@ import {
 
 import RowComponent from "../component/RowComponent";
 import AnimatedQuickCmtComponent from "./commentBox/AnimatedQuickCmtComponent";
-import MoreOptionPostComponent from "./MoreOptionPostComponent";
+import MoreOptionPostComponent from "./moreOptionBox/MoreOptionPostComponent";
 
 
 
@@ -91,26 +91,21 @@ const PostViewComponent = ({ post, user, emoji }) => {
                             }}
                         >
                             <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
-
                         </ButtonsComponent>
                     </SkeletonComponent>
 
                     <SkeletonComponent Data={user.userId} isButton>
                         <View
                             style={{
-                                flex: 1,
-                                width: "100%",
-                                height: "100%",
+                                width: "10%",
+                                height: "30%",
                                 justifyContent: "center",
                                 alignItems: "center",
                             }}
                         >
                             <MoreOptionPostComponent />
-
                         </View>
                     </SkeletonComponent>
-
-
                 </RowComponent>
 
                 {/* Content Title */}
