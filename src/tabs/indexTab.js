@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 
 const getRouteName = (route) => {
     const routeName = getFocusedRouteNameFromRoute(route);
-    if (routeName == 'picture') {
+    if (routeName == 'picture' || routeName == 'DetailPost') {
         return 'none';
     }
     return 'flex';

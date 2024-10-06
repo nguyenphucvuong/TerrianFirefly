@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View, } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, } from "react-native";
 import React from "react";
+import { useNavigation } from '@react-navigation/native';
 
 
 import { appInfo } from "../constains/appInfo";
@@ -24,6 +25,8 @@ const PostViewComponent = ({ post, user, emoji }) => {
         return <></>;
     }
 
+    const navigation = useNavigation();
+
 
     const title = post?.title.substring(0, 120);
     const content = post?.content.substring(0, 120);
@@ -39,6 +42,9 @@ const PostViewComponent = ({ post, user, emoji }) => {
     };
 
 
+    const handleNagigateDetailPost = () => {
+        navigation.navigate("DetailPost", { Data: post, User: user, emoji: emoji });
+    }
 
 
     return (
@@ -99,22 +105,6 @@ const PostViewComponent = ({ post, user, emoji }) => {
                                 alignItems: "center",
                             }}
                         >
-                            {/* <ButtonsComponent isButton onPress={handleAd}
-                                style={{
-                                    borderRadius: 30,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    width: "30%",
-                                    height: "30%",
-                                }}>
-                                <Image
-                                    style={{
-                                        width: "100%",
-                                        height: "100%",
-                                    }}
-                                    source={require('../../assets/dots_vertical-512.jpg')}
-                                    contentFit="cover" />
-                            </ButtonsComponent> */}
                             <MoreOptionPostComponent />
 
                         </View>
@@ -132,8 +122,8 @@ const PostViewComponent = ({ post, user, emoji }) => {
 
                     }}>
 
-                    <SkeletonComponent Data={title}>
-                        <Text style={StyleGlobal.textTitleContent}>{title}</Text>
+                    <SkeletonComponent Data={"title"}>
+                        <Text style={StyleGlobal.textTitleContent} onPress={handleNagigateDetailPost}>{title}</Text>
                     </SkeletonComponent>
                 </RowComponent>
 
@@ -145,7 +135,7 @@ const PostViewComponent = ({ post, user, emoji }) => {
                         flexDirection: "column",
 
                     }}>
-                    <HandleIsEmpty length={content.length} view={<Text style={StyleGlobal.textContent}>{content}</Text>} />
+                    <HandleIsEmpty length={content.length} view={<Text style={StyleGlobal.textContent} onPress={handleNagigateDetailPost}>{content}</Text>} />
 
                 </RowComponent>
 

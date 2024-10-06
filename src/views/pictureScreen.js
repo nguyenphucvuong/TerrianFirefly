@@ -12,6 +12,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from "expo-linear-gradient";
+import { CameraRoll } from '@react-native-camera-roll/camera-roll'
 import { Modal } from 'react-native';
 import ImageViewer from 'react-native-image-zoom-viewer';
 
@@ -26,7 +27,8 @@ const PictureScreen = ({ }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
     const { Data, Select, User, emoji } = route.params;
-    console.log(data.user.avatar)
+
+    const [isVisible, setIsVisible] = useState(false);
 
     // console.log(User)
     // console.log(Select)
@@ -40,13 +42,17 @@ const PictureScreen = ({ }) => {
         setIndex(num.nativeEvent.position + 1);
     }
 
+    const handleTouchOnImage = () => {
+        setIsVisible(!isVisible);
+    }
+
     {/* Image Viewer Versoin 1 */ }
     const imageUrls = Data.images.map((item) => ({ url: item }));
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
             {/* Tab Status Bar */}
             <StatusBar barStyle={'default'} />
-            <View style={{
+            {isVisible && <View style={{
                 flexDirection: "row",
                 position: 'absolute',
                 zIndex: 999,
@@ -62,7 +68,7 @@ const PictureScreen = ({ }) => {
                 </View>
 
                 <Feather name='more-vertical' color={'white'} size={24} />
-            </View>
+            </View>}
 
             {/* Image Viewer Versoin 1 */}
             {/* <PagerView style={{ flex: 1 }} initialPage={Select}
@@ -87,10 +93,11 @@ const PictureScreen = ({ }) => {
                 onChange={(idx) => setIndex(idx)}
                 enableSwipeDown={true}
                 onSwipeDown={() => navigation.goBack()}
-                onLongPress={() => console.log('onLongPress')}
+                onClick={() => handleTouchOnImage()}
+                menuContext={{ saveToLocal: 'Lưu hình', cancel: 'Hủy' }}
             />
 
-            <View style={{ flex: 1, position: 'absolute', zIndex: 999, bottom: 0, right: 0, left: 0, height: 300 }}>
+            {isVisible && <View style={{ flex: 1, position: 'absolute', zIndex: 999, bottom: 0, right: 0, left: 0, height: 300 }}>
                 <LinearGradient
                     start={{ x: 0, y: 0.2 }} end={{ x: 0, y: 1 }}
                     colors={["transparent", "black"]}
@@ -131,7 +138,7 @@ const PictureScreen = ({ }) => {
                     {<AnimatedQuickCmtComponent isNomal post={data.user} user={User} emoji={emoji} />}
                 </View>
 
-            </View>
+            </View>}
 
         </View>
 
