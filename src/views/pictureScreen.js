@@ -1,5 +1,5 @@
 
-import { View, StatusBar, Text, TouchableOpacity } from 'react-native'
+import { View, StatusBar, Text, TouchableOpacity, Alert, Platform, PermissionsAndroid } from 'react-native'
 import React, { useState } from 'react'
 import { Image } from 'expo-image'
 
@@ -12,9 +12,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from "expo-linear-gradient";
-import { CameraRoll } from '@react-native-camera-roll/camera-roll'
 import { Modal } from 'react-native';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+
 
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
@@ -28,11 +30,7 @@ const PictureScreen = ({ }) => {
     const route = useRoute();
     const { Data, Select, User, emoji } = route.params;
 
-    const [isVisible, setIsVisible] = useState(false);
-
-    // console.log(User)
-    // console.log(Select)
-    // console.log(Data)
+    const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
 
     const DataLength = Object.keys(Data).length;
     const inset = useSafeAreaInsets();
@@ -41,6 +39,30 @@ const PictureScreen = ({ }) => {
     const handleIndex = num => {
         setIndex(num.nativeEvent.position + 1);
     }
+
+    const handleSaveImage = async (url) => {
+        try {
+            const { status } = await MediaLibrary.requestPermissionsAsync(); // Yêu cầu quyền truy cập thư viện
+            if (status !== 'granted') {
+                Alert.alert('Quyền bị từ chối!', 'Bạn cần cấp quyền truy cập để lưu hình ảnh.');
+                return;
+            }
+            const fileName = url.split('/').pop(); // Lấy tên file từ url
+            const fileUri = `${FileSystem.documentDirectory}${fileName}`; // Đường dẫn lưu file
+            const download = await FileSystem.downloadAsync(url, fileUri); // Tải file về để lưu vào thiết bị
+
+            if (download.status === 200) {
+                const asset = await MediaLibrary.createAssetAsync(download.uri);
+                await MediaLibrary.createAlbumAsync('Download', asset, false);
+                Alert.alert('Thành công', 'Hình ảnh đã được lưu thành công!');
+            } else {
+                Alert.alert('Lỗi', 'Không thể lưu hình ảnh.');
+            }
+        } catch (error) {
+            console.log('Lỗi lưu hình ảnh:', error);
+            Alert.alert('Lỗi', 'Không thể lưu hình ảnh.');
+        }
+    };
 
     const handleTouchOnImage = () => {
         setIsVisible(!isVisible);
@@ -95,6 +117,7 @@ const PictureScreen = ({ }) => {
                 onSwipeDown={() => navigation.goBack()}
                 onClick={() => handleTouchOnImage()}
                 menuContext={{ saveToLocal: 'Lưu hình', cancel: 'Hủy' }}
+                onSave={(url) => handleSaveImage(url)}
             />
 
             {isVisible && <View style={{ flex: 1, position: 'absolute', zIndex: 999, bottom: 0, right: 0, left: 0, height: 300 }}>
