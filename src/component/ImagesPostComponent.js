@@ -143,7 +143,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                     paddingHorizontal: "2%",
                 }}>
                     <Image
-                        source={require("../../assets/bottomtabIcons/mutiple-img-bursts.png")}
+                        source={require("../../assets/bottomtabicons/mutiple-img-bursts.png")}
                         onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 2 })}
                         style={{
                             width: 13,
