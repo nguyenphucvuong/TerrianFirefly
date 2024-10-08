@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-
 import { Animated, StyleSheet, Text, TextInput, View } from 'react-native'
 import React from 'react'
 import { Image } from 'expo-image';

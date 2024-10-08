@@ -5,8 +5,7 @@ import React from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { NavigationContainer } from '@react-navigation/native'
 
-
-import IndexTab from './src/tabs/indexTab'
+import StackNavigator from './src/stacks/StackNavigator'
 
 const App = () => {
   return (
@@ -14,8 +13,7 @@ const App = () => {
       <StatusBar barStyle={'default'} />
       {/* <IndexRouter /> */}
       <NavigationContainer >
-
-        <IndexTab />
+        <StackNavigator />
       </NavigationContainer >
 
     </SafeAreaProvider>
