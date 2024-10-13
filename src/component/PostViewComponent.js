@@ -17,6 +17,7 @@ import {
 import RowComponent from "../component/RowComponent";
 import AnimatedQuickCmtComponent from "./commentBox/AnimatedQuickCmtComponent";
 import MoreOptionPostComponent from "./moreOptionBox/MoreOptionPostComponent";
+import YoutubePlayerComponent from "./YoutubePlayerComponent";
 
 
 
@@ -43,17 +44,51 @@ const PostViewComponent = ({ post, user, emoji }) => {
 
 
     const handleNagigateDetailPost = () => {
-        navigation.navigate("DetailPost", { Data: post, User: user, emoji: emoji });
+        navigation.navigate("DetailPost", { post: post, user: user, emoji: emoji });
     }
 
+    const IsYTView = () => {
+        return post?.isYT ? (
+            < RowComponent
+                minHeight={appInfo.widthWindows * 0.53}
+                height={"auto"}
+                style={{
+                    paddingTop: "2%",
+                    marginBottom: "2%",
+                }}
+            >
+                <YoutubePlayerComponent url={post?.content} />
+            </ RowComponent>
+        ) : (
+            <RowComponent
+                minHeight={post?.images.length == 0 ? 0 : appInfo.widthWindows * 0.45}
+                height={"auto"}
+                maxHeight={250}
+                // backgroundColor={"red"}
+                style={{
+                    marginTop: "2%",
+                }}>
+                <ImagesPostComponent post={post} user={user} emoji={emoji} />
+            </RowComponent>
+        );
+    }
 
     return (
         <View style={{
-            ...styles.box,
-            // backgroundColor: "pink",
+            width: "auto",
+            height: "auto",
+            borderBottomWidth: 1,
+            borderBottomColor: "rgba(0,0,0,0.1)",
+            backgroundColor: "pink",
         }}>
 
-            <View style={{ ...styles.content }}>
+            <View style={{
+                width: appInfo.widthWindows,
+                height: "auto",
+                minHeight: "100%",
+                maxHeight: appInfo.widthWindows * 1.4,
+                paddingHorizontal: "5%",
+            }}>
                 {/* Avatar */}
                 <RowComponent
                     height={appInfo.widthWindows / 5.7}
@@ -123,32 +158,32 @@ const PostViewComponent = ({ post, user, emoji }) => {
                 </RowComponent>
 
                 {/* Content */}
-                <RowComponent
-                    minHeight={content ? 20 : 0}
-                    maxHeight={content ? 35 : 0}
-                    style={{
-                        flexDirection: "column",
+                {!post?.isYT && post?.content != '' ?
+                    <RowComponent
+                        minHeight={content != '' && post?.isYT ? 20 : 0}
+                        maxHeight={content != '' && post?.isYT ? 35 : 0}
+                        style={{
+                            flexDirection: "column",
 
-                    }}>
-                    <HandleIsEmpty length={content.length} view={<Text style={StyleGlobal.textContent} onPress={handleNagigateDetailPost}>{content}</Text>} />
+                        }}>
+                        <Text style={StyleGlobal.textContent} onPress={handleNagigateDetailPost}>{content}</Text>
 
-                </RowComponent>
+                    </RowComponent>
+                    :
+                    <></>
+                }
+
 
                 {/* Image Content */}
-                <HandleIsEmpty
-                    length={post?.images.length}
+                {/* <HandleIsEmpty
+                    length={post?.images.length &&}
                     view={
-                        <RowComponent
-                            minHeight={appInfo.widthWindows * 0.45}
-                            height={"auto"}
-                            maxHeight={250}
-                            // backgroundColor={"red"}
-                            style={{
-                                marginTop: "2%",
-                            }}>
-                            <ImagesPostComponent post={post} user={user} emoji={emoji} />
-                        </RowComponent>}
-                />
+                        <IsYTView />
+                    }
+                /> */}
+                <IsYTView />
+
+                {/* Emoji */}
 
                 {/* Hashtag */}
                 <RowComponent
@@ -168,19 +203,5 @@ const PostViewComponent = ({ post, user, emoji }) => {
 export default React.memo(PostViewComponent)
 
 const styles = StyleSheet.create({
-    box: {
-        width: "auto",
-        height: "auto",
-        borderBottomWidth: 1,
-        borderBottomColor: "rgba(0,0,0,0.1)",
 
-    },
-    content: {
-        width: appInfo.widthWindows,
-        height: "auto",
-        minHeight: "100%",
-        maxHeight: appInfo.widthWindows * 1.4,
-        paddingHorizontal: "5%",
-
-    },
 })

@@ -47,6 +47,7 @@ const post = [
             "Impact",
             "3rd",
         ],
+        isYT: false,
         emoji: {
             like: "10",
             heart: "2",
@@ -81,6 +82,7 @@ const post = [
             "Impact",
             "3rd",
         ],
+        isYT: false,
         emoji: {
             like: "10",
             heart: "2",
@@ -111,6 +113,61 @@ const post = [
             "Impact",
             "3rd",
         ],
+        isYT: false,
+        emoji: {
+            like: "10",
+            heart: "2",
+            laugh: "133",
+            sad: "5",
+        },
+        view: "12350",
+    },
+    {
+        idPost: "1",
+        idUser: "1",
+        createAt: " 1 giờ trước - Honkai",
+        title: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum
+    aperiam exercitationem aliquid, repellendus quae alias dolores
+    eligendi ea beatae vitae quis doloremque quibusdam, molestias
+    non. Perspiciatis nemo laudantium rerum laboriosam.`,
+        content: `4kyNZjXN5xo`,
+        images: [
+        ],
+        hashtag: [
+            "Honkai Impact 3rd",
+            "Mihoyo",
+            "Honkai",
+            "Impact",
+            "3rd",
+        ],
+        isYT: true,
+        emoji: {
+            like: "10",
+            heart: "2",
+            laugh: "133",
+            sad: "5",
+        },
+        view: "12350",
+    },
+    {
+        idPost: "1",
+        idUser: "1",
+        createAt: " 1 giờ trước - Honkai",
+        title: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum
+    aperiam exercitationem aliquid, repellendus quae alias dolores
+    eligendi ea beatae vitae quis doloremque quibusdam, molestias
+    non. Perspiciatis nemo laudantium rerum laboriosam.`,
+        content: `4kyNZjXN5xo`,
+        images: [
+        ],
+        hashtag: [
+            "Honkai Impact 3rd",
+            "Mihoyo",
+            "Honkai",
+            "Impact",
+            "3rd",
+        ],
+        isYT: false,
         emoji: {
             like: "10",
             heart: "2",
@@ -139,7 +196,7 @@ const emoji = {
     userId: "1",
     like: "0",
     heart: "0",
-    laugh: "1",
+    laugh: "0",
     sad: "0",
 }
 

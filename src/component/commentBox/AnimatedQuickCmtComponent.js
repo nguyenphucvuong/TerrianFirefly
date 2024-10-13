@@ -15,7 +15,7 @@ import { Image } from 'expo-image';
 
 
 
-const AnimatedQuickCmtComponent = ({ isNomal, post, user, emoji }) => {
+const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style }) => {
     // const [expanded, setExpanded] = useState(false);
     // const [isNomal] = [info.isNomal];
     var expanded = false;
@@ -198,69 +198,97 @@ const AnimatedQuickCmtComponent = ({ isNomal, post, user, emoji }) => {
         </>
     ) : (
         <>
-            <RowComponent
-                height={"100%"}
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    alignContent: "center",
-                    justifyContent: "center",
-                    paddingHorizontal: "3%",
+            {!isImgIn ?
+                <RowComponent
+                    height={"100%"}
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        alignContent: "center",
+                        justifyContent: "center",
+                        paddingHorizontal: "3%",
 
-                }}>
-                <Pressable onPress={handleShowPop} style={{
-                    with: "100%",
-                    height: "80%",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    flex: 1,
-                    borderRadius: 30,
-                    borderWidth: 1,
-                    paddingLeft: 10,
-                    paddingRight: 10,
-                    backgroundColor: "#D8D8D833",
-                }}
-                >
-                    <AvatarEx size={30} round={30} url={user.avatar} style={{ position: "relative", }} />
-                    <View style={{ width: 10 }} />
-                    <TextInput
-                        placeholderTextColor={"white"}
-                        placeholder="Viết bình luận..."
-                        editable={false}
-                    />
-                </Pressable>
-                {/* Quick Comment Box */}
-                <ModalPop
-                    visible={isVisible}
-                    transparent={true}
-                    onRequestClose={handleHidePop}
-                >
-                    <CmtBoxComponent translateY={translateY} handleHideInput={handleHidePop} />
-                </ModalPop>
+                    }}>
+                    <Pressable onPress={handleShowPop} style={{
+                        with: "100%",
+                        height: "80%",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        flex: 1,
+                        borderRadius: 30,
+                        borderWidth: 1,
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                        backgroundColor: "#D8D8D833",
+                    }}
+                    >
+                        <AvatarEx size={30} round={30} url={user.avatar} style={{ position: "relative", }} />
+                        <View style={{ width: 10 }} />
+                        <TextInput
+                            placeholderTextColor={"white"}
+                            placeholder="Viết bình luận..."
+                            editable={false}
+                        />
+                    </Pressable>
+                    {/* Quick Comment Box */}
+                    <ModalPop
+                        visible={isVisible}
+                        transparent={true}
+                        onRequestClose={handleHidePop}
+                    >
+                        <CmtBoxComponent translateY={translateY} handleHideInput={handleHidePop} />
+                    </ModalPop>
 
-            </RowComponent>
+                </RowComponent>
+                :
+                <RowComponent
+                    height={"100%"}
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        alignContent: "center",
+                        justifyContent: "center",
+                        paddingHorizontal: "3%",
+
+                    }}>
+                    <AvatarEx size={33} round={30} url={user.avatar} style={{ position: "relative", marginRight: "3%" }} />
+
+                    <Pressable onPress={handleShowPop} style={{
+                        with: "100%",
+                        height: "65%",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        flex: 1,
+                        borderRadius: 30,
+                        borderWidth: 1,
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                        // backgroundColor: "#D8D8D833",
+                        borderColor: "#ABABAB",
+                    }}
+                    >
+                        <View style={{ width: 10 }} />
+                        <TextInput
+                            placeholderTextColor={"#ABABAB"}
+                            placeholder="Tôi có lời muốn nói..."
+                            editable={false}
+                        />
+                    </Pressable>
+                    {/* Quick Comment Box */}
+                    <ModalPop
+                        visible={isVisible}
+                        transparent={true}
+                        onRequestClose={handleHidePop}
+                    >
+                        <CmtBoxComponent translateY={translateY} handleHideInput={handleHidePop} />
+                    </ModalPop>
+
+                </RowComponent>}
         </>
     );
 };
 
 const styles = StyleSheet.create({
-    animatedContainer: {
-        flex: 1,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: '#fff',
-        padding: 20,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 10,
-
-    },
 
 })
 

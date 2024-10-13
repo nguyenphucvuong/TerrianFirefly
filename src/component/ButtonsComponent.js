@@ -53,7 +53,7 @@ const ButtonsComponent = (infoButton) => {
 
   const HashtagButtons = () => {
 
-    const renderHashtagButtons = ({ item }) => {
+    const RenderHashtagButtons = ({ item }) => {
       return (
         <TouchableOpacity
           onPress={onPress}
@@ -91,12 +91,13 @@ const ButtonsComponent = (infoButton) => {
 
     return (
       <FlatList
-        // scrollEnabled={true}
+        scrollEnabled={true}
         showsHorizontalScrollIndicator={false}
         data={hashtag}
-        renderItem={({ item }) => renderHashtagButtons({ item })}
+        renderItem={({ item }) => <RenderHashtagButtons item={item} />}
         keyExtractor={(item) => item}
         horizontal={true}
+        // numColumns={1}
         contentContainerStyle={{
           justifyContent: "flex-start",
           alignItems: "center",
