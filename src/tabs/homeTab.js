@@ -10,7 +10,6 @@ const Tab = createMaterialTopTabNavigator();
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { appcolor } from '../constains/appcolor';
 import { appInfo } from '../constains/appInfo';
-import EventRouter from './eventRouter';
 
 const HomeTab = () => {
   const inset = useSafeAreaInsets();

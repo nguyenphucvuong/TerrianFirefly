@@ -7,10 +7,17 @@ import { useNavigation } from '@react-navigation/native';
 import sizeImage from '../utils/sizeImage';
 import { Text, View } from 'react-native';
 
-const ImagesPostComponent = (imagesInfo) => {
+// const ImagesPostComponent = (imagesInfo) => {
+const ImagesPostComponent = ({ post, user, emoji }) => {
+    // console.log("userasasd: ", user)
+    const User = user;
+    const Data = post.images;
+    // console.log("userasasd: ", User) 
     const navigation = useNavigation();
 
-    const [Data] = [imagesInfo.Data];
+    // console.log(imagesInfo.Data)
+
+    // const [Data] = [imagesInfo.Data];
     const [imageWidth, setImageWidth] = useState(0);
     const [imageHeight, setImageHeight] = useState(0);
 
@@ -48,7 +55,7 @@ const ImagesPostComponent = (imagesInfo) => {
 
 
 
-        return <Image onTouchEndCapture={() => navigation.navigate("picture", { Data: [Data[0]] })}
+        return <Image onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
             source={{ uri: Data[0] }}
             style={CheckHeightReturnStyle}
         />
@@ -65,14 +72,14 @@ const ImagesPostComponent = (imagesInfo) => {
                     }}>
                     <Image
                         source={{ uri: Data[0] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
                         style={{
                             width: "49%",
                             height: "100%",
                         }} />
                     <Image
                         source={{ uri: Data[1] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
                         style={{
                             width: "49%",
                             height: "100%",
@@ -94,21 +101,21 @@ const ImagesPostComponent = (imagesInfo) => {
                     }}>
                     <Image
                         source={{ uri: Data[0] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
                         style={{
                             width: "32%",
                             height: "100%",
                         }} />
                     <Image
                         source={{ uri: Data[1] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
                         style={{
                             width: "33%",
                             height: "100%",
                         }} />
                     <Image
                         source={{ uri: Data[2] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, emoji: emoji })}
                         style={{
                             width: "32%",
                             height: "100%",
@@ -137,7 +144,7 @@ const ImagesPostComponent = (imagesInfo) => {
                 }}>
                     <Image
                         source={require("../../assets/bottomtabicons/mutiple-img-bursts.png")}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2 })}
+                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 2 })}
                         style={{
                             width: 13,
                             height: 13,
@@ -161,21 +168,21 @@ const ImagesPostComponent = (imagesInfo) => {
                 }}>
                 <Image
                     source={{ uri: Data[0] }}
-                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 0 })}
+                    onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
                     style={{
                         width: "32%",
                         height: "100%",
                     }} />
                 <Image
                     source={{ uri: Data[1] }}
-                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 1 })}
+                    onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
                     style={{
                         width: "33%",
                         height: "100%",
                     }} />
                 <Image
                     source={{ uri: Data[2] }}
-                    onTouchEndCapture={() => navigation.navigate("picture", { Data: Data, Select: 2 })}
+                    onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, emoji: emoji })}
                     style={{
                         width: "32%",
                         height: "100%",

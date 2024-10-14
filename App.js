@@ -11,7 +11,7 @@ import IndexTab from './src/tabs/indexTab'
 const App = () => {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={'default'} />
+      <StatusBar barStyle={'dark-content'} translucent={true} backgroundColor="transparent" />
       {/* <IndexRouter /> */}
       <NavigationContainer >
 

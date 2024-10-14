@@ -34,7 +34,7 @@ const CmtBoxComponent = (infoCmt) => {
                 <ButtonsComponent isButton onPress={handleHideInput}>
                     <Image
 
-                        source={require('../../../assets/close_icon.png')}
+                        source={require('../../../assets/appIcons/close_icon.png')}
                         style={{
                             height: 30,
                             width: 30,
