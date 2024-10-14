@@ -187,13 +187,13 @@ const PostViewComponent = ({ post, user, emoji }) => {
 
                 {/* Hashtag */}
                 <RowComponent
-                    height={post?.hashtag.length === 0 ? 0 : 45}
-                    width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
+                    height={post?.hashtag.length === 0 ? 0 : "auto"}
+                    width={appInfo.widthWindows - (appInfo.widthWindows * 0.1)}
                 >
                     <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
                 </RowComponent >
 
-                <AnimatedQuickCmtComponent post={post} user={user} emoji={emoji} />
+                <AnimatedQuickCmtComponent post={post} user={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
 
             </View>
         </View >

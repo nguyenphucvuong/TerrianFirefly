@@ -11,13 +11,7 @@ const FollowScreen = () => {
             }]}
             showsVerticalScrollIndicator={false}
         >
-            <View style={StyleGlobal.container}>
-                <PostViewComponent></PostViewComponent>
-                <PostViewComponent></PostViewComponent>
-                <PostViewComponent></PostViewComponent>
 
-
-            </View>
         </ScrollView>
 
     )

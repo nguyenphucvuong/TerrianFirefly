@@ -78,7 +78,7 @@ const PictureScreen = ({ }) => {
                 flexDirection: "row",
                 position: 'absolute',
                 zIndex: 999,
-                top: inset.top + 25, // Chưa tìm được cách nâng hiển thị index của ImageViewer lên, nên tạm thời hạ thanh navigate bar xuống
+                top: inset.top, // Chưa tìm được cách nâng hiển thị index của ImageViewer lên, nên tạm thời hạ thanh navigate bar xuống
                 padding: 10,
             }}>
                 <Feather name='x' color={'white'} size={24}

@@ -1,7 +1,11 @@
 import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import PagerView from 'react-native-pager-view'
+
+
 
 import Feather from 'react-native-vector-icons/Feather'
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -16,7 +20,9 @@ import AvatarComponent from '../component/AvatarComponent';
 import { ButtonsComponent } from '../component';
 import { StyleGlobal } from '../styles/StyleGlobal';
 import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtComponent';
-
+import { Image } from 'expo-image';
+import ImagesPaperComponent from '../component/ImagesPaperComponent';
+import YoutubePlayerComponent from '../component/YoutubePlayerComponent';
 
 const DetailPostScreen = () => {
     const inset = useSafeAreaInsets();
@@ -25,19 +31,58 @@ const DetailPostScreen = () => {
 
     const { post, user, emoji } = route;
 
+    // const [index, setIndex] = useState(0);
+    // const handleIndex = num => {
+    //     setIndex(num.nativeEvent.position + 1);
+    // }
+
+
     const handleAd = () => {
         console.log("toi day");
         // console.log(post, user, emoji);
         // console.log(post.hashtag)
     };
     return (
-        <View style={{ flex: 1, height: appInfo.heightWindows, backgroundColor: "green" }}>
-            <StatusBar barStyle={'dark-content'} />
+        <View style={{ flex: 1, backgroundColor: "green" }}>
+            <StatusBar barStyle={'dark-content'} backgroundColor={"white"} />
+            {/* Navigate bar */}
+            <RowComponent style={{
+                width: "100%",
+                position: 'absolute',
+                zIndex: 999,
+                top: inset.top,
+                paddingVertical: "4%",
+                alignItems: "center",
+                backgroundColor: "white",
+            }}>
+                <Ionicons name='chevron-back-outline' color={'black'} size={25}
+                    onPress={() => navigation.goBack()} />
 
+                <View
+                    style={{
+                        width: "85%",
+                        height: "100%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                </View>
+
+                <View
+                    style={{
+                        width: "10%",
+                        height: "70%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    <MoreOptionPostComponent />
+                </View>
+            </RowComponent>
             {/* Quick Comment */}
             <View style={{
                 flex: 1, position: 'absolute', zIndex: 999, bottom: 0, right: 0, left: 0, height: "7%",
-                // backgroundColor: "red",
+                backgroundColor: "white",
                 justifyContent: "flex-end",
             }}>
                 <View style={{ height: "100%", }} >
@@ -50,48 +95,12 @@ const DetailPostScreen = () => {
                 paddingHorizontal: "3.5%",
                 backgroundColor: "rgba(255, 255, 255, 1)",
             }}>
-
-
-                {/* Navigate bar */}
-                <RowComponent style={{
-                    width: "100%",
-                    position: 'absolute',
-                    zIndex: 999,
-                    top: inset.top,
-                    paddingVertical: "4%",
-                    alignItems: "center",
-                }}>
-                    <Ionicons name='chevron-back-outline' color={'black'} size={25}
-                        onPress={() => navigation.goBack()} />
-
-                    <View
-                        style={{
-                            width: "85%",
-                            height: "100%",
-                            justifyContent: "center",
-                            alignItems: "center",
-                        }}
-                    >
-                    </View>
-
-                    <View
-                        style={{
-                            width: "10%",
-                            height: "70%",
-                            justifyContent: "center",
-                            alignItems: "center",
-                        }}
-                    >
-                        <MoreOptionPostComponent />
-                    </View>
-                </RowComponent>
-
                 {/* Content Detail Post */}
                 <View style={{
                     flex: 1,
                     backgroundColor: "yellow",
-                    top: "12%",
-                    paddingBottom: 50,
+                    top: "8.5%",
+                    paddingBottom: "30%",
                 }}>
                     <View style={{
                         marginTop: "3%",
@@ -168,15 +177,56 @@ const DetailPostScreen = () => {
                             fontSize: 15,
                         }}>{post.content}</Text>
                     </View>
+
+                    {/* Image Post */}
+                    {/* <PagerView style={{
+                        height: 300,
+                        width: "auto",
+                        backgroundColor: "red",
+                    }}
+
+                        initialPage={index}
+                        onPageSelected={handleIndex}>
+                        {post.images.map((item, index) => (
+                            <Image
+                                key={index}
+                                source={{ uri: item }}
+                                contentFit='contain'
+                                style={{
+                                    width: appInfo.widthWindows,
+                                }}
+                            />
+                        ))}
+                    </PagerView> */}
+                    {!post.isYT ?
+                        post.images.length > 0 ?
+
+                            <ImagesPaperComponent post={post} />
+                            :
+                            <></>
+                        :
+                        < RowComponent
+                            minHeight={appInfo.widthWindows * 0.53}
+                            height={"auto"}
+                            style={{
+                                paddingTop: "2%",
+                                marginBottom: "2%",
+                            }}
+                        >
+                            <YoutubePlayerComponent url={post?.content} />
+                        </ RowComponent>
+                    }
+
                 </View >
 
+                {/* Hashtag */}
                 <RowComponent
-                    height={post.hashtag.length === 0 ? 0 : appInfo.heightWindows / 100 * 16}
+                    height={post.hashtag.length === 0 ? 0 : appInfo.heightWindows * 0.}
                     width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
                 >
-                    <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
+                    <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} isDetail />
                 </RowComponent >
-
+                <View style={{ height: 60, backgroundColor: "red" }} />
 
             </ScrollView >
         </View>
@@ -184,6 +234,6 @@ const DetailPostScreen = () => {
     )
 }
 
-export default DetailPostScreen
+export default React.memo(DetailPostScreen)
 
 const styles = StyleSheet.create({})

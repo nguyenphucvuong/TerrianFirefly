@@ -2,18 +2,20 @@ import { Text, TouchableOpacity, FlatList, Pressable } from "react-native";
 import React from "react";
 import { Image } from 'expo-image';
 
-const ButtonsComponent = (infoButton) => {
-  const [children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag,] = [
-    infoButton.children,
-    infoButton.color,
-    infoButton.style,
-    infoButton.isButton,
-    infoButton.isPressable,
-    infoButton.onPress,
-    infoButton.onLongPress,
-    infoButton.isHashtag,
-    infoButton.hashtag,
-  ];
+const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail }) => {
+  // const ButtonsComponent = (infoButton) => {
+  // const [children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail] = [
+  //   infoButton.children,
+  //   infoButton.color,
+  //   infoButton.style,
+  //   infoButton.isButton,
+  //   infoButton.isPressable,
+  //   infoButton.onPress,
+  //   infoButton.onLongPress,
+  //   infoButton.isHashtag,
+  //   infoButton.hashtag,
+  //   infoButton.isDetail,
+  // ];
 
   const PressableButton = () => {
 
@@ -87,23 +89,24 @@ const ButtonsComponent = (infoButton) => {
         </TouchableOpacity>
       )
     }
-
-
     return (
       <FlatList
-        scrollEnabled={true}
+        scrollEnabled={!isDetail}
         showsHorizontalScrollIndicator={false}
         data={hashtag}
         renderItem={({ item }) => <RenderHashtagButtons item={item} />}
         keyExtractor={(item) => item}
-        horizontal={true}
-        // numColumns={1}
+        horizontal={!isDetail}
+        numColumns={isDetail ? 2 : 0}
+        style={{
+          width: "95%",
+          height: "100%",
+          backgroundColor: "green",
+        }}
         contentContainerStyle={{
           justifyContent: "flex-start",
-          alignItems: "center",
           width: "auto",
           height: "100%",
-          // backgroundColor: "pink",
         }}
       />
 

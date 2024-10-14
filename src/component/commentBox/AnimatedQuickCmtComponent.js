@@ -15,7 +15,7 @@ import { Image } from 'expo-image';
 
 
 
-const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style }) => {
+const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style, handleNagigateDetailPost }) => {
     // const [expanded, setExpanded] = useState(false);
     // const [isNomal] = [info.isNomal];
     var expanded = false;
@@ -192,7 +192,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style 
                 length={post.idPost.length}
                 view={
                     // <PostButton toggleExpand={toggleExpand} handleShowPopEmoji={handleShowPopEmoji} data={data} />
-                    <PostButton toggleExpand={toggleExpand} post={post} user={user} emoji={emoji} handleShowPop={handleShowPop} />
+                    <PostButton toggleExpand={toggleExpand} post={post} user={user} emoji={emoji} handleShowPop={handleShowPop} handleNagigateDetailPost={handleNagigateDetailPost} />
                 }
             />
         </>

@@ -23,7 +23,7 @@ const formatNumber = (num) => {
         return num.toString(); // số bình thường
     }
 };
-const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji }) => {
+const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji, handleNagigateDetailPost }) => {
     // const [toggleExpand, handleShowPopEmoji] = [infoBtn.toggleExpand, infoBtn.handleShowPopEmoji];
     // const [toggleExpand, handleShowPop] = [infoBtn.toggleExpand, infoBtn.handleShowPop];
 
@@ -166,7 +166,7 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji }) => {
                         flexDirection: "row",
                     }}>
                     <ButtonsComponent isButton
-                        onPress={handleShowPop}
+                        onPress={handleNagigateDetailPost} //
                         style={{ marginHorizontal: "10%" }}>
                         <Image
                             style={{
