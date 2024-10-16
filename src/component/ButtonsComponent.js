@@ -2,18 +2,20 @@ import { Text, TouchableOpacity, FlatList, Pressable } from "react-native";
 import React from "react";
 import { Image } from 'expo-image';
 
-const ButtonsComponent = (infoButton) => {
-  const [children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag,] = [
-    infoButton.children,
-    infoButton.color,
-    infoButton.style,
-    infoButton.isButton,
-    infoButton.isPressable,
-    infoButton.onPress,
-    infoButton.onLongPress,
-    infoButton.isHashtag,
-    infoButton.hashtag,
-  ];
+const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail }) => {
+  // const ButtonsComponent = (infoButton) => {
+  // const [children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail] = [
+  //   infoButton.children,
+  //   infoButton.color,
+  //   infoButton.style,
+  //   infoButton.isButton,
+  //   infoButton.isPressable,
+  //   infoButton.onPress,
+  //   infoButton.onLongPress,
+  //   infoButton.isHashtag,
+  //   infoButton.hashtag,
+  //   infoButton.isDetail,
+  // ];
 
   const PressableButton = () => {
 
@@ -23,6 +25,7 @@ const ButtonsComponent = (infoButton) => {
         onPress={onPress}
         onLongPress={onLongPress}
         activeOpacity={0.6}
+        delayLongPress={500}
         style={[{
           color: color,
         }, style && style]}
@@ -40,6 +43,7 @@ const ButtonsComponent = (infoButton) => {
         onPress={onPress}
         onLongPress={onLongPress}
         activeOpacity={0.6}
+        delayLongPress={500}
         style={[{
           color: color,
         }, style && style]}
@@ -51,7 +55,7 @@ const ButtonsComponent = (infoButton) => {
 
   const HashtagButtons = () => {
 
-    const renderHashtagButtons = ({ item }) => {
+    const RenderHashtagButtons = ({ item }) => {
       return (
         <TouchableOpacity
           onPress={onPress}
@@ -75,7 +79,7 @@ const ButtonsComponent = (infoButton) => {
               height: 15,
             }}
             // eslint-disable-next-line no-undef
-            source={require('../../assets/hashtag_icon.png')}
+            source={require('../../assets/appIcons/hashtag_icon.png')}
             contentFit="cover" />
           <Text
             style={{
@@ -85,22 +89,24 @@ const ButtonsComponent = (infoButton) => {
         </TouchableOpacity>
       )
     }
-
-
     return (
       <FlatList
-        // scrollEnabled={true}
+        scrollEnabled={!isDetail}
         showsHorizontalScrollIndicator={false}
         data={hashtag}
-        renderItem={({ item }) => renderHashtagButtons({ item })}
+        renderItem={({ item }) => <RenderHashtagButtons item={item} />}
         keyExtractor={(item) => item}
-        horizontal={true}
+        horizontal={!isDetail}
+        numColumns={isDetail ? 2 : 0}
+        style={{
+          width: "95%",
+          height: "100%",
+          backgroundColor: "green",
+        }}
         contentContainerStyle={{
           justifyContent: "flex-start",
-          alignItems: "center",
           width: "auto",
           height: "100%",
-          // backgroundColor: "pink",
         }}
       />
 

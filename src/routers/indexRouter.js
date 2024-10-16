@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeRouter from './homeRouter';
-import { PictureScreen } from "../views"
+import { PictureScreen, DetailPostScreen } from "../views"
+import HomeTab from '../tabs/homeTab';
 
 const Stack = createStackNavigator();
 
@@ -12,7 +12,9 @@ const IndexRouter = () => {
                 display: route.name === 'picture' ? 'none' : 'flex',
             },
         })}>
-            <Stack.Screen name="HomeRouter" component={HomeRouter} />
+            <Stack.Screen name="HomeTab" component={HomeTab} />
+            <Stack.Screen name='picture' component={PictureScreen} />
+            <Stack.Screen name='DetailPost' component={DetailPostScreen} />
         </Stack.Navigator>
     );
 };
