@@ -5,6 +5,7 @@ import { data } from "../constains/data";
 
 
 
+
 import PostViewComponent from "../component/PostViewComponent";
 
 const HomeScreen = () => {
@@ -25,6 +26,13 @@ const HomeScreen = () => {
       setRefreshing(false);
     }, 2000);
   }, []);
+
+
+
+
+  const fetchData = () => {
+    vugndpsd
+  }
 
   return (
     <FlatList

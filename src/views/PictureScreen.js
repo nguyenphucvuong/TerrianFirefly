@@ -32,9 +32,11 @@ const PictureScreen = ({ }) => {
 
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
 
-    const DataLength = Object.keys(Data).length;
+    const DataLength = Object.keys(Data.images).length;
     const inset = useSafeAreaInsets();
     const navigation = useNavigation();
+
+    // console.log(Select);
 
     const handleIndex = num => {
         setIndex(num.nativeEvent.position + 1);
@@ -68,12 +70,14 @@ const PictureScreen = ({ }) => {
         setIsVisible(!isVisible);
     }
 
+
+
     {/* Image Viewer Versoin 1 */ }
     const imageUrls = Data.images.map((item) => ({ url: item }));
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
             {/* Tab Status Bar */}
-            <StatusBar barStyle={'default'} />
+            <StatusBar barStyle={'default'} backgroundColor={"black"} />
             {isVisible && <View style={{
                 flexDirection: "row",
                 position: 'absolute',
@@ -95,7 +99,7 @@ const PictureScreen = ({ }) => {
             {/* Image Viewer Versoin 1 */}
             {/* <PagerView style={{ flex: 1 }} initialPage={Select}
                 onPageSelected={handleIndex}>
-                {Data.map((item, index) => (
+                {Data.images.map((item, index) => (
                     <Image
                         key={index}
                         source={{ uri: item }}
