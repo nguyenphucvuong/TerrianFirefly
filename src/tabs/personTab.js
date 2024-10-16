@@ -1,14 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet} from 'react-native'
 import React from 'react'
+//Screen
+import { PersonScreen } from '../views'
 
 const PersonTab = () => {
     return (
-        <View>
-            <Text>personTab</Text>
-        </View>
+        <PersonScreen></PersonScreen>
     )
 }
-
 export default PersonTab
 
 const styles = StyleSheet.create({})

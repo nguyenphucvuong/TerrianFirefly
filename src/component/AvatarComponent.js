@@ -6,7 +6,7 @@ const AvatarComponent = (infoImage) => {
   const [size, round, url, style] = [infoImage.infoImage.size, infoImage.infoImage.round, infoImage.infoImage.url, infoImage.infoImage.style];
 
   return (
-    < Image
+    <Image
       style={
         [{
           width: size,

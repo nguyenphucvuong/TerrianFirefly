@@ -20,5 +20,8 @@ export const StyleGlobal = StyleSheet.create({
   text: {
     fontSize: 13,
   },
-
+  container: {
+    flex: 1,
+    margin: '4%',
+  },
 });
