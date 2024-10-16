@@ -18,7 +18,7 @@ const DATA = [
     { id: 7 },
     { id: 8 },
     { id: 9 },
-    { id: 10 },
+    { id: 10 }, 
 ];
 const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.08;
 const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.15;
