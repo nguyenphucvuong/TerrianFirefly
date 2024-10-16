@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 //style
 import { StyleGlobal } from '../styles/StyleGlobal'
 //components
-import { UserAvatarComponent, IconComponent, StatisticsComponent } from '../component';
+import { UserAvatarComponent, IconComponent, StatisticsComponent, AvatarEx } from '../component';
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
 
@@ -20,70 +20,64 @@ const DATA = [
     { id: 9 },
     { id: 10 },
 ];
+const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.08;
+const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.15;
 
-const Header_Max_Height = appInfo.heightWindows * 0.18;
-const Header_Min_Height = appInfo.heightWindows * 0.1;
-const Scroll_Distance = Header_Max_Height - Header_Min_Height;
 
-const DynamicHeader = ({ value }) => {
-    const animatedHeaderHeight = value.interpolate({
-        inputRange: [0, Scroll_Distance],
-        outputRange: [Header_Max_Height, Header_Min_Height],
-        extrapolate: 'clamp',
-    });
-    const animatedOpacity = value.interpolate({
-        inputRange: [0, Scroll_Distance / 2, Scroll_Distance],
-        outputRange: [1, 0.5, 0],
-        extrapolate: 'clamp',
-    });
-    // source={{ uri: 'https://images4.alphacoders.com/973/973967.jpg' }}
-    return (
-        <View>
-            <Animated.View style={[styles.header, { height: animatedHeaderHeight }]}>
-
-                <Animated.View style={styles.overlay}>
-                    <Animated.View style={[styles.avatar, { opacity: animatedOpacity }]}>
-                        <UserAvatarComponent name={'ABC'} />
-                    </Animated.View>
-                    <View style={styles.setting}>
-                        <IconComponent name={'settings'} size={32} color={'#222222'} />
-                    </View>
-                </Animated.View>
-            </Animated.View>
-        </View>
-
-    );
-}
 const PersonScreen = () => {
     const navigation = useNavigation(); // Sử dụng hook navigation\
-    const srcollOffsetY = useRef(new Animated.Value(0)).current;
+    const animatedValue = useRef(new Animated.Value(0)).current;
+    //Avatar
+    const avatarAnimation = {
+        opacity: animatedValue.interpolate({
+            inputRange: [0, UPPER_HEADER_HEIGHT],
+            outputRange: [1, 0],
+            extrapolate: 'clamp',
+        })
+    }
+    //Avatar Header
+    const avatarHeaderAnimation = {
+        opacity: animatedValue.interpolate({
+            inputRange: [0, LOWER_HEADER_HEIGHT],
+            outputRange: [0, 1],
+            extrapolate: 'clamp',
+        })
+    }
     return (
         <View style={{ flex: 1 }}>
             <SafeAreaView>
                 <View style={styles.upperHeaderPlacehholder} />
             </SafeAreaView>
-            <SafeAreaView style={styles.header}>
+            <ImageBackground style={styles.header} source={require('../../assets/background/background1.jpg')}>
                 <View style={styles.upperrHeader}>
-                    <ImageBackground>
-                        
-                    </ImageBackground>
+                    <Animated.View style={[styles.avatarHeader,avatarHeaderAnimation]}>
+                        <AvatarEx size={30} round={90} url={'https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg'} />
+                        <Text style={{ left: '20%', color: 'white', fontSize: 12 }}>Gia Huy</Text>
+                    </Animated.View>
+                    <View style={styles.setting}>
+                        <IconComponent name={'settings'} size={24} color={'white'} />
+                    </View>
                 </View>
                 <View style={styles.lowerHeader} />
-            </SafeAreaView>
+            </ImageBackground>
             <ScrollView
                 scrollEventThrottle={5}
                 showsHorizontalScrollIndicator={false}
-                onScroll={Animated.event([
-                    { nativeEvent: { contentOffset: { y: srcollOffsetY } } }
-                ], {
-                    useNativeDriver: false,
-                },)} >
+                onScroll={e => {
+                    const offsetY = e.nativeEvent.contentOffset.y;
+                    animatedValue.setValue(offsetY);
+                }}>
                 <View style={styles.paddingForHeader}></View>
                 <View style={styles.scrollViewContent}>
-                    <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
-                        <IconComponent name={'edit'} size={24} color={'#190AEF'} text={'Chỉnh sửa'} textColor={'#190AEF'}
-                            style={styles.button}
-                            onPress={() => navigation.navigate('InfomationScreen')} />
+                    <View style={{ flexDirection: 'row' }}>
+                        <Animated.View style={[styles.avatar, avatarAnimation]}>
+                            <UserAvatarComponent name={'ABC'} />
+                        </Animated.View>
+                        <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
+                            <IconComponent name={'edit'} size={24} color={'#190AEF'} text={'Chỉnh sửa'} textColor={'#190AEF'}
+                                style={styles.button}
+                                onPress={() => navigation.navigate('InfomationScreen')} />
+                        </View>
                     </View>
                     <View style={styles.iconRow}>
                         <IconComponent
@@ -121,7 +115,7 @@ const PersonScreen = () => {
 
 const styles = StyleSheet.create({
     upperHeaderPlacehholder: {
-        height: appInfo.heightWindows * 0.03,
+        height: appInfo.heightWindows * 0.04,
     },
     header: {
         position: 'absolute',
@@ -129,13 +123,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#000000',
     },
     paddingForHeader: {
-        height: appInfo.heightWindows * 0.1,
+        height: LOWER_HEADER_HEIGHT,
     },
     upperrHeader: {
-        height: appInfo.heightWindows * 0.03,
+        height: appInfo.heightWindows * 0.09,
     },
-    lowerHeader:{
-        height: appInfo.heightWindows * 0.1,
+    lowerHeader: {
+        height: LOWER_HEADER_HEIGHT,
     },
     scrollViewContent: {
         height: appInfo.heightWindows * 2,
@@ -151,8 +145,17 @@ const styles = StyleSheet.create({
         width: appInfo.widthWindows * 0.3
     },
     avatar: {
-        marginLeft: '5%',
-        top: appInfo.heightWindows * 0.08,
+        position: 'absolute',
+        marginRight: 'auto',
+        bottom: appInfo.heightWindows * 0.003,
+        left: appInfo.widthWindows * 0.05,
+    },
+    avatarHeader: {
+        position: 'absolute',
+        flexDirection: 'row',
+        left: '3%', // Căn phải cách một khoảng
+        top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
+        alignItems: 'center',
     },
     setting: {
         position: 'absolute', // Đặt nút settings ở vị trí tuyệt đối

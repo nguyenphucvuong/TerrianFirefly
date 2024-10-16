@@ -9,7 +9,7 @@ const UserAvatarComponent = ({onPress, style, name}) => {
         <TouchableOpacity style={[{alignItems: 'center'}, style]} onPress={onPress}>
             <AvatarEx size={80} round={80} url={'https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg'} />
             <Image
-                source={require('../../assets/frame_background.png')}
+                source={require('../../assets/frame/frame_background.png')}
                 style={{
                     height: 80,
                     width: 110,
