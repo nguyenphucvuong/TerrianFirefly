@@ -8,7 +8,6 @@ const ButtonFunctionComponent = ({ check = false, onPress, name, backgroundColor
                 {check && <Image style= {{width : 25, height: 25}} source={url} />}
                 <Text style={[styles.buttonText, { color: colorText }]}>{name}</Text>
             </View>
-
         </TouchableOpacity>
     )
 }
@@ -22,7 +21,7 @@ const styles = StyleSheet.create({
         elevation: 2, // Thêm độ bóng cho Android
     },
     buttonText: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
     },
 

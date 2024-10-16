@@ -1,4 +1,4 @@
-import { View, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native'
 import React from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 // Lấy chiều cao màn hình để tính toán
@@ -8,28 +8,32 @@ import { UserAvatarComponent, ButtonFunctionComponent, InputComponents } from '.
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 const InfomationScreen = () => {
+    const navigation = useNavigation(); // Sử dụng hook navigation
     return (
-        <View style={StyleGlobal.container} >
-            <UserAvatarComponent style={styles.avatar} name={'Zenot'} />
-            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                <ButtonFunctionComponent
-                    style={styles.button}
-                    backgroundColor={'#D9D9D9'}
-                    name={'Chọn Ảnh Đại Diện'}
-                    colorText={'#000000'} />
-                <ButtonFunctionComponent
-                    style={styles.button}
-                    backgroundColor={'#D9D9D9'}
-                    name={'Chọn Thành Tựu'}
-                    colorText={'#000000'} />
-            </View>
-            <InputComponents title={'Tên'} value={'Zenot'} />
-            <TouchableOpacity >
-                <InputComponents title={'Giới tính'} placeholder={'Chọn giới tính'} iconNameRight={'chevron-right'} editable={false} />
-            </TouchableOpacity>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={StyleGlobal.container} >
+                <UserAvatarComponent style={styles.avatar} />
+                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                    <ButtonFunctionComponent
+                        style={styles.button}
+                        backgroundColor={'#D9D9D9'}
+                        name={'Chọn Ảnh Đại Diện'}
+                        colorText={'#000000'} />
+                    <ButtonFunctionComponent
+                        style={styles.button}
+                        onPress={() => navigation.navigate('AchievementsScreen')}
+                        backgroundColor={'#D9D9D9'}
+                        name={'Chọn Thành Tựu'}
+                        colorText={'#000000'} />
+                </View>
+                <InputComponents title={'Tên'} value={'Zenot'} />
+                <TouchableOpacity >
+                    <InputComponents title={'Giới tính'} placeholder={'Chọn giới tính'} iconNameRight={'chevron-right'} editable={false} />
+                </TouchableOpacity>
 
-            <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button2} />
-        </View>
+                <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button2} />
+            </View>
+        </TouchableWithoutFeedback>
     )
 }
 const styles = StyleSheet.create({
