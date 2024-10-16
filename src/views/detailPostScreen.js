@@ -54,6 +54,7 @@ const DetailPostScreen = () => {
                 paddingVertical: "4%",
                 alignItems: "center",
                 backgroundColor: "white",
+                paddingHorizontal: "3.5%",
             }}>
                 <Ionicons name='chevron-back-outline' color={'black'} size={25}
                     onPress={() => navigation.goBack()} />
@@ -201,7 +202,7 @@ const DetailPostScreen = () => {
                     {!post.isYT ?
                         post.images.length > 0 ?
 
-                            <ImagesPaperComponent post={post} />
+                            <ImagesPaperComponent post={post} user={user} emoji={emoji} />
                             :
                             <></>
                         :

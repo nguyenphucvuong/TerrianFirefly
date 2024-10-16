@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import React from 'react';
 
 import { EventTab, NewPostTab, NotiTab, PersonTab } from './';
-import IndexRouter from '../routers/indexRouter';
+import { IndexRouter } from '../routers/indexRouter';
 
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 

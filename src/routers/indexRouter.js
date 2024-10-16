@@ -19,4 +19,6 @@ const IndexRouter = () => {
     );
 };
 
-export default IndexRouter;
+
+
+export { IndexRouter };
