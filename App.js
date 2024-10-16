@@ -6,7 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { NavigationContainer } from '@react-navigation/native'
 import "react-native-gesture-handler";
 import StackNavigator from './src/stacks/StackNavigator'
-
+ 
 const App = () => {
   return (
     <SafeAreaProvider>
