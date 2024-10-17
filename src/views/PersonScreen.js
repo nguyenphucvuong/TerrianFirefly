@@ -1,4 +1,4 @@
-import { StyleSheet, View, SafeAreaView, TouchableOpacity, ImageBackground, ScrollView, Animated, Text } from 'react-native'
+import { StyleSheet, View, TouchableWithoutFeedback, TouchableOpacity, ImageBackground, ScrollView, Animated, Text } from 'react-native'
 import React, { useRef } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 //style
@@ -46,18 +46,25 @@ const PersonScreen = () => {
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.upperHeaderPlacehholder} />
-            <ImageBackground style={styles.header} source={require('../../assets/background/background4.jpg')}>
-                <View style={styles.upperrHeader}>
-                    <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
-                        <AvatarEx size={30} round={90} url={'https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg'} />
-                        <Text style={{ left: '20%', color: 'white', fontSize: 12 }}>Gia Huy</Text>
-                    </Animated.View>
-                    <View style={styles.setting}>
-                        <IconComponent name={'settings'} size={24} color={'white'} />
+            <View style={styles.header}>
+                <ImageBackground source={require('../../assets/background/background4.jpg')} style={styles.imageBackground}>
+                    <View style={styles.upperrHeader}>
+                        <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
+                            <AvatarEx
+                                size={30}
+                                round={90}
+                                url={'https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg'}
+                            />
+                            <Text style={{ left: '20%', color: 'white', fontSize: 12 }}>Gia Huy</Text>
+                        </Animated.View>
                     </View>
-                </View>
-                <View style={styles.lowerHeader} />
-            </ImageBackground>
+                    <View style={styles.setting}>
+                        <IconComponent name={'settings'} size={24} color={'white'} onPress={() => navigation.navigate('InfomationScreen')} />
+                    </View>
+
+                    <View style={styles.lowerHeader} />
+                </ImageBackground>
+            </View>
             <ScrollView
                 scrollEventThrottle={5}
                 showsHorizontalScrollIndicator={false}
@@ -65,7 +72,11 @@ const PersonScreen = () => {
                     const offsetY = e.nativeEvent.contentOffset.y;
                     animatedValue.setValue(offsetY);
                 }}>
-                <View style={styles.paddingForHeader}></View>
+                <TouchableOpacity
+                    style={styles.paddingForHeader}
+                    onPress={() => navigation.navigate('BackgroundScreen')}>
+                </TouchableOpacity>
+
                 <View style={styles.scrollViewContent}>
                     <View style={{ flexDirection: 'row' }}>
                         <Animated.View style={[styles.avatar, avatarAnimation]}>
@@ -148,7 +159,7 @@ const styles = StyleSheet.create({
     avatarHeader: {
         position: 'absolute',
         flexDirection: 'row',
-        left: '3%', // Căn phải cách một khoảng
+        left: appInfo.heightWindows * 0.01,
         top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
         alignItems: 'center',
     },
@@ -156,6 +167,7 @@ const styles = StyleSheet.create({
         position: 'absolute', // Đặt nút settings ở vị trí tuyệt đối
         right: '3%', // Căn phải cách một khoảng
         top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
+        zIndex: 1,
     },
     iconRow: {
         marginLeft: appInfo.widthWindows * 0.03,
@@ -187,7 +199,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         justifyContent: 'center',
-        alignItems: 'center',
     },
 
 });
