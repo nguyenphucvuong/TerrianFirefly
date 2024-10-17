@@ -70,7 +70,7 @@ const IndexTab = () => {
                             source={require('../../assets/bottomtabicons/plus.png')}
                             style={{ width: 30, height: 30 }}
                         />
-                    ),
+                    ),tabBarStyle: { display: 'none' }, headerShown: false //Ẩn thanh tab 
                 }}
             />
             <Tab.Screen

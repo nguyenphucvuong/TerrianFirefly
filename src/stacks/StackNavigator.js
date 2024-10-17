@@ -36,7 +36,7 @@ const StackNavigator = () => {
                 options={({ navigation }) => ({
                     // Kết hợp các cấu hình từ cả hai hàm
                     ...IconBack("Danh Hiệu"),
-                    ...IconHeaderRight( "Lưu",
+                    ...IconHeaderRight("Lưu",
                         () => navigation.navigate('NickNameScreen')),
                 })}
             />

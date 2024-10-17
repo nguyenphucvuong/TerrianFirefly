@@ -1,11 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 import React from 'react'
-
+import { CreatePostScreen } from "../views/";
 const NewPostTab = () => {
     return (
-        <View>
-            <Text>newPostTab</Text>
-        </View>
+        <CreatePostScreen></CreatePostScreen>
     )
 }
 
