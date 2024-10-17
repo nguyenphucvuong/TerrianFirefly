@@ -35,7 +35,7 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
     );
   }
 
-  const NormalButton = () => {
+  const NormalTouchableOpacity = () => {
 
     return (
       <TouchableOpacity
@@ -114,7 +114,7 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
   }
 
   if (isButton) {
-    return <NormalButton />;
+    return <NormalTouchableOpacity />;
   } else if (isHashtag) {
     return <HashtagButtons />;
   } else if (isPressable) {
