@@ -18,7 +18,7 @@ const DATA = [
     { id: 7 },
     { id: 8 },
     { id: 9 },
-    { id: 10 }, 
+    { id: 10 },
 ];
 const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.08;
 const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.15;
@@ -45,12 +45,10 @@ const PersonScreen = () => {
     }
     return (
         <View style={{ flex: 1 }}>
-            <SafeAreaView>
-                <View style={styles.upperHeaderPlacehholder} />
-            </SafeAreaView>
-            <ImageBackground style={styles.header} source={require('../../assets/background/background1.jpg')}>
+            <View style={styles.upperHeaderPlacehholder} />
+            <ImageBackground style={styles.header} source={require('../../assets/background/background4.jpg')}>
                 <View style={styles.upperrHeader}>
-                    <Animated.View style={[styles.avatarHeader,avatarHeaderAnimation]}>
+                    <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
                         <AvatarEx size={30} round={90} url={'https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg'} />
                         <Text style={{ left: '20%', color: 'white', fontSize: 12 }}>Gia Huy</Text>
                     </Animated.View>
@@ -108,34 +106,31 @@ const PersonScreen = () => {
                 </View>
             </ScrollView >
         </View>
-
-
     )
 }
 
 const styles = StyleSheet.create({
     upperHeaderPlacehholder: {
-        height: appInfo.heightWindows * 0.04,
+        height: appInfo.heightWindows * 0.09,
     },
     header: {
         position: 'absolute',
         width: '100%',
         backgroundColor: '#000000',
     },
-    paddingForHeader: {
-        height: LOWER_HEADER_HEIGHT,
-    },
     upperrHeader: {
-        height: appInfo.heightWindows * 0.09,
+        height: appInfo.heightWindows * 0.05,
     },
     lowerHeader: {
-        height: LOWER_HEADER_HEIGHT,
+        height: appInfo.heightWindows * 0.14,
+    },
+    paddingForHeader: {
+        height: appInfo.heightWindows * 0.1,
     },
     scrollViewContent: {
         height: appInfo.heightWindows * 2,
         backgroundColor: 'white',
     },
-
     button: {
         justifyContent: 'center',
         borderColor: '#190AEF',
