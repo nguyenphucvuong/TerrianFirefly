@@ -30,6 +30,7 @@ import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from '../../src/firebase/FirebaseConfig';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPost, getPosts } from '../redux/slices/PostSlices';
+import { getHashtag } from '../redux/slices/HashtagSlices';
 import { Ionicons } from '@expo/vector-icons'; // Thư viện icon trong Expo
 
 
@@ -38,7 +39,9 @@ const { height } = Dimensions.get('window');
 const CreatePostScreen = () => {
 
   const dispatch = useDispatch();
-  const { status, error } = useSelector((state) => state.post);
+  const {post, status, error } = useSelector((state) => state.post);
+  const {hashtag, statusHashtag} = useSelector((state) => state.hashtag);
+
   // sethashTag((prevHashTags) => [
   //   ...prevHashTags,
   //   { id: '100', name: "hello" }  // Tạo ID duy nhất
@@ -141,7 +144,7 @@ const CreatePostScreen = () => {
     }
 
     const formattedDate = currentDate.toLocaleDateString('vi-VN');
-    const newData = {
+    const newDataPost = {
       //trạng thái mặc định
       status_post_id: 0,
       //lượt tương tác gán mặc định = 0
@@ -154,13 +157,14 @@ const CreatePostScreen = () => {
       //tiêu đề, nội dung (hoặc link ytb)
       title: textTitle,
       body: body,
-      hashtag: selectedHashTag, //chủ đề chọn
+      hashtag: selectedHashTag , //chủ đề chọn
       imgPost: images, // hình ảnh chọn
       isYtb: isEnabled, //là bài đăng dạng ảnh hay link ytb
       created_at: formattedDate,
     }; // Dữ liệu bạn muốn thêm
-    console.log(dispatch(getPosts()));
-    dispatch(createPost(newData));
+    console.log("loi: ",error);
+    console.log("status: ",status);
+    dispatch(createPost(newDataPost));
 
   };
 
@@ -174,7 +178,9 @@ const CreatePostScreen = () => {
     setIsEnabled(false);
     setImages([]);
     onchangeLink('');
-    navigation.goBack();
+    //navigation.goBack();
+    //dispatch(getHashtag());
+    //console.log("danh sách hashtag: ",hashtag);
   };
 
   //xử lý khi chọn một chủ đề
@@ -188,11 +194,11 @@ const CreatePostScreen = () => {
       } else {
 
         Dialog.show({
-                  type: ALERT_TYPE.WARNING,
-                  title: 'Cảnh báo',
-                  textBody: 'Tối đa thêm 5 chủ đề',
-                  button: 'Đóng',
-                })
+          type: ALERT_TYPE.WARNING,
+          title: 'Cảnh báo',
+          textBody: 'Tối đa thêm 5 chủ đề',
+          button: 'Đóng',
+        })
       }
     }
   };
@@ -409,7 +415,7 @@ const CreatePostScreen = () => {
         {/*Danh sách chủ đề cho trước*/}
         <View>
           <FlatList
-            data={hashTag}
+            data={hashtag}
             horizontal
             keyExtractor={(item) => item.id}
             renderItem={renderHashTagItem}
@@ -514,18 +520,17 @@ const CreatePostScreen = () => {
           />
         </View>
 
-        
+
 
         {/* Nếu switch bật thì hiển thị component nhập link */}
         {isEnabled ? (
           <View style={{ marginTop: 5 }}>
-            <TouchableOpacity title="Nhấn để dán link youtube" onPress={pasteFromClipboard} >
-              {/* <Text>Paste your link below:</Text> */}
+            <TouchableOpacity onPress={pasteFromClipboard} >
               <TextInput
-                style={{ borderColor: 'gray', borderWidth: 1, padding: 10, borderRadius: 10, }}
+                style={{ borderStyle: 'dashed', borderColor: '#ccc', borderWidth: 1, padding: 10, borderRadius: 10, color: 'black' }}
                 value={link}
                 onChangeText={text => onchangeLink(text)}
-                placeholder="Paste your link here"
+                placeholder="Nhấn để dán link youtube"
                 editable={false} //tắt nhập liệu
               />
             </TouchableOpacity>
@@ -538,6 +543,7 @@ const CreatePostScreen = () => {
               <TouchableOpacity style={styles.buttonAddImg} onPress={pickImage}>
                 <Ionicons name="add" size={40} color="white" />
               </TouchableOpacity>
+
               {images.map((imageUri, index) => (
                 <View key={index} style={styles.imageContainer}>
                   <TouchableOpacity onPress={() => openModal(imageUri)}>
@@ -563,9 +569,7 @@ const CreatePostScreen = () => {
           </View>
         </Modal>
         {/*End modal */}
-        <AlertNotificationRoot>
-          
-        </AlertNotificationRoot>
+        <AlertNotificationRoot></AlertNotificationRoot>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -683,7 +687,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   image: {
-    marginLeft: 10,
+    margin: 10,
     width: 70,
     height: 70,
     borderRadius: 10,
@@ -691,8 +695,8 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     position: 'absolute',
-    top: -5,
-    right: -5,
+    top: 5,
+    right: 5,
     backgroundColor: 'red',
     borderRadius: 15,
     width: 30,
@@ -729,12 +733,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   buttonAddImg: {
+    marginTop:10,
     width: 70,
     height: 70,
     backgroundColor: '#dcdcdc', // Màu nền của nút
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10, // Tạo góc bo tròn cho nút
+    
     //shadowColor: '#000',
     //shadowOffset: { width: 0, height: 2 },
     //shadowOpacity: 0.8,

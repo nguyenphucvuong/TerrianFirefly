@@ -40,7 +40,7 @@ export const getPosts = createAsyncThunk('data/getPosts', async () => {
     //const querySnapshot = await getDocs(collection(db, "Posts")); // Thay "Posts" bằng tên bộ sưu tập của bạn
     const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Lấy dữ liệu và ID của từng tài liệu
 
-    console.log("Danh sách post: ",postData[0].imgPost);
+    //console.log("Danh sách post: ",postData[0].imgPost);
     return postData; // Trả về danh sách bài đăng
   } catch (error) {
     console.error('Error fetching posts: ', error);
