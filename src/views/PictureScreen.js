@@ -92,7 +92,6 @@ const PictureScreen = ({ }) => {
                     {/* Image Index Versoin 1 */}
                     {/* <Text style={{ color: "white" }}>{index}/{DataLength}</Text> */}
                 </View>
-
                 <Feather name='more-vertical' color={'white'} size={24} />
             </View>}
 

@@ -36,63 +36,16 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji, handleNagi
     const translateYEmoji = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
 
     const [isPressLike, setIsPressLike] = useState(false);
-    const checkUserLike = () => {
-        if (emoji.idPost == post.idPost && emoji.userId == user.idUser && emoji.idPost != null && emoji.userId != null) {
-            if ((Number(emoji.like) + Number(emoji.heart) + Number(emoji.laugh) + Number(emoji.sad)) > 0) {
-                setIsPressLike(true);
-            } else {
-                setIsPressLike(false);
-            }
-        }
-        else {
-            // console.log("asdasdasdsadasd");
-            setIsPressLike(false);
-        }
-    }
-    useEffect(() => {
-        checkUserLike();
 
-    }, []);
-
-
-
-    const handlePressLike = () => {
-        if (isPressLike) {
-            // console.log("false");
-            if (emoji.heart === 1) {
-                emoji.heart = 0;
-                post.emoji.heart--;
-                // console.log("heart", emoji.heart);
-            }
-            else if (emoji.like === 1) {
-                emoji.like = 0;
-                post.emoji.like--;
-                // console.log("like", emoji.like);
-            }
-            else if (emoji.sad === 1) {
-                emoji.sad = 0;
-                post.emoji.sad;
-                // console.log("sad", emoji.sad);
-            }
-            else if (emoji.laugh === 1) {
-                emoji.laugh = 0;
-                post.emoji.laugh--;
-                // console.log("laugh", emoji.laugh);
-            }
-            setIsPressLike(false);
-        } else {
-            console.log("true");
-            emoji.like = 1;
-            post.emoji.like++;
-            // console.log("like", emoji.like);
-            setIsPressLike(true);
-        }
-        toggleExpand();
-    }
 
     const setFalse = () => {
         // setIsVisible(false);
         setIsShowEmojiBox(false);
+        setIsPressLike(false);
+    }
+    const handlePressLike = () => {
+        setIsPressLike(!isPressLike);
+        toggleExpand();
     }
 
     const handleShowPopEmoji = () => {

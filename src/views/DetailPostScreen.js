@@ -52,14 +52,15 @@ const DetailPostScreen = () => {
     }
 
     const [copiedText, setCopiedText] = useState('');
-    const copyToClipboard = async () => {
-        await Clipboard.setStringAsync(post.content);
+    const copyToClipboard = async (content) => {
+        await Clipboard.setStringAsync(content);
     };
 
     const fetchCopiedText = async () => {
         copyToClipboard();
         const text = await Clipboard.getStringAsync();
         setCopiedText(text);
+        console.log(copiedText)
         if (Platform.OS === 'android') {
             ToastAndroid.show('Đã sao chép!', ToastAndroid.SHORT);
         } else {
@@ -256,7 +257,7 @@ const DetailPostScreen = () => {
                         <Text style={{
                             fontSize: 15,
                         }}
-                            onLongPress={fetchCopiedText}
+                            onLongPress={() => fetchCopiedText(post.content)}
                         >{post.content}</Text>
                     </View>
 
@@ -361,8 +362,8 @@ const DetailPostScreen = () => {
                     }}>
                         <Text
                             style={{ fontSize: 15 }}
-                            onLongPress={fetchCopiedText}
-                        >{post.content}/aaa</Text>
+                        // onLongPress={(text) => fetchCopiedText(text.)}
+                        >askdhahsgdjahsgdjhaaa</Text>
                     </View>
                 </View>
                 {/* Comment Buttons */}
@@ -407,7 +408,7 @@ const DetailPostScreen = () => {
 
 
             </ScrollView >
-        </View>
+        </View >
 
     )
 }
