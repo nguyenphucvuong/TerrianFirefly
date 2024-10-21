@@ -10,7 +10,7 @@ import { Text, View } from 'react-native';
 // const ImagesPostComponent = (imagesInfo) => {
 const ImagesPostComponent = ({ post, user, emoji }) => {
     const User = user;
-    const Data = post.images;
+    const Data = post.imgPost;
     const navigation = useNavigation();
 
     // console.log(imagesInfo.Data)

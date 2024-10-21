@@ -35,13 +35,14 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
     );
   }
 
-  const NormalButton = () => {
+  const NormalTouchableOpacity = () => {
 
     return (
       <TouchableOpacity
         // onPress={onPress}
         onPress={onPress}
         onLongPress={onLongPress}
+        on
         activeOpacity={0.6}
         delayLongPress={500}
         style={[{
@@ -137,7 +138,7 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
     }
 
   if (isButton) {
-    return <NormalButton />;
+    return <NormalTouchableOpacity />;
   } else if (isHashtag) {
     return <HashtagButtons />;
   } else if (isPressable) {
