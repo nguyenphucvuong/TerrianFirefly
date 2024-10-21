@@ -190,9 +190,9 @@ const DetailPostScreen = () => {
 
                     <RowComponent style={{ height: 30, width: "100%", marginVertical: "3%" }}>
                         <AntDesign name='clockcircle' color={'#BFBFBF'} size={15} />
-                        <Text style={{ color: "#BFBFBF", fontSize: 12, marginRight: "15%", marginLeft: "2%" }}>{post.createAt}</Text>
+                        <Text style={{ color: "#BFBFBF", fontSize: 12, marginRight: "15%", marginLeft: "2%" }}>{post.created_at}</Text>
                         <AntDesign name='eye' color={'#BFBFBF'} size={20} style={{ bottom: ".5%" }} />
-                        <Text style={{ color: "#BFBFBF", fontSize: 12, marginLeft: "2%" }}>{post.view}</Text>
+                        <Text style={{ color: "#BFBFBF", fontSize: 12, marginLeft: "2%" }}>{post.count_view}</Text>
                     </RowComponent>
 
 
@@ -225,7 +225,7 @@ const DetailPostScreen = () => {
                             <Text style={{
                                 fontSize: 12,
                                 color: "#BFBFBF",
-                            }}>{post.createAt}</Text>
+                            }}>{post.created_at}</Text>
                         </View>
                         <View style={{
                             flex: 1,
@@ -257,8 +257,8 @@ const DetailPostScreen = () => {
                         <Text style={{
                             fontSize: 15,
                         }}
-                            onLongPress={() => fetchCopiedText(post.content)}
-                        >{post.content}</Text>
+                            onLongPress={() => fetchCopiedText(post.body)}
+                        >{post.body}</Text>
                     </View>
 
                     {/* Image Post */}
@@ -281,8 +281,8 @@ const DetailPostScreen = () => {
                             />
                         ))}
                     </PagerView> */}
-                    {!post.isYT ?
-                        post.images.length > 0 ?
+                    {!post.isYtb ?
+                        post.imgPost.length > 0 ?
                             <ImagesPaperComponent post={post} user={user} emoji={emoji} />
                             :
                             <></>
@@ -295,7 +295,7 @@ const DetailPostScreen = () => {
                                 marginBottom: "2%",
                             }}
                         >
-                            <YoutubePlayerComponent url={post?.content} />
+                            <YoutubePlayerComponent url={post?.body} />
                         </ RowComponent>
                     }
 
@@ -343,7 +343,7 @@ const DetailPostScreen = () => {
                             }}
                         >
                             <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.userName}</Text>
-                            <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{post?.createAt}</Text>
+                            <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{post?.created_at}</Text>
                         </View>
                         <View
                             style={{

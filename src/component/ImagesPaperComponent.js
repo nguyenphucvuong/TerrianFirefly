@@ -31,7 +31,6 @@ const ImagesPagerComponent = ({ post, user, emoji }) => {
             justifyContent: "center",
             alignItems: "center",
         }}>
-
             <PagerView
                 // onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: index, User: user, emoji: emoji })}
                 style={{
@@ -43,7 +42,7 @@ const ImagesPagerComponent = ({ post, user, emoji }) => {
                 onPageScrollStateChanged={handlePageScrollStateChanged}
             >
                 {
-                    post.images.map((item, index) => (
+                    post.imgPost.map((item, index) => (
                         <Image
                             onTouchEndCapture={handleChangeScreen}
                             key={index}
@@ -70,7 +69,7 @@ const ImagesPagerComponent = ({ post, user, emoji }) => {
                 right: 10,
                 top: 10,
             }}>
-                <Text style={{ color: "white", fontSize: 12 }}>{index + 1}/{post.images.length}</Text>
+                <Text style={{ color: "white", fontSize: 12 }}>{index + 1}/{post.imgPost.length}</Text>
 
             </View>
         </View>

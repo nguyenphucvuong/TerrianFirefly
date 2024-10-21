@@ -28,9 +28,9 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji, handleNagi
     // const [toggleExpand, handleShowPop] = [infoBtn.toggleExpand, infoBtn.handleShowPop];
 
     // console.log(post.emoji)
-    const dataPostView = formatNumber(post.view);
+    const dataPostView = formatNumber(post.count_view);
     const dataPostCmt = null; // chưa có dữ liệu tạm thời để trống
-    const dataPostEmoji = formatNumber(Number(post.emoji.like) + Number(post.emoji.heart) + Number(post.emoji.laugh) + Number(post.emoji.sad));
+    const dataPostEmoji = formatNumber(post.count_emoji);
     const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
 
     const translateYEmoji = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen

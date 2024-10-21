@@ -1,12 +1,13 @@
 /* eslint-disable no-undef */
 import React, { useRef, useState, useEffect } from 'react';
 import { TextInput, Animated, Pressable, Easing, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import * as tf from '@tensorflow/tfjs';
-import { fetch, bundleResourceIO } from '@tensorflow/tfjs-react-native';
-import * as jpeg from 'jpeg-js';
-import * as nsfwjs from 'nsfwjs';
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+
+// import * as tf from '@tensorflow/tfjs';
+// import { fetch, bundleResourceIO } from '@tensorflow/tfjs-react-native';
+// import * as jpeg from 'jpeg-js';
+// import * as nsfwjs from 'nsfwjs';
+// import * as ImagePicker from 'expo-image-picker';
+// import * as FileSystem from 'expo-file-system';
 import { Image } from 'expo-image';
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -35,106 +36,106 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
 
 
 
-    const [tfReady, setTfReady] = useState(false);
-    const [modelReady, setModelReady] = useState(false);
-    const [predictions, setPredictions] = useState(null);
-    const [image, setImage] = useState(null);
-    const [model, setModel] = useState(null);
+    // const [tfReady, setTfReady] = useState(false);
+    // const [modelReady, setModelReady] = useState(false);
+    // const [predictions, setPredictions] = useState(null);
+    // const [image, setImage] = useState(null);
+    // const [model, setModel] = useState(null);
 
-    useEffect(() => {
-        const loadModel = async () => {
-            await tf.ready();
-            setTfReady(true);
-            const loadedModel = await nsfwjs.load(
-                "https://nguyenphucvuong.github.io/models/mobilenet_v2/model.json"
-            );
-            console.log(loadedModel)
-            setModel(loadedModel);
-            console.log(model);
-            setModelReady(true);
-        };
-        loadModel();
-    }, []);
-    const touchss = () => {
-        console.log("modelready", modelReady);
-        console.log("tfready", tfReady);
-    }
-    const classifyImage = async (imageUri) => {
-        console.log("uri", imageUri);
-        console.log("uri2", imageUri.uri);
+    // useEffect(() => {
+    //     const loadModel = async () => {
+    //         await tf.ready();
+    //         setTfReady(true);
+    //         const loadedModel = await nsfwjs.load(
+    //             "https://nguyenphucvuong.github.io/models/mobilenet_v2/model.json"
+    //         );
+    //         console.log(loadedModel)
+    //         setModel(loadedModel);
+    //         console.log(model);
+    //         setModelReady(true);
+    //     };
+    //     loadModel();
+    // }, []);
+    // const touchss = () => {
+    //     console.log("modelready", modelReady);
+    //     console.log("tfready", tfReady);
+    // }
+    // const classifyImage = async (imageUri) => {
+    //     console.log("uri", imageUri);
+    //     console.log("uri2", imageUri.uri);
 
-        if (!imageUri || !imageUri.uri) {
-            console.error("No image URI available");
-            return;
-        }
+    //     if (!imageUri || !imageUri.uri) {
+    //         console.error("No image URI available");
+    //         return;
+    //     }
 
-        try {
-            console.log("Fetching image from URI:", imageUri.uri);
+    //     try {
+    //         console.log("Fetching image from URI:", imageUri.uri);
 
-            const rawImageData = await FileSystem.readAsStringAsync(imageUri.uri, {
-                encoding: FileSystem.EncodingType.Base64,
-            });
+    //         const rawImageData = await FileSystem.readAsStringAsync(imageUri.uri, {
+    //             encoding: FileSystem.EncodingType.Base64,
+    //         });
 
-            const imageBuffer = Uint8Array.from(atob(rawImageData), c => c.charCodeAt(0));
-            const jpegData = jpeg.decode(imageBuffer, true);
-            const imageTensor = imageToTensor(jpegData);
+    //         const imageBuffer = Uint8Array.from(atob(rawImageData), c => c.charCodeAt(0));
+    //         const jpegData = jpeg.decode(imageBuffer, true);
+    //         const imageTensor = imageToTensor(jpegData);
 
-            const predictions = await model.classify(imageTensor);
-            setPredictions(predictions);
-        } catch (error) {
-            console.error("Error classifying image:", error);
-        }
-    };
+    //         const predictions = await model.classify(imageTensor);
+    //         setPredictions(predictions);
+    //     } catch (error) {
+    //         console.error("Error classifying image:", error);
+    //     }
+    // };
 
-    const imageToTensor = (rawImageData) => {
-        const { width, height, data } = rawImageData;
-        const buffer = new Uint8Array(width * height * 3);
-        let offset = 0;
+    // const imageToTensor = (rawImageData) => {
+    //     const { width, height, data } = rawImageData;
+    //     const buffer = new Uint8Array(width * height * 3);
+    //     let offset = 0;
 
-        for (let i = 0; i < buffer.length; i += 3) {
-            buffer[i] = data[offset]; // Red
-            buffer[i + 1] = data[offset + 1]; // Green
-            buffer[i + 2] = data[offset + 2]; // Blue
-            offset += 4;
-        }
-        return tf.tensor3d(buffer, [height, width, 3]);
-    };
+    //     for (let i = 0; i < buffer.length; i += 3) {
+    //         buffer[i] = data[offset]; // Red
+    //         buffer[i + 1] = data[offset + 1]; // Green
+    //         buffer[i + 2] = data[offset + 2]; // Blue
+    //         offset += 4;
+    //     }
+    //     return tf.tensor3d(buffer, [height, width, 3]);
+    // };
 
-    const selectImage = async () => {
-        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (permissionResult.granted === false) {
-            alert("Permission to access camera roll is required!");
-            return;
-        }
+    // const selectImage = async () => {
+    //     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    //     if (permissionResult.granted === false) {
+    //         alert("Permission to access camera roll is required!");
+    //         return;
+    //     }
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: false,  // Tắt chế độ chỉnh sửa ảnh
-            //aspect: [4, 3],        // Tùy chọn này không cần thiết khi allowsEditing là false
-            quality: 1,            // Giữ nguyên chất lượng ảnh
-        });
+    //     const result = await ImagePicker.launchImageLibraryAsync({
+    //         mediaTypes: ImagePicker.MediaTypeOptions.All,
+    //         allowsEditing: false,  // Tắt chế độ chỉnh sửa ảnh
+    //         //aspect: [4, 3],        // Tùy chọn này không cần thiết khi allowsEditing là false
+    //         quality: 1,            // Giữ nguyên chất lượng ảnh
+    //     });
 
-        if (!result.canceled && result.assets.length > 0) {
-            const selectedImageUri = result.assets[0].uri;
-            console.log("Selected Image URI:", selectedImageUri);
+    //     if (!result.canceled && result.assets.length > 0) {
+    //         const selectedImageUri = result.assets[0].uri;
+    //         console.log("Selected Image URI:", selectedImageUri);
 
-            // Cập nhật state cho hình ảnh
-            setImage({ uri: selectedImageUri });
-            console.log("ádasdasd", { uri: selectedImageUri })
-            setPredictions(null);
-            classifyImage({ uri: selectedImageUri });
+    //         // Cập nhật state cho hình ảnh
+    //         setImage({ uri: selectedImageUri });
+    //         console.log("ádasdasd", { uri: selectedImageUri })
+    //         setPredictions(null);
+    //         classifyImage({ uri: selectedImageUri });
 
-        } else {
-            console.log("Image selection was canceled or no assets found.");
-        }
-    };
-    const renderPrediction = (prediction) => {
-        return (
-            <Text key={prediction.className} style={styles.text}>
-                {prediction.className}: {Math.round(prediction.probability * 100)}%
-            </Text>
-        );
-    };
+    //     } else {
+    //         console.log("Image selection was canceled or no assets found.");
+    //     }
+    // };
+    // const renderPrediction = (prediction) => {
+    //     return (
+    //         <Text key={prediction.className} style={styles.text}>
+    //             {prediction.className}: {Math.round(prediction.probability * 100)}%
+    //         </Text>
+    //     );
+    // };
 
 
 
@@ -294,8 +295,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         width: appInfo.widthWindows,
                         left: -20,
                     }}>
-                        <Text style={styles.text}>TFJS: {tfReady ? "Ready" : "Loading"}</Text>
-                        {tfReady && <Text style={styles.text}>Model: {modelReady ? "Loaded" : "Loading"}</Text>}
+
                         {/* Image */}
                         <View
                             style={{
@@ -338,7 +338,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         marginTop: 10,
                     }}>
                         {/* Choose Image */}
-                        {tfReady && modelReady ? <ButtonsComponent
+                        {<ButtonsComponent
                             isButton
                             // onPress={aaaaa}
                             style={{
@@ -353,7 +353,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                                     height: 28,
                                 }}
                                 source={require('../../../assets/appIcons/image-choose.png')} />
-                        </ButtonsComponent> : <></>}
+                        </ButtonsComponent>}
 
                         <LinearGradient
                             start={{ x: 0, y: 0 }} end={{ x: 0.1999, y: 0 }}
@@ -367,7 +367,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         >
                             <ButtonsComponent
                                 isButton
-                                onPress={touchss}
+                                // onPress={touchss}
                                 style={{
                                     borderRadius: 30,
                                     justifyContent: "center",
@@ -394,7 +394,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
 
             {/* Like, Comment, View */}
             < HandleIsEmpty
-                length={post.idPost.length}
+                length={post.post_id.length}
                 view={
                     // <PostButton toggleExpand={toggleExpand} handleShowPopEmoji={handleShowPopEmoji} data={data} />
                     < PostButton toggleExpand={toggleExpand} post={post} user={user} emoji={emoji} handleShowPop={handleShowPop} handleNagigateDetailPost={handleNagigateDetailPost} />

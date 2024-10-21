@@ -32,7 +32,7 @@ const PictureScreen = ({ }) => {
 
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
 
-    const DataLength = Object.keys(Data.images).length;
+    // const DataLength = Object.keys(Data.imgPost).length;
     const inset = useSafeAreaInsets();
     const navigation = useNavigation();
 
@@ -73,7 +73,7 @@ const PictureScreen = ({ }) => {
 
 
     {/* Image Viewer Versoin 1 */ }
-    const imageUrls = Data.images.map((item) => ({ url: item }));
+    const imageUrls = Data.imgPost.map((item) => ({ url: item }));
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
             {/* Tab Status Bar */}
