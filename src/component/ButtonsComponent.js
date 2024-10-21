@@ -1,8 +1,8 @@
-import { Text, TouchableOpacity, FlatList, Pressable } from "react-native";
+import { Text, TouchableOpacity, FlatList, Pressable, StyleSheet } from "react-native";
 import React from "react";
 import { Image } from 'expo-image';
 
-const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail }) => {
+const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail, isBack, isNext }) => {
   // const ButtonsComponent = (infoButton) => {
   // const [children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail] = [
   //   infoButton.children,
@@ -113,12 +113,39 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
     )
   }
 
+    //Nút quay lại
+    const BackButton = () => {
+      return (
+        <TouchableOpacity onPress={onPress} style={styles.buttonBack}>
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/512/3114/3114883.png',
+            }}
+            style={{ width: 25, height: 25, marginTop: 'auto' }}
+          />
+        </TouchableOpacity>
+      )
+    }
+  
+    //Nút tiếp tục
+    const NextButton = () => {
+      return (
+        <TouchableOpacity onPress={onPress} style={styles.buttonNext}>
+          {children}
+        </TouchableOpacity>
+      )
+    }
+
   if (isButton) {
     return <NormalButton />;
   } else if (isHashtag) {
     return <HashtagButtons />;
   } else if (isPressable) {
     return <PressableButton />;
+  } else if (isBack) {
+    return <BackButton />;
+  } else if (isNext) {
+    return <NextButton />;
   } else {
     return <></>
   }
@@ -127,4 +154,18 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
 };
 
 export default React.memo(ButtonsComponent);
-
+const styles = StyleSheet.create({
+  buttonNext: {
+    width: '18%',
+    height: 33,
+    backgroundColor: '#697BEB',
+    borderRadius: 20,
+    alignItems: 'center',
+    marginLeft: '62%',
+  },
+  buttonBack: {
+    width: '19%',
+    height: 30,
+    borderRadius: 10,
+  },
+});

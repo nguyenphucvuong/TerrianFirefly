@@ -7,5 +7,6 @@ import InfomationScreen from './InfomationScreen';
 import AchievementsScreen from './AchievementsScreen';
 import NickNameScreen from './NickNameScreen';
 import DetailPostScreen from './DetailPostScreen';
-export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen, InfomationScreen, AchievementsScreen, NickNameScreen, DetailPostScreen}; 
+import CreatePostScreen from './CreatePostScreen';
+export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen, InfomationScreen, AchievementsScreen, NickNameScreen, DetailPostScreen, CreatePostScreen };
 
