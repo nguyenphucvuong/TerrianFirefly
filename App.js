@@ -9,7 +9,6 @@ import StackNavigator from './src/stacks/StackNavigator'
 import { Provider } from 'react-redux';
 import { store } from './src/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadModel, classifyImage, setImage } from './src/redux/slices/imageCheckSlice';
 import { getPosts } from './src/redux/slices/PostSlice';
 
 import * as tf from '@tensorflow/tfjs';
