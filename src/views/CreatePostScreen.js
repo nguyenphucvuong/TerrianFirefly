@@ -26,8 +26,8 @@ import * as ImagePicker from 'expo-image-picker';
 import ButtonsComponent from '../component/ButtonsComponent';
 import { ALERT_TYPE, Dialog, AlertNotificationRoot, Toast } from 'react-native-alert-notification';
 import { useDispatch, useSelector } from 'react-redux';
-import { createPost, getPosts } from '../redux/slices/PostSlices';
-import { getHashtag, createHashtag } from '../redux/slices/HashtagSlices';
+import { createPost, getPosts } from '../redux/slices/PostSlice';
+import { getHashtag, createHashtag } from '../redux/slices/HashtagSlice';
 import { Ionicons } from '@expo/vector-icons';
 const { height } = Dimensions.get('window');
 
