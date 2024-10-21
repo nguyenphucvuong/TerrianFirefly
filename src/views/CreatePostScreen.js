@@ -25,41 +25,46 @@ import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
 import ButtonsComponent from '../component/ButtonsComponent';
 import { ALERT_TYPE, Dialog, AlertNotificationRoot, Toast } from 'react-native-alert-notification';
-//import CustomComponent from '../component/CustomSwitchComponent';
-import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
-import { db } from '../../src/firebase/FirebaseConfig';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPost, getPosts } from '../redux/slices/PostSlices';
-import { getHashtag } from '../redux/slices/HashtagSlices';
-import { Ionicons } from '@expo/vector-icons'; // Thư viện icon trong Expo
-
-
+import { getHashtag, createHashtag } from '../redux/slices/HashtagSlices';
+import { Ionicons } from '@expo/vector-icons';
 const { height } = Dimensions.get('window');
 
 const CreatePostScreen = () => {
-
+  //khai bao redux
   const dispatch = useDispatch();
-  const {post, status, error } = useSelector((state) => state.post);
-  const {hashtag, statusHashtag} = useSelector((state) => state.hashtag);
-
-  // sethashTag((prevHashTags) => [
-  //   ...prevHashTags,
-  //   { id: '100', name: "hello" }  // Tạo ID duy nhất
-  // ]);
+  const { post, status, error } = useSelector((state) => state.post); // post
+  const { hashtag, statusHashtag } = useSelector((state) => state.hashtag); //hashtag
 
   // chuyển màn hình
   const navigation = useNavigation();
 
-  // Trạng thái hiển thị bảng tùy chọn
-  const [showOptions, setShowOptions] = useState(false);
-
   //khai báo biến
   const currentDate = new Date();
+  const [showOptions, setShowOptions] = useState(false); // Trạng thái của modal bảng tùy chọn 
   const [textTitle, onChangeTextTitle] = React.useState(''); // tiêu đề
   const [textPost, onChangeTextPost] = React.useState(''); // nội dung
   const [textHashTag, onChangetextHashTag] = React.useState(''); //nội dung chủ đề tìm kiếm
+  const [newHashtag, setNewHashtag] = useState([]); // Lưu các hashtag mới được thêm
   const [isEnabled, setIsEnabled] = useState(false); //trạng thái của switch
   const [link, onchangeLink] = useState(''); //link ytb
+  const [selectedHashTag, setSelectedHashTag] = useState([]); // Danh sách chủ đề đã chọn
+  const [images, setImages] = useState([]); //Lưu hình ảnh được chọn từ thư viện
+  const [selectedImage, setSelectedImage] = useState(null); // Để lưu ảnh được nhấn vào để hiển fullsize
+  const [isModalVisible, setModalVisible] = useState(false); //Trạng thái của modal hình ảnh
+
+  //xử lý ẩn bảng chủ đề
+  const handlePressOutside = () => {
+    Keyboard.dismiss();
+    setShowOptions(false); //set false
+  };
+
+  //xử lý hiện bảng chủ đề
+  const handleShowOptions = () => {
+    onChangetextHashTag('');
+    setShowOptions(true); //set true
+  };
 
   //hàm để bật tắt switch
   const toggleSwitch = () => {
@@ -77,77 +82,32 @@ const CreatePostScreen = () => {
     });
   };
 
-
   // Hàm lấy giá trị từ clipboard và dán vào text input
   const pasteFromClipboard = async () => {
     const clipboardContent = await Clipboard.getStringAsync()
-    onchangeLink(clipboardContent);
-    onChangeTextPost('');
+    onchangeLink(clipboardContent); //gán nội dung
   };
+
   const handleFocus = () => {
     if (isEnabled) {
       Alert.alert("Thông báo", "Bạn không thể nhập dữ liệu khi Switch đang bật.");
       console.log('an cai cc');
     }
   };
-  // Danh sách chủ đề đã chọn
-  const [selectedHashTag, setSelectedHashTag] = useState([]);
 
-  //Hình ảnh chọn
-  const [images, setImages] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);  // Để lưu ảnh được chọn cho modal
-  const [isModalVisible, setModalVisible] = useState(false); // Kiểm soát trạng thái của modal
-
-  //xử lý ẩn bảng chủ đề
-  const handlePressOutside = () => {
-    Keyboard.dismiss();
-    setShowOptions(false);
-  };
-
-  //xử lý hiện bảng chủ đề
-  const handleShowOptions = () => {
-    onChangetextHashTag('');
-    setShowOptions(true);
-  };
-
-  //dữ liệu mẫu
-  const [hashTag, sethashTag] = useState([
-    { id: '1', name: 'Vẽ Nghệ Thuật' },
-    { id: '2', name: 'Tích Nguyên Thạch Cho Kazuha' },
-    { id: '3', name: 'Sát Thương' },
-    { id: '4', name: 'Vẽ Nghệ Thuật 1' },
-    { id: '5', name: 'Tích Nguyên Thạch Cho Kazuha 2' },
-    { id: '6', name: 'Sát Thương 3' },
-    { id: '7', name: 'Vẽ Nghệ Thuật 4' },
-    { id: '8', name: 'Tích Nguyên Thạch Cho Kazuha 5' },
-    { id: '9', name: 'Sát Thương 6' },
-    { id: '10', name: 'Vẽ Nghệ Thuật 7' },
-    { id: '11', name: 'Tích Nguyên Thạch Cho Kazuha 8' },
-    { id: '12', name: 'Sát Thương 9' },
-    { id: '13', name: 'Vẽ Nghệ Thuật 10' },
-    { id: '14', name: 'Tích Nguyên Thạch Cho Kazuha 11' },
-    { id: '15', name: 'Sát Thương 12' },
-    { id: '16', name: 'Vẽ Nghệ Thuật 13' },
-    { id: '17', name: 'Tích Nguyên Thạch Cho Kazuha 14' },
-    { id: '18', name: 'Sát Thương 15' },
-    { id: '19', name: 'Vẽ Nghệ Thuật 16' },
-    { id: '20', name: 'Tích Nguyên Thạch Cho Kazuha 17' },
-  ]);
-
+  //chuyển đổi mảng sang json
+  const JsonNewHashtag = newHashtag.map((hashtag, index) => ({
+    hashtag_id: hashtag,  // Bạn có thể thay đổi logic để tạo id tùy ý
+    hashtag_background: "#ffff",
+    hashtag_color: "#000",
+}));
   //xử lý đăng bài viết mới
   const handlePost = async () => {
-    let body = '';
-    if (isEnabled) {
-      body = link;
-    } else {
-      body = textPost;
-    }
-
+    let body = isEnabled ? body = link : body = textPost;
     const formattedDate = currentDate.toLocaleDateString('vi-VN');
     const newDataPost = {
-      //trạng thái mặc định
+      //dữ liệu mặc định ban đầu
       status_post_id: 0,
-      //lượt tương tác gán mặc định = 0
       count_emoji: 0,
       count_comment: 0,
       count_view: 0,
@@ -157,20 +117,22 @@ const CreatePostScreen = () => {
       //tiêu đề, nội dung (hoặc link ytb)
       title: textTitle,
       body: body,
-      hashtag: selectedHashTag , //chủ đề chọn
+      hashtag: selectedHashTag, //chủ đề chọn
       imgPost: images, // hình ảnh chọn
       isYtb: isEnabled, //là bài đăng dạng ảnh hay link ytb
-      created_at: formattedDate,
-    }; // Dữ liệu bạn muốn thêm
-    console.log("loi: ",error);
-    console.log("status: ",status);
+      created_at: formattedDate, //thời gian tạo dd/mm/yyyy
+    };
+    if(newHashtag != null){
+      dispatch(createHashtag(JsonNewHashtag));
+    }
+    console.log("loi: ", error);
+    console.log("status: ", status);
     dispatch(createPost(newDataPost));
-
   };
-
 
   //xử lý quay lại màn hình trước
   const handleGoBack = () => {
+    //gán lại
     onChangeTextTitle('');
     onChangeTextPost('');
     onChangetextHashTag('');
@@ -178,19 +140,16 @@ const CreatePostScreen = () => {
     setIsEnabled(false);
     setImages([]);
     onchangeLink('');
-    //navigation.goBack();
-    //dispatch(getHashtag());
-    //console.log("danh sách hashtag: ",hashtag);
+    navigation.goBack();
   };
 
   //xử lý khi chọn một chủ đề
   const handleSelectHashTag = (item) => {
-
-    // Kiểm tra xem chủ đề đã được chọn chưa
-    if (!selectedHashTag.includes(item.name)) {
+    //Kiểm tra xem chủ đề đã được chọn chưa
+    if (!selectedHashTag.includes(item.hashtag_id)) {
       if (selectedHashTag.length < 5) {
-        setSelectedHashTag([...selectedHashTag, item.name]);
-        console.log('chu de: ', item.name);
+        setSelectedHashTag([...selectedHashTag, item.hashtag_id]);
+        //console.log('chu de: ', item.hashtag_id);
       } else {
 
         Dialog.show({
@@ -211,10 +170,9 @@ const CreatePostScreen = () => {
   //render chủ đề cho trước
   const renderHashTagItem = ({ item }) => {
     // Kiểm tra xem chủ đề đã được chọn chưa
-    if (selectedHashTag.includes(item.name)) {
+    if (selectedHashTag.includes(item.hashtag_id)) {
       return null; // ẩn đi nếu được chọn
     }
-
     return (
       <TouchableOpacity
         onPress={() => handleSelectHashTag(item)}
@@ -225,7 +183,7 @@ const CreatePostScreen = () => {
             style={{ width: 20, height: 20 }}
             resizeMode="cover"
           />
-          <Text style={styles.tagText}>{item.name}</Text>
+          <Text style={styles.tagText}>{item.hashtag_id}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -234,10 +192,9 @@ const CreatePostScreen = () => {
   //render chu de de xuat
   const renderHashTagItemIn = ({ item }) => {
     // Kiểm tra xem chủ đề đã được chọn chưa
-    if (selectedHashTag.includes(item.name)) {
+    if (selectedHashTag.includes(item.hashtag_id)) {
       return null; // ẩn nếu được chọn
     }
-
     return (
       <TouchableOpacity
         onPress={() => handleSelectHashTag(item)}
@@ -248,13 +205,13 @@ const CreatePostScreen = () => {
             style={{ width: 20, height: 20 }}
             resizeMode="cover" // Tùy chọn cách hiển thị hình ảnh
           />
-          <Text style={styles.tagText}>{item.name}</Text>
+          <Text style={styles.tagText}>{item.hashtag_id}</Text>
         </View>
       </TouchableOpacity>
     );
   };
 
-  //render chủ đề duoc chon
+  //render chủ đề được chọn
   const renderSelectedHashTagItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => handleRemoveHashTag(item)}
@@ -263,47 +220,75 @@ const CreatePostScreen = () => {
         <Image
           source={require('../../assets/appIcons/hashtag_icon.png')} // Đường dẫn đến hình ảnh
           style={{ width: 20, height: 20 }}
-          resizeMode="cover" // Tùy chọn cách hiển thị hình ảnh
-        />
+          resizeMode="cover" />
         <Text style={styles.tagText}>{item}  ×</Text>
       </View>
-
     </TouchableOpacity>
   );
 
   //lọc chủ đề
-  const filteredHashTag = hashTag.filter((hashTagName) =>
-    hashTagName.name.toLowerCase().includes(textHashTag.toLowerCase())
+  const filteredHashTag = hashtag.filter((hashTagName) =>
+    hashTagName.hashtag_id.toLowerCase().includes(textHashTag.toLowerCase())
   );
 
-  // Kiểm tra nếu không tìm thấy chủ đề trong danh sách, thêm vào danh sách với dấu (+)
-  const isNewHashTag = !hashTag.some((hashTagName) => hashTagName.name === textHashTag);
+  // Kiểm tra nếu không tìm thấy chủ đề trong danh sách, thêm vào danh sách với dấu (+) 
+  const isNewHashTag = !hashtag.some((hashTagName) => hashTagName.hashtag_id === textHashTag);
 
   // Hiển thị chủ đề mới với dấu (+)
   const renderHashTagItemNew = () => (
     <TouchableOpacity
-      onPress={() => {
-        console.log("Thêm chủ đề mới");
-      }}
+      onPress={handleAddNewHashTag}
       style={styles.tagContainerIn}>
       <View style={styles.viewHashTag}>
         <Image
           source={require('../../assets/appIcons/hashtag_icon.png')}
-          style={{ width: 20, height: 20 }}
+          style={{ width: 20, height: 20, }}
           resizeMode="cover"
         />
-        <Text style={styles.tagText}>{textHashTag} </Text>
+        <Text style={[styles.tagText, { marginLeft: 3, width: '84%' }]}
+          numberOfLines={1} // Hiển thị 1 dòng
+          ellipsizeMode="tail" // Dùng dấu ... ở cuối
+        >
+          {textHashTag}
+        </Text>
         <Image
           source={require('../../assets/appIcons/icon_add.png')}
-          style={{ marginTop: 2, marginLeft: '75%', width: 18, height: 18 }}
+          style={{
+            marginTop: 2, marginLeft: '75%', width: 18, height: 18, position: 'absolute',
+            bottom: 0,
+            right: 5,
+          }}
           resizeMode="cover"
         />
       </View>
     </TouchableOpacity>
   );
 
+  // Hàm xử lý khi nhấn vào thêm mới
+  const handleAddNewHashTag = () => {
+    if (textHashTag) {
+      const newHashTagItem = textHashTag; // Lấy giá trị từ ô nhập chủ đề
+      if (!selectedHashTag.includes(newHashTagItem)) {
+        if (selectedHashTag.length < 5) {
+          // Thêm hashtag mới vào danh sách
+          setSelectedHashTag([...selectedHashTag, newHashTagItem]);
+          setNewHashtag([...newHashtag, newHashTagItem]); // Thêm vào newHashtag
+        } else {
+          Dialog.show({
+            type: ALERT_TYPE.WARNING,
+            title: 'Cảnh báo',
+            textBody: 'Tối đa thêm 5 chủ đề',
+            button: 'Đóng',
+          });
+        }
+      }
+      onChangetextHashTag(''); // Reset nội dung input
+      console.log('newHashtag: ', newHashtag)
+      console.log('selectedHashTag: ', selectedHashTag)
+    }
+  };
+
   // Xử lý chọn hình ảnh
-  // Hỏi quyền truy cập ảnh
   const pickImage = async () => {
     if (Platform.OS !== 'web') {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -469,7 +454,7 @@ const CreatePostScreen = () => {
                   )}
                 </View>
 
-                {/* */}
+                {/*Chủ đề tìm kiếm và thêm mới */}
                 {textHashTag ? (
                   <>
                     {/*Hiển thị chủ đề tìm kiếm hoặc chủ đề mới */}
@@ -478,18 +463,17 @@ const CreatePostScreen = () => {
                       data={filteredHashTag} //hàm filter để lọc dữ liệu
                       keyExtractor={(item) => item.id}
                       renderItem={renderHashTagItemIn}
-                      ListFooterComponent={isNewHashTag ? renderHashTagItemNew : null}
+                      ListHeaderComponent={isNewHashTag ? renderHashTagItemNew : null}
                       showsHorizontalScrollIndicator={false}
                       style={styles.flatList}
                     />
                   </>
                 ) : (
-
                   <>
                     {/*Hiển thị chủ đề đề xuất */}
                     <Text style={styles.titleHashTag}>Chủ đề đề xuất</Text>
                     <FlatList
-                      data={hashTag}
+                      data={hashtag}
                       keyExtractor={(item) => item.id}
                       renderItem={renderHashTagItemIn}
                       showsHorizontalScrollIndicator={false}
@@ -556,7 +540,8 @@ const CreatePostScreen = () => {
                   </TouchableOpacity>
                 </View>
               ))}
-            </ScrollView></>)}
+            </ScrollView>
+          </>)}
         {/*End*/}
 
         {/* Modal hiển thị ảnh full màn hình */}
@@ -569,6 +554,7 @@ const CreatePostScreen = () => {
           </View>
         </Modal>
         {/*End modal */}
+
         <AlertNotificationRoot></AlertNotificationRoot>
       </View>
     </TouchableWithoutFeedback>
@@ -733,14 +719,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   buttonAddImg: {
-    marginTop:10,
+    marginTop: 10,
     width: 70,
     height: 70,
     backgroundColor: '#dcdcdc', // Màu nền của nút
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10, // Tạo góc bo tròn cho nút
-    
+
     //shadowColor: '#000',
     //shadowOffset: { width: 0, height: 2 },
     //shadowOpacity: 0.8,

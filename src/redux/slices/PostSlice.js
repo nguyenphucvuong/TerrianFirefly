@@ -34,9 +34,9 @@ export const createPost = createAsyncThunk('data/createPost', async (newData) =>
 export const getPosts = createAsyncThunk('data/getPosts', async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "Posts"));
-        querySnapshot.forEach((doc) => {
-          console.log(`post: ${doc.id} => `, doc.data());
-        });
+    querySnapshot.forEach((doc) => {
+      console.log(`post: ${doc.id} => `, doc.data());
+    });
     //const querySnapshot = await getDocs(collection(db, "Posts")); // Thay "Posts" bằng tên bộ sưu tập của bạn
     const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Lấy dữ liệu và ID của từng tài liệu
 
@@ -48,6 +48,29 @@ export const getPosts = createAsyncThunk('data/getPosts', async () => {
   }
 });
 
+// lấy dữ liệu theo trường yêu cầu từ firestore
+export const getPostsByField = createAsyncThunk('data/getPostsByField', async (fieldWhere, fieldOrderBy, value) => {
+  try {
+    const p = query(
+      collection(db, 'posts'),
+      where(fieldWhere),
+      orderBy(fieldOrderBy, 'desc'), // Sắp xếp theo ngày mới nhất
+      limit(n) // Thêm giới hạn số lượng tài liệu
+  );
+  
+  const querySnapshot = await getDocs(p);
+
+  const posts = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+  }));
+
+    return posts;
+  } catch (error) {
+    console.error('Error fetching posts: ', error);
+    throw error;
+  }
+});
 // Tạo slice cho Post
 export const PostSlice = createSlice({
   name: 'post',
