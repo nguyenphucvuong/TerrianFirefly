@@ -1,5 +1,5 @@
-import { ScrollView, View, } from "react-native";
-import React from "react";
+import { RefreshControl, ScrollView, Text, View, FlatList } from "react-native";
+import React, { useCallback, useState } from "react";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import { getUser } from '../redux/slices/UserSlices';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,21 +10,20 @@ const HomeScreen = () => {
   const {user, statusUser, errorUser } = useSelector((state) => state.user);
     console.log('dang nhap thanh cong', user);
   return (
-    <ScrollView
-      style={[{
-      }]}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={StyleGlobal.container}>
-        <PostViewComponent></PostViewComponent>
-        <PostViewComponent></PostViewComponent>
-        <PostViewComponent></PostViewComponent>
+    <FlatList
 
-
-      </View>
-    </ScrollView>
-
-
+      data={data.post}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({ item }) => {
+        return (
+          <PostViewComponent post={item} user={user} images={item.images} emoji={emoji} />
+        )
+      }}
+      contentContainerStyle={{ flexGrow: 1 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    />
 
 
   );

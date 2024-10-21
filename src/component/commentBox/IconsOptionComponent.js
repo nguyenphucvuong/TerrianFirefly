@@ -29,7 +29,7 @@ const IconsOptionComponent = () => {
                         width: 28,
                         height: 28,
                     }}
-                    source={require('../../../assets/smile_icon_cmt.png')} />
+                    source={require('../../../assets/appIcons/smile_icon_cmt.png')} />
             </ButtonsComponent>
             <ButtonsComponent
                 isButton
@@ -45,7 +45,7 @@ const IconsOptionComponent = () => {
                         width: 28,
                         height: 28,
                     }}
-                    source={require('../../../assets/smile_icon_cmt.png')} />
+                    source={require('../../../assets/appIcons/smile_icon_cmt.png')} />
             </ButtonsComponent>
             <ButtonsComponent
                 isButton
@@ -61,7 +61,7 @@ const IconsOptionComponent = () => {
                         width: 28,
                         height: 28,
                     }}
-                    source={require('../../../assets/smile_icon_cmt.png')} />
+                    source={require('../../../assets/appIcons/smile_icon_cmt.png')} />
             </ButtonsComponent>
             <ButtonsComponent
                 isButton
@@ -77,7 +77,7 @@ const IconsOptionComponent = () => {
                         width: 28,
                         height: 28,
                     }}
-                    source={require('../../../assets/smile_icon_cmt.png')} />
+                    source={require('../../../assets/appIcons/smile_icon_cmt.png')} />
             </ButtonsComponent>
             <ButtonsComponent
                 isButton
@@ -93,7 +93,7 @@ const IconsOptionComponent = () => {
                         width: 28,
                         height: 28,
                     }}
-                    source={require('../../../assets/smile_icon_cmt.png')} />
+                    source={require('../../../assets/appIcons/smile_icon_cmt.png')} />
             </ButtonsComponent>
             <ButtonsComponent
                 isButton
@@ -109,7 +109,7 @@ const IconsOptionComponent = () => {
                         width: 28,
                         height: 28,
                     }}
-                    source={require('../../../assets/smile_icon_cmt.png')} />
+                    source={require('../../../assets/appIcons/smile_icon_cmt.png')} />
             </ButtonsComponent>
         </ScrollView>
     )

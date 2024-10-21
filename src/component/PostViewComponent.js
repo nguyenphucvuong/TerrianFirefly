@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View, } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, } from "react-native";
 import React from "react";
+import { useNavigation } from '@react-navigation/native';
 
 
 import { appInfo } from "../constains/appInfo";
@@ -15,11 +16,21 @@ import {
 
 import RowComponent from "../component/RowComponent";
 import AnimatedQuickCmtComponent from "./commentBox/AnimatedQuickCmtComponent";
-import MoreOptionPostComponent from "./MoreOptionPostComponent";
+import MoreOptionPostComponent from "./moreOptionBox/MoreOptionPostComponent";
+import YoutubePlayerComponent from "./YoutubePlayerComponent";
 
 
 
-const PostViewComponent = () => {
+const PostViewComponent = ({ post, user, emoji }) => {
+    if (!post) {
+        return <></>;
+    }
+
+    const navigation = useNavigation();
+
+
+    const title = post?.title.substring(0, 120);
+    const content = post?.content.substring(0, 120);
 
 
     const HandleIsEmpty = (data) => {
@@ -32,22 +43,59 @@ const PostViewComponent = () => {
     };
 
 
+    const handleNagigateDetailPost = () => {
+        navigation.navigate("DetailPost", { post: post, user: user, emoji: emoji });
+    }
 
+    const IsYTView = () => {
+        return post?.isYT ? (
+            < RowComponent
+                minHeight={appInfo.widthWindows * 0.53}
+                height={"auto"}
+                style={{
+                    paddingTop: "2%",
+                    marginBottom: "2%",
+                }}
+            >
+                <YoutubePlayerComponent url={post?.content} />
+            </ RowComponent>
+        ) : (
+            <RowComponent
+                minHeight={post?.images.length == 0 ? 0 : appInfo.widthWindows * 0.45}
+                height={"auto"}
+                maxHeight={250}
+                // backgroundColor={"red"}
+                style={{
+                    marginTop: "2%",
+                }}>
+                <ImagesPostComponent post={post} user={user} emoji={emoji} />
+            </RowComponent>
+        );
+    }
 
     return (
         <View style={{
-            ...styles.box,
-            // backgroundColor: "pink",
+            width: "auto",
+            height: "auto",
+            borderBottomWidth: 1,
+            borderBottomColor: "rgba(0,0,0,0.1)",
+            backgroundColor: "pink",
         }}>
 
-            <View style={{ ...styles.content }}>
+            <View style={{
+                width: appInfo.widthWindows,
+                height: "auto",
+                minHeight: "100%",
+                maxHeight: appInfo.widthWindows * 1.4,
+                paddingHorizontal: "5%",
+            }}>
                 {/* Avatar */}
                 <RowComponent
                     height={appInfo.widthWindows / 5.7}
                     style={{ alignItems: "center" }}
                 >
-                    <SkeletonComponent isAvatar Data={data.state.avatar}>
-                        <AvatarEx size={40} round={30} url={data.state.avatar} />
+                    <SkeletonComponent isAvatar Data={user.avatar}>
+                        <AvatarEx size={40} round={30} url={user.avatar} />
                     </SkeletonComponent>
 
                     <View
@@ -58,13 +106,13 @@ const PostViewComponent = () => {
                             paddingLeft: "3%",
                         }}
                     >
-                        <SkeletonComponent Data={data.state.userId}>
-                            <Text style={StyleGlobal.textName}>Tai tồ</Text>
-                            <Text style={StyleGlobal.textInfo}>1 giờ trước • Honkai</Text>
+                        <SkeletonComponent Data={user.userId}>
+                            <Text style={StyleGlobal.textName}>{user.userName}</Text>
+                            <Text style={StyleGlobal.textInfo}>{post?.createAt}</Text>
                         </SkeletonComponent>
                     </View>
 
-                    <SkeletonComponent Data={data.state.userId} isButton>
+                    <SkeletonComponent Data={user.userId} isButton>
                         <ButtonsComponent isButton onPress={handleAd}
                             style={{
                                 borderColor: "rgba(121,141,218,1)",
@@ -78,42 +126,21 @@ const PostViewComponent = () => {
                             }}
                         >
                             <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
-
                         </ButtonsComponent>
                     </SkeletonComponent>
 
-                    <SkeletonComponent Data={data.state.userId} isButton>
+                    <SkeletonComponent Data={user.userId} isButton>
                         <View
                             style={{
-                                flex: 1,
-                                width: "100%",
-                                height: "100%",
+                                width: "10%",
+                                height: "30%",
                                 justifyContent: "center",
                                 alignItems: "center",
                             }}
                         >
-                            {/* <ButtonsComponent isButton onPress={handleAd}
-                                style={{
-                                    borderRadius: 30,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    width: "30%",
-                                    height: "30%",
-                                }}>
-                                <Image
-                                    style={{
-                                        width: "100%",
-                                        height: "100%",
-                                    }}
-                                    source={require('../../assets/dots_vertical-512.jpg')}
-                                    contentFit="cover" />
-                            </ButtonsComponent> */}
                             <MoreOptionPostComponent />
-
                         </View>
                     </SkeletonComponent>
-
-
                 </RowComponent>
 
                 {/* Content Title */}
@@ -125,48 +152,48 @@ const PostViewComponent = () => {
 
                     }}>
 
-                    <SkeletonComponent Data={data.text}>
-                        <Text style={StyleGlobal.textTitleContent}>{data.text}</Text>
+                    <SkeletonComponent Data={"title"}>
+                        <Text style={StyleGlobal.textTitleContent} onPress={handleNagigateDetailPost}>{title}</Text>
                     </SkeletonComponent>
                 </RowComponent>
 
                 {/* Content */}
-                <RowComponent
-                    minHeight={data.texts ? 20 : 0}
-                    maxHeight={data.texts ? 35 : 0}
-                    style={{
-                        flexDirection: "column",
+                {!post?.isYT && post?.content != '' ?
+                    <RowComponent
+                        minHeight={content != '' && post?.isYT ? 20 : 0}
+                        maxHeight={content != '' && post?.isYT ? 35 : 0}
+                        style={{
+                            flexDirection: "column",
 
-                    }}>
-                    <HandleIsEmpty length={data.texts.length} view={<Text style={StyleGlobal.textContent}>{data.texts}</Text>} />
+                        }}>
+                        <Text style={StyleGlobal.textContent} onPress={handleNagigateDetailPost}>{content}</Text>
 
-                </RowComponent>
+                    </RowComponent>
+                    :
+                    <></>
+                }
+
 
                 {/* Image Content */}
-                <HandleIsEmpty
-                    length={data.state.images.length}
+                {/* <HandleIsEmpty
+                    length={post?.images.length &&}
                     view={
-                        <RowComponent
-                            minHeight={appInfo.widthWindows * 0.45}
-                            height={"auto"}
-                            maxHeight={250}
-                            // backgroundColor={"red"}
-                            style={{
-                                marginTop: "2%",
-                            }}>
-                            <ImagesPostComponent Data={data.state.images} />
-                        </RowComponent>}
-                />
+                        <IsYTView />
+                    }
+                /> */}
+                <IsYTView />
+
+                {/* Emoji */}
 
                 {/* Hashtag */}
                 <RowComponent
-                    height={data.state.hashtag.length === 0 ? 0 : 45}
-                    width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
+                    height={post?.hashtag.length === 0 ? 0 : "auto"}
+                    width={appInfo.widthWindows - (appInfo.widthWindows * 0.1)}
                 >
-                    <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={data.state.hashtag} />
+                    <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
                 </RowComponent >
 
-                <AnimatedQuickCmtComponent />
+                <AnimatedQuickCmtComponent post={post} user={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
 
             </View>
         </View >
@@ -176,19 +203,5 @@ const PostViewComponent = () => {
 export default React.memo(PostViewComponent)
 
 const styles = StyleSheet.create({
-    box: {
-        width: "auto",
-        height: "auto",
-        borderBottomWidth: 1,
-        borderBottomColor: "rgba(0,0,0,0.1)",
 
-    },
-    content: {
-        width: appInfo.widthWindows,
-        height: "auto",
-        minHeight: "100%",
-        maxHeight: appInfo.widthWindows * 1.4,
-        paddingHorizontal: "5%",
-
-    },
 })

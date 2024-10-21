@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 //Screens
-import {WellcomScreen, LoginScreen, RegisterScreen, ForgotPassword} from '../views';
+
+import { BackgroundScreen, InfomationScreen, AchievementsScreen, NickNameScreen, WellcomScreen, LoginScreen, RegisterScreen, ForgotPassword} from '../views';
+
 import IndexTab from '../tabs/indexTab';
 //components
 import { ButtonBackComponent, IconComponent } from '../component';
@@ -24,11 +26,8 @@ const IconHeaderRight = (text, onPress) => ({
     ),
 });
 
-
-
 const StackNavigator = () => {
-    const [isLogin, setIsLogin] = useState(false);
-
+        const [isLogin, setIsLogin] = useState(false);
     return (
         <Stack.Navigator initialRouteName='WellcomScreen'>
             <Stack.Screen name='WellcomScreen' component={WellcomScreen} options={{ headerShown: false }} />
@@ -36,7 +35,18 @@ const StackNavigator = () => {
             <Stack.Screen name='RegisterScreen' component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{ headerShown: false }} />
             <Stack.Screen name='IndexTab' component={IndexTab} options={{ headerShown: false }} />
-            
+            <Stack.Screen name='BackgroundScreen' component={BackgroundScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='InfomationScreen' component={InfomationScreen}
+                options={() => IconBack("Thông Tin Cá Nhân")} />
+            <Stack.Screen name='AchievementsScreen' component={AchievementsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='NickNameScreen' component={NickNameScreen}
+                options={({ navigation }) => ({
+                    // Kết hợp các cấu hình từ cả hai hàm
+                    ...IconBack("Danh Hiệu"),
+                    ...IconHeaderRight( "Lưu",
+                        () => navigation.navigate('NickNameScreen')),
+                })}
+            />
         </Stack.Navigator>
     )
 }

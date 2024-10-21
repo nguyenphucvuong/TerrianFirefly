@@ -3,7 +3,7 @@ import React from 'react'
 import ButtonsComponent from '../ButtonsComponent'
 import { Image } from 'expo-image';
 
-const ShareButtonComponent = (infoButton) => {
+const MoreOptionItemComponent = (infoButton) => {
     const [isRow, styleBtn, styleImg, styleText, onPress, url, text] = [
 
         infoButton.isRow,
@@ -14,7 +14,7 @@ const ShareButtonComponent = (infoButton) => {
         infoButton.url,
         infoButton.text,
     ];
-    const SharePop = () => {
+    const OptionPop = () => {
         return isRow ? (
             <ButtonsComponent isPressable
                 onPress={onPress}
@@ -36,13 +36,13 @@ const ShareButtonComponent = (infoButton) => {
 
     return (
         <>
-            <SharePop />
+            <OptionPop />
         </>
     )
 
 }
 
-export default ShareButtonComponent
+export default MoreOptionItemComponent
 
 const styles = StyleSheet.create({
     btnLogoCol: {

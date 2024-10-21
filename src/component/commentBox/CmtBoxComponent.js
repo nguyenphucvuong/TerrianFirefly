@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-
 import { Animated, StyleSheet, Text, TextInput, View } from 'react-native'
 import React from 'react'
 import { Image } from 'expo-image';
@@ -34,7 +33,7 @@ const CmtBoxComponent = (infoCmt) => {
                 <ButtonsComponent isButton onPress={handleHideInput}>
                     <Image
 
-                        source={require('../../../assets/close_icon.png')}
+                        source={require('../../../assets/appIcons/close_icon.png')}
                         style={{
                             height: 30,
                             width: 30,

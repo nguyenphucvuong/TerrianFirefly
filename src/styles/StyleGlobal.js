@@ -20,9 +20,16 @@ export const StyleGlobal = StyleSheet.create({
   text: {
     fontSize: 13,
   },
+<<<<<<< HEAD
   textTitle: {
     fontSize : 28,
     fontWeight: 'bold',
   },
   
+=======
+  container: {
+    flex: 1,
+    margin: '4%',
+  },
+>>>>>>> 14c76a0b3abf2217003d243f3cdd8448cfbbc92a
 });

@@ -10,6 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^5.0.4",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-google-signin/google-signin": "^13.1.0",
@@ -29,6 +30,7 @@
     "expo-image-manipulator": "^12.0.5",
     "expo-linear-gradient": "^13.0.2",
     "expo-linking": "~6.3.1",
+    "expo-media-library": "^16.0.5",
     "expo-random": "~14.0.1",
     "expo-router": "~3.5.18",
     "expo-status-bar": "~1.12.1",
@@ -52,7 +54,7 @@
     "yet": "^0.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0",
+    "@babel/core": "^7.24.0",
     "@eslint/js": "^9.8.0",
     "eslint": "^9.8.0",
     "eslint-config-expo": "^7.0.0",

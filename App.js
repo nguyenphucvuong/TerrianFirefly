@@ -7,20 +7,22 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { store } from './src/redux/store';
 
-import StackNavigator from './src/stacks/StackNavigator'
 import { Provider } from 'react-redux';
+
+import "react-native-gesture-handler";
+import StackNavigator from './src/stacks/StackNavigator'
 
 const App = () => {
   return (
     <Provider store={store}>
       <SafeAreaProvider>
-      <StatusBar barStyle={'default'} />
-      {/* <IndexRouter /> */}
-      <NavigationContainer >
-        <StackNavigator />
-      </NavigationContainer >
+        <StatusBar barStyle={'dark-content'} translucent={true} backgroundColor="white" />
+        {/* <IndexRouter /> */}
+        <NavigationContainer >
+          <StackNavigator />
+        </NavigationContainer >
 
-    </SafeAreaProvider>
+      </SafeAreaProvider>
     </Provider>
 
   )

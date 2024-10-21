@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const PostDetailScreen = () => {
+const CommentScreen = () => {
     return (
         <View>
-            <Text>postDetailScreen</Text>
+            <Text>CommentScreen</Text>
         </View>
     )
 }
 
-export default PostDetailScreen
+export default CommentScreen
 
 const styles = StyleSheet.create({})

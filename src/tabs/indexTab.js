@@ -3,8 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image } from 'expo-image';
 import React from 'react';
 
-import { EventTab, NewPost, NotiTab, PersonTab } from './';
-import IndexRouter from '../routers/indexRouter';
+import { EventTab, NewPostTab, NotiTab, PersonTab } from './';
+import { IndexRouter } from '../routers/indexRouter';
 
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 
 const getRouteName = (route) => {
     const routeName = getFocusedRouteNameFromRoute(route);
-    if (routeName == 'picture') {
+    if (routeName == 'picture' || routeName == 'DetailPost') {
         return 'none';
     }
     return 'flex';
@@ -62,8 +62,8 @@ const IndexTab = () => {
                 })}
             />
             <Tab.Screen
-                name="NewPost"
-                component={NewPost}
+                name="NewPostTab"
+                component={NewPostTab}
                 options={{
                     tabBarIcon: () => (
                         <Image

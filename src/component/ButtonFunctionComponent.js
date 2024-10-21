@@ -1,18 +1,9 @@
-import { Text, TouchableOpacity, Pressable, StyleSheet, View, Image, ActivityIndicator } from "react-native";
+import { Text, TouchableOpacity, StyleSheet, View, Image, ActivityIndicator } from "react-native";
 import React from "react";
 import { appInfo } from '../constains/appInfo';
-const ButtonFunctionComponent = ({ 
-    isLoading = false,
-    check = false, 
-    onPress, 
-    name, 
-    backgroundColor, 
-    colorText , 
-    url
-    }) => {
-    
+const ButtonFunctionComponent = ({ check = false, onPress, name, backgroundColor, colorText , url, style}) => {
     return (
-        <TouchableOpacity disabled={isLoading} onPress={onPress} style={[styles.button, { backgroundColor: backgroundColor ? backgroundColor : isLoading ? Colors.gray : Colors.blue}]}>
+        <TouchableOpacity disabled={isLoading} onPress={onPress} style={[styles.button, { backgroundColor: backgroundColor ? backgroundColor : isLoading ? Colors.gray : Colors.blue}, style]}>
             {
                 isLoading ? <ActivityIndicator/> : (
                     <View style={{flexDirection: 'row'}}>
@@ -24,19 +15,17 @@ const ButtonFunctionComponent = ({
         </TouchableOpacity>
     )
 }
-const styles = StyleSheet.create({
+const styles = StyleSheet.create({ 
 
     button: {
         alignSelf: 'center',
-        width: appInfo.heightWindows * 0.45,
-        height: appInfo.heightWindows * 0.06,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 100,
+        borderRadius: 80,
         elevation: 2, // Thêm độ bóng cho Android
     },
     buttonText: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
     },
 

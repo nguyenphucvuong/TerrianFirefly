@@ -1,96 +1,121 @@
-import React from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, } from 'react-native';
-import { StyleGlobal } from '../styles/StyleGlobal';
-import ButtonFunctionComponent from '../component/ButtonFunctionComponent';
+import React from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ImageBackground,
+} from "react-native";
+import { StyleGlobal } from "../styles/StyleGlobal";
+// import ButtonFunctionComponent from '../component/ButtonFunctionComponent';
+import { ButtonsComponent } from "../component";
 
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation } from "@react-navigation/native";
 
 function WellcomScreen() {
   const navigation = useNavigation();
   return (
-    <ImageBackground style={styles.imageBg} source={{ uri: "https://www.vietnamworks.com/hrinsider/wp-content/uploads/2023/12/hinh-nen-dien-thoai-13.jpg" }}>
+    <ImageBackground
+      style={styles.imageBg}
+      source={{
+        uri: "https://www.vietnamworks.com/hrinsider/wp-content/uploads/2023/12/hinh-nen-dien-thoai-13.jpg",
+      }}
+    >
       <View style={[StyleGlobal.container, { flex: 1 }]}>
-        <Image source={require("../../assets/app_icon.png")} style={styles.image} />
+        <Image
+          source={require("../../assets/app_icon.png")}
+          style={styles.image}
+        />
         <Text style={styles.textWellcom}>Chào Mừng Bạn Đến với</Text>
         <Text style={styles.textWellcom}>Terrian Firefly</Text>
-        <Text style={[StyleGlobal.textTitle, styles.textLogin]}>Đăng Nhập/Tạo Tài Khoản</Text>
+        <Text style={[StyleGlobal.textTitle, styles.textLogin]}>
+          Đăng Nhập/Tạo Tài Khoản
+        </Text>
         <ButtonFunctionComponent
-          name={'Đăng Ký'}
-          backgroundColor={'#0286FF'}
-          colorText={'#fff'}
-          onPress={() => navigation.navigate('RegisterScreen')}
+          name={"Đăng Ký"}
+          backgroundColor={"#0286FF"}
+          colorText={"#fff"}
+          onPress={() => navigation.navigate("RegisterScreen")}
         />
+        <ButtonsComponent isButton>
+          isLoading ? <ActivityIndicator /> : (
+          <Text style={[styles.buttonText, { color: colorText }]}>Đăng Ký</Text>
+          )
+        </ButtonsComponent>
         {/* Phần Ngăn Cách */}
-        <View style={[styles.separatorContainer, ]}>
+        <View style={[styles.separatorContainer]}>
           <View style={styles.separator} />
           <Text style={styles.separatorText}>Hoặc</Text>
           <View style={styles.separator} />
         </View>
-        <ButtonFunctionComponent check={true} name={' Đăng Nhập với Google'} backgroundColor={'#fff'} colorText={'#000'}
-          url={require('../../assets/google-icon.png')}
+        <ButtonFunctionComponent
+          check={true}
+          name={" Đăng Nhập với Google"}
+          backgroundColor={"#fff"}
+          colorText={"#000"}
+          url={require("../../assets/google-icon.png")}
         />
         <View style={styles.link}>
           <View style={{ flexDirection: "row" }}>
             <Text>Đã có tài khoản ?</Text>
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('LoginScreen')}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("LoginScreen")}
             >
-              <Text style={{ color: '#0286FF' }}> Đăng Nhập</Text>
+              <Text style={{ color: "#0286FF" }}> Đăng Nhập</Text>
             </TouchableOpacity>
           </View>
         </View>
-
       </View>
     </ImageBackground>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   imageBg: {
     resizeMode: "cover",
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   textWellcom: {
     fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   image: {
-    alignSelf: 'center',
+    alignSelf: "center",
     width: 160,
     height: 160,
     marginTop: "25%",
-
   },
   textLogin: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: "15%",
-    marginBottom: "15%"
+    marginBottom: "15%",
   },
   buttonHover: {
-    backgroundColor: '#0276E3',
+    backgroundColor: "#0276E3",
   },
   separatorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 20, // Khoảng cách giữa các nút
   },
   separator: {
     flex: 1,
     height: 2,
-    backgroundColor: '#CCCCCC', // Màu đường kẻ
+    backgroundColor: "#CCCCCC", // Màu đường kẻ
   },
   separatorText: {
     marginHorizontal: 10,
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000000', // Màu chữ
+    fontWeight: "bold",
+    color: "#000000", // Màu chữ
   },
   link: {
-    marginTop: 'auto',
-    width: '100%',
-    alignItems: 'center',
+    marginTop: "auto",
+    width: "100%",
+    alignItems: "center",
     marginBottom: 15,
   },
 });

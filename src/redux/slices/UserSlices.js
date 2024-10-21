@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { db, auth } from '../../component/FirebaseConfig';
+import { db, auth } from '../../firebase/FirebaseConfig';
 import { collection, addDoc, getDoc, getDocs, query, where } from 'firebase/firestore';
 
 // Trạng thái ban đầu
