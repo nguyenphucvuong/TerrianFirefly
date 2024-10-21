@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Skeleton } from "@rneui/base";
 
-const SkeletonComponent = (skeletonInfo) => {
+const SkeletonComponent = ({ Data, children, isAvatar, isButton }) => {
   const [isLoading, setIsLoading] = useState(Boolean);
 
-  const [Data, children, isAvatar, isButton] = [
-    skeletonInfo.Data,
-    skeletonInfo.children,
-    skeletonInfo.isAvatar,
-    skeletonInfo.isButton,
-  ];
+  // const [Data, children, isAvatar, isButton] = [
+  //   skeletonInfo.Data,
+  //   skeletonInfo.children,
+  //   skeletonInfo.isAvatar,
+  //   skeletonInfo.isButton,
+  // ];
 
   // console.log(Data);
 

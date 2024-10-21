@@ -1,13 +1,17 @@
 /* eslint-disable no-undef */
-import { Animated, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Animated, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { Image } from 'expo-image';
+import { LinearGradient } from "expo-linear-gradient";
+import * as ImagePicker from 'expo-image-picker';
+
+
+
 import RowComponent from '../RowComponent';
 import {
     ButtonsComponent,
     IconsOptionComponent,
 } from '../';
-import { LinearGradient } from "expo-linear-gradient";
 import { appInfo } from '../../constains/appInfo';
 // import ButtonsComponent from '../ButtonsComponent';
 // import IconsOptionComponent from './IconsOptionComponent';
@@ -52,12 +56,44 @@ const CmtBoxComponent = (infoCmt) => {
                 autoFocus={true}
                 multiline
             />
+
             <View style={{
                 borderBottomWidth: 1,
                 borderColor: "rgba(0,0,0,0.1)",
                 width: appInfo.widthWindows,
                 left: -20,
             }}>
+                {/* Image */}
+                <View
+                    style={{
+                        width: 200,
+                        height: 200,
+                        backgroundColor: "red",
+                    }}>
+                    <TouchableOpacity
+                        style={{
+                            width: 25,
+                            height: 25,
+                            backgroundColor: "green",
+                            position: "absolute",
+                            zIndex: 1,
+                            top: 0,
+                            right: 0,
+                        }} >
+                        <Image source={require('../../../assets/appIcons/close_icon.png')}
+                            style={{
+                                width: 25,
+                                height: 25,
+                                resizeMode: "contain",
+                            }} />
+                    </TouchableOpacity>
+                    <Image source={require('../../../assets/appIcons/image-choose.png')}
+                        style={{
+                            width: 200,
+                            height: 200,
+                            resizeMode: "contain",
+                        }} />
+                </View>
 
             </View>
             <View style={{
@@ -66,9 +102,25 @@ const CmtBoxComponent = (infoCmt) => {
                 width: "100%",
                 height: 35,
                 flexDirection: "row",
-                marginVertical: 10,
+                marginTop: 10,
             }}>
-                <IconsOptionComponent />
+                <ButtonsComponent
+                    isButton
+                    // onPress={aaaaa}
+                    style={{
+                        // backgroundColor: "red",
+                        marginRight: 10,
+                        justifyContent: "center",
+                        width: "70%"
+                    }}>
+                    <Image
+                        style={{
+                            width: 28,
+                            height: 28,
+                        }}
+                        source={require('../../../assets/appIcons/image-choose.png')} />
+                </ButtonsComponent>
+
                 <LinearGradient
                     start={{ x: 0, y: 0 }} end={{ x: 0.1999, y: 0 }}
                     colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}

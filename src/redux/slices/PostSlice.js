@@ -56,14 +56,14 @@ export const getPostsByField = createAsyncThunk('data/getPostsByField', async (f
       where(fieldWhere),
       orderBy(fieldOrderBy, 'desc'), // Sắp xếp theo ngày mới nhất
       limit(n) // Thêm giới hạn số lượng tài liệu
-  );
-  
-  const querySnapshot = await getDocs(p);
+    );
 
-  const posts = querySnapshot.docs.map(doc => ({
+    const querySnapshot = await getDocs(p);
+
+    const posts = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-  }));
+    }));
 
     return posts;
   } catch (error) {
