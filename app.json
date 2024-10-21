@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "TerrianFirefly",
+    "scheme": "terrianfirefly",
     "slug": "TerrianFirefly",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,17 +12,31 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": ["@react-native-google-signin/google-signin"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.terrianfirefly",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleSignIn": {
+          "apiKey": "AIzaSyCkvjkZqD05s7JkJPNUG2UW_DZgGc2p1b4"
+        }},
+      "package": "com.example.terrianfirefly"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "bb4e1b5c-b574-4b67-8de8-1afad372fe9e"
+      }
     }
   }
 }

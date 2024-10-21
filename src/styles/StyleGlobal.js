@@ -20,5 +20,9 @@ export const StyleGlobal = StyleSheet.create({
   text: {
     fontSize: 13,
   },
-
+  textTitle: {
+    fontSize : 28,
+    fontWeight: 'bold',
+  },
+  
 });

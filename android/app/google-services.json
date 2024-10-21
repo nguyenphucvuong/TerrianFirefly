@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "713889504554",
+    "firebase_url": "https://terrianfirefly-default-rtdb.firebaseio.com",
+    "project_id": "terrianfirefly",
+    "storage_bucket": "terrianfirefly.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:713889504554:android:c628efe78b3c9ad8069253",
+        "android_client_info": {
+          "package_name": "com.nhom7.terrianFirefly"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "713889504554-2331qe37l11nrh535ee9ljfivuj37m3m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nhom7.terrianFirefly",
+            "certificate_hash": "1f4787ee71349b944b4043b8df5a07fd9ce535d9"
+          }
+        },
+        {
+          "client_id": "713889504554-3m9k1n4jtohud708icu3cpkn1srdcder.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkvjkZqD05s7JkJPNUG2UW_DZgGc2p1b4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "713889504554-3m9k1n4jtohud708icu3cpkn1srdcder.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "713889504554-73pbtlmdnt4gn9vn5m9vi0m1o7hrm2vm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nhom7.terrianFirefly"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
