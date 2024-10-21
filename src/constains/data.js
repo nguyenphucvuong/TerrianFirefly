@@ -29,7 +29,8 @@ const post = [
         content: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum
     aperiam exercitationem aliquid, repellendus quae alias dolores
     eligendi ea beatae vitae quis doloremque quibusdam, molestias
-    non. Perspiciatis nemo laudantium rerum laboriosam.`,
+    non. Perspiciatis nemo laudantium rerum laboriosam.
+    `,
         images: [
             "https://upload-os-bbs.hoyolab.com/upload/2024/05/12/111816991/034be374ffb331e6b0dbc16ed3c0fbf6_933372970025389044.jpg",
         ],

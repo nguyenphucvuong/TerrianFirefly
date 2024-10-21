@@ -9,7 +9,7 @@ const ArticleScreen = () => {
     return (
 
             <View style={{ flexGrow: 1 }}>
-                {data.post.map((item, index) => (
+                {/* {data.post.map((item, index) => (
                     <PostViewComponent
                         key={index.toString()} // Dùng index làm key
                         post={item}
@@ -17,7 +17,7 @@ const ArticleScreen = () => {
                         images={item.images}
                         emoji={emoji}
                     />
-                ))}
+                ))} */}
             </View>
 
     )

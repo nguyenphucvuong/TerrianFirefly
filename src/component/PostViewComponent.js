@@ -18,6 +18,7 @@ import RowComponent from "../component/RowComponent";
 import AnimatedQuickCmtComponent from "./commentBox/AnimatedQuickCmtComponent";
 import MoreOptionPostComponent from "./moreOptionBox/MoreOptionPostComponent";
 import YoutubePlayerComponent from "./YoutubePlayerComponent";
+import { Image } from "expo-image";
 
 
 
@@ -26,18 +27,22 @@ const PostViewComponent = ({ post, user, emoji }) => {
         return <></>;
     }
 
+
+    console.log(post)
+    // console.log(post?.imgPost.length)
+    // console.log(post?.hashtag.length)
     const navigation = useNavigation();
 
 
     const title = post?.title.substring(0, 120);
-    const content = post?.content.substring(0, 120);
+    const content = post?.body.substring(0, 120);
 
 
-    const HandleIsEmpty = (data) => {
-        const view = data.view;
-        const length = data.length;
-        return length === 0 ? <></> : view;
-    }
+    // const HandleIsEmpty = (data) => {
+    //     const view = data.view;
+    //     const length = data.length;
+    //     return length === 0 ? <></> : view;
+    // }
     const handleAd = () => {
         console.log("toi day");
     };
@@ -46,9 +51,10 @@ const PostViewComponent = ({ post, user, emoji }) => {
     const handleNagigateDetailPost = () => {
         navigation.navigate("DetailPost", { post: post, user: user, emoji: emoji });
     }
+    console.log("isyt", post?.isYtb)
 
     const IsYTView = () => {
-        return post?.isYT ? (
+        return post?.isYtb ? (
             < RowComponent
                 minHeight={appInfo.widthWindows * 0.53}
                 height={"auto"}
@@ -57,11 +63,11 @@ const PostViewComponent = ({ post, user, emoji }) => {
                     marginBottom: "2%",
                 }}
             >
-                <YoutubePlayerComponent url={post?.content} />
+                <YoutubePlayerComponent url={post?.body} />
             </ RowComponent>
         ) : (
             <RowComponent
-                minHeight={post?.images.length == 0 ? 0 : appInfo.widthWindows * 0.45}
+                minHeight={post?.imgPost.length == 0 ? 0 : appInfo.widthWindows * 0.45}
                 height={"auto"}
                 maxHeight={250}
                 // backgroundColor={"red"}
@@ -95,7 +101,17 @@ const PostViewComponent = ({ post, user, emoji }) => {
                     style={{ alignItems: "center" }}
                 >
                     <SkeletonComponent isAvatar Data={user.avatar}>
-                        <AvatarEx size={40} round={30} url={user.avatar} />
+                        <AvatarEx size={40} round={30} url={user.avatar} frame={'../../assets/frame/frame_background.png'} />
+                        {/* <Image
+                            source={require('../../assets/frame/frame_background.png')}
+                            style={{
+                                height: 60,
+                                width: 60,
+                                position: 'absolute', // Chồng lên Avatar
+                                borderRadius: 80,
+                            }}
+                        >
+                        </Image> */}
                     </SkeletonComponent>
 
                     <View
@@ -158,7 +174,7 @@ const PostViewComponent = ({ post, user, emoji }) => {
                 </RowComponent>
 
                 {/* Content */}
-                {!post?.isYT && post?.content != '' ?
+                {!post?.isYT && post?.body != '' ?
                     <RowComponent
                         minHeight={content != '' && post?.isYT ? 20 : 0}
                         maxHeight={content != '' && post?.isYT ? 35 : 0}
