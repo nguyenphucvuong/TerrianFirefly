@@ -30,10 +30,10 @@ const AchievementsScreen = () => {
     return (
         <BottomSheetModalProvider>
             <View style={{ backgroundColor: '#7982FB', height: appInfo.heightWindows * 0.2, justifyContent: 'center', borderRadius: 20 }}>
-                <View style={[StyleGlobal.container, { top: appInfo.heightWindows * 0.03, flexDirection: 'row' }]}>
-                    <ButtonBackComponent color={'#000000'} />
+                <View style={{ top: appInfo.heightWindows * 0.03 }}>
+                    <ButtonBackComponent color={'white'} />
                 </View>
-                <UserAvatarComponent />
+                <UserAvatarComponent style={styles.avatar} />
             </View>
             <FlatList
                 style={{ margin: '2%', marginTop: '5%' }}
@@ -73,6 +73,9 @@ const styles = StyleSheet.create({
         width: '90%',
         height: appInfo.heightWindows * 0.05,
         marginTop: 'auto',
+    },
+    avatar: {
+        top: appInfo.heightWindows * 0.03,
     },
 });
 export default AchievementsScreen;

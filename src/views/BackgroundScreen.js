@@ -26,11 +26,9 @@ const BackgroundScreen = () => {
     return (
         <View style={{ flex: 1 }}>
             <BottomSheetModalProvider>
-
-
                 <ImageBackground style={{ width: '100%', height: appInfo.heightWindows * 0.2, }}
                     source={{ uri: 'https://images4.alphacoders.com/973/973967.jpg' }}>
-                    <View style={[StyleGlobal.container, { position: 'absolute', top: appInfo.heightWindows * 0.03 }]}>
+                    <View style={{top: appInfo.heightWindows * 0.05 }}>
                         <ButtonBackComponent color={'white'} />
                     </View>
                     <View style={styles.background}>

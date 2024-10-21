@@ -1,10 +1,10 @@
-import { View, StyleSheet, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native'
+import { View, StyleSheet, Text, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native'
 import React from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
 //components
-import { UserAvatarComponent, ButtonFunctionComponent, InputComponents } from '../component';
+import { UserAvatarComponent, ButtonFunctionComponent, InputComponents, IconComponent } from '../component';
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 const InfomationScreen = () => {
@@ -26,12 +26,18 @@ const InfomationScreen = () => {
                         name={'Chọn Thành Tựu'}
                         colorText={'#000000'} />
                 </View>
-                <InputComponents title={'Tên'} value={'Zenot'} />
-                <TouchableOpacity >
-                    <InputComponents title={'Giới tính'} placeholder={'Chọn giới tính'} iconNameRight={'chevron-right'} editable={false} />
-                </TouchableOpacity>
-
-                <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button2} />
+                <View style={{marginTop: '3%'}}>
+                    <Text style={StyleGlobal.textTitleContent}>Tên</Text>
+                    <InputComponents iconName={'user'} value={'Zenot'} />
+                </View>
+                <View style={{marginTop: '3%'}}>
+                    <Text style={StyleGlobal.textTitleContent}>Giới Tính</Text>
+                    <TouchableOpacity style={styles.buttonRow}>
+                        <Text style={styles.buttonText}>Chọn Giới Tính</Text>
+                        <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
+                    </TouchableOpacity>
+                </View>
+                <ButtonFunctionComponent name={'Lưu'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button2} />
             </View>
         </TouchableWithoutFeedback>
     )
@@ -50,6 +56,22 @@ const styles = StyleSheet.create({
         width: '100%',
         height: appInfo.heightWindows * 0.055,
         marginTop: 'auto',
+    },
+    buttonText: {
+        color: '#000000',
+        fontSize: 16,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: 'gray',
+        borderWidth: 1,
+        borderRadius: 10,
+        padding: 10,
+        marginTop: appInfo.heightWindows * 0.01,
+    },
+    iconStyle: {
+        marginLeft: 'auto',
     },
 })
 export default InfomationScreen;
