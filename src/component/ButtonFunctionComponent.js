@@ -1,7 +1,15 @@
 import { Text, TouchableOpacity, StyleSheet, View, Image, ActivityIndicator } from "react-native";
 import React from "react";
 import { appInfo } from '../constains/appInfo';
-const ButtonFunctionComponent = ({ check = false, onPress, name, backgroundColor, colorText , url, style}) => {
+const ButtonFunctionComponent = ({ 
+    isLoading = false,
+    check = false, 
+    onPress, 
+    name, 
+    backgroundColor, 
+    colorText , 
+    url, 
+    style}) => {
     return (
         <TouchableOpacity disabled={isLoading} onPress={onPress} style={[styles.button, { backgroundColor: backgroundColor ? backgroundColor : isLoading ? Colors.gray : Colors.blue}, style]}>
             {

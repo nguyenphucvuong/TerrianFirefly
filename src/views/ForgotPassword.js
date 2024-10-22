@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TextInput, Button, TouchableOpacity } from 'rea
 import { StyleGlobal } from '../styles/StyleGlobal';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import ButtonFunctionComponent from '../component/ButtonFunctionComponent';
-
+import { appInfo } from "../constains/appInfo";
 import { useNavigation } from '@react-navigation/native'
 
 function ForgotPassword() {
@@ -38,7 +38,8 @@ function ForgotPassword() {
           name={'Xác Nhận'}
           backgroundColor={'#0286FF'}
           colorText={'#fff'}
-          onPress={() => navigation.navigate('LoginScreen')}
+          onPress={() => navigation.navigate('VerificationCodeScreen')}
+          style={[StyleGlobal.buttonLg, StyleGlobal.buttonTextLg]}
         />
       </View>
     )
@@ -57,28 +58,30 @@ const styles = StyleSheet.create({
         marginBottom: '19%',
     },
     textNameApp: {
-        alignSelf: 'center',
-        fontWeight: 'bold',
-        fontSize: 28,
-        padding: '4%',
-        marginBottom: '8%',
+      marginTop: appInfo.heightWindows * 0.05,
+      alignSelf: "center",
+      fontWeight: "bold",
+      fontSize: 28,
+      padding: "4%",
+      marginBottom: appInfo.heightWindows * 0.08,
     },
     viewInput: {
-        margin: '3%',
-        height: '8%',
-        marginBottom: '85%',
+      margin: "3%",
+      height: appInfo.heightWindows * 0.06,
+      marginBottom: appInfo.heightWindows * 0.4,
     },
     input: {
-
-        borderColor: 'gray',
-        borderWidth: 1,
-        padding: '3%',
-        flexDirection: 'row',
-        borderRadius: 100,
-        backgroundColor: '#E0E5EB',
-      },
+      width: appInfo.widthWindows * 0.88,
+      borderColor: "gray",
+      borderWidth: 1,
+      padding: "3%",
+      flexDirection: "row",
+      borderRadius: 100,
+      backgroundColor: "#E0E5EB",
+    },
     textInput: {
-        marginLeft : '5%',
+      width: appInfo.widthWindows * 0.5,
+      marginLeft: "5%",
     },
     link: {
         marginTop: 'auto',

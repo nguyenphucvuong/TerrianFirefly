@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { appInfo } from '../constains/appInfo';
 
 export const StyleGlobal = StyleSheet.create({
   textName: {
@@ -20,16 +21,25 @@ export const StyleGlobal = StyleSheet.create({
   text: {
     fontSize: 13,
   },
-<<<<<<< HEAD
   textTitle: {
-    fontSize : 28,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: "bold",
   },
-  
-=======
   container: {
     flex: 1,
-    margin: '4%',
+    margin: "4%",
   },
->>>>>>> 14c76a0b3abf2217003d243f3cdd8448cfbbc92a
+  buttonLg: {
+    alignSelf: "center",
+    width: appInfo.heightWindows * 0.41,
+    height: appInfo.heightWindows * 0.06,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 100,
+    elevation: 2, // Thêm độ bóng cho Android
+  },
+  buttonTextLg: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
 });
