@@ -118,12 +118,7 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
     const BackButton = () => {
       return (
         <TouchableOpacity onPress={onPress} style={styles.buttonBack}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/3114/3114883.png',
-            }}
-            style={{ width: 25, height: 25, marginTop: 'auto' }}
-          />
+          {children}
         </TouchableOpacity>
       )
     }

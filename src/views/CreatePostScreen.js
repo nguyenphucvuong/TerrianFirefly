@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, {useCallback, useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -18,20 +18,39 @@ import {
   Switch,
   SafeAreaView,
   Button,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { appInfo } from '../constains/appInfo';
-import * as Clipboard from 'expo-clipboard';
-import * as ImagePicker from 'expo-image-picker';
-import ButtonsComponent from '../component/ButtonsComponent';
-import { ALERT_TYPE, Dialog, AlertNotificationRoot, Toast } from 'react-native-alert-notification';
-import { useDispatch, useSelector } from 'react-redux';
-import { createPost, getPosts } from '../redux/slices/PostSlice';
-import { getHashtag, createHashtag } from '../redux/slices/HashtagSlice';
-import { Ionicons } from '@expo/vector-icons';
-const { height } = Dimensions.get('window');
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { appInfo } from "../constains/appInfo";
+import * as Clipboard from "expo-clipboard";
+import * as ImagePicker from "expo-image-picker";
+import ButtonsComponent from "../component/ButtonsComponent";
+import {
+  ALERT_TYPE,
+  Dialog,
+  AlertNotificationRoot,
+  Toast,
+} from "react-native-alert-notification";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createPost,
+  getPosts,
+  getPostsByField,
+} from "../redux/slices/PostSlice";
+import { getHashtag, createHashtag } from "../redux/slices/HashtagSlice";
+import { Ionicons } from "@expo/vector-icons";
+const { height } = Dimensions.get("window");
 
 const CreatePostScreen = () => {
+
+  
+  // useEffect(() => {
+    
+  //   const interval = setInterval(() => {
+  //     dispatch(getPosts());
+  //   dispatch(getHashtag());
+  //   }, 1000); 
+  // }, [dispatch]);
+  
   //khai bao redux
   const dispatch = useDispatch();
   const { post, status, error } = useSelector((state) => state.post); // post
@@ -42,27 +61,27 @@ const CreatePostScreen = () => {
 
   //khai báo biến
   const currentDate = new Date();
-  const [showOptions, setShowOptions] = useState(false); // Trạng thái của modal bảng tùy chọn 
-  const [textTitle, onChangeTextTitle] = React.useState(''); // tiêu đề
-  const [textPost, onChangeTextPost] = React.useState(''); // nội dung
-  const [textHashTag, onChangetextHashTag] = React.useState(''); //nội dung chủ đề tìm kiếm
+  const [showOptions, setShowOptions] = useState(false); // Trạng thái của modal bảng tùy chọn
+  const [textTitle, onChangeTextTitle] = React.useState(""); // tiêu đề
+  const [textPost, onChangeTextPost] = React.useState(""); // nội dung
+  const [textHashTag, onChangetextHashTag] = React.useState(""); //nội dung chủ đề tìm kiếm
   const [newHashtag, setNewHashtag] = useState([]); // Lưu các hashtag mới được thêm
   const [isEnabled, setIsEnabled] = useState(false); //trạng thái của switch
-  const [link, onchangeLink] = useState(''); //link ytb
+  const [link, onchangeLink] = useState(""); //link ytb
   const [selectedHashTag, setSelectedHashTag] = useState([]); // Danh sách chủ đề đã chọn
   const [images, setImages] = useState([]); //Lưu hình ảnh được chọn từ thư viện
   const [selectedImage, setSelectedImage] = useState(null); // Để lưu ảnh được nhấn vào để hiển fullsize
   const [isModalVisible, setModalVisible] = useState(false); //Trạng thái của modal hình ảnh
 
   //xử lý ẩn bảng chủ đề
-  const handlePressOutside = () => {
+  const handleHideModal = () => {
     Keyboard.dismiss();
     setShowOptions(false); //set false
   };
 
   //xử lý hiện bảng chủ đề
   const handleShowOptions = () => {
-    onChangetextHashTag('');
+    onChangetextHashTag("");
     setShowOptions(true); //set true
   };
 
@@ -72,11 +91,11 @@ const CreatePostScreen = () => {
       // Xóa dữ liệu trong TextInput khi bật switch hoặc tắt
       if (!previousState) {
         // Đặt lại giá trị
-        onChangeTextPost('');
+        onChangeTextPost("");
         setImages([]);
       } else {
         // đặt lại giá trị
-        onchangeLink('');
+        onchangeLink("");
       }
       return !previousState;
     });
@@ -84,27 +103,24 @@ const CreatePostScreen = () => {
 
   // Hàm lấy giá trị từ clipboard và dán vào text input
   const pasteFromClipboard = async () => {
-    const clipboardContent = await Clipboard.getStringAsync()
+    const clipboardContent = await Clipboard.getStringAsync();
     onchangeLink(clipboardContent); //gán nội dung
   };
 
   const handleFocus = () => {
     if (isEnabled) {
-      Alert.alert("Thông báo", "Bạn không thể nhập dữ liệu khi Switch đang bật.");
-      console.log('an cai cc');
+      Alert.alert(
+        "Thông báo",
+        "Bạn không thể nhập dữ liệu khi Switch đang bật."
+      );
+      console.log("an cai cc");
     }
   };
 
-  //chuyển đổi mảng sang json
-  const JsonNewHashtag = newHashtag.map((hashtag, index) => ({
-    hashtag_id: hashtag,  // Bạn có thể thay đổi logic để tạo id tùy ý
-    hashtag_background: "#ffff",
-    hashtag_color: "#000",
-}));
   //xử lý đăng bài viết mới
   const handlePost = async () => {
-    let body = isEnabled ? body = link : body = textPost;
-    const formattedDate = currentDate.toLocaleDateString('vi-VN');
+    let body = isEnabled ? (body = link) : (body = textPost);
+    const formattedDate = currentDate.toLocaleDateString("vi-VN");
     const newDataPost = {
       //dữ liệu mặc định ban đầu
       status_post_id: 0,
@@ -122,24 +138,27 @@ const CreatePostScreen = () => {
       isYtb: isEnabled, //là bài đăng dạng ảnh hay link ytb
       created_at: formattedDate, //thời gian tạo dd/mm/yyyy
     };
-    if(newHashtag != null){
-      dispatch(createHashtag(JsonNewHashtag));
+    if (newHashtag.length != 0) {
+      dispatch(createHashtag(newHashtag));
+      console.log("loi: ", "áđá");
     }
+
     console.log("loi: ", error);
-    console.log("status: ", status);
+    console.log("status: ", statusHashtag);
+    console.log("getPostByField: ", getPostsByField("null", "created_at", 10));
     dispatch(createPost(newDataPost));
   };
 
   //xử lý quay lại màn hình trước
   const handleGoBack = () => {
     //gán lại
-    onChangeTextTitle('');
-    onChangeTextPost('');
-    onChangetextHashTag('');
+    onChangeTextTitle("");
+    onChangeTextPost("");
+    onChangetextHashTag("");
     setSelectedHashTag([]);
     setIsEnabled(false);
     setImages([]);
-    onchangeLink('');
+    onchangeLink("");
     navigation.goBack();
   };
 
@@ -151,13 +170,12 @@ const CreatePostScreen = () => {
         setSelectedHashTag([...selectedHashTag, item.hashtag_id]);
         //console.log('chu de: ', item.hashtag_id);
       } else {
-
         Dialog.show({
           type: ALERT_TYPE.WARNING,
-          title: 'Cảnh báo',
-          textBody: 'Tối đa thêm 5 chủ đề',
-          button: 'Đóng',
-        })
+          title: "Cảnh báo",
+          textBody: "Tối đa thêm 5 chủ đề",
+          button: "Đóng",
+        });
       }
     }
   };
@@ -165,6 +183,8 @@ const CreatePostScreen = () => {
   //xử lý xóa một chủ đề khỏi danh sách đã chọn
   const handleRemoveHashTag = (item) => {
     setSelectedHashTag(selectedHashTag.filter((HashTag) => HashTag !== item));
+    const updatedNewHashTag = newHashtag.filter((hashTag) => hashTag !== item);
+    setNewHashtag(updatedNewHashTag);
   };
 
   //render chủ đề cho trước
@@ -176,10 +196,11 @@ const CreatePostScreen = () => {
     return (
       <TouchableOpacity
         onPress={() => handleSelectHashTag(item)}
-        style={styles.tagContainer}>
+        style={styles.tagContainer}
+      >
         <View style={styles.viewHashTag}>
           <Image
-            source={require('../../assets/appIcons/hashtag_icon.png')}//icon #
+            source={require("../../assets/appIcons/hashtag_icon.png")} //icon #
             style={{ width: 20, height: 20 }}
             resizeMode="cover"
           />
@@ -198,10 +219,11 @@ const CreatePostScreen = () => {
     return (
       <TouchableOpacity
         onPress={() => handleSelectHashTag(item)}
-        style={styles.tagContainerIn}>
+        style={styles.tagContainerIn}
+      >
         <View style={styles.viewHashTag}>
           <Image
-            source={require('../../assets/appIcons/hashtag_icon.png')} // Đường dẫn đến hình ảnh
+            source={require("../../assets/appIcons/hashtag_icon.png")} // Đường dẫn đến hình ảnh
             style={{ width: 20, height: 20 }}
             resizeMode="cover" // Tùy chọn cách hiển thị hình ảnh
           />
@@ -215,46 +237,63 @@ const CreatePostScreen = () => {
   const renderSelectedHashTagItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => handleRemoveHashTag(item)}
-      style={styles.selectedTagContainer}>
+      style={styles.selectedTagContainer}
+    >
       <View style={styles.viewHashTag}>
         <Image
-          source={require('../../assets/appIcons/hashtag_icon.png')} // Đường dẫn đến hình ảnh
+          source={require("../../assets/appIcons/hashtag_icon.png")} // Đường dẫn đến hình ảnh
           style={{ width: 20, height: 20 }}
-          resizeMode="cover" />
-        <Text style={styles.tagText}>{item}  ×</Text>
+          resizeMode="cover"
+        />
+        <Text style={styles.tagText}>{item} ×</Text>
       </View>
     </TouchableOpacity>
   );
 
   //lọc chủ đề
-  const filteredHashTag = hashtag.filter((hashTagName) =>
-    hashTagName.hashtag_id.toLowerCase().includes(textHashTag.toLowerCase())
+  const filteredHashTag = hashtag.filter(
+    (hashTagName) =>
+      // Kiểm tra nếu hashTagName có hashtag_id, nó là chuỗi và loại bỏ khoảng trắng thừa trước khi so sánh
+      hashTagName.hashtag_id &&
+      typeof hashTagName.hashtag_id === "string" &&
+      hashTagName.hashtag_id
+        .trim()
+        .toLowerCase()
+        .includes(textHashTag.trim().toLowerCase())
   );
 
-  // Kiểm tra nếu không tìm thấy chủ đề trong danh sách, thêm vào danh sách với dấu (+) 
-  const isNewHashTag = !hashtag.some((hashTagName) => hashTagName.hashtag_id === textHashTag);
+  // Kiểm tra nếu không tìm thấy chủ đề trong danh sách, thêm vào danh sách với dấu (+)
+  const isNewHashTag = !hashtag.some(
+    (hashTagName) => hashTagName.hashtag_id === textHashTag
+  );
 
   // Hiển thị chủ đề mới với dấu (+)
   const renderHashTagItemNew = () => (
     <TouchableOpacity
       onPress={handleAddNewHashTag}
-      style={styles.tagContainerIn}>
+      style={styles.tagContainerIn}
+    >
       <View style={styles.viewHashTag}>
         <Image
-          source={require('../../assets/appIcons/hashtag_icon.png')}
-          style={{ width: 20, height: 20, }}
+          source={require("../../assets/appIcons/hashtag_icon.png")}
+          style={{ width: 20, height: 20 }}
           resizeMode="cover"
         />
-        <Text style={[styles.tagText, { marginLeft: 3, width: '84%' }]}
+        <Text
+          style={[styles.tagText, { marginLeft: 3, width: "84%" }]}
           numberOfLines={1} // Hiển thị 1 dòng
           ellipsizeMode="tail" // Dùng dấu ... ở cuối
         >
           {textHashTag}
         </Text>
         <Image
-          source={require('../../assets/appIcons/icon_add.png')}
+          source={require("../../assets/appIcons/icon_add.png")}
           style={{
-            marginTop: 2, marginLeft: '75%', width: 18, height: 18, position: 'absolute',
+            marginTop: 2,
+            marginLeft: "75%",
+            width: 18,
+            height: 18,
+            position: "absolute",
             bottom: 0,
             right: 5,
           }}
@@ -276,31 +315,32 @@ const CreatePostScreen = () => {
         } else {
           Dialog.show({
             type: ALERT_TYPE.WARNING,
-            title: 'Cảnh báo',
-            textBody: 'Tối đa thêm 5 chủ đề',
-            button: 'Đóng',
+            title: "Cảnh báo",
+            textBody: "Tối đa thêm 5 chủ đề",
+            button: "Đóng",
           });
         }
       }
-      onChangetextHashTag(''); // Reset nội dung input
-      console.log('newHashtag: ', newHashtag)
-      console.log('selectedHashTag: ', selectedHashTag)
+      onChangetextHashTag(""); // Reset nội dung input
+      //console.log("newHashtag: ", newHashtag);
+      //console.log("selectedHashTag: ", selectedHashTag);
     }
   };
 
   // Xử lý chọn hình ảnh
   const pickImage = async () => {
-    if (Platform.OS !== 'web') {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Cần quyền truy cập thư viện ảnh để tiếp tục!');
+    if (Platform.OS !== "web") {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Cần quyền truy cập thư viện ảnh để tiếp tục!");
         return;
       }
     }
 
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: true,  // Cho phép chọn nhiều ảnh
+      allowsMultipleSelection: true, // Cho phép chọn nhiều ảnh
       allowsEditing: false,
       quality: 1,
     });
@@ -310,9 +350,9 @@ const CreatePostScreen = () => {
       const newImages = selectedImages.filter((uri) => !images.includes(uri));
 
       if (newImages.length > 0) {
-        setImages([...images, ...newImages]);  // Thêm các ảnh chưa được chọn
+        setImages([...images, ...newImages]); // Thêm các ảnh chưa được chọn
       } else {
-        alert('Bạn đã chọn các ảnh này rồi!');
+        alert("Bạn đã chọn các ảnh này rồi!");
       }
     }
   };
@@ -330,23 +370,30 @@ const CreatePostScreen = () => {
     setModalVisible(true);
   };
 
-  //return màn hình
+  //Nội dung màn hình
   return (
-    <TouchableWithoutFeedback onPress={handlePressOutside} style={{ flex: 1, }}>
-
+    <TouchableWithoutFeedback onPress={handleHideModal} style={{ flex: 1 }}>
       <View style={styles.container}>
         <SafeAreaView>
           <View style={styles.upperHeaderPlacehholder} />
         </SafeAreaView>
         {/* View Thanh điều hướng */}
         <View style={styles.navigationView}>
-
           {/* Nút quay lại */}
-          <ButtonsComponent isBack onPress={handleGoBack}></ButtonsComponent>
+          <ButtonsComponent isBack onPress={handleGoBack}>
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/512/3114/3114883.png',
+            }}
+            style={{ width: 25, height: 25, marginTop: 'auto' }}
+          />
+          </ButtonsComponent>
 
           {/* Nút đăng*/}
           <ButtonsComponent isNext onPress={handlePost}>
-            <Text style={{ color: '#ffff', fontSize: 13, marginTop: '12%' }}>Đăng</Text>
+            <Text style={{ color: "#ffff", fontSize: 13, marginTop: "12%" }}>
+              Đăng
+            </Text>
           </ButtonsComponent>
         </View>
 
@@ -390,14 +437,14 @@ const CreatePostScreen = () => {
           {/* Nút để hiển thị bảng tùy chọn */}
           {selectedHashTag.length < 5 && (
             <TouchableOpacity onPress={handleShowOptions} style={styles.button}>
-              <Text style={{ color: '#ffff', fontSize: 13, padding: 3 }}>
+              <Text style={{ color: "#ffff", fontSize: 13, padding: 3 }}>
                 Thêm chủ đề
               </Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/*Danh sách chủ đề cho trước*/}
+        {/*Danh sách chủ đề đề xuất*/}
         <View>
           <FlatList
             data={hashtag}
@@ -414,13 +461,20 @@ const CreatePostScreen = () => {
           visible={showOptions}
           transparent={true}
           animationType="slide"
-          onRequestClose={handlePressOutside}>
+          onRequestClose={handleHideModal}
+        >
           <TouchableOpacity activeOpacity={1.0}>
             <View style={styles.modalContainer}>
               <View style={styles.modalContent}>
-
                 {/*Nút đóng bảng */}
-                <ButtonsComponent isBack onPress={handlePressOutside}></ButtonsComponent>
+                <ButtonsComponent isBack onPress={handleHideModal}>
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/512/3114/3114883.png',
+            }}
+            style={{ width: 25, height: 25, marginTop: 'auto' }}
+          />
+          </ButtonsComponent>
 
                 {/*Nhập tên chủ đề cần tìm kiếm */}
                 <TextInput
@@ -437,12 +491,13 @@ const CreatePostScreen = () => {
                 {/* Hiển thị danh sách các chủ đề đã chọn */}
                 <View
                   style={{
-                    height: '25%',
+                    height: "25%",
                     borderWidth: 1,
-                    borderColor: '#E0E0E0',
+                    borderColor: "#E0E0E0",
                     borderRadius: 8,
                     padding: 7,
-                  }}>
+                  }}
+                >
                   {selectedHashTag.length > 0 && (
                     <FlatList
                       data={selectedHashTag}
@@ -463,7 +518,9 @@ const CreatePostScreen = () => {
                       data={filteredHashTag} //hàm filter để lọc dữ liệu
                       keyExtractor={(item) => item.id}
                       renderItem={renderHashTagItemIn}
-                      ListHeaderComponent={isNewHashTag ? renderHashTagItemNew : null}
+                      ListHeaderComponent={
+                        isNewHashTag ? renderHashTagItemNew : null
+                      }
                       showsHorizontalScrollIndicator={false}
                       style={styles.flatList}
                     />
@@ -487,12 +544,11 @@ const CreatePostScreen = () => {
           </TouchableOpacity>
         </Modal>
 
-
         {/* Dạng bài viết */}
         <View style={styles.navigationView}>
-          <Text style={{ marginLeft: 3, width: '86%', color: '#ccc' }} >
-            *Nếu muốn đăng nội dung với link youtbe hãy gạt nút,
-            nhưng bạn không thể nhập nội dung và thêm ảnh cho bài viết.
+          <Text style={{ marginLeft: 3, width: "86%", color: "#ccc" }}>
+            *Nếu muốn đăng nội dung với link youtbe hãy gạt nút, nhưng bạn không
+            thể nhập nội dung và thêm ảnh cho bài viết.
           </Text>
           <Switch
             style={{}}
@@ -504,16 +560,21 @@ const CreatePostScreen = () => {
           />
         </View>
 
-
-
         {/* Nếu switch bật thì hiển thị component nhập link */}
         {isEnabled ? (
           <View style={{ marginTop: 5 }}>
-            <TouchableOpacity onPress={pasteFromClipboard} >
+            <TouchableOpacity onPress={pasteFromClipboard}>
               <TextInput
-                style={{ borderStyle: 'dashed', borderColor: '#ccc', borderWidth: 1, padding: 10, borderRadius: 10, color: 'black' }}
+                style={{
+                  borderStyle: "dashed",
+                  borderColor: "#ccc",
+                  borderWidth: 1,
+                  padding: 10,
+                  borderRadius: 10,
+                  color: "black",
+                }}
                 value={link}
-                onChangeText={text => onchangeLink(text)}
+                onChangeText={(text) => onchangeLink(text)}
                 placeholder="Nhấn để dán link youtube"
                 editable={false} //tắt nhập liệu
               />
@@ -522,7 +583,7 @@ const CreatePostScreen = () => {
         ) : (
           <>
             {/* Hiển thị hình ảnh được chọn  */}
-            <ScrollView horizontal={true} >
+            <ScrollView horizontal={true}>
               {/**Nút chọn ảnh */}
               <TouchableOpacity style={styles.buttonAddImg} onPress={pickImage}>
                 <Ionicons name="add" size={40} color="white" />
@@ -535,19 +596,24 @@ const CreatePostScreen = () => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.removeButton}
-                    onPress={() => removeImage(index)}>
+                    onPress={() => removeImage(index)}
+                  >
                     <Text style={styles.removeButtonText}>X</Text>
                   </TouchableOpacity>
                 </View>
               ))}
             </ScrollView>
-          </>)}
+          </>
+        )}
         {/*End*/}
 
         {/* Modal hiển thị ảnh full màn hình */}
         <Modal visible={isModalVisible} transparent={true}>
           <View style={styles.modalIMGContainer}>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
               <Text style={styles.closeButtonText}>Đóng</Text>
             </TouchableOpacity>
             <Image source={{ uri: selectedImage }} style={styles.fullImage} />
@@ -565,166 +631,165 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#ffff',
+    backgroundColor: "#ffff",
   },
   upperHeaderPlacehholder: {
     height: appInfo.heightWindows * 0.04,
   },
   navigationView: {
     marginTop: 5,
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 25,
   },
   viewHashTag: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   inputTitle: {
-    height: '8%',
+    height: "8%",
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 10,
     padding: 10,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     marginBottom: 10,
   },
   input: {
-    height: '18%',
+    height: "18%",
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 10,
     padding: 10,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   inputHashTag: {
     marginTop: 10,
     height: height * 0.055,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: "#E0E0E0",
     borderRadius: 8,
     padding: 10,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   titleHashTag: {
     padding: 10,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   inputTag: {
     marginTop: 10,
     marginBottom: 10,
     //height: height * 0.05,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: "#E0E0E0",
     borderRadius: 8,
     padding: 10,
   },
   button: {
     width: 100,
-    backgroundColor: '#697BEB',
+    backgroundColor: "#697BEB",
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   tagContainer: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
     borderRadius: 10,
     paddingVertical: 3.5,
     paddingHorizontal: 16,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginRight: 8,
     marginBottom: 5,
   },
   tagContainerIn: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 16,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginRight: 8,
     marginBottom: 5,
-    width: '100%',
+    width: "100%",
   },
   tagText: {
-    color: '#333',
+    color: "#333",
   },
   selectedTagContainer: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
     borderRadius: 10,
-    paddingVertical: '1%',
+    paddingVertical: "1%",
     paddingHorizontal: 16,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginBottom: 5,
   },
   flatList: {
     marginBottom: 5,
   },
   modalContent: {
-    top: '20%',
-    backgroundColor: '#fff',
+    top: "20%",
+    backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 10,
-    height: '94%', // Giảm chiều cao modal để vừa với màn hình
+    height: "94%", // Giảm chiều cao modal để vừa với màn hình
   },
   modalContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     elevation: 5,
   },
   imageContainer: {
-
-    position: 'relative',
+    position: "relative",
   },
   image: {
     margin: 10,
     width: 70,
     height: 70,
     borderRadius: 10,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   removeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 5,
     right: 5,
-    backgroundColor: 'red',
+    backgroundColor: "red",
     borderRadius: 15,
     width: 30,
     height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   removeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 14,
   },
   modalIMGContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 1)', // Màu nền tối
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 1)", // Màu nền tối
+    justifyContent: "center",
+    alignItems: "center",
   },
   fullImage: {
-    width: '90%',
-    height: '70%',
-    resizeMode: 'contain',  // Hiển thị ảnh đầy đủ, không bị cắt
+    width: "90%",
+    height: "70%",
+    resizeMode: "contain", // Hiển thị ảnh đầy đủ, không bị cắt
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     left: 20,
-    backgroundColor: 'red',
+    backgroundColor: "red",
     padding: 10,
     borderRadius: 10,
   },
   closeButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
   },
   buttonAddImg: {
     marginTop: 10,
     width: 70,
     height: 70,
-    backgroundColor: '#dcdcdc', // Màu nền của nút
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#dcdcdc", // Màu nền của nút
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 10, // Tạo góc bo tròn cho nút
 
     //shadowColor: '#000',

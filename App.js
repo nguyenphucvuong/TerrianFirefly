@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { store } from './src/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPosts } from './src/redux/slices/PostSlice';
+import { getHashtag } from './src/redux/slices/HashtagSlice';
 
 import * as tf from '@tensorflow/tfjs';
 import { fetch, bundleResourceIO } from '@tensorflow/tfjs-react-native';
@@ -125,6 +126,7 @@ const MainApp = () => {
 
   useEffect(() => {
     dispatch(getPosts());
+    dispatch(getHashtag());
   }, [dispatch]);
 
 
@@ -137,9 +139,10 @@ const MainApp = () => {
     </>
   );
 };
+
 const App = () => {
 
-  return (
+  return ( 
     <Provider store={store}>
       <ImageProvider>
         <SafeAreaProvider>

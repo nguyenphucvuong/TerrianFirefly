@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { collection, addDoc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
-
+import { storage } from '../../firebase/FirebaseConfig'; // Firebase config
 // Trạng thái ban đầu
 const initialState = {
   hashtag: [],
@@ -13,8 +13,37 @@ const initialState = {
 // Tạo async thunk để thêm dữ liệu lên Firestore
 export const createHashtag = createAsyncThunk('data/createHashtag', async (newData) => {
   try {
-    // Thêm dữ liệu mới vào Firestore
-    const docRef = await addDoc(collection(db, 'Hashtag'), newData);
+    const addedHashtags = [];
+
+    // Lặp qua từng phần tử trong mảng newData
+    for (const hashtag of newData) {
+      // Tạo đối tượng hashtag cho mỗi phần tử trong mảng
+      const formattedHashtag = {
+        hashtag_id: hashtag,  // ID của hashtag
+        hashtag_background: "#ffff",
+        hashtag_color: "#000",
+      };
+
+      // Gọi hàm thêm hashtag vào Firebase Firestore và chờ kết quả
+      const addedHashtag = await addHashtagToFirebase(formattedHashtag);
+      
+      // Thêm hashtag vừa được thêm vào mảng kết quả
+      addedHashtags.push(addedHashtag);
+    }
+
+    // Trả về tất cả các hashtag vừa thêm
+    return addedHashtags;
+  } catch (error) {
+    console.error('Error adding document: ', error);
+    throw error;
+  }
+});
+
+// Hàm này thêm một hashtag vào Firebase Firestore
+const addHashtagToFirebase = async (hashtag) => {
+  try {
+    // Thêm đối tượng hashtag vào Firestore
+    const docRef = await addDoc(collection(db, 'Hashtag'), hashtag);
 
     // Lấy tài liệu vừa thêm từ Firestore
     const docSnap = await getDoc(docRef);
@@ -29,14 +58,16 @@ export const createHashtag = createAsyncThunk('data/createHashtag', async (newDa
     console.error('Error adding document: ', error);
     throw error;
   }
-});
+};
+
+
 
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getHashtag = createAsyncThunk('data/getHashtag', async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "Hashtag"));
     querySnapshot.forEach((doc) => {
-      console.log(`hashtag: ${doc.id} => `, doc.data());
+      //console.log(`hashtag: ${doc.id} => `, doc.data());
     });
     //console.log('querysnap', querySnapshot);
     const hashTagData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Lấy dữ liệu và ID của từng tài liệu

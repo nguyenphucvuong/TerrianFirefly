@@ -19,4 +19,4 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-//const storage = getStorage(app, "gs://terrianfirefly.appspot.com");
+export const storage = getStorage(app);
