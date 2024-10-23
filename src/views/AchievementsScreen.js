@@ -1,32 +1,43 @@
 import { View, FlatList, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useEffect } from 'react'
 import {
     BottomSheetModal,
     BottomSheetView,
     BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
+import { useSelector, useDispatch } from "react-redux";
 //components
 import { UserAvatarComponent, SelectImageComponent, ButtonBackComponent, ButtonFunctionComponent } from '../component';
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
+//redux
+import { getAchievement } from '../redux/slices/AchievementSlice';
 const AchievementsScreen = () => {
-    const data = [
-        { id: 1, image: 'https://i.pinimg.com/736x/81/31/20/8131208cdb98026d71d3f89b8097c522.jpg' },
-        { id: 2, image: 'https://mega.com.vn/media/news/2605_hinh-nen-anime-may-tinh41.jpg' },
-        { id: 3, image: 'https://gstatic.gvn360.com/2021/06/Mot-vu-tru-moi_-11-scaled.jpg' },
-        { id: 4, image: 'https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2023/12/hinh-nen-vu-tru-72.jpg' },
-        { id: 1, image: 'https://i.pinimg.com/736x/81/31/20/8131208cdb98026d71d3f89b8097c522.jpg' },
-        { id: 2, image: 'https://mega.com.vn/media/news/2605_hinh-nen-anime-may-tinh41.jpg' },
-    ];
+    // const data = [
+    //     { id: 1, image: 'https://i.pinimg.com/736x/81/31/20/8131208cdb98026d71d3f89b8097c522.jpg' },
+    //     { id: 2, image: 'https://mega.com.vn/media/news/2605_hinh-nen-anime-may-tinh41.jpg' },
+    //     { id: 3, image: 'https://gstatic.gvn360.com/2021/06/Mot-vu-tru-moi_-11-scaled.jpg' },
+    //     { id: 4, image: 'https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2023/12/hinh-nen-vu-tru-72.jpg' },
+    //     { id: 1, image: 'https://i.pinimg.com/736x/81/31/20/8131208cdb98026d71d3f89b8097c522.jpg' },
+    //     { id: 2, image: 'https://mega.com.vn/media/news/2605_hinh-nen-anime-may-tinh41.jpg' },
+    // ];
 
     // variables
-    const snapPoints = useMemo(() => ['15%'], []);
+    const snapPoints = useMemo(() => [appInfo.heightWindows * 0.15], []);
     const bottomSheetModalRef = useRef(null);
     const handldeOpenPress = () => {
         bottomSheetModalRef.current?.present();
     };
+    const achievement = useSelector((state) => state.achievement.achievement);
+    const dispatch = useDispatch();
+    //cập nhật lại dữ liệu     
+    useEffect(() => {  
+        //đọc dữ liệu   
+        dispatch(getAchievement());
+    }, []);
+    //console.log('achievement',achievement);
     return (
         <BottomSheetModalProvider>
             <View style={{ backgroundColor: '#7982FB', height: appInfo.heightWindows * 0.2, justifyContent: 'center', borderRadius: 20 }}>
@@ -38,17 +49,17 @@ const AchievementsScreen = () => {
             <FlatList
                 style={{ margin: '2%', marginTop: '5%' }}
                 numColumns={3}
-                data={data}
+                data={achievement}
                 renderItem={({ item }) => {
                     return (
                         <SelectImageComponent
-                            uri={item.image} width={'100%'}
+                            uri={item.nameAchie} width={'100%'}
                             height={appInfo.heightWindows * 0.13}
                             onPress={() => handldeOpenPress()}
                         />
                     )
                 }}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item.achie_id.toString()}
             />
             <BottomSheetModal
                 ref={bottomSheetModalRef}

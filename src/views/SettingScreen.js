@@ -17,7 +17,7 @@ const SettingScreen = () => {
                 <View style={styles.separator} />
             </View>
             {/* Tài Khoản */}
-            <TouchableOpacity style={styles.buttonRow}>
+            <TouchableOpacity style={styles.buttonRow} onPress={() => navigation.navigate('SetUpAccountScreen')}>
                 <Text style={styles.buttonText}>Quản Lý Tài Khoản</Text>
                 <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
             </TouchableOpacity>

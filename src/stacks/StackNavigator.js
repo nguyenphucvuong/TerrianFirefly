@@ -12,6 +12,7 @@ import {
     NotificationManagement,
     ManagePostsScreen,
     ArticleDetailsScreen,
+    SetUpAccountScreen,
 } from '../views';
 import IndexTab from '../tabs/indexTab';
 //components
@@ -62,6 +63,8 @@ const StackNavigator = () => {
                 options={() => IconBack("Quản Lý Bài Viết")} />
             <Stack.Screen name='ArticleDetailsScreen' component={ArticleDetailsScreen}
                 options={() => IconBack("Chi Tiết Bài Viết")} />
+            <Stack.Screen name='SetUpAccountScreen' component={SetUpAccountScreen}
+                options={() => IconBack("Thiết Lập Tài Khoản")} />
         </Stack.Navigator>
     )
 }

@@ -11,7 +11,7 @@ import { StyleGlobal } from '../styles/StyleGlobal'
 //constains
 import { appInfo } from '../constains/appInfo'
 //components
-import { InputComponents, ButtonFunctionComponent, IconComponent } from '../component'
+import { InputComponents, IconComponent } from '../component'
 const AccountDetailsScreen = () => {
     const navigation = useNavigation(); // Sử dụng hook navigation
     const snapPoints = useMemo(() => [appInfo.heightWindows * 0.25], []);
@@ -71,11 +71,6 @@ const AccountDetailsScreen = () => {
 const styles = StyleSheet.create({
     status: {
         alignItems: 'center',
-    },
-    button1: {
-        width: '100%',
-        height: appInfo.heightWindows * 0.055,
-        marginTop: 'auto',
     },
     contentContainer: {
         margin: 10,

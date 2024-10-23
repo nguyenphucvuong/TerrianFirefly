@@ -16,8 +16,9 @@ import GroupScreen from './GroupScreen';
 import NotificationManagement from './NotificationManagement';
 import ManagePostsScreen from './ManagePostsScreen';
 import ArticleDetailsScreen from './ArticleDetailsScreen';
+import SetUpAccountScreen from './SetUpAccountScreen';
 export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen,
      InfomationScreen, AchievementsScreen, NickNameScreen, DetailPostScreen, UserManagementScreen,
       SettingScreen, AccountDetailsScreen, ArticleScreen, FavouriteScreen, GroupScreen, NotificationManagement,
-      ManagePostsScreen, ArticleDetailsScreen}; 
+      ManagePostsScreen, ArticleDetailsScreen, SetUpAccountScreen}; 
 

@@ -1,18 +1,40 @@
 import { View, FlatList, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useMemo, useRef } from 'react'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from "react-redux";
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal'
 //constains
 import { appInfo } from '../constains/appInfo'
 //components
 import { IconComponent } from '../component'
+//redux
+import { getNickname } from '../redux/slices/NicknameSlice';
 const NickNameScreen = () => {
+    const nickname = useSelector((state) => state.nickname.nickname);
+    const dispatch = useDispatch();
+    //cập nhật lại dữ liệu     
+    useEffect(() => {
+        //đọc dữ liệu   
+        dispatch(getNickname());
+    }, []);
+    //console.log('nickname', nickname);
+
     return (
         <View style={StyleGlobal.container}>
-            <TouchableOpacity style={styles.buttonRow}>
-                <Text style={styles.buttonText}>Người Bình Thường</Text>
-                <IconComponent name={'check'} size={24} color={'gray'} style={styles.iconStyle} />
-            </TouchableOpacity>
+            <FlatList
+                data={nickname}
+                renderItem={({ item }) => {
+                    return (
+                        <TouchableOpacity style={styles.buttonRow}>
+                            <Text style={styles.buttonText}>{item.nickname}</Text>
+                            <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'gray'} style={styles.iconStyle} />
+                        </TouchableOpacity>
+                    )
+
+                }}
+                keyExtractor={(item) => item.id.toString()}
+            />
+
         </View>
     )
 }
@@ -29,6 +51,8 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         marginTop: appInfo.heightWindows * 0.01,
+        marginBottom: appInfo.heightWindows * 0.015,
+
     },
     iconStyle: {
         marginLeft: 'auto',
