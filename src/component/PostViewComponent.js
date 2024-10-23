@@ -29,8 +29,8 @@ const PostViewComponent = ({ post, user, emoji }) => {
 
 
     console.log(post)
-    console.log(post?.imgPost.length)
-    console.log(post?.hashtag.length)
+    // console.log(post?.imgPost.length)
+    // console.log(post?.hashtag.length)
     const navigation = useNavigation();
 
 

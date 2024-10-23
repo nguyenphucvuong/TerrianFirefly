@@ -6,10 +6,6 @@ import ImageViewer from 'react-native-image-zoom-viewer';
 import PagerView from 'react-native-pager-view'
 import { Image } from 'expo-image';
 import * as Clipboard from 'expo-clipboard';
-
-
-
-
 import Feather from 'react-native-vector-icons/Feather'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
@@ -75,10 +71,8 @@ const DetailPostScreen = () => {
         console.log(componentPosition);
     };
     return (
-        <View style={{
-            width: "100%",
-            height: "100%",
-        }}>
+        <View style={{ flex: 1, backgroundColor: "green" }}>
+            
             <StatusBar barStyle={'dark-content'} backgroundColor={"white"} />
             {/* Navigate bar */}
             <RowComponent style={{

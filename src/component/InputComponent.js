@@ -5,28 +5,23 @@ import Feather from 'react-native-vector-icons/Feather';
 import { appInfo } from '../constains/appInfo';
 //styles
 import { StyleGlobal } from "../styles/StyleGlobal";
-const InputComponents = ({ title,iconNameLeft, iconNameRight, value, keyboardType, onChangeText, placeholder, editable }) => {
+const InputComponents = ({iconName, value, keyboardType, onChangeText, placeholder, editable }) => {
     return (
-        <View style={{marginTop: '3%'}}>
-            <Text style={StyleGlobal.textTitleContent}>{title}</Text>
-            <View style={styles.textInput}>
-                <Feather name={iconNameLeft} size={24} color={'#858585'} />
-                <TextInput
-                    value={value}
-                    keyboardType={keyboardType}
-                    onChangeText={onChangeText}
-                    placeholder={placeholder}
-                    editable={editable}
-                />
-                <Feather style={styles.iconRight} name={iconNameRight} size={24} color={'#858585'} />
-            </View>
-
+        <View style={styles.textInput}>
+            <Feather style={styles.icon} name={iconName} size={appInfo.heightWindows * 0.024} color={'#858585'} />
+            <TextInput
+                value={value}
+                keyboardType={keyboardType}
+                onChangeText={onChangeText}
+                placeholder={placeholder}
+                editable={editable}
+            />
         </View>
     )
 }
 const styles = StyleSheet.create({
     textInput: {
-        marginTop: '2%',
+        marginTop: 10,
         width: '100%',
         height: appInfo.heightWindows * 0.055,
         borderColor: 'C4C4C4',
@@ -41,8 +36,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
     },
-    iconRight: {
-        marginLeft: 'auto',
+    icon: {
+        marginRight: 10,
     },
 });
 export default InputComponents;
