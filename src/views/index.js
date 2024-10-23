@@ -11,6 +11,23 @@ import WellcomScreen from './WellcomScreen';
 import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
 import ForgotPassword from './ForgotPassword';
+import CreatePostScreen from './CreatePostScreen';
 import VerificationCodeScreen from './VerificationCodeScreen';
-export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen, InfomationScreen, AchievementsScreen, NickNameScreen, DetailPostScreen, WellcomScreen, LoginScreen, RegisterScreen, ForgotPassword, VerificationCodeScreen}; 
+export { 
+    HomeScreen,
+    FollowScreen, 
+    PictureScreen, 
+    PersonScreen, 
+    BackgroundScreen, 
+    InfomationScreen, 
+    AchievementsScreen, 
+    NickNameScreen, 
+    DetailPostScreen, 
+    WellcomScreen, 
+    LoginScreen, 
+    RegisterScreen, 
+    ForgotPassword, 
+    VerificationCodeScreen,
+    CreatePostScreen,
+    }; 
 

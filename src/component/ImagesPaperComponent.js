@@ -25,32 +25,54 @@ const ImagesPagerComponent = ({ post, user, emoji }) => {
         setScrollState(event.nativeEvent.pageScrollState);
     }
     return (
-        <PagerView
-            // onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: index, User: user, emoji: emoji })}
-            style={{
-                height: 175,
-                width: "100%",
+        <View style={{
+            width: "100%",
+            height: 175,
+            justifyContent: "center",
+            alignItems: "center",
+        }}>
+            <PagerView
+                // onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: index, User: user, emoji: emoji })}
+                style={{
+                    height: 175,
+                    width: "100%",
+                }}
+                initialPage={index}
+                onPageSelected={handleIndex}
+                onPageScrollStateChanged={handlePageScrollStateChanged}
+            >
+                {
+                    post.imgPost.map((item, index) => (
+                        <Image
+                            onTouchEndCapture={handleChangeScreen}
+                            key={index}
+                            source={{ uri: item }}
+                            contentFit='cover'
+                            style={{
+                                width: appInfo.widthWindows * 0.935,
+                                height: "100%",
+                                borderRadius: 30,
+                            }}
+                        />
+                    ))
+                }
+            </PagerView >
+            <View style={{
+                backgroundColor: "rgba(0,0,0,0.5)",
+                position: "absolute",
+                zIndex: 1,
+                borderRadius: 25,
+                height: 20,
+                width: 35,
+                justifyContent: "center",
+                alignItems: "center",
+                right: 10,
+                top: 10,
+            }}>
+                <Text style={{ color: "white", fontSize: 12 }}>{index + 1}/{post.imgPost.length}</Text>
 
-            }}
-            initialPage={index}
-            onPageSelected={handleIndex}
-            onPageScrollStateChanged={handlePageScrollStateChanged}
-        >
-            {post.images.map((item, index) => (
-                <Image
-                    onTouchEndCapture={handleChangeScreen}
-                    key={index}
-                    source={{ uri: item }}
-                    contentFit='contain'
-                    style={{
-                        width: appInfo.widthWindows * 0.935,
-                        height: "100%",
-                        borderRadius: 30,
-                        backgroundColor: "black",
-                    }}
-                />
-            ))}
-        </PagerView>
+            </View>
+        </View>
     )
 }
 
