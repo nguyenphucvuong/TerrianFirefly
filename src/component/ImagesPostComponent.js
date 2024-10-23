@@ -81,6 +81,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                         style={{
                             width: "49%",
                             height: "100%",
+                            
                         }} />
                 </RowComponent>
             );
