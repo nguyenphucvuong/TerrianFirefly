@@ -13,7 +13,13 @@ import {
     ManagePostsScreen,
     ArticleDetailsScreen,
     SetUpAccountScreen,
+    WellcomScreen, 
+    LoginScreen, 
+    RegisterScreen, 
+    ForgotPassword, 
+    VerificationCodeScreen,
 } from '../views';
+
 import IndexTab from '../tabs/indexTab';
 //components
 import { ButtonBackComponent, IconComponent } from '../component';
@@ -37,8 +43,14 @@ const IconHeaderRight = (text, onPress, name) => ({
 });
 
 const StackNavigator = () => {
+        const [isLogin, setIsLogin] = useState(false);
     return (
-        <Stack.Navigator initialRouteName='IndexTab'>
+        <Stack.Navigator initialRouteName='WellcomScreen'>
+            <Stack.Screen name='WellcomScreen' component={WellcomScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='LoginScreen' component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='RegisterScreen' component={RegisterScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{ headerShown: false }} />
+            <Stack.Screen name='VerificationCodeScreen' component={VerificationCodeScreen} options={{ headerShown: false }} />
             <Stack.Screen name='IndexTab' component={IndexTab} options={{ headerShown: false }} />
             <Stack.Screen name='BackgroundScreen' component={BackgroundScreen} options={{ headerShown: false }} />
             <Stack.Screen name='InfomationScreen' component={InfomationScreen}

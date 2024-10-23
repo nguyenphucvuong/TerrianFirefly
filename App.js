@@ -1,13 +1,14 @@
 // import IndexRouter from './src/routers/indexRouter'
-import { StatusBar } from 'react-native'
+import { StatusBar, View } from 'react-native'
 
 import React, { useEffect, useState, useContext, createContext } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { NavigationContainer } from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { store } from './src/redux/store';
 import "react-native-gesture-handler";
 import StackNavigator from './src/stacks/StackNavigator'
 import { Provider } from 'react-redux';
-import { store } from './src/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPosts } from './src/redux/slices/PostSlice';
 

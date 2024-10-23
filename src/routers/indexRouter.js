@@ -6,6 +6,7 @@ import HomeTab from '../tabs/homeTab';
 const Stack = createStackNavigator();
 
 const IndexRouter = () => {
+    
     return (
         <Stack.Navigator screenOptions={({ route }) => ({
             headerShown: false, tabBarStyle: {

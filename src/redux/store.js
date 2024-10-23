@@ -6,6 +6,7 @@ import HashtagSlice from './slices/HashtagSlice';
 import BackgroundSlice from './slices/BackgroundSlice';
 import AchievementSlice  from './slices/AchievementSlice';
 import NicknameSlice  from './slices/NicknameSlice';
+import UserSlices  from './slices/UserSlices';
 export const store = configureStore({
     reducer: {
         post: Post,
@@ -13,7 +14,9 @@ export const store = configureStore({
         background: BackgroundSlice,
         achievement: AchievementSlice,
         nickname: NicknameSlice,
+        user: UserSlices,
     },
 })
+
 
 
