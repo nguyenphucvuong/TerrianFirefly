@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
-import { appInfo } from '../constains/appInfo';
-
+import { appInfo } from "../constains/appInfo";
 export const StyleGlobal = StyleSheet.create({
   textName: {
     fontSize: 13,
@@ -27,7 +26,8 @@ export const StyleGlobal = StyleSheet.create({
   },
   container: {
     flex: 1,
-    margin: "4%",
+    padding: appInfo.widthWindows * 0.04,
+    backgroundColor: 'white',
   },
   buttonLg: {
     alignSelf: "center",

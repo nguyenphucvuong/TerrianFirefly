@@ -36,9 +36,9 @@ const ImageProvider = ({ children }) => {
       const loadedModel = await nsfwjs.load(
         "https://nguyenphucvuong.github.io/models/mobilenet_v2/model.json"
       );
-      //console.log(loadedModel)
+      // console.log(loadedModel)
       setModel(loadedModel);
-      //console.log(model);
+      // console.log(model);
       setModelReady(true);
     };
     loadModel();
