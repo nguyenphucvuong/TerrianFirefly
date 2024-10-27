@@ -28,9 +28,9 @@ const PostViewComponent = ({ post, user, emoji }) => {
     }
 
 
-    console.log(post)
-    console.log(post?.imgPost.length)
-    console.log(post?.hashtag.length)
+    // console.log(post)
+    // console.log(post?.imgPost.length)
+    // console.log(post?.hashtag.length)
     const navigation = useNavigation();
 
 
@@ -51,7 +51,8 @@ const PostViewComponent = ({ post, user, emoji }) => {
     const handleNagigateDetailPost = () => {
         navigation.navigate("DetailPost", { post: post, user: user, emoji: emoji });
     }
-    console.log("isyt", post?.isYtb)
+    // console.log("isyt", post?.isYtb)
+    // console.log("isyt", post?.imgPost.length)
 
     const IsYTView = () => {
         return post?.isYtb ? (
@@ -205,11 +206,12 @@ const PostViewComponent = ({ post, user, emoji }) => {
                 <RowComponent
                     height={post?.hashtag.length === 0 ? 0 : "auto"}
                     width={appInfo.widthWindows - (appInfo.widthWindows * 0.1)}
+                // style={{ marginTop: 5 }}
                 >
                     <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
                 </RowComponent >
 
-                <AnimatedQuickCmtComponent post={post} user={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
+                <AnimatedQuickCmtComponent post={post} userPost={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
 
             </View>
         </View >

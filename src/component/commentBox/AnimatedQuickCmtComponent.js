@@ -1,13 +1,8 @@
 /* eslint-disable no-undef */
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useContext } from 'react';
 import { TextInput, Animated, Pressable, Easing, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-// import * as tf from '@tensorflow/tfjs';
-// import { fetch, bundleResourceIO } from '@tensorflow/tfjs-react-native';
-// import * as jpeg from 'jpeg-js';
-// import * as nsfwjs from 'nsfwjs';
-// import * as ImagePicker from 'expo-image-picker';
-// import * as FileSystem from 'expo-file-system';
+
 import { Image } from 'expo-image';
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -23,121 +18,26 @@ import { ButtonsComponent } from '../';
 
 // import { data } from '../../constains/data'
 import PostButton from './PostButton';
+import { count } from 'firebase/firestore';
+import { useSelector, useDispatch } from "react-redux";
+import { createComment, getComment } from '../../redux/slices/CommentSlice';
+import { ImageCheckContext } from '../../context/ImageProvider';
 
 
 
 
-const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style, handleNagigateDetailPost }) => {
+const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, emoji, style, handleNagigateDetailPost, isSubCmt }) => {
     // const [expanded, setExpanded] = useState(false);
     // const [isNomal] = [info.isNomal];
     var expanded = false;
     const animation = useRef(new Animated.Value(0)).current;
+    const dispatch = useDispatch();
 
-
-
-
-    // const [tfReady, setTfReady] = useState(false);
-    // const [modelReady, setModelReady] = useState(false);
-    // const [predictions, setPredictions] = useState(null);
-    // const [image, setImage] = useState(null);
-    // const [model, setModel] = useState(null);
-
-    // useEffect(() => {
-    //     const loadModel = async () => {
-    //         await tf.ready();
-    //         setTfReady(true);
-    //         const loadedModel = await nsfwjs.load(
-    //             "https://nguyenphucvuong.github.io/models/mobilenet_v2/model.json"
-    //         );
-    //         console.log(loadedModel)
-    //         setModel(loadedModel);
-    //         console.log(model);
-    //         setModelReady(true);
-    //     };
-    //     loadModel();
-    // }, []);
-    // const touchss = () => {
-    //     console.log("modelready", modelReady);
-    //     console.log("tfready", tfReady);
-    // }
-    // const classifyImage = async (imageUri) => {
-    //     console.log("uri", imageUri);
-    //     console.log("uri2", imageUri.uri);
-
-    //     if (!imageUri || !imageUri.uri) {
-    //         console.error("No image URI available");
-    //         return;
-    //     }
-
-    //     try {
-    //         console.log("Fetching image from URI:", imageUri.uri);
-
-    //         const rawImageData = await FileSystem.readAsStringAsync(imageUri.uri, {
-    //             encoding: FileSystem.EncodingType.Base64,
-    //         });
-
-    //         const imageBuffer = Uint8Array.from(atob(rawImageData), c => c.charCodeAt(0));
-    //         const jpegData = jpeg.decode(imageBuffer, true);
-    //         const imageTensor = imageToTensor(jpegData);
-
-    //         const predictions = await model.classify(imageTensor);
-    //         setPredictions(predictions);
-    //     } catch (error) {
-    //         console.error("Error classifying image:", error);
-    //     }
-    // };
-
-    // const imageToTensor = (rawImageData) => {
-    //     const { width, height, data } = rawImageData;
-    //     const buffer = new Uint8Array(width * height * 3);
-    //     let offset = 0;
-
-    //     for (let i = 0; i < buffer.length; i += 3) {
-    //         buffer[i] = data[offset]; // Red
-    //         buffer[i + 1] = data[offset + 1]; // Green
-    //         buffer[i + 2] = data[offset + 2]; // Blue
-    //         offset += 4;
-    //     }
-    //     return tf.tensor3d(buffer, [height, width, 3]);
-    // };
-
-    // const selectImage = async () => {
-    //     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    //     if (permissionResult.granted === false) {
-    //         alert("Permission to access camera roll is required!");
-    //         return;
-    //     }
-
-    //     const result = await ImagePicker.launchImageLibraryAsync({
-    //         mediaTypes: ImagePicker.MediaTypeOptions.All,
-    //         allowsEditing: false,  // Tắt chế độ chỉnh sửa ảnh
-    //         //aspect: [4, 3],        // Tùy chọn này không cần thiết khi allowsEditing là false
-    //         quality: 1,            // Giữ nguyên chất lượng ảnh
-    //     });
-
-    //     if (!result.canceled && result.assets.length > 0) {
-    //         const selectedImageUri = result.assets[0].uri;
-    //         console.log("Selected Image URI:", selectedImageUri);
-
-    //         // Cập nhật state cho hình ảnh
-    //         setImage({ uri: selectedImageUri });
-    //         console.log("ádasdasd", { uri: selectedImageUri })
-    //         setPredictions(null);
-    //         classifyImage({ uri: selectedImageUri });
-
-    //     } else {
-    //         console.log("Image selection was canceled or no assets found.");
-    //     }
-    // };
-    // const renderPrediction = (prediction) => {
-    //     return (
-    //         <Text key={prediction.className} style={styles.text}>
-    //             {prediction.className}: {Math.round(prediction.probability * 100)}%
-    //         </Text>
-    //     );
-    // };
-
-
+    const image = useContext(ImageCheckContext).image
+    const setImage = useContext(ImageCheckContext).setImage
+    const predictions = useContext(ImageCheckContext).predictions
+    const selectImage = useContext(ImageCheckContext).selectImage
+    const modelReady = useContext(ImageCheckContext).modelReady
 
 
 
@@ -209,6 +109,31 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
         // }).start(setFalse());
     };
 
+    const [content, setContent] = useState("")
+
+    const dataCmt = !isImgIn ? {
+        comment_id: "",
+        post_id: post.post_id,
+        user_id: "truongthien1410@gmail.com",
+        content: content,
+        count_like: 0,
+        count_comment: 0,
+        created_at: Date.now(),
+        img_id: "",
+    } : {
+        sub_comment_id: "",
+        comment_id: "",
+        user_id: "truongthien1410@gmail.com",
+        content: content,
+        count_like: 0,
+        created_at: Date.now(),
+        img_id: "",
+    }
+
+    const btnDangComment = () => {
+        dispatch(createComment(dataCmt))
+        handleHidePop();
+    }
 
     return !isNomal ? (
         <>
@@ -223,7 +148,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         alignContent: "center",
                         justifyContent: "center",
                     }}>
-                    <AvatarEx size={40} round={30} url={user.avatar} style={{ marginRight: "3%" }} />
+                    <AvatarEx size={40} round={30} url={userPost.avatar} style={{ marginRight: "3%" }} />
                     <Pressable
                         onPress={handleLikePressed}
                         style={{
@@ -283,10 +208,10 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         placeholderTextColor={"rgba(0,0,0,0.3)"}
                         style={[styles.inputQuickCmt, {
                             height: "auto",
-
                         }]}
                         autoFocus={true}
                         multiline
+                        onChangeText={(text) => setContent(text)}
                     />
 
                     <View style={{
@@ -295,38 +220,39 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         width: appInfo.widthWindows,
                         left: -20,
                     }}>
-
                         {/* Image */}
-                        <View
+                        {image && <View
                             style={{
                                 width: 200,
                                 height: 200,
                                 backgroundColor: "red",
                             }}>
-                            <TouchableOpacity
-                                style={{
-                                    width: 25,
-                                    height: 25,
-                                    backgroundColor: "green",
-                                    position: "absolute",
-                                    zIndex: 1,
-                                    top: 0,
-                                    right: 0,
-                                }} >
-                                <Image source={require('../../../assets/appIcons/close_icon.png')}
+                            {<>
+                                <TouchableOpacity
                                     style={{
                                         width: 25,
                                         height: 25,
+                                        backgroundColor: "green",
+                                        position: "absolute",
+                                        zIndex: 1,
+                                        top: 0,
+                                        right: 0,
+                                    }} >
+                                    <Image source={require('../../../assets/appIcons/close_icon.png')}
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            contentFit: "cover",
+                                        }} />
+                                </TouchableOpacity>
+                                {image && <Image source={image}
+                                    style={{
+                                        width: 200,
+                                        height: 200,
                                         contentFit: "cover",
-                                    }} />
-                            </TouchableOpacity>
-                            <Image source={require('../../../assets/appIcons/image-choose.png')}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                    contentFit: "cover",
-                                }} />
-                        </View>
+                                    }} />}
+                            </>}
+                        </View>}
 
                     </View>
                     <View style={{
@@ -338,22 +264,23 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         marginTop: 10,
                     }}>
                         {/* Choose Image */}
-                        {<ButtonsComponent
+                        <ButtonsComponent
                             isButton
-                            // onPress={aaaaa}
+                            onPress={modelReady ? selectImage : undefined}
                             style={{
                                 // backgroundColor: "red",
                                 marginRight: 10,
                                 justifyContent: "center",
                                 width: "70%"
                             }}>
+
                             <Image
                                 style={{
                                     width: 28,
                                     height: 28,
                                 }}
                                 source={require('../../../assets/appIcons/image-choose.png')} />
-                        </ButtonsComponent>}
+                        </ButtonsComponent>
 
                         <LinearGradient
                             start={{ x: 0, y: 0 }} end={{ x: 0.1999, y: 0 }}
@@ -367,7 +294,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         >
                             <ButtonsComponent
                                 isButton
-                                // onPress={touchss}
+                                onPress={btnDangComment}
                                 style={{
                                     borderRadius: 30,
                                     justifyContent: "center",
@@ -397,7 +324,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                 length={post.post_id.length}
                 view={
                     // <PostButton toggleExpand={toggleExpand} handleShowPopEmoji={handleShowPopEmoji} data={data} />
-                    < PostButton toggleExpand={toggleExpand} post={post} user={user} emoji={emoji} handleShowPop={handleShowPop} handleNagigateDetailPost={handleNagigateDetailPost} />
+                    < PostButton toggleExpand={toggleExpand} post={post} user={userPost} emoji={emoji} handleShowPop={handleShowPop} handleNagigateDetailPost={handleNagigateDetailPost} />
                 }
             />
         </>
@@ -406,13 +333,14 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
             {!isImgIn ?
                 <RowComponent
                     height={"100%"}
+
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
                         alignContent: "center",
                         justifyContent: "center",
                         paddingHorizontal: "3%",
-
+                        width: "100%"
                     }}>
                     <Pressable onPress={handleShowPop} style={{
                         with: "100%",
@@ -427,7 +355,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         backgroundColor: "#D8D8D833",
                     }}
                     >
-                        <AvatarEx size={30} round={30} url={user.avatar} style={{ position: "relative", }} />
+                        <AvatarEx size={30} round={30} url={userPost.avatar} style={{ position: "relative", }} />
                         <View style={{ width: 10 }} />
                         <TextInput
                             placeholderTextColor={"white"}
@@ -456,7 +384,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         paddingHorizontal: "3%",
 
                     }}>
-                    <AvatarEx size={33} round={30} url={user.avatar} style={{ position: "relative", marginRight: "3%" }} />
+                    <AvatarEx size={33} round={30} url={userPost.avatar} style={{ position: "relative", marginRight: "3%" }} />
 
                     <Pressable onPress={handleShowPop} style={{
                         with: "100%",
@@ -485,8 +413,144 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, user, emoji, style,
                         transparent={true}
                         onRequestClose={handleHidePop}
                     >
-                        {/* <CmtBoxComponent translateY={translateY} handleHideInput={handleHidePop} tfReady={tfReady} modelReady={modelReady} setImage={setImage} /> */}
-                    </ModalPop>
+                        <Animated.View style={[styles.animatedContainer, { transform: [{ translateY }] }]}>
+                            <RowComponent width={"100%"} height={"auto"} style={{
+                                // backgroundColor: "pink",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}>
+                                <Text style={{
+                                    flex: 1,
+                                    color: "gray",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }}>
+                                    Đăng bình luận
+                                </Text>
+                                <ButtonsComponent isButton onPress={handleHidePop}>
+                                    <Image
+
+                                        source={require('../../../assets/appIcons/close_icon.png')}
+                                        style={{
+                                            height: 30,
+                                            width: 30,
+                                        }}
+                                    />
+                                </ButtonsComponent>
+
+                            </RowComponent>
+                            <TextInput
+                                placeholder="Tôi có lời muốn nói..."
+                                placeholderTextColor={"rgba(0,0,0,0.3)"}
+                                style={[styles.inputQuickCmt, {
+                                    height: "auto",
+
+                                }]}
+                                autoFocus={true}
+                                multiline
+                                onChangeText={(text) => setContent(text)}
+                            />
+
+                            <View style={{
+                                borderBottomWidth: 1,
+                                borderColor: "rgba(0,0,0,0.1)",
+                                width: appInfo.widthWindows,
+                                left: -20,
+                            }}>
+
+                                {/* Image */}
+                                <View
+                                    style={{
+                                        width: 200,
+                                        height: 200,
+                                        backgroundColor: "red",
+                                    }}>
+                                    <TouchableOpacity
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            backgroundColor: "green",
+                                            position: "absolute",
+                                            zIndex: 1,
+                                            top: 0,
+                                            right: 0,
+                                        }} >
+                                        <Image source={require('../../../assets/appIcons/close_icon.png')}
+                                            style={{
+                                                width: 25,
+                                                height: 25,
+                                                contentFit: "cover",
+                                            }} />
+                                    </TouchableOpacity>
+                                    <Image source={require('../../../assets/appIcons/image-choose.png')}
+                                        style={{
+                                            width: 200,
+                                            height: 200,
+                                            contentFit: "cover",
+                                        }} />
+                                </View>
+
+                            </View>
+                            <View style={{
+                                flex: 1,
+                                // backgroundColor: "pink",
+                                width: "100%",
+                                height: 35,
+                                flexDirection: "row",
+                                marginTop: 10,
+                            }}>
+                                {/* Choose Image */}
+                                {<ButtonsComponent
+                                    isButton
+                                    // onPress={aaaaa}
+                                    style={{
+                                        // backgroundColor: "red",
+                                        marginRight: 10,
+                                        justifyContent: "center",
+                                        width: "70%"
+                                    }}>
+                                    <Image
+                                        style={{
+                                            width: 28,
+                                            height: 28,
+                                        }}
+                                        source={require('../../../assets/appIcons/image-choose.png')} />
+                                </ButtonsComponent>}
+
+                                <LinearGradient
+                                    start={{ x: 0, y: 0 }} end={{ x: 0.1999, y: 0 }}
+                                    colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
+
+                                    style={{
+                                        paddingLeft: "8.5%",
+                                        width: "auto",
+                                        height: "100%",
+                                    }}
+                                >
+                                    <ButtonsComponent
+                                        isButton
+                                        // onPress={touchss}
+                                        style={{
+                                            borderRadius: 30,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            width: 65,
+                                            height: "100%",
+                                            paddingHorizontal: "2%",
+                                            backgroundColor: "rgba(101,128,255,1)",
+
+                                        }}>
+                                        <Text
+                                            style={{
+                                                color: "white",
+                                                fontSize: 12,
+                                            }} >Đăng</Text>
+                                    </ButtonsComponent>
+                                </LinearGradient>
+
+                            </View>
+                        </Animated.View >
+                    </ModalPop >
 
                 </RowComponent>}
         </>

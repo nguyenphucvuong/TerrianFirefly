@@ -2,7 +2,8 @@ import { StyleSheet, Text, View } from "react-native";
 import React, { useCallback } from "react";
 import { Image } from "expo-image";
 
-const AvatarComponent = ({ size, round, url, style, frame }) => {
+
+const AvatarEx = ({ size, round, url, style, frame }) => {
   // const [size, round, url, style, children] = [infoImage.infoImage.size, infoImage.infoImage.round, infoImage.infoImage.url, infoImage.infoImage.style, infoImage.infoImage.children];
   const urlFrame = require('../../assets/frame/frame_background.png');
   return (
@@ -33,19 +34,6 @@ const AvatarComponent = ({ size, round, url, style, frame }) => {
           }}>
         </Image >
       </View>
-    </>
-  );
-};
-
-const AvatarEx = ({ size, round, url, style, frame }) => {
-
-  const AvatarCallback = useCallback(() => {
-    return <AvatarComponent size={size} round={round} url={url} style={style} frame={frame} />;
-  }, [size, round, url, style, frame]);
-
-  return (
-    <>
-      <AvatarCallback />
     </>
   );
 }

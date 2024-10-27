@@ -7,23 +7,27 @@ import { useNavigation } from '@react-navigation/native';
 
 
 const ImagesPagerComponent = ({ post, user, emoji }) => {
+
     const [index, setIndex] = useState(0);
-    const [scrollState, setScrollState] = useState('idle');
 
     const navigation = useNavigation();
 
 
-    const handleIndex = num => {
-        setIndex(num.nativeEvent.position);
+    const [scrollState, setScrollState] = useState('idle');
+    const handlePageScrollStateChanged = (event) => {
+        setScrollState(event.nativeEvent.pageScrollState);
     }
     const handleChangeScreen = () => {
         if (scrollState === 'idle') {
             navigation.navigate("picture", { Data: post, Select: index, User: user, emoji: emoji });
         }
     }
-    const handlePageScrollStateChanged = (event) => {
-        setScrollState(event.nativeEvent.pageScrollState);
+
+    const handleIndex = num => {
+        setIndex(num.nativeEvent.position);
     }
+
+
     return (
         <View style={{
             width: "100%",
