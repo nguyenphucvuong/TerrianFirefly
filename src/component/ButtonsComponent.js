@@ -8,6 +8,7 @@ import {
 import React from "react";
 import { Image } from "expo-image";
 
+<<<<<<< HEAD
 const ButtonsComponent = ({
   children,
   color,
@@ -23,6 +24,9 @@ const ButtonsComponent = ({
   isNext,
   isNotiButton,
 }) => {
+=======
+const ButtonsComponent = ({ children, color, style, disabled, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail, isBack, isNext }) => {
+>>>>>>> ba3ddd68d426fcb4a03c1aba2de45ae45eb39092
   // const ButtonsComponent = (infoButton) => {
   // const [children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail] = [
   //   infoButton.children,
@@ -130,7 +134,7 @@ const ButtonsComponent = ({
         style={{
           width: "95%",
           height: "100%",
-          backgroundColor: "green",
+          // backgroundColor: "green",
         }}
         contentContainerStyle={{
           justifyContent: "flex-start",
@@ -150,12 +154,30 @@ const ButtonsComponent = ({
     );
   };
 
+<<<<<<< HEAD
+=======
+  //Nút quay lại
+  const BackButton = () => {
+    return (
+      <TouchableOpacity onPress={onPress} style={styles.buttonBack}>
+        <Image
+          source={{
+            uri: 'https://cdn-icons-png.flaticon.com/512/3114/3114883.png',
+          }}
+          style={{ width: 25, height: 25, marginTop: 'auto' }}
+        />
+      </TouchableOpacity>
+    )
+  }
+
+>>>>>>> ba3ddd68d426fcb4a03c1aba2de45ae45eb39092
   //Nút tiếp tục
   const NextButton = () => {
     return (
       <TouchableOpacity onPress={onPress} style={styles.buttonNext}>
         {children}
       </TouchableOpacity>
+<<<<<<< HEAD
     );
   };
 
@@ -167,6 +189,10 @@ const ButtonsComponent = ({
       </TouchableOpacity>
     );
   };
+=======
+    )
+  }
+>>>>>>> ba3ddd68d426fcb4a03c1aba2de45ae45eb39092
 
   if (isButton) {
     return <NormalTouchableOpacity />;

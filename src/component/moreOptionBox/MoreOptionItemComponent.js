@@ -16,15 +16,15 @@ const MoreOptionItemComponent = (infoButton) => {
     ];
     const OptionPop = () => {
         return isRow ? (
-            <ButtonsComponent isPressable
+            <ButtonsComponent isButton
                 onPress={onPress}
-                style={[styles.btnLogoRow, styleBtn && styleBtn]}>
+                style={[styles.btnLogoRow, styleBtn && styleBtn]} >
                 <Image source={url}
                     style={[styles.iconBtnLogoRow, styleImg && styleImg]} />
                 <Text style={[styles.textShareRow, styleText && styleText]}>{text}</Text>
-            </ButtonsComponent>
+            </ButtonsComponent >
         ) : (
-            <ButtonsComponent isPressable
+            <ButtonsComponent isButton
                 onPress={onPress}
                 style={[styles.btnLogoCol, styleBtn && styleBtn]}>
                 <Image source={url}
@@ -65,7 +65,6 @@ const styles = StyleSheet.create({
     btnLogoRow: {
         width: "100%",
         flexDirection: "row",
-        backgroundColor: "yellow",
         alignItems: "center",
         marginVertical: 10,
     },
@@ -75,8 +74,9 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     iconBtnLogoRow: {
-        width: 35,
-        height: 35,
-        marginRight: 5,
+        margin: 5,
+        width: 25,
+        height: 25,
+        marginRight: 10,
     },
 })

@@ -11,22 +11,22 @@ const initialState = {
 
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getUser = createAsyncThunk('data/getUser', async (email) => {
-    
-    
+
+
     try {
         const q = query(collection(db, 'user'), where('email', '==', email));
-                const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(q);
 
-                const posts = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
+        const posts = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
 
-                return posts;
-            } catch (err) {
-                return err.message;
-            }
-       
+        return posts;
+    } catch (err) {
+        return err.message;
+    }
+
 });
 
 export const updateUserPassword = createAsyncThunk('data/updateUserPassword', async ({ userId, newPassWord }) => {

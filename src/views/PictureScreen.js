@@ -22,6 +22,7 @@ import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
 import { data } from '../constains/data'
 import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtComponent'
+import { AvatarEx, ButtonsComponent } from '../component'
 // import { AvatarEx } from '../component'
 // import RowComponent from '../RowComponent';
 
@@ -77,7 +78,7 @@ const PictureScreen = ({ }) => {
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
             {/* Tab Status Bar */}
-            <StatusBar barStyle={'default'} backgroundColor={"black"} />
+            <StatusBar barStyle={'default'} backgroundColor={"transparent"} />
             {isVisible && <View style={{
                 flexDirection: "row",
                 position: 'absolute',
@@ -141,11 +142,17 @@ const PictureScreen = ({ }) => {
                 <View style={{ height: "80%", flexDirection: "row" }}>
                     <View style={{ width: "80%", height: "100%", }} />
                     <View style={{ width: "20%", height: "100%", alignItems: 'center' }}>
-                        <TouchableOpacity style={{ alignItems: "center", marginBottom: "10%" }}>
-                            <Image source={{ uri: User.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
-                                style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} />
-                            <AndtDegisn name='pluscircle' color={appcolor.primary} size={17} style={{ width: 17, height: 17, backgroundColor: "white", borderRadius: 100, marginTop: "-15%" }} />
-                        </TouchableOpacity>
+                        <ButtonsComponent isButton style={{ alignItems: "center", marginBottom: "10%" }}>
+                            <AvatarEx size={50} round={30} url={User.avatar} style={{ marginRight: "3%" }} />
+                            {/* <Image source={{ uri: User.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
+                                style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} /> */}
+                        </ButtonsComponent>
+
+                        <ButtonsComponent isButton>
+                            <AndtDegisn name='pluscircle' color={appcolor.primary} size={17} style={{ width: 17, height: 17, backgroundColor: "white", borderRadius: 100, marginTop: "-15%", top: -5 }} />
+
+                        </ButtonsComponent>
+
                         <TouchableOpacity style={{ alignItems: "center" }}>
                             <AndtDegisn name='like1' color={"white"} size={30} />
                             <Text style={{ color: "white" }}>20</Text>
@@ -161,7 +168,7 @@ const PictureScreen = ({ }) => {
                     </View>
                 </View>
                 <View style={{ height: "20%" }} >
-                    {<AnimatedQuickCmtComponent isNomal post={data.user} user={User} emoji={emoji} />}
+                    {<AnimatedQuickCmtComponent isNomal post={data.user} userPost={User} emoji={emoji} />}
                 </View>
 
             </View>}

@@ -8,15 +8,20 @@ import {
   query,
   limit,
   orderBy,
+  startAfter,
+  doc,
 } from "firebase/firestore";
 import { db } from "../../firebase/FirebaseConfig"; // Firebase config
 import { storage } from "../../firebase/FirebaseConfig"; // Firebase config
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
 const initialState = {
   post: [],
-  status: "idle",
+  lastVisiblePost: null,
+  status: 'idle',
   error: null,
   postByField: [],
 };
@@ -69,9 +74,9 @@ export const createPost = createAsyncThunk(
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getPosts = createAsyncThunk("data/getPosts", async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "Posts"));
+    const querySnapshot = await getDocs(collection(db, "Posts"),);
     querySnapshot.forEach((doc) => {
-      console.log(`post: ${doc.id} => `, doc.data());
+      // console.log(`post: ${doc.id} => `, doc.data());
     });
     //const querySnapshot = await getDocs(collection(db, "Posts")); // Thay "Posts" bằng tên bộ sưu tập của bạn
     const postData = querySnapshot.docs.map((doc) => ({
@@ -87,86 +92,78 @@ export const getPosts = createAsyncThunk("data/getPosts", async () => {
   }
 });
 
-// lấy dữ liệu theo trường yêu cầu từ firestore
-// lấy dữ liệu theo trường yêu cầu từ firestore
-export const getPostsByField = createAsyncThunk(
-  "data/getPostsByField",
-  async ({ fieldOrderBy, quantity }) => {
-    try {
-      // Kiểm tra xem giá trị fieldOrderBy và quantity có hợp lệ không
-      if (!fieldOrderBy || !quantity) {
-        throw new Error("fieldOrderBy and quantity are required");
-      }
+export const getPostsRefresh = createAsyncThunk('data/getPostsRefresh', async () => {
+  try {
+    let postsQuery = query(
+      collection(db, "Posts"),
+      orderBy("created_at", "desc"),
+      limit(3)
+    );
 
-      // Tạo một truy vấn Firestore với limit và orderBy
-      const q = query(
-        collection(db, "Posts"), // Collection "Posts"
-        orderBy(fieldOrderBy, "desc"), // Sắp xếp theo trường yêu cầu
-        limit(quantity) // Giới hạn số lượng tài liệu trả về
+    const querySnapshot = await getDocs(postsQuery);
+
+    if (querySnapshot.empty) {
+      return { posts: [], lastVisiblePost: null };
+    }
+
+    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return {
+      postData: postData,
+      lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
+    }; // Return only the document ID for `lastVisiblePost`
+  } catch (error) {
+    console.error('Error fetching posts: ', error);
+    throw error;
+  }
+});
+
+export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({ field, quantity }, { getState }) => {
+
+  try {
+    const lastVisiblePostId = getState().post.lastVisiblePost;
+    let lastVisibleDoc = null;
+    if (lastVisiblePostId) {
+      const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
+      lastVisibleDoc = await getDoc(lastVisibleDocRef);
+    }
+
+    let postsQuery = query(
+      collection(db, "Posts"),
+      orderBy(field, "desc"),
+      limit(quantity)
+    );
+
+    if (lastVisibleDoc) {
+      postsQuery = query(
+        collection(db, "Posts"),
+        orderBy(field, "desc"),
+        startAfter(lastVisibleDoc),
+        limit(quantity)
       );
-
-      // Lấy tài liệu dựa trên truy vấn (query)
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        console.log("No matching documents.");
-        return [];
-      }
-
-      // Map qua các tài liệu để lấy dữ liệu cần thiết
-      const posts = querySnapshot.docs.map((doc) => {
-        const data = doc.data();
-        console.log("Post data: ", data); // Debug xem dữ liệu có hợp lệ không
-        return {
-          id: doc.id,
-          ...data,
-        };
-      });
-
-      console.log("get by field", posts); // Debug để xem có dữ liệu nào không
-      return posts;
-    } catch (error) {
-      console.error("Error fetching posts: ", error);
-      throw error; // Ném lại lỗi để xử lý sau
     }
-  }
-);
 
-// Tạo async thunk để xóa bài viết và ảnh liên quan
-export const deletePostById = createAsyncThunk(
-  "data/deletePostById",
-  async (postId, { rejectWithValue }) => {
-    try {
-      // Lấy thông tin bài viết trước khi xóa
-      const postDoc = await getDoc(doc(db, "Posts", postId));
+    const querySnapshot = await getDocs(postsQuery);
 
-      if (postDoc.exists()) {
-        const postData = postDoc.data();
-
-        // Nếu bài viết có ảnh, xóa ảnh khỏi Firebase Storage
-        if (postData.imgPost && postData.imgPost.length > 0) {
-          const deletePromises = postData.imgPost.map((imgUrl) => {
-            const imgRef = ref(storage, `images/${imgUrl.split("/").pop()}`);
-            return deleteObject(imgRef); // Xóa ảnh
-          });
-
-          // Thực hiện xóa ảnh
-          await Promise.all(deletePromises);
-        }
-
-        // Xóa bài viết khỏi Firestore
-        await deleteDoc(doc(db, "Posts", postId));
-      } else {
-        throw new Error("No such document!");
-      }
-
-      return postId; // Trả về ID của bài viết đã xóa
-    } catch (error) {
-      console.error("Error deleting post: ", error);
-      return rejectWithValue(error.message);
+    if (querySnapshot.empty) {
+      return { postData: [], lastVisiblePost: null };
     }
+
+    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return {
+      postData: postData,
+      lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
+
+    }; // Return only the document ID for `lastVisiblePost`
+  } catch (error) {
+    console.error('Error fetching posts: ', error);
+    throw error;
   }
-);
+});
+
+
 
 // Tạo slice cho Post
 export const PostSlice = createSlice({
@@ -186,18 +183,45 @@ export const PostSlice = createSlice({
         state.post = action.payload; // Cập nhật danh sách bài đăng
         state.status = "succeeded"; // Đánh dấu thành công
       })
-
-      // Xử lý khi lấy dữ liệu thành công
-      .addCase(getPostsByField.fulfilled, (state, action) => {
-        state.postByField = action.payload; // Cập nhật danh sách bài đăng
-        state.status = "succeeded"; // Đánh dấu thành công
+      .addCase(getPosts.pending, (state) => {
+        state.status = 'loading'; // Đánh dấu trạng thái đang tải
+      })
+      .addCase(getPosts.rejected, (state, action) => {
+        state.error = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
+        state.status = 'failed'; // Đánh dấu thất bại
       })
 
-      // Xử lý khi xóa dữ liệu thành công
-      .addCase(deletePostById.fulfilled, (state, action) => {
-        state.post = state.post.filter((post) => post.id !== action.payload); // Loại bỏ bài viết đã xóa
+      // getPostsByField
+      .addCase(getPostsByField.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPostsByField.fulfilled, (state, action) => {
+        state.loading = false;
+        state.post.push(...action.payload.postData); // Push dữ liệu mới vào mảng posts
+        state.lastVisiblePost = action.payload.lastVisiblePost; // Lưu lại lastVisiblePost
+        state.status = "succeeded"; // Đánh dấu thành công
+      })
+      .addCase(getPostsByField.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+
+      // getPostsRefresh
+      .addCase(getPostsRefresh.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPostsRefresh.fulfilled, (state, action) => {
+        state.loading = false;
+        state.post = action.payload.postData;
+        state.lastVisiblePost = action.payload.lastVisiblePost; // Lưu lại lastVisiblePost
         state.status = "succeeded";
-      });
+      })
+      .addCase(getPostsRefresh.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
   },
 });
 
