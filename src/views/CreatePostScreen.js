@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState, useEffect } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -38,29 +38,21 @@ import {
 } from "../redux/slices/PostSlice";
 import { getHashtag, createHashtag } from "../redux/slices/HashtagSlice";
 import { Ionicons } from "@expo/vector-icons";
+import { log } from "@tensorflow/tfjs";
 const { height } = Dimensions.get("window");
 
 const CreatePostScreen = () => {
 
-  
-  // useEffect(() => {
-    
-  //   const interval = setInterval(() => {
-  //     dispatch(getPosts());
-  //   dispatch(getHashtag());
-  //   }, 1000); 
-  // }, [dispatch]);
-  
   //khai bao redux
   const dispatch = useDispatch();
   const { post, status, error } = useSelector((state) => state.post); // post
   const { hashtag, statusHashtag } = useSelector((state) => state.hashtag); //hashtag
+  const { user, errorUser } = useSelector((state) => state.user); //hashtag
 
   // chuyển màn hình
   const navigation = useNavigation();
 
   //khai báo biến
-  const currentDate = new Date();
   const [showOptions, setShowOptions] = useState(false); // Trạng thái của modal bảng tùy chọn
   const [textTitle, onChangeTextTitle] = React.useState(""); // tiêu đề
   const [textPost, onChangeTextPost] = React.useState(""); // nội dung
@@ -113,53 +105,84 @@ const CreatePostScreen = () => {
         "Thông báo",
         "Bạn không thể nhập dữ liệu khi Switch đang bật."
       );
-      console.log("an cai cc");
+      // console.log("an cai cc");
     }
   };
-
+  
+  //Hàm lấy id trong link ytb
+  const extractYouTubeVideoID = (url) => {
+    const youtubeRegex =
+      /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(youtubeRegex);
+    return match ? match[1] : "Erro link";
+  };
   //xử lý đăng bài viết mới
   const handlePost = async () => {
-    let body = isEnabled ? (body = link) : (body = textPost);
-    const formattedDate = currentDate.toLocaleDateString("vi-VN");
+    let body = isEnabled ? link : textPost;
+    if (isEnabled) {
+      body = extractYouTubeVideoID(body);
+    }
+
     const newDataPost = {
-      //dữ liệu mặc định ban đầu
       status_post_id: 0,
       count_emoji: 0,
       count_comment: 0,
       count_view: 0,
-      //id user và id bài viết
-      post_id: "temp",
-      user_id: "temp",
-      //tiêu đề, nội dung (hoặc link ytb)
+      post_id: "temp", 
+      user_id: user[0].user_id,
       title: textTitle,
       body: body,
-      hashtag: selectedHashTag, //chủ đề chọn
-      imgPost: images, // hình ảnh chọn
-      isYtb: isEnabled, //là bài đăng dạng ảnh hay link ytb
-      created_at: formattedDate, //thời gian tạo dd/mm/yyyy
+      hashtag: selectedHashTag, 
+      imgPost: images, 
+      isYtb: isEnabled, 
+      created_at: Date.now(), 
     };
-    if (newHashtag.length != 0) {
-      dispatch(createHashtag(newHashtag));
-      console.log("loi: ", "áđá");
+    // Nếu có hashtag mới, thêm vào Firestore
+    if (newHashtag.length !== 0) {
+      await dispatch(createHashtag(newHashtag))
+        .then(() => {
+          dispatch(getHashtag());
+
+        })
+        .catch((error) => {
+          console.error("Lỗi thêm hashtag:", error);
+        });
     }
 
-    console.log("loi: ", error);
-    console.log("status: ", statusHashtag);
-    console.log("getPostByField: ", getPostsByField("null", "created_at", 10));
-    dispatch(createPost(newDataPost));
+    // Gọi lại danh sách hashtag sau khi thêm mới
+    await dispatch(getHashtag()).unwrap();
+    console.log("Cập nhật danh sách hashtag thành công");
+
+    // Thêm bài viết mới vào Firestore
+    await dispatch(createPost(newDataPost)).unwrap();
+    console.log("Thêm bài viết thành công");
+
+    await dispatch(getPosts()).unwrap();
+    console.log("Cập nhật danh sách bài viết thành công");
+
+    resetData();
   };
 
   //xử lý quay lại màn hình trước
-  const handleGoBack = () => {
+  const handleGoBack = async () => {
+    // const postByF = await dispatch(getPostsByField({ fieldOrderBy: 'created_at', quantity: 3 })).unwrap();
+    // console.log("getPostsByField", postByF);
+    //gán lại
+    resetData();
+    navigation.goBack();
+  };
+
+  const resetData = () => {
     //gán lại
     onChangeTextTitle("");
     onChangeTextPost("");
     onChangetextHashTag("");
-    setSelectedHashTag([]);
-    setIsEnabled(false);
-    setImages([]);
     onchangeLink("");
-    navigation.goBack();
+    onchangeLink("");
+    setIsEnabled(false);
+    setSelectedHashTag([]);
+    setNewHashtag([]);
+    setImages([]);
   };
 
   //xử lý khi chọn một chủ đề
@@ -168,7 +191,6 @@ const CreatePostScreen = () => {
     if (!selectedHashTag.includes(item.hashtag_id)) {
       if (selectedHashTag.length < 5) {
         setSelectedHashTag([...selectedHashTag, item.hashtag_id]);
-        //console.log('chu de: ', item.hashtag_id);
       } else {
         Dialog.show({
           type: ALERT_TYPE.WARNING,
@@ -381,12 +403,12 @@ const CreatePostScreen = () => {
         <View style={styles.navigationView}>
           {/* Nút quay lại */}
           <ButtonsComponent isBack onPress={handleGoBack}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/3114/3114883.png',
-            }}
-            style={{ width: 25, height: 25, marginTop: 'auto' }}
-          />
+            <Image
+              source={{
+                uri: "https://cdn-icons-png.flaticon.com/512/3114/3114883.png",
+              }}
+              style={{ width: 25, height: 25, marginTop: "auto" }}
+            />
           </ButtonsComponent>
 
           {/* Nút đăng*/}
@@ -421,7 +443,7 @@ const CreatePostScreen = () => {
           Chủ đề đã chọn ({selectedHashTag.length}/5)
         </Text>
 
-        {/*Khung chứa chủ đề đã chọn và nút hiển thị modal */}
+        {/*View chủ đề đã chọn và nút hiển thị modal */}
         <View style={styles.inputTag}>
           {/* Hiển thị các chủ đề đã chọn */}
           {selectedHashTag.length > 0 && (
@@ -430,6 +452,8 @@ const CreatePostScreen = () => {
               keyExtractor={(item, index) => index.toString()}
               renderItem={renderSelectedHashTagItem}
               showsHorizontalScrollIndicator={false}
+              initialNumToRender={10}
+              maxToRenderPerBatch={5}
               style={styles.flatList}
             />
           )}
@@ -468,13 +492,13 @@ const CreatePostScreen = () => {
               <View style={styles.modalContent}>
                 {/*Nút đóng bảng */}
                 <ButtonsComponent isBack onPress={handleHideModal}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/3114/3114883.png',
-            }}
-            style={{ width: 25, height: 25, marginTop: 'auto' }}
-          />
-          </ButtonsComponent>
+                  <Image
+                    source={{
+                      uri: "https://cdn-icons-png.flaticon.com/512/3114/3114883.png",
+                    }}
+                    style={{ width: 25, height: 25, marginTop: "auto" }}
+                  />
+                </ButtonsComponent>
 
                 {/*Nhập tên chủ đề cần tìm kiếm */}
                 <TextInput
@@ -563,22 +587,21 @@ const CreatePostScreen = () => {
         {/* Nếu switch bật thì hiển thị component nhập link */}
         {isEnabled ? (
           <View style={{ marginTop: 5 }}>
-            <TouchableOpacity onPress={pasteFromClipboard}>
-              <TextInput
-                style={{
-                  borderStyle: "dashed",
-                  borderColor: "#ccc",
-                  borderWidth: 1,
-                  padding: 10,
-                  borderRadius: 10,
-                  color: "black",
-                }}
-                value={link}
-                onChangeText={(text) => onchangeLink(text)}
-                placeholder="Nhấn để dán link youtube"
-                editable={false} //tắt nhập liệu
-              />
-            </TouchableOpacity>
+            <TextInput
+              onPress={pasteFromClipboard}
+              style={{
+                borderStyle: "dashed",
+                borderColor: "#ccc",
+                borderWidth: 1,
+                padding: 10,
+                borderRadius: 10,
+                color: "black",
+              }}
+              value={link}
+              onChangeText={(text) => onchangeLink(text)}
+              placeholder="Nhấn để dán link youtube"
+              editable={false} //tắt nhập liệu
+            />
           </View>
         ) : (
           <>
@@ -637,7 +660,6 @@ const styles = StyleSheet.create({
     height: appInfo.heightWindows * 0.04,
   },
   navigationView: {
-    marginTop: 5,
     flexDirection: "row",
     marginBottom: 25,
   },
@@ -785,6 +807,7 @@ const styles = StyleSheet.create({
   },
   buttonAddImg: {
     marginTop: 10,
+    marginLeft: 5,
     width: 70,
     height: 70,
     backgroundColor: "#dcdcdc", // Màu nền của nút
@@ -792,11 +815,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10, // Tạo góc bo tròn cho nút
 
-    //shadowColor: '#000',
-    //shadowOffset: { width: 0, height: 2 },
-    //shadowOpacity: 0.8,
-    //shadowRadius: 2,
-    //elevation: 5, // Tạo bóng giống như trong iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1.5 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
 });
 

@@ -13,9 +13,6 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
     const Data = post.imgPost;
     const navigation = useNavigation();
 
-    // console.log(imagesInfo.Data)
-
-    // const [Data] = [imagesInfo.Data];
     const [imageWidth, setImageWidth] = useState(0);
     const [imageHeight, setImageHeight] = useState(0);
 

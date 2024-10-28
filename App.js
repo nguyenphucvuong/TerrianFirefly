@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPosts } from './src/redux/slices/PostSlice';
 import { getHashtag } from './src/redux/slices/HashtagSlice';
+import { getEvent, getEventByField } from "./src/redux/slices/EventSlice";
 
 import * as tf from '@tensorflow/tfjs';
 import { fetch, bundleResourceIO } from '@tensorflow/tfjs-react-native';
@@ -29,7 +30,6 @@ const ImageProvider = ({ children }) => {
   const [predictions, setPredictions] = useState(null);
   const [image, setImage] = useState(null);
   const [model, setModel] = useState(null);
-
   useEffect(() => {
     const loadModel = async () => {
       await tf.ready();
@@ -124,10 +124,15 @@ const ImageProvider = ({ children }) => {
 
 const MainApp = () => {
   const dispatch = useDispatch();
-
+  const today = new Date();
+  const value = today.toISOString(); // Đảm bảo là định dạng ISO
+  
   useEffect(() => {
     dispatch(getPosts());
-    dispatch(getHashtag());
+    dispatch(getHashtag()); 
+    dispatch(getEvent()); 
+    dispatch(getEventByField({ fieldWhere: "created_at", value: Date.now() }));    
+
   }, [dispatch]);
 
 

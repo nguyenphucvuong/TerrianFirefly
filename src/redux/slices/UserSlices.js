@@ -4,7 +4,7 @@ import { collection, addDoc, getDoc, getDocs, query, where } from 'firebase/fire
 
 // Trạng thái ban đầu
 const initialState = {
-    user: null,
+    user: [],
     statusUser: 'idle',
     errorUser: null,
 };
@@ -29,8 +29,21 @@ export const getUser = createAsyncThunk('data/getUser', async (email) => {
        
 });
 
+export const updateUserPassword = createAsyncThunk('data/updateUserPassword', async ({ userId, newPassWord }) => {
+    try {
+        const userRef = doc(db, 'user', userId); // Tạo tham chiếu đến tài liệu của người dùng trong Firestore
+        await updateDoc(userRef, {
+            passWord: newPassWord, // Cập nhật trường passWord với mật khẩu mới
+        });
+
+        return { userId, newPassWord }; // Trả về userId và mật khẩu mới sau khi cập nhật thành công
+    } catch (err) {
+        return rejectWithValue(err.message);
+    }
+});
+
 // Tạo slice cho user
-export const UserSlices = createSlice({
+export const UserSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {},
@@ -55,4 +68,4 @@ export const UserSlices = createSlice({
 
 // export const { sethashtag } = UserSlice.actions
 
-export default UserSlices.reducer;
+export default UserSlice.reducer;
