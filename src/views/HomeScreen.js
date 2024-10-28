@@ -1,5 +1,5 @@
 import { RefreshControl, ScrollView, Text, View, FlatList, ActivityIndicator } from "react-native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import { data } from "../constains/data";
 import { useSelector, useDispatch } from "react-redux";
@@ -11,12 +11,16 @@ import { SkeletonComponent } from "../component";
 
 
 import PostViewComponent from "../component/PostViewComponent";
+import { ImageCheckContext } from "../context/ImageProvider";
 const HomeScreen = () => {
   // console.log(data.post);
   const user = data.user;
   const emoji = data.emoji;
   const post = useSelector((state) => state.post.post);
   const dispatch = useDispatch();
+  // const lastVisiblePost = useContext(ImageCheckContext).lastVisiblePost;
+  // const setLastVisiblePost = useContext(ImageCheckContext).setLastVisiblePost;
+
 
 
 
@@ -25,14 +29,6 @@ const HomeScreen = () => {
 
 
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    dispatch(getPostsRefresh({ field: "created_at", quatity: 10 }));
-    setTimeout(() => {
-      // Sau khi hoàn thành refresh, có thể cập nhật lại dữ liệu từ API hoặc giữ nguyên
-      setRefreshing(false);
-    }, 2000);
-  }, []);
 
   return (
     <>
@@ -54,7 +50,16 @@ const HomeScreen = () => {
           }}
           contentContainerStyle={{ flexGrow: 1 }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl refreshing={refreshing} onRefresh={() => {
+              setRefreshing(true);
+              setTimeout(async () => {
+                const dataRefresh = await dispatch(getPostsRefresh({ field: "created_at", quantity: 3 }));
+                // setLastVisiblePost(dataRefresh.payload.lastVisiblePost);
+                console.log("getPostsRefresh")
+                // Sau khi hoàn thành refresh, có thể cập nhật lại dữ liệu từ API hoặc giữ nguyên
+                setRefreshing(false);
+              }, 2000);
+            }} />
           }
           ListFooterComponent={() => (
             loading ? //  a==b ? b : a
@@ -73,16 +78,23 @@ const HomeScreen = () => {
               </View> : null
           )}
 
-          onEndReached={() => {
-            setLoading(true)
-            // setData(mang_du_lieu)
-            setTimeout(async () => {
-              if (loading) {
-                await dispatch(getPostsByField({ field: "created_at", quantity: 3 }));
+          onEndReached={async () => {
+            if (loading) return; // Avoid multiple calls while still loading
 
+            setLoading(true);
+
+            try {
+              const dataLoadMore = await dispatch(getPostsByField({ field: "created_at", quantity: 3 }));
+
+              // Stop loading only if there are no more posts to load
+              if (!dataLoadMore.payload.postData.length) {
+                setLoading(false);
               }
-              setLoading(false)
-            }, 2000);
+            } catch (error) {
+              console.error("Error loading more posts:", error);
+            } finally {
+              setLoading(false); // Ensure loading state is reset
+            }
           }}
           onEndReachedThreshold={0.1}
         />)}

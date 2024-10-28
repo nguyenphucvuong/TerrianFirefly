@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter, doc } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
@@ -49,40 +49,13 @@ export const getPosts = createAsyncThunk('data/getPosts', async () => {
   }
 });
 
-export const getPostsRefresh = createAsyncThunk('data/getPostsRefresh', async ({ field, quatity }) => {
+export const getPostsRefresh = createAsyncThunk('data/getPostsRefresh', async () => {
   try {
-    const querySnapshot = await getDocs(query(collection(db, "Posts"), orderBy(field, "desc"), limit(quatity)));
-
-    //const querySnapshot = await getDocs(collection(db, "Posts")); // Thay "Posts" bằng tên bộ sưu tập của bạn
-    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Lấy dữ liệu và ID của từng tài liệu
-
-    //console.log("Danh sách post: ",postData[0].imgPost);
-    return postData; // Trả về danh sách bài đăng
-  } catch (error) {
-    console.error('Error fetching posts: ', error);
-    throw error;
-  }
-});
-
-export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({ field, quantity }, { getState }) => {
-
-  try {
-    const lastVisiblePost = getState().post.lastVisiblePost;
-
     let postsQuery = query(
       collection(db, "Posts"),
-      orderBy(field, "desc"),
-      limit(quantity)
+      orderBy("created_at", "desc"),
+      limit(3)
     );
-    if (lastVisiblePost) {
-      console.log(lastVisiblePost)
-      postsQuery = query(
-        collection(db, "Posts"),
-        orderBy(field, "desc"),
-        startAfter(lastVisiblePost),
-        limit(quantity)
-      );
-    }
 
     const querySnapshot = await getDocs(postsQuery);
 
@@ -92,10 +65,53 @@ export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({
 
     const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
     const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return {
+      postData: postData,
+      lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
+    }; // Return only the document ID for `lastVisiblePost`
+  } catch (error) {
+    console.error('Error fetching posts: ', error);
+    throw error;
+  }
+});
+
+export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({ field, quantity }, { getState }) => {
+
+  try {
+    const lastVisiblePostId = getState().post.lastVisiblePost;
+    let lastVisibleDoc = null;
+    if (lastVisiblePostId) {
+      const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
+      lastVisibleDoc = await getDoc(lastVisibleDocRef);
+    }
+
+    let postsQuery = query(
+      collection(db, "Posts"),
+      orderBy(field, "desc"),
+      limit(quantity)
+    );
+
+    if (lastVisibleDoc) {
+      postsQuery = query(
+        collection(db, "Posts"),
+        orderBy(field, "desc"),
+        startAfter(lastVisibleDoc),
+        limit(quantity)
+      );
+    }
+
+    const querySnapshot = await getDocs(postsQuery);
+
+    if (querySnapshot.empty) {
+      return { postData: [], lastVisiblePost: null };
+    }
+
+    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     return {
       postData: postData,
-      lastVisiblePost: lastVisible ? lastVisible : null, // Serialize the last visible post
+      lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
 
     }; // Return only the document ID for `lastVisiblePost`
   } catch (error) {
@@ -162,7 +178,8 @@ export const PostSlice = createSlice({
       })
       .addCase(getPostsRefresh.fulfilled, (state, action) => {
         state.loading = false;
-        state.post = action.payload;
+        state.post = action.payload.postData;
+        state.lastVisiblePost = action.payload.lastVisiblePost; // Lưu lại lastVisiblePost
         state.status = "succeeded";
       })
       .addCase(getPostsRefresh.rejected, (state, action) => {

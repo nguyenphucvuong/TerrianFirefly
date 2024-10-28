@@ -27,22 +27,11 @@ const PostViewComponent = ({ post, user, emoji }) => {
         return <></>;
     }
 
-
-    // console.log(post)
-    // console.log(post?.imgPost.length)
-    // console.log(post?.hashtag.length)
     const navigation = useNavigation();
-
 
     const title = post?.title.substring(0, 120);
     const content = post?.body.substring(0, 120);
 
-
-    // const HandleIsEmpty = (data) => {
-    //     const view = data.view;
-    //     const length = data.length;
-    //     return length === 0 ? <></> : view;
-    // }
     const handleAd = () => {
         console.log("toi day");
     };
@@ -51,8 +40,25 @@ const PostViewComponent = ({ post, user, emoji }) => {
     const handleNagigateDetailPost = () => {
         navigation.navigate("DetailPost", { post: post, user: user, emoji: emoji });
     }
-    // console.log("isyt", post?.isYtb)
-    // console.log("isyt", post?.imgPost.length)
+
+    const handleTime = () => {
+        const now = Date.now(); // Current time in milliseconds
+        const secondsAgo = Math.floor((now - post.created_at) / 1000); // Difference in seconds
+
+        if (secondsAgo < 60) {
+            return `${secondsAgo} giây trước`;
+        } else if (secondsAgo < 3600) {
+            const minutesAgo = Math.floor(secondsAgo / 60);
+            return `${minutesAgo} phút trước`;
+        } else if (secondsAgo < 86400) {
+            const hoursAgo = Math.floor(secondsAgo / 3600);
+            return `${hoursAgo} giờ trước`;
+        } else {
+            const daysAgo = Math.floor(secondsAgo / 86400);
+            return `${daysAgo} ngày trước`;
+        }
+    }
+
 
     const IsYTView = () => {
         return post?.isYtb ? (
@@ -125,7 +131,7 @@ const PostViewComponent = ({ post, user, emoji }) => {
                     >
                         <SkeletonComponent Data={user.userId}>
                             <Text style={StyleGlobal.textName}>{user.userName}</Text>
-                            <Text style={StyleGlobal.textInfo}>{post?.createAt}</Text>
+                            <Text style={StyleGlobal.textInfo}>{handleTime()}</Text>
                         </SkeletonComponent>
                     </View>
 
