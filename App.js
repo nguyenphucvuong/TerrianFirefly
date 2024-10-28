@@ -18,7 +18,7 @@ import { ImageProvider } from './src/context/ImageProvider';
 const MainApp = () => {
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(getPostsByField({ field: "title", quantity: "2", lastVisiblePost: null }));
+    dispatch(getPostsByField({ field: "created_at", quantity: "2", lastVisiblePost: null }));
 
 
   }, []);

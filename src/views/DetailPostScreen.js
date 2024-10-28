@@ -72,7 +72,7 @@ const DetailPostScreen = () => {
     };
     return (
         <View style={{ flex: 1, backgroundColor: "green" }}>
-            
+
             <StatusBar barStyle={'dark-content'} backgroundColor={"white"} />
             {/* Navigate bar */}
             <RowComponent style={{
@@ -409,6 +409,6 @@ const DetailPostScreen = () => {
     )
 }
 
-export default React.memo(DetailPostScreen)
+export default DetailPostScreen
 
 const styles = StyleSheet.create({})

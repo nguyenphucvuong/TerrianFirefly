@@ -463,13 +463,13 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, emoji, st
                                     style={{
                                         width: 200,
                                         height: 200,
-                                        backgroundColor: "red",
+                                        // backgroundColor: "red",
                                     }}>
                                     <TouchableOpacity
                                         style={{
                                             width: 25,
                                             height: 25,
-                                            backgroundColor: "green",
+                                            // backgroundColor: "green",
                                             position: "absolute",
                                             zIndex: 1,
                                             top: 0,

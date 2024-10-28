@@ -101,7 +101,7 @@ const ButtonsComponent = ({ children, color, style, disabled, isButton, isPressa
         style={{
           width: "95%",
           height: "100%",
-          backgroundColor: "green",
+          // backgroundColor: "green",
         }}
         contentContainerStyle={{
           justifyContent: "flex-start",

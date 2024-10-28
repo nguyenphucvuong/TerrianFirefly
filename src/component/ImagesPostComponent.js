@@ -42,7 +42,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
         } : {
             width: imageWidth > appInfo.widthWindows * 0.45 ? appInfo.widthWindows * 0.45 : "100%",
             // height: imageHeight > 250 ? 250 : imageHeight,
-            height: 250,
+            height: 240,
             minWidth: appInfo.widthWindows * 0.4,
             maxWidth: appInfo.widthWindows * 0.5,
             minHeight: 200,
@@ -55,7 +55,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
         return <TouchableOpacity
             activeOpacity={1}
             onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
-            style={CheckHeightReturnStyle}>
+            style={[{}, CheckHeightReturnStyle]}>
             <Image
                 source={{ uri: Data[0] }}
                 style={CheckHeightReturnStyle}

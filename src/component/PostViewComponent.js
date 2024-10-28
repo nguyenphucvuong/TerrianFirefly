@@ -80,6 +80,7 @@ const PostViewComponent = ({ post, user, emoji }) => {
                 // backgroundColor={"red"}
                 style={{
                     marginTop: "2%",
+                    marginBottom: 15,
                 }}>
                 <ImagesPostComponent post={post} user={user} emoji={emoji} />
             </RowComponent>
@@ -92,7 +93,7 @@ const PostViewComponent = ({ post, user, emoji }) => {
             height: "auto",
             borderBottomWidth: 1,
             borderBottomColor: "rgba(0,0,0,0.1)",
-            backgroundColor: "pink",
+            // backgroundColor: "pink",
         }}>
 
             <View style={{
