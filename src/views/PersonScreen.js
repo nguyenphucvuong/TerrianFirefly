@@ -1,11 +1,12 @@
 import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useSelector, useDispatch } from "react-redux";
 //style
 import { StyleGlobal } from '../styles/StyleGlobal'
 //components
-import { UserAvatarComponent, IconComponent, StatisticsComponent, AvatarEx } from '../component';
+import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx } from '../component';
 //screen
 import ArticleScreen from './ArticleScreen';
 import FavouriteScreen from './FavouriteScreen';
@@ -13,9 +14,9 @@ import GroupScreen from './GroupScreen';
 //constains
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
+//redux
+import { getUser } from '../redux/slices/UserSlices';
 const Tab = createMaterialTopTabNavigator();
-
-const AnimatedTab = Animated.createAnimatedComponent(TouchableOpacity);
 
 const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.09;
 const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
@@ -23,6 +24,9 @@ const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 
 const PersonScreen = () => {
     const navigation = useNavigation();
+    //firebase
+    const user = useSelector((state) => state.user.user);
+    //Animated
     const animatedValue = useRef(new Animated.Value(0)).current;
 
     const avatarAnimation = {
@@ -32,7 +36,6 @@ const PersonScreen = () => {
             extrapolate: 'clamp',
         }),
     };
-
     const avatarHeaderAnimation = {
         opacity: animatedValue.interpolate({
             inputRange: [0, LOWER_HEADER_HEIGHT],
@@ -66,19 +69,21 @@ const PersonScreen = () => {
                 return null;
         }
     };
+    //console.log('user[0]', user);
+
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.upperHeaderPlacehholder} />
             <View style={styles.header}>
-                <ImageBackground source={require('../../assets/background/background4.jpg')} style={styles.imageBackground}>
+                <ImageBackground source={{ uri: user[0].backgroundUser }} style={styles.imageBackground}>
                     <View style={styles.upperrHeader}>
                         <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
                             <AvatarEx
                                 size={appInfo.heightWindows * 0.035}
                                 round={90}
-                                url={'https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg'}
+                                url={user[0].imgUser}
                             />
-                            <Text style={styles.avatarText}>Gia Huy</Text>
+                            <Text style={styles.avatarText}>{user[0].username}</Text>
                         </Animated.View>
                     </View>
                     <View style={styles.setting}>
@@ -104,9 +109,17 @@ const PersonScreen = () => {
                 />
                 <View style={styles.scrollViewContent}>
                     <View style={{ flexDirection: 'row' }}>
+                        {/* Avatar */}
                         <Animated.View style={[styles.avatar, avatarAnimation]}>
-                            <UserAvatarComponent name={'ABC'} />
+                            <AvatarEx
+                                url={user[0].imgUser}
+                                size={appInfo.widthWindows * 0.22}
+                                round={20}
+                                frame={user[0].frame_user}
+                                name={user[0].username}
+                            />
                         </Animated.View>
+                        {/* Chỉnh sửa */}
                         <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
                             <IconComponent
                                 name={'edit'}
@@ -119,10 +132,34 @@ const PersonScreen = () => {
                             />
                         </View>
                     </View>
-                    <View style={styles.iconRow}>
-                        <IconComponent name={'credit-card'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'ID: 123456'} />
-                        <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'Người bình thường'} onPress={() => navigation.navigate('NickNameScreen')} />
-                    </View>
+
+                    {
+                        user.length === 0 || !user[0].user_id ? (
+                            <View style={styles.iconRow}>
+                                <SkeletonComponent
+                                    Data={""}
+                                    style={{ width: '100%', height: appInfo.heightWindows * 0.1 }}
+                                />
+                                <SkeletonComponent
+                                    Data={""}
+                                    style={{ width: '100%', height: appInfo.heightWindows * 0.1 }}
+                                />
+                            </View>
+                        ) : (
+                            <View style={styles.iconRow}>
+                                <IconComponent name={'credit-card'}
+                                    size={appInfo.heightWindows * 0.025}
+                                    color={'#33363F'}
+                                    text={'ID: ' + user[0].user_id} />
+                                <IconComponent name={'user'}
+                                    size={appInfo.heightWindows * 0.025}
+                                    color={'#33363F'}
+                                    text={'Người ' + user[0].nickname}
+                                    onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user[0].nickname })} />
+                            </View>
+                        )
+                    }
+
                     <View style={styles.statisticsContainer}>
                         <StatisticsComponent quantity={0} name={'Bài Viết'} />
                         <StatisticsComponent quantity={0} name={'Theo Dõi'} />
@@ -151,8 +188,8 @@ const PersonScreen = () => {
                         </ScrollView>
                     </View>
                 </View>
-            </ScrollView>
-        </View>
+            </ScrollView >
+        </View >
     );
 };
 
@@ -197,9 +234,9 @@ const styles = StyleSheet.create({
     avatarHeader: {
         position: 'absolute',
         flexDirection: 'row',
-        left: appInfo.heightWindows * 0.01,
         top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
         alignItems: 'center',
+        justifyContent: 'center',
     },
     avatarText: {
         marginLeft: '8%', // Khoảng cách giữa ảnh đại diện và tên

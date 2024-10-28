@@ -7,44 +7,44 @@ import {
 } from '@gorhom/bottom-sheet';
 import { useSelector, useDispatch } from "react-redux";
 //components
-import { UserAvatarComponent, SelectImageComponent, ButtonBackComponent, ButtonFunctionComponent } from '../component';
+import { AvatarEx, SelectImageComponent, ButtonBackComponent, ButtonFunctionComponent } from '../component';
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
 //redux
 import { getAchievement } from '../redux/slices/AchievementSlice';
+import { getUser } from '../redux/slices/UserSlices';
 const AchievementsScreen = () => {
-    // const data = [
-    //     { id: 1, image: 'https://i.pinimg.com/736x/81/31/20/8131208cdb98026d71d3f89b8097c522.jpg' },
-    //     { id: 2, image: 'https://mega.com.vn/media/news/2605_hinh-nen-anime-may-tinh41.jpg' },
-    //     { id: 3, image: 'https://gstatic.gvn360.com/2021/06/Mot-vu-tru-moi_-11-scaled.jpg' },
-    //     { id: 4, image: 'https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2023/12/hinh-nen-vu-tru-72.jpg' },
-    //     { id: 1, image: 'https://i.pinimg.com/736x/81/31/20/8131208cdb98026d71d3f89b8097c522.jpg' },
-    //     { id: 2, image: 'https://mega.com.vn/media/news/2605_hinh-nen-anime-may-tinh41.jpg' },
-    // ];
 
-    // variables
+    // bottomSheetModal
     const snapPoints = useMemo(() => [appInfo.heightWindows * 0.15], []);
     const bottomSheetModalRef = useRef(null);
     const handldeOpenPress = () => {
         bottomSheetModalRef.current?.present();
     };
     const achievement = useSelector((state) => state.achievement.achievement);
+    const user = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
     //cập nhật lại dữ liệu     
-    useEffect(() => {  
+    useEffect(() => {
         //đọc dữ liệu   
         dispatch(getAchievement());
+        dispatch(getUser(user[0].email));
     }, []);
-    //console.log('achievement',achievement);
+    console.log('achievement',achievement);
     return (
         <BottomSheetModalProvider>
             <View style={{ backgroundColor: '#7982FB', height: appInfo.heightWindows * 0.2, justifyContent: 'center', borderRadius: 20 }}>
                 <View style={{ top: appInfo.heightWindows * 0.03 }}>
                     <ButtonBackComponent color={'white'} />
                 </View>
-                <UserAvatarComponent style={styles.avatar} />
+                <AvatarEx
+                    url={user[0].imgUser}
+                    size={appInfo.widthWindows * 0.22}
+                    round={20}
+                    frame={user[0].frame_user}
+                />
             </View>
             <FlatList
                 style={{ margin: '2%', marginTop: '5%' }}
@@ -84,9 +84,6 @@ const styles = StyleSheet.create({
         width: '90%',
         height: appInfo.heightWindows * 0.05,
         marginTop: 'auto',
-    },
-    avatar: {
-        top: appInfo.heightWindows * 0.03,
     },
 });
 export default AchievementsScreen;

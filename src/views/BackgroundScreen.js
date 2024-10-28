@@ -1,5 +1,5 @@
-import { View, ImageBackground, FlatList, StyleSheet, Text } from 'react-native'
-import React, { useMemo, useRef, useEffect } from 'react'
+import { View, ImageBackground, FlatList, StyleSheet, Text, TouchableOpacity, Image } from 'react-native'
+import React, { useMemo, useRef, useEffect, useState } from 'react'
 import {
     BottomSheetModal,
     BottomSheetView,
@@ -7,53 +7,76 @@ import {
 } from '@gorhom/bottom-sheet';
 import { useSelector, useDispatch } from "react-redux";
 //components
-import { SelectImageComponent, ButtonBackComponent, UserAvatarComponent, ButtonFunctionComponent } from '../component';
+import { IconComponent, ButtonBackComponent, AvatarEx, ButtonFunctionComponent } from '../component';
 //style
 import { StyleGlobal } from '../styles/StyleGlobal';
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
 //Redux
 import { getBackground } from '../redux/slices/BackgroundSlice';
+import { getUser } from '../redux/slices/UserSlices';
 const BackgroundScreen = () => {
     const snapPoints = useMemo(() => ['15%'], []);
     const bottomSheetModalRef = useRef(null);
-    const handldeOpenPress = () => {
+    const handldeOpenPress = (url) => {
         bottomSheetModalRef.current?.present();
+        setBackground(url);
     };
-    const background = useSelector((state) => state.background.background);
+
+    //FireBase
+    const arrBackground = useSelector((state) => state.background.background);
+    const user = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
+    //set data
+    const [background, setBackground] = useState(user[0].backgroundUser);
     //cập nhật lại dữ liệu     
-    useEffect(() => {  
+    useEffect(() => {
         //đọc dữ liệu   
         dispatch(getBackground());
+        // dispatch(getUser(user[0].email));
+
     }, []);
     //console.log('background',background);
-    
+
     return (
         <View style={{ flex: 1 }}>
             <BottomSheetModalProvider>
                 <ImageBackground style={{ width: '100%', height: appInfo.heightWindows * 0.2, }}
-                    source={{ uri: 'https://images4.alphacoders.com/973/973967.jpg' }}>
-                    <View style={{top: appInfo.heightWindows * 0.05 }}>
+                    source={{ url: background }}>
+                    <View style={{ top: appInfo.heightWindows * 0.05 }}>
                         <ButtonBackComponent color={'white'} />
                     </View>
                     <View style={styles.background}>
                         <View style={{ marginRight: 'auto', marginLeft: '5%', bottom: appInfo.heightWindows * 0.04 }}>
-                            <UserAvatarComponent />
+                            <AvatarEx
+                                url={user[0].imgUser}
+                                size={appInfo.widthWindows * 0.22}
+                                round={20}
+                                frame={user[0].frame_user}
+                            />
                         </View>
                     </View>
                 </ImageBackground>
                 <FlatList
                     style={{ margin: '2%', marginTop: '20%' }}
                     numColumns={2}
-                    data={background}
+                    data={arrBackground}
                     renderItem={({ item }) => {
                         return (
-                            <SelectImageComponent uri={item.nameBackground}
-                                width={'100%'}
-                                height={appInfo.heightWindows * 0.1}
-                                onPress={() => handldeOpenPress()}
-                            />
+                            <TouchableOpacity style={{ flex: 1, margin: 5 }} onPress={() => handldeOpenPress(item.nameBackground)} >
+                                <Image
+                                    style={{ width: '100%', height: appInfo.heightWindows * 0.1, borderRadius: 20 }}
+                                    source={{ url: item.nameBackground }}
+                                />
+                                {user[0].backgroundUser == item.nameBackground
+                                    ? <IconComponent
+                                        name={'check-circle'}
+                                        size={appInfo.heightWindows * 0.024}
+                                        color={'#0286FF'}
+                                        style={{ position: "absolute", bottom: 0, right: 4, width: 24, height: 24 }}
+                                    />
+                                    : null}
+                            </TouchableOpacity>
                         )
                     }}
                     keyExtractor={(item) => item.background_id.toString()}
@@ -64,6 +87,7 @@ const BackgroundScreen = () => {
                     snapPoints={snapPoints}>
                     <BottomSheetView style={styles.contentContainer}>
                         <Text style={StyleGlobal.textName}> Cấp độ: Người nổi tiếng 🎉</Text>
+
                         <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button} />
                     </BottomSheetView>
                 </BottomSheetModal>
@@ -90,11 +114,12 @@ const styles = StyleSheet.create({
         width: '90%',
         height: appInfo.heightWindows * 0.05,
         marginTop: 'auto',
+        marginBottom: '10%',
     },
     contentContainer: {
         margin: 10,
         alignItems: 'center',
-        flex: 1,
+        height: appInfo.heightWindows * 0.15,
     },
 });
 export default BackgroundScreen;
