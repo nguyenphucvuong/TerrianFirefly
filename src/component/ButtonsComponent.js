@@ -42,7 +42,6 @@ const ButtonsComponent = ({ children, color, style, disabled, isButton, isPressa
         // onPress={onPress}
         onPress={onPress}
         onLongPress={onLongPress}
-        disabled={disabled}
         activeOpacity={0.6}
         delayLongPress={500}
         style={[{

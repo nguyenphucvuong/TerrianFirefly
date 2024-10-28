@@ -1,13 +1,25 @@
-import { Text, TouchableOpacity, Pressable, StyleSheet, View, Image } from "react-native";
+import { Text, TouchableOpacity, StyleSheet, View, Image, ActivityIndicator } from "react-native";
 import React from "react";
-
-const ButtonFunctionComponent = ({ check = false, onPress, name, backgroundColor, colorText , url, style}) => {
+import { appInfo } from '../constains/appInfo';
+const ButtonFunctionComponent = ({ 
+    isLoading = false,
+    check = false, 
+    onPress, 
+    name, 
+    backgroundColor, 
+    colorText , 
+    url, 
+    style}) => {
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.button, { backgroundColor: backgroundColor}, style]}>
-            <View style={{flexDirection: 'row'}}>
-                {check && <Image style= {{width : 25, height: 25}} source={url} />}
-                <Text style={[styles.buttonText, { color: colorText }]}>{name}</Text>
-            </View>
+        <TouchableOpacity disabled={isLoading} onPress={onPress} style={[styles.button, { backgroundColor: backgroundColor ? backgroundColor : isLoading ? Colors.gray : Colors.blue}, style]}>
+            {
+                isLoading ? <ActivityIndicator/> : (
+                    <View style={{flexDirection: 'row'}}>
+                    {check && <Image style= {{width : 25, height: 25}} source={url} />}
+                    <Text style={[styles.buttonText, { color: colorText }]}>{name}</Text>
+                    </View>
+                )
+            }
         </TouchableOpacity>
     )
 }

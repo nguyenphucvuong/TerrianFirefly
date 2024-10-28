@@ -1,36 +1,40 @@
 import { View, ImageBackground, FlatList, StyleSheet, Text } from 'react-native'
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useEffect } from 'react'
 import {
     BottomSheetModal,
     BottomSheetView,
     BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
+import { useSelector, useDispatch } from "react-redux";
 //components
 import { SelectImageComponent, ButtonBackComponent, UserAvatarComponent, ButtonFunctionComponent } from '../component';
 //style
 import { StyleGlobal } from '../styles/StyleGlobal';
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
+//Redux
+import { getBackground } from '../redux/slices/BackgroundSlice';
 const BackgroundScreen = () => {
-    const data = [
-        { id: 1, image: 'https://i.pinimg.com/736x/81/31/20/8131208cdb98026d71d3f89b8097c522.jpg' },
-        { id: 2, image: 'https://mega.com.vn/media/news/2605_hinh-nen-anime-may-tinh41.jpg' },
-        { id: 3, image: 'https://gstatic.gvn360.com/2021/06/Mot-vu-tru-moi_-11-scaled.jpg' },
-        { id: 4, image: 'https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2023/12/hinh-nen-vu-tru-72.jpg' },
-    ];
     const snapPoints = useMemo(() => ['15%'], []);
     const bottomSheetModalRef = useRef(null);
     const handldeOpenPress = () => {
         bottomSheetModalRef.current?.present();
     };
+    const background = useSelector((state) => state.background.background);
+    const dispatch = useDispatch();
+    //cập nhật lại dữ liệu     
+    useEffect(() => {  
+        //đọc dữ liệu   
+        dispatch(getBackground());
+    }, []);
+    //console.log('background',background);
+    
     return (
         <View style={{ flex: 1 }}>
             <BottomSheetModalProvider>
-
-
                 <ImageBackground style={{ width: '100%', height: appInfo.heightWindows * 0.2, }}
                     source={{ uri: 'https://images4.alphacoders.com/973/973967.jpg' }}>
-                    <View style={[StyleGlobal.container, { position: 'absolute', top: appInfo.heightWindows * 0.03 }]}>
+                    <View style={{top: appInfo.heightWindows * 0.05 }}>
                         <ButtonBackComponent color={'white'} />
                     </View>
                     <View style={styles.background}>
@@ -42,17 +46,17 @@ const BackgroundScreen = () => {
                 <FlatList
                     style={{ margin: '2%', marginTop: '20%' }}
                     numColumns={2}
-                    data={data}
+                    data={background}
                     renderItem={({ item }) => {
                         return (
-                            <SelectImageComponent uri={item.image}
+                            <SelectImageComponent uri={item.nameBackground}
                                 width={'100%'}
                                 height={appInfo.heightWindows * 0.1}
                                 onPress={() => handldeOpenPress()}
                             />
                         )
                     }}
-                    keyExtractor={(item) => item.id.toString()}
+                    keyExtractor={(item) => item.background_id.toString()}
                 />
                 <BottomSheetModal
                     ref={bottomSheetModalRef}

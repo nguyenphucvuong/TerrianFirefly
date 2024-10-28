@@ -1,7 +1,8 @@
-import { StyleSheet} from 'react-native'
-import React from 'react'
+import { StyleSheet} from 'react-native';
+import React from 'react';
 //Screen
 import { PersonScreen } from '../views'
+
 
 const PersonTab = () => {
     return (
