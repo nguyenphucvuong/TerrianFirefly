@@ -1,9 +1,9 @@
 // Import the functions you need from the SDKs you need
 
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , GoogleAuthProvider, getReactNativePersistence} from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, getReactNativePersistence } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { firestore } from "firebase/firestore"; 
+import { firestore } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyA-eHeNn8X3V3__td26bDztXuvTKv5uqLM",
-  
+
   authDomain: "terrianfirefly.firebaseapp.com",
   projectId: "terrianfirefly",
   storageBucket: "terrianfirefly.appspot.com",
@@ -31,4 +31,3 @@ export const provider = new GoogleAuthProvider();
 // Initialize Firebase
 export const db = getFirestore(app);
 //const storage = getStorage(app, "gs://terrianfirefly.appspot.com");
-

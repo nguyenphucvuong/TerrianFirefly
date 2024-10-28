@@ -52,11 +52,11 @@ const DetailPostScreen = () => {
         await Clipboard.setStringAsync(content);
     };
 
-    const fetchCopiedText = async () => {
-        copyToClipboard();
+    const fetchCopiedText = async (content) => {
+        copyToClipboard(content);
         const text = await Clipboard.getStringAsync();
         setCopiedText(text);
-        console.log(copiedText)
+        console.log(text)
         if (Platform.OS === 'android') {
             ToastAndroid.show('Đã sao chép!', ToastAndroid.SHORT);
         } else {
@@ -72,7 +72,7 @@ const DetailPostScreen = () => {
     };
     return (
         <View style={{ flex: 1, backgroundColor: "green" }}>
-            
+
             <StatusBar barStyle={'dark-content'} backgroundColor={"white"} />
             {/* Navigate bar */}
             <RowComponent style={{
@@ -152,7 +152,7 @@ const DetailPostScreen = () => {
                 justifyContent: "flex-end",
             }}>
                 <View style={{ height: "100%", }} >
-                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} user={user} emoji={emoji} />}
+                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={user} emoji={emoji} />}
                 </View>
             </View>
 
@@ -296,13 +296,15 @@ const DetailPostScreen = () => {
                 </View >
 
                 {/* Hashtag */}
-                <RowComponent
-                    height={post.hashtag.length === 0 ? 0 : appInfo.heightWindows * 0.1}
-                    width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
+                {post.hashtag.length === 0 ? <></> :
+                    <RowComponent
+                        height={post.hashtag.length === 0 ? 0 : appInfo.heightWindows * 0.1}
+                        width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
 
-                >
-                    <ButtonsComponent isHashtag onPress={handleAd} hashtag={post?.hashtag} isDetail />
-                </RowComponent >
+                    >
+                        <ButtonsComponent isHashtag onPress={handleAd} hashtag={post?.hashtag} isDetail />
+                    </RowComponent >}
+
 
                 <View style={{
                     width: "100%",
@@ -407,6 +409,6 @@ const DetailPostScreen = () => {
     )
 }
 
-export default React.memo(DetailPostScreen)
+export default DetailPostScreen
 
 const styles = StyleSheet.create({})

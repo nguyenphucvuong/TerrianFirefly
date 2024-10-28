@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Skeleton } from "@rneui/base";
 
-const SkeletonComponent = ({ Data, children, isAvatar, isButton }) => {
+const SkeletonComponent = ({ Data, children, isAvatar, isButton, style, size }) => {
   const [isLoading, setIsLoading] = useState(Boolean);
 
   // const [Data, children, isAvatar, isButton] = [
@@ -35,13 +35,7 @@ const SkeletonComponent = ({ Data, children, isAvatar, isButton }) => {
         <Skeleton
           animation="wave"
           circle
-          style={{ width: "40%", height: "20%", marginBottom: "2%" }}
-        />
-
-        <Skeleton
-          animation="wave"
-          circle
-          style={{ width: "70%", height: "20%" }}
+          style={[{ width: "50%", height: "20%", marginBottom: "5%" }, style && style]}
         />
       </>
     ) : (
@@ -53,7 +47,7 @@ const SkeletonComponent = ({ Data, children, isAvatar, isButton }) => {
     return isAvatar ? (
       <>
         {isLoading ? (
-          <Skeleton circle style={{ width: 40, height: 40 }} />
+          <Skeleton circle style={[{ width: size ? size : 40, height: size ? size : 40, marginBottom: "5%" }, style && style]} />
         ) : (
           children
         )}
