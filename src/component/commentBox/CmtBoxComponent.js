@@ -1,12 +1,12 @@
 /* eslint-disable no-undef */
 import { Animated, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useContext, } from 'react'
 import { Image } from 'expo-image';
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from 'expo-image-picker';
 
 
-
+import { ImageCheckContext } from '../../context/ImageProvider';
 import RowComponent from '../RowComponent';
 import {
     ButtonsComponent,
@@ -16,9 +16,12 @@ import { appInfo } from '../../constains/appInfo';
 // import ButtonsComponent from '../ButtonsComponent';
 // import IconsOptionComponent from './IconsOptionComponent';
 
-const CmtBoxComponent = (infoCmt) => {
-    const [translateY, handleHideInput] = [infoCmt.translateY, infoCmt.handleHideInput];
-
+const CmtBoxComponent = ({ translateY, handleHidePop, setContent, btnDangComment }) => {
+    const image = useContext(ImageCheckContext).image
+    const setImage = useContext(ImageCheckContext).setImage
+    const predictions = useContext(ImageCheckContext).predictions
+    const selectImage = useContext(ImageCheckContext).selectImage
+    const modelReady = useContext(ImageCheckContext).modelReady
     return (
         <Animated.View style={[styles.animatedContainer, { transform: [{ translateY }] }]}>
             <RowComponent width={"100%"} height={"auto"} style={{
@@ -34,7 +37,7 @@ const CmtBoxComponent = (infoCmt) => {
                 }}>
                     Đăng bình luận
                 </Text>
-                <ButtonsComponent isButton onPress={handleHideInput}>
+                <ButtonsComponent isButton onPress={handleHidePop}>
                     <Image
 
                         source={require('../../../assets/appIcons/close_icon.png')}
@@ -51,10 +54,10 @@ const CmtBoxComponent = (infoCmt) => {
                 placeholderTextColor={"rgba(0,0,0,0.3)"}
                 style={[styles.inputQuickCmt, {
                     height: "auto",
-
                 }]}
                 autoFocus={true}
                 multiline
+                onChangeText={(text) => setContent(text)}
             />
 
             <View style={{
@@ -64,36 +67,38 @@ const CmtBoxComponent = (infoCmt) => {
                 left: -20,
             }}>
                 {/* Image */}
-                <View
+                {image && <View
                     style={{
                         width: 200,
                         height: 200,
                         backgroundColor: "red",
                     }}>
-                    <TouchableOpacity
-                        style={{
-                            width: 25,
-                            height: 25,
-                            backgroundColor: "green",
-                            position: "absolute",
-                            zIndex: 1,
-                            top: 0,
-                            right: 0,
-                        }} >
-                        <Image source={require('../../../assets/appIcons/close_icon.png')}
+                    {<>
+                        <TouchableOpacity
                             style={{
                                 width: 25,
                                 height: 25,
-                                resizeMode: "contain",
-                            }} />
-                    </TouchableOpacity>
-                    <Image source={require('../../../assets/appIcons/image-choose.png')}
-                        style={{
-                            width: 200,
-                            height: 200,
-                            resizeMode: "contain",
-                        }} />
-                </View>
+                                backgroundColor: "green",
+                                position: "absolute",
+                                zIndex: 1,
+                                top: 0,
+                                right: 0,
+                            }} >
+                            <Image source={require('../../../assets/appIcons/close_icon.png')}
+                                style={{
+                                    width: 25,
+                                    height: 25,
+                                    contentFit: "cover",
+                                }} />
+                        </TouchableOpacity>
+                        {image && <Image source={image}
+                            style={{
+                                width: 200,
+                                height: 200,
+                                contentFit: "cover",
+                            }} />}
+                    </>}
+                </View>}
 
             </View>
             <View style={{
@@ -104,15 +109,17 @@ const CmtBoxComponent = (infoCmt) => {
                 flexDirection: "row",
                 marginTop: 10,
             }}>
+                {/* Choose Image */}
                 <ButtonsComponent
                     isButton
-                    // onPress={aaaaa}
+                    onPress={modelReady ? selectImage : undefined}
                     style={{
                         // backgroundColor: "red",
                         marginRight: 10,
                         justifyContent: "center",
                         width: "70%"
                     }}>
+
                     <Image
                         style={{
                             width: 28,
@@ -133,7 +140,7 @@ const CmtBoxComponent = (infoCmt) => {
                 >
                     <ButtonsComponent
                         isButton
-                        onPress={handleHideInput}
+                        onPress={btnDangComment}
                         style={{
                             borderRadius: 30,
                             justifyContent: "center",

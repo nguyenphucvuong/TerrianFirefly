@@ -10,7 +10,7 @@ import "react-native-gesture-handler";
 import StackNavigator from './src/stacks/StackNavigator'
 import { Provider } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
-import { getPosts, getPostsByField } from './src/redux/slices/PostSlice';
+import { getPostsFirstTime, getPostsByField } from './src/redux/slices/PostSlice';
 import { ImageProvider } from './src/context/ImageProvider';
 
 
@@ -18,9 +18,8 @@ import { ImageProvider } from './src/context/ImageProvider';
 const MainApp = () => {
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(getPostsByField({ field: "created_at", quantity: "2", lastVisiblePost: null }));
-
-
+    // dispatch(getPostsByField({ field: "created_at", quantity: "2", lastVisiblePost: null }));
+    dispatch(getPostsFirstTime());
   }, []);
 
   return (

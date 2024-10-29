@@ -64,7 +64,7 @@ const ButtonsComponent = ({ children, color, style, disabled, isButton, isPressa
             justifyContent: "center",
             alignItems: "center",
             width: "auto",
-            height: "90%",
+            height: "100%",
             paddingHorizontal: 10,
             paddingVertical: 5,
             marginEnd: 8,

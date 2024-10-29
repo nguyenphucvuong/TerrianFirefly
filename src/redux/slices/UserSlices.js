@@ -4,7 +4,8 @@ import { collection, addDoc, getDoc, getDocs, query, where, updateDoc } from 'fi
 
 // Trạng thái ban đầu
 const initialState = {
-    user: [],
+    user: null,
+    // userByField: {},
     statusUser: 'idle',
     errorUser: null,
 };
@@ -14,15 +15,18 @@ export const getUser = createAsyncThunk('data/getUser', async (email) => {
     try {
         const q = query(collection(db, 'user'), where('email', '==', email));
         const querySnapshot = await getDocs(q);
-        // console.log('querySnapshot',querySnapshot);
-        
-        const users = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
-        console.log('users',users);
-        
-        return users;
+
+        // const posts = querySnapshot.docs.map(doc => ({
+        //     id: doc.id,
+        //     ...doc.data(),
+        // }));
+
+        const posts = {
+            id: querySnapshot.docs[0].id,
+            ...querySnapshot.docs[0].data(),
+        };
+
+        return posts;
     } catch (err) {
         return err.message;
     }
@@ -59,6 +63,33 @@ export const updateUser = createAsyncThunk('user/updateUser', async (user) => {
 );
 
 
+
+export const getUserByField = createAsyncThunk('data/getUserByField', async ({ user_id }) => {
+    try {
+        const queryDoc = query(collection(db, 'user'), where('user_id', '==', user_id));
+        const querySnapshot = await getDocs(queryDoc);
+
+        if (querySnapshot.empty) {
+            return null; // No user found
+        }
+
+        // const userById = querySnapshot.docs.map(doc => ({
+        //     id: doc.id,
+        //     ...doc.data(),
+        // }));
+        const userById = {
+            id: querySnapshot.docs[0].id,
+            ...querySnapshot.docs[0].data(),
+        };
+
+
+        return userById;
+    } catch (error) {
+        console.error('Error fetching user: ', error);
+        throw error; // Just return the error message
+    }
+});
+
 // Tạo slice cho user
 export const UserSlices = createSlice({
     name: 'user',
@@ -70,6 +101,8 @@ export const UserSlices = createSlice({
             // Xử lý khi lấy dữ liệu thành công
             .addCase(getUser.fulfilled, (state, action) => {
                 state.user = action.payload; // Cập nhật danh sách
+                // console.log("action.payload", action.payload);
+                // console.log("state.user", state.user);
                 state.statusUser = 'succeeded'; // Đánh dấu thành công
             })
             .addCase(getUser.pending, (state) => {
@@ -79,18 +112,21 @@ export const UserSlices = createSlice({
                 state.errorUser = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
                 state.statusUser = 'failed'; // Đánh dấu thất bại
             })
-            // Xử lý khi thêm dữ liệu thành công
-            .addCase(updateUser.fulfilled, (state, action) => {
-                state.user.push(action.payload); // Thêm dữ liệu mới vào state
-                state.status = 'succeeded'; // Đánh dấu thành công
+
+            // getUserByField
+            .addCase(getUserByField.fulfilled, (state, action) => {
+                // const userId = action.payload[0]?.id; // Giả định rằng action.payload là mảng người dùng
+                // if (userId && !state.userByField[userId]) {
+                //     state.userByField[userId] = action.payload[0]; // Lưu người dùng vào state
+                // }
+                state.userByField = action.payload;
             })
-            .addCase(updateUser.pending, (state) => {
-                state.status = 'loading'; // Đánh dấu trạng thái đang tải
+            .addCase(getUserByField.pending, (state) => {
             })
-            .addCase(updateUser.rejected, (state, action) => {
-                state.error = action.error.message; // Lưu lỗi nếu quá trình thêm thất bại
-                state.status = 'failed'; // Đánh dấu thất bại
-            })
+            .addCase(getUserByField.rejected, (state, action) => {
+                state.errorUser = action.error.message;
+            });
+
 
     },
 });

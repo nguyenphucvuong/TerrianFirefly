@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter, doc } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter, doc, getCountFromServer, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
@@ -32,17 +32,35 @@ export const createPost = createAsyncThunk('data/createPost', async (newData) =>
 });
 
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
-export const getPosts = createAsyncThunk('data/getPosts', async () => {
+export const getPostsFirstTime = createAsyncThunk('data/getPostsFirstTime', async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "Posts"),);
-    querySnapshot.forEach((doc) => {
-      // console.log(`post: ${doc.id} => `, doc.data());
-    });
-    //const querySnapshot = await getDocs(collection(db, "Posts")); // Thay "Posts" bằng tên bộ sưu tập của bạn
-    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Lấy dữ liệu và ID của từng tài liệu
+    let postsQuery = query(
+      collection(db, "Posts"),
+      orderBy("created_at", "desc"),
+      limit(3)
+    );
 
-    //console.log("Danh sách post: ",postData[0].imgPost);
-    return postData; // Trả về danh sách bài đăng
+    const querySnapshot = await getDocs(postsQuery);
+
+    if (querySnapshot.empty) {
+      return { posts: [], lastVisiblePost: null };
+
+    }
+    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Thêm lượt xem mỗi khi duyệt qua bài viết
+    querySnapshot.docs.forEach(async doc => {
+      const currentCountView = doc.data().count_view || 0;
+      await updateDoc(doc.ref, {
+        count_view: currentCountView + 1
+      });
+    });
+
+    return {
+      postData: postData,
+      lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
+    }; // Return only the document ID for `lastVisiblePost`
   } catch (error) {
     console.error('Error fetching posts: ', error);
     throw error;
@@ -63,6 +81,13 @@ export const getPostsRefresh = createAsyncThunk('data/getPostsRefresh', async ()
       return { posts: [], lastVisiblePost: null };
     }
 
+    querySnapshot.docs.forEach(async doc => {
+      const currentCountView = doc.data().count_view || 0;
+      await updateDoc(doc.ref, {
+        count_view: currentCountView + 1
+      });
+    });
+
     const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
     const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return {
@@ -75,9 +100,18 @@ export const getPostsRefresh = createAsyncThunk('data/getPostsRefresh', async ()
   }
 });
 
-export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({ field, quantity }, { getState }) => {
+export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({ field, quantity }, { getState, dispatch }) => {
 
   try {
+    const totalPostsCount = getState().post.totalPostsCount;
+    // Chỉ lấy tổng số lượng bài viết một lần nếu chưa có
+    if (totalPostsCount === 0) {
+      const coll = collection(db, "Posts");
+      const snapshot = await getCountFromServer(coll);
+      const count = snapshot.data().count;
+      dispatch(setTotalPostsCount(count)); // Cập nhật totalPostsCount trong Redux
+    }
+
     const lastVisiblePostId = getState().post.lastVisiblePost;
     let lastVisibleDoc = null;
     if (lastVisiblePostId) {
@@ -106,6 +140,13 @@ export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({
       return { postData: [], lastVisiblePost: null };
     }
 
+    querySnapshot.docs.forEach(async doc => {
+      const currentCountView = doc.data().count_view || 0;
+      await updateDoc(doc.ref, {
+        count_view: currentCountView + 1
+      });
+    });
+
     const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
     const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -121,12 +162,38 @@ export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({
 });
 
 
+export const updatePostsByField = createAsyncThunk(
+  'data/updatePostsByField',
+  async ({ postId, field, value }, { getState, dispatch }) => {
+    try {
+      // Tạo tham chiếu đến tài liệu trong Firestore
+      const postRef = doc(db, "Posts", postId);
+
+      // Cập nhật trường cụ thể
+      await updateDoc(postRef, {
+        [field]: value
+      });
+
+      console.log(`Field '${field}' updated successfully with value: ${value}`);
+
+      // Bạn có thể dispatch thêm action nếu cần
+      // dispatch(someAction(...));
+
+    } catch (error) {
+      console.error('Error updating post: ', error);
+      throw error;
+    }
+  }
+);
+
 
 // Tạo slice cho Post
 export const PostSlice = createSlice({
   name: 'post',
   initialState,
-  reducers: {},
+  reducers: {
+
+  },
   extraReducers: (builder) => {
     builder
       // Xử lý khi thêm dữ liệu thành công
@@ -143,14 +210,16 @@ export const PostSlice = createSlice({
       })
 
       // Xử lý khi lấy dữ liệu thành công
-      .addCase(getPosts.fulfilled, (state, action) => {
-        state.post = action.payload; // Cập nhật danh sách bài đăng
-        state.status = 'succeeded'; // Đánh dấu thành công
+      .addCase(getPostsFirstTime.fulfilled, (state, action) => {
+        state.loading = false;
+        state.post = action.payload.postData;
+        state.lastVisiblePost = action.payload.lastVisiblePost; // Lưu lại lastVisiblePost
+        state.status = "succeeded";
       })
-      .addCase(getPosts.pending, (state) => {
+      .addCase(getPostsFirstTime.pending, (state) => {
         state.status = 'loading'; // Đánh dấu trạng thái đang tải
       })
-      .addCase(getPosts.rejected, (state, action) => {
+      .addCase(getPostsFirstTime.rejected, (state, action) => {
         state.error = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
         state.status = 'failed'; // Đánh dấu thất bại
       })
@@ -189,6 +258,6 @@ export const PostSlice = createSlice({
   },
 });
 
-// export const { setPost } = PostSlice.actions
+export const { } = PostSlice.actions
 
 export default PostSlice.reducer;

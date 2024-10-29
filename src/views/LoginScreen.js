@@ -41,7 +41,7 @@ function LoginScreen() {
         text: text,
         onPress: () => console.log('ok'),
         style: style,
-  
+
       },
     ]);
   }
@@ -197,13 +197,13 @@ function LoginScreen() {
       setErrorTextPass("");
       setisLoading(true);
       await signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           // Signed up
           navigation.navigate("IndexTab");
           setisLoading(false);
           const userL = userCredential.user;
           console.log("Đăng nhập thành công", userL);
-          dispatch(getUser(userL.email));
+          await dispatch(getUser(userL.email));
         })
         .catch((error) => {
           setisLoading(false);
