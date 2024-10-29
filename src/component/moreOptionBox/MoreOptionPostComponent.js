@@ -73,44 +73,11 @@ const MoreOptionPostComponent = (info) => {
                             fontSize: 17,
                             fontWeight: "bold",
                         }}>
-                            Chia Sẻ Đến
+                            Lựa Chọn
                         </Text>
                     </RowComponent>
 
-                    <RowComponent width={"100%"} height={"auto"}
-                        style={{
-                            borderBottomWidth: 1,
-                            borderBottomColor: "rgba(0,0,0,0.1)",
-                            paddingVertical: 10,
-                        }}>
-                        <ScrollView
-                            horizontal={true}
-                            showsHorizontalScrollIndicator={false}
-                            scrollEnabled={true}
-                            style={{
-                            }}>
-                            {/* Discord */}
-                            <MoreOptionItemComponent
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Discord"}
-                                onPress={() => console.log("Discord")} />
-                            {/* Facebook */}
-                            <MoreOptionItemComponent
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Facebook"}
-                                onPress={() => console.log("Facebook")} />
-                            {/* Twitter */}
-                            <MoreOptionItemComponent
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Twitter"}
-                                onPress={() => console.log("Twitter")} />
-                            {/* Reddit */}
-                            <MoreOptionItemComponent
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Reddit"}
-                                onPress={() => console.log("Reddit")} />
-                        </ScrollView>
-                    </RowComponent>
+
                     <RowComponent width={"100%"} height={"auto"}
                         style={{
                             borderBottomWidth: 1,
@@ -122,40 +89,24 @@ const MoreOptionPostComponent = (info) => {
                             scrollEnabled={true}
                             style={{
                             }}>
-                            {/* Discord */}
+
+                            {/* Hủy theo dõi */}
                             <MoreOptionItemComponent
                                 isRow
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Discord"}
-                                onPress={() => console.log("Discord")} />
-                            {/* Facebook */}
-                            <MoreOptionItemComponent
-                                isRow
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Facebook"}
-                                onPress={() => console.log("Facebook")} />
-                            {/* Twitter */}
-                            <MoreOptionItemComponent
-                                isRow
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Twitter"}
-                                onPress={() => console.log("Twitter")} />
-                            {/* Reddit */}
-                            <MoreOptionItemComponent
-                                isRow
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Reddit"}
+                                url={require('../../../assets/appIcons/sad-unfollow.png')}
+                                text={"Hủy theo dõi"}
                                 onPress={() => console.log("Reddit")} />
+                            {/* Yêu thích */}
                             <MoreOptionItemComponent
                                 isRow
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Twitter"}
+                                url={require('../../../assets/appIcons/favorite.png')}
+                                text={"Yêu thích"}
                                 onPress={() => console.log("Twitter")} />
-                            {/* Reddit */}
+                            {/* Báo cáo */}
                             <MoreOptionItemComponent
                                 isRow
-                                url={require('../../../assets/appIcons/discord_icon.png')}
-                                text={"Reddit"}
+                                url={require('../../../assets/appIcons/report-flag.png')}
+                                text={"Báo cáo"}
                                 onPress={() => console.log("Reddit")} />
                         </ScrollView>
                     </RowComponent>

@@ -27,22 +27,11 @@ const PostViewComponent = ({ post, user, emoji }) => {
         return <></>;
     }
 
-
-    console.log(post)
-    // console.log(post?.imgPost.length)
-    // console.log(post?.hashtag.length)
     const navigation = useNavigation();
-
 
     const title = post?.title.substring(0, 120);
     const content = post?.body.substring(0, 120);
 
-
-    // const HandleIsEmpty = (data) => {
-    //     const view = data.view;
-    //     const length = data.length;
-    //     return length === 0 ? <></> : view;
-    // }
     const handleAd = () => {
         console.log("toi day");
     };
@@ -51,7 +40,25 @@ const PostViewComponent = ({ post, user, emoji }) => {
     const handleNagigateDetailPost = () => {
         navigation.navigate("DetailPost", { post: post, user: user, emoji: emoji });
     }
-    console.log("isyt", post?.isYtb)
+
+    const handleTime = () => {
+        const now = Date.now(); // Current time in milliseconds
+        const secondsAgo = Math.floor((now - post.created_at) / 1000); // Difference in seconds
+
+        if (secondsAgo < 60) {
+            return `${secondsAgo} giây trước`;
+        } else if (secondsAgo < 3600) {
+            const minutesAgo = Math.floor(secondsAgo / 60);
+            return `${minutesAgo} phút trước`;
+        } else if (secondsAgo < 86400) {
+            const hoursAgo = Math.floor(secondsAgo / 3600);
+            return `${hoursAgo} giờ trước`;
+        } else {
+            const daysAgo = Math.floor(secondsAgo / 86400);
+            return `${daysAgo} ngày trước`;
+        }
+    }
+
 
     const IsYTView = () => {
         return post?.isYtb ? (
@@ -73,6 +80,7 @@ const PostViewComponent = ({ post, user, emoji }) => {
                 // backgroundColor={"red"}
                 style={{
                     marginTop: "2%",
+                    marginBottom: 15,
                 }}>
                 <ImagesPostComponent post={post} user={user} emoji={emoji} />
             </RowComponent>
@@ -85,7 +93,7 @@ const PostViewComponent = ({ post, user, emoji }) => {
             height: "auto",
             borderBottomWidth: 1,
             borderBottomColor: "rgba(0,0,0,0.1)",
-            backgroundColor: "pink",
+            // backgroundColor: "pink",
         }}>
 
             <View style={{
@@ -124,7 +132,7 @@ const PostViewComponent = ({ post, user, emoji }) => {
                     >
                         <SkeletonComponent Data={user.userId}>
                             <Text style={StyleGlobal.textName}>{user.userName}</Text>
-                            <Text style={StyleGlobal.textInfo}>{post?.createAt}</Text>
+                            <Text style={StyleGlobal.textInfo}>{handleTime()}</Text>
                         </SkeletonComponent>
                     </View>
 
@@ -205,11 +213,12 @@ const PostViewComponent = ({ post, user, emoji }) => {
                 <RowComponent
                     height={post?.hashtag.length === 0 ? 0 : "auto"}
                     width={appInfo.widthWindows - (appInfo.widthWindows * 0.1)}
+                // style={{ marginTop: 5 }}
                 >
                     <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
                 </RowComponent >
 
-                <AnimatedQuickCmtComponent post={post} user={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
+                <AnimatedQuickCmtComponent post={post} userPost={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
 
             </View>
         </View >

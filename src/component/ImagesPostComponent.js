@@ -5,7 +5,7 @@ import { appInfo } from '../constains/appInfo'
 import RowComponent from './RowComponent';
 import { useNavigation } from '@react-navigation/native';
 import sizeImage from '../utils/sizeImage';
-import { Text, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 // const ImagesPostComponent = (imagesInfo) => {
 const ImagesPostComponent = ({ post, user, emoji }) => {
@@ -13,7 +13,6 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
     const Data = post.imgPost;
     const navigation = useNavigation();
 
-    // console.log(imagesInfo.Data)
 
     // const [Data] = [imagesInfo.Data];
     const [imageWidth, setImageWidth] = useState(0);
@@ -41,9 +40,9 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
             height: "100%",
             borderRadius: 10,
         } : {
-            width: imageWidth > appInfo.widthWindows * 0.5 ? appInfo.widthWindows * 0.5 : "100%",
+            width: imageWidth > appInfo.widthWindows * 0.45 ? appInfo.widthWindows * 0.45 : "100%",
             // height: imageHeight > 250 ? 250 : imageHeight,
-            height: 250,
+            height: 240,
             minWidth: appInfo.widthWindows * 0.4,
             maxWidth: appInfo.widthWindows * 0.5,
             minHeight: 200,
@@ -53,35 +52,59 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
 
 
 
-        return <Image onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
-            source={{ uri: Data[0] }}
-            style={CheckHeightReturnStyle}
-        />
+        return <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
+            style={[{}, CheckHeightReturnStyle]}>
+            <Image
+                source={{ uri: Data[0] }}
+                style={CheckHeightReturnStyle}
+            />
+        </TouchableOpacity>
     }
 
     const TwoOrThreeImageContent = () => {
         const TwoImageContent = () => {
             return (
-                <RowComponent maxHeight={appInfo.widthWindows * 0.7}
+
+                <RowComponent
+                    maxHeight={appInfo.widthWindows * 0.55}
+                    minHeight={imageHeight > 150 ? 150 : appInfo.widthWindows * 0.35}
                     style={{
                         justifyContent: "space-between",
                         overflow: "hidden",
                         borderRadius: 10,
+                        height: imageHeight > 150 ? 150 : imageHeight,
                     }}>
-                    <Image
-                        source={{ uri: Data[0] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
                         style={{
                             width: "49%",
                             height: "100%",
-                        }} />
-                    <Image
-                        source={{ uri: Data[1] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
+                        }}>
+                        <Image
+                            source={{ uri: Data[0] }}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                            }} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
                         style={{
                             width: "49%",
                             height: "100%",
-                        }} />
+                        }}>
+                        <Image
+                            source={{ uri: Data[1] }}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                            }} />
+                    </TouchableOpacity>
+
                 </RowComponent>
             );
         }
@@ -97,27 +120,51 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                         borderRadius: 10,
                         height: imageHeight > 150 ? 150 : imageHeight,
                     }}>
-                    <Image
-                        source={{ uri: Data[0] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
-                        style={{
-                            width: "32%",
-                            height: "100%",
-                        }} />
-                    <Image
-                        source={{ uri: Data[1] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
                         style={{
                             width: "33%",
                             height: "100%",
-                        }} />
-                    <Image
-                        source={{ uri: Data[2] }}
-                        onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, emoji: emoji })}
+                        }}>
+                        <Image
+                            source={{ uri: Data[0] }}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                            }} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
                         style={{
                             width: "32%",
                             height: "100%",
-                        }} />
+                        }}>
+                        <Image
+                            source={{ uri: Data[1] }}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                            }} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, emoji: emoji })}
+                        style={{
+                            width: "33%",
+                            height: "100%",
+                        }}>
+                        <Image
+                            source={{ uri: Data[2] }}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                            }} />
+                    </TouchableOpacity>
+
                 </RowComponent>
             );
         }
@@ -164,27 +211,48 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                     borderRadius: 10,
                     height: imageHeight > 150 ? 150 : imageHeight,
                 }}>
-                <Image
-                    source={{ uri: Data[0] }}
-                    onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
+                <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
                     style={{
                         width: "32%",
                         height: "100%",
-                    }} />
-                <Image
-                    source={{ uri: Data[1] }}
-                    onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
+                    }}>
+                    <Image
+                        source={{ uri: Data[0] }}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                        }} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
                     style={{
                         width: "33%",
                         height: "100%",
-                    }} />
-                <Image
-                    source={{ uri: Data[2] }}
-                    onTouchEndCapture={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, emoji: emoji })}
+                    }}>
+                    <Image
+                        source={{ uri: Data[1] }}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                        }} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, emoji: emoji })}
                     style={{
                         width: "32%",
                         height: "100%",
-                    }} />
+                    }}>
+                    <Image
+                        source={{ uri: Data[2] }}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                        }} />
+                </TouchableOpacity>
                 {Data.length > 3 ? <MiniImgCount /> : <></>}
 
             </RowComponent>

@@ -37,7 +37,6 @@ const AvatarEx = ({ size, round, url, style, frame, name }) => {
         <Text style={[StyleGlobal.textTitleContent]}>{name}</Text>
       </View>
     </>
-
   );
 }
 
