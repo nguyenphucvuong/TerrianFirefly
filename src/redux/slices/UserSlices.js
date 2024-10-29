@@ -5,7 +5,7 @@ import { collection, addDoc, getDoc, getDocs, query, where } from 'firebase/fire
 // Trạng thái ban đầu
 const initialState = {
     user: null,
-    userByField: {},
+    // userByField: {},
     statusUser: 'idle',
     errorUser: null,
 };
@@ -18,10 +18,15 @@ export const getUser = createAsyncThunk('data/getUser', async (email) => {
         const q = query(collection(db, 'user'), where('email', '==', email));
         const querySnapshot = await getDocs(q);
 
-        const posts = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
+        // const posts = querySnapshot.docs.map(doc => ({
+        //     id: doc.id,
+        //     ...doc.data(),
+        // }));
+
+        const posts = {
+            id: querySnapshot.docs[0].id,
+            ...querySnapshot.docs[0].data(),
+        };
 
         return posts;
     } catch (err) {
@@ -33,17 +38,21 @@ export const getUser = createAsyncThunk('data/getUser', async (email) => {
 
 export const getUserByField = createAsyncThunk('data/getUserByField', async ({ user_id }) => {
     try {
-        const q = query(collection(db, 'user'), where('user_id', '==', user_id));
-        const querySnapshot = await getDocs(q);
+        const queryDoc = query(collection(db, 'user'), where('user_id', '==', user_id));
+        const querySnapshot = await getDocs(queryDoc);
 
         if (querySnapshot.empty) {
             return null; // No user found
         }
 
-        const userById = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
+        // const userById = querySnapshot.docs.map(doc => ({
+        //     id: doc.id,
+        //     ...doc.data(),
+        // }));
+        const userById = {
+            id: querySnapshot.docs[0].id,
+            ...querySnapshot.docs[0].data(),
+        };
 
 
         return userById;
@@ -64,6 +73,8 @@ export const UserSlices = createSlice({
             // Xử lý khi lấy dữ liệu thành công
             .addCase(getUser.fulfilled, (state, action) => {
                 state.user = action.payload; // Cập nhật danh sách
+                // console.log("action.payload", action.payload);
+                // console.log("state.user", state.user);
                 state.statusUser = 'succeeded'; // Đánh dấu thành công
             })
             .addCase(getUser.pending, (state) => {
@@ -76,10 +87,11 @@ export const UserSlices = createSlice({
 
             // getUserByField
             .addCase(getUserByField.fulfilled, (state, action) => {
-                const userId = action.payload[0]?.id; // Giả định rằng action.payload là mảng người dùng
-                if (userId && !state.userByField[userId]) {
-                    state.userByField[userId] = action.payload[0]; // Lưu người dùng vào state
-                }
+                // const userId = action.payload[0]?.id; // Giả định rằng action.payload là mảng người dùng
+                // if (userId && !state.userByField[userId]) {
+                //     state.userByField[userId] = action.payload[0]; // Lưu người dùng vào state
+                // }
+                state.userByField = action.payload;
             })
             .addCase(getUserByField.pending, (state) => {
             })

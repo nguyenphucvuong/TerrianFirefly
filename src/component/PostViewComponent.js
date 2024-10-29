@@ -25,27 +25,21 @@ import YoutubePlayerComponent from "./YoutubePlayerComponent";
 
 
 
-const PostViewComponent = ({ post, emoji }) => {
+const PostViewComponent = ({ post, emoji, user }) => {
     if (!post) {
 
         return <></>;
     }
     const dispatch = useDispatch();
     const userId = post.user_id; // Lấy user_id từ post
-    const [user, setUser] = useState(null);
+    const [userPost, setUserPost] = useState(null);
 
 
     useEffect(() => {
         const handleGetUserPost = async () => {
             const userResponse = await dispatch(getUserByField({ user_id: userId }));
-            const userData = userResponse.payload; // Lấy dữ liệu từ phản hồi
-            setUser(userData[0]);
-
-            // Kiểm tra nếu userData là một mảng và lấy phần tử đầu tiên
-            // if (Array.isArray(userData) && userData.length > 0) {
-            //     const user = userData[0]; // Lấy đối tượng user đầu tiên
-
-            // }
+            const userData = userResponse.payload;
+            setUserPost(userData);
         }
         handleGetUserPost();
     }, [dispatch, userId]);
@@ -60,7 +54,7 @@ const PostViewComponent = ({ post, emoji }) => {
 
 
     const handleNagigateDetailPost = () => {
-        navigation.navigate("DetailPost", { post: post, user: user, emoji: emoji });
+        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, emoji: emoji });
     }
 
     // const handleTime = () => {
@@ -104,14 +98,14 @@ const PostViewComponent = ({ post, emoji }) => {
                     marginTop: "2%",
                     marginBottom: 15,
                 }}>
-                <ImagesPostComponent post={post} user={user} emoji={emoji} />
+                <ImagesPostComponent post={post} user={user} userPost={userPost} emoji={emoji} />
             </RowComponent>
         );
     }
 
     return (
         <>
-            {user && post ?
+            {userPost && post ?
                 <View style={{
                     width: "auto",
                     height: "auto",
@@ -132,7 +126,7 @@ const PostViewComponent = ({ post, emoji }) => {
                             height={appInfo.widthWindows / 5.7}
                             style={{ alignItems: "center" }}
                         >
-                            <AvatarEx size={40} round={30} url={user.imgUser} frame={'../../assets/frame/frame_background.png'} />
+                            <AvatarEx size={40} round={30} url={userPost.imgUser} frame={'../../assets/frame/frame_background.png'} />
                             {/* <Image
                             source={require('../../assets/frame/frame_background.png')}
                             style={{
@@ -152,13 +146,13 @@ const PostViewComponent = ({ post, emoji }) => {
                                     paddingLeft: "3%",
                                 }}
                             >
-                                <SkeletonComponent Data={user.userId}>
-                                    <Text style={StyleGlobal.textName}>{user.username}</Text>
+                                <SkeletonComponent Data={userPost.userId}>
+                                    <Text style={StyleGlobal.textName}>{userPost.username}</Text>
                                     <Text style={StyleGlobal.textInfo}>{handleTime({ post: post })}</Text>
                                 </SkeletonComponent>
                             </View>
 
-                            <SkeletonComponent Data={user.userId} isButton>
+                            <SkeletonComponent Data={userPost.userId} isButton>
                                 <ButtonsComponent isButton onPress={handleAd}
                                     style={{
                                         borderColor: "rgba(121,141,218,1)",
@@ -175,7 +169,7 @@ const PostViewComponent = ({ post, emoji }) => {
                                 </ButtonsComponent>
                             </SkeletonComponent>
 
-                            <SkeletonComponent Data={user.userId} isButton>
+                            <SkeletonComponent Data={userPost.userId} isButton>
                                 <View
                                     style={{
                                         width: "10%",
@@ -232,7 +226,7 @@ const PostViewComponent = ({ post, emoji }) => {
                             <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
                         </RowComponent >
 
-                        <AnimatedQuickCmtComponent post={post} userPost={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
+                        <AnimatedQuickCmtComponent post={post} userPost={userPost} user={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
 
                     </View>
                 </View >

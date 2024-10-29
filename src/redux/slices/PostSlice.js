@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter, doc, getCountFromServer } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter, doc, getCountFromServer, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
 const initialState = {
   post: [],
   lastVisiblePost: null,
-  totalPostsCount: 0,
   status: 'idle',
   error: null,
 };
@@ -45,10 +44,19 @@ export const getPostsFirstTime = createAsyncThunk('data/getPostsFirstTime', asyn
 
     if (querySnapshot.empty) {
       return { posts: [], lastVisiblePost: null };
-    }
 
+    }
     const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
     const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Thêm lượt xem mỗi khi duyệt qua bài viết
+    querySnapshot.docs.forEach(async doc => {
+      const currentCountView = doc.data().count_view || 0;
+      await updateDoc(doc.ref, {
+        count_view: currentCountView + 1
+      });
+    });
+
     return {
       postData: postData,
       lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
@@ -72,6 +80,13 @@ export const getPostsRefresh = createAsyncThunk('data/getPostsRefresh', async ()
     if (querySnapshot.empty) {
       return { posts: [], lastVisiblePost: null };
     }
+
+    querySnapshot.docs.forEach(async doc => {
+      const currentCountView = doc.data().count_view || 0;
+      await updateDoc(doc.ref, {
+        count_view: currentCountView + 1
+      });
+    });
 
     const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
     const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -125,6 +140,13 @@ export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({
       return { postData: [], lastVisiblePost: null };
     }
 
+    querySnapshot.docs.forEach(async doc => {
+      const currentCountView = doc.data().count_view || 0;
+      await updateDoc(doc.ref, {
+        count_view: currentCountView + 1
+      });
+    });
+
     const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
     const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -140,15 +162,37 @@ export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({
 });
 
 
+export const updatePostsByField = createAsyncThunk(
+  'data/updatePostsByField',
+  async ({ postId, field, value }, { getState, dispatch }) => {
+    try {
+      // Tạo tham chiếu đến tài liệu trong Firestore
+      const postRef = doc(db, "Posts", postId);
+
+      // Cập nhật trường cụ thể
+      await updateDoc(postRef, {
+        [field]: value
+      });
+
+      console.log(`Field '${field}' updated successfully with value: ${value}`);
+
+      // Bạn có thể dispatch thêm action nếu cần
+      // dispatch(someAction(...));
+
+    } catch (error) {
+      console.error('Error updating post: ', error);
+      throw error;
+    }
+  }
+);
+
 
 // Tạo slice cho Post
 export const PostSlice = createSlice({
   name: 'post',
   initialState,
   reducers: {
-    setTotalPostsCount(state, action) {
-      state.totalPostsCount = action.payload;
-    },
+
   },
   extraReducers: (builder) => {
     builder
@@ -214,6 +258,6 @@ export const PostSlice = createSlice({
   },
 });
 
-export const { setTotalPostsCount } = PostSlice.actions
+export const { } = PostSlice.actions
 
 export default PostSlice.reducer;

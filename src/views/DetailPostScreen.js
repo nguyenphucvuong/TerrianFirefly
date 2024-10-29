@@ -29,7 +29,7 @@ const DetailPostScreen = () => {
     const navigation = useNavigation();
     const route = useRoute().params;
 
-    const { post, user, emoji } = route;
+    const { post, user, emoji, userPost } = route;
 
 
     {/* Lấy tọa độ của component để sử dụng kích hoạt animated khi lướt đến */ }
@@ -154,7 +154,7 @@ const DetailPostScreen = () => {
                 justifyContent: "flex-end",
             }}>
                 <View style={{ height: "100%", }} >
-                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={user} emoji={emoji} />}
+                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={userPost} user={user} emoji={emoji} />}
                 </View>
             </View>
 
@@ -172,7 +172,7 @@ const DetailPostScreen = () => {
                 {/* Content Detail Post */}
                 <View style={{
                     flex: 1,
-                    backgroundColor: "yellow",
+                    // backgroundColor: "yellow",
                     paddingBottom: "5%",
                 }}>
                     <View style={{
@@ -324,7 +324,7 @@ const DetailPostScreen = () => {
                     style={{
                         height: "auto",
                         width: "100%",
-                        backgroundColor: "pink",
+                        // backgroundColor: "pink",
                     }} >
                     {/* Avatar */}
                     <RowComponent
@@ -368,7 +368,7 @@ const DetailPostScreen = () => {
                 <RowComponent
                     height={30}
                     style={{
-                        backgroundColor: "red",
+                        // backgroundColor: "red",
                         justifyContent: "flex-end",
                     }}>
                     <ButtonsComponent onPress={handleAd}

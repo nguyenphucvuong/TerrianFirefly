@@ -18,9 +18,9 @@ const HomeScreen = () => {
   // const user = data.user;
   const emoji = data.emoji;
   const post = useSelector((state) => state.post.post);
+  const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
-  // const lastVisiblePost = useContext(ImageCheckContext).lastVisiblePost;
-  // const setLastVisiblePost = useContext(ImageCheckContext).setLastVisiblePost;
+
 
 
 
@@ -39,7 +39,7 @@ const HomeScreen = () => {
 
   return (
     <>
-      {post.length === 0 ? (
+      {post.length === 0 || user === null ? (
         <View style={{ height: 100, width: "100%", paddingHorizontal: "5%", }}>
           <SkeletonComponent isAvatar Data={""} />
           <SkeletonComponent style={{ width: "60%", height: 20 }} Data={""} />
@@ -52,7 +52,7 @@ const HomeScreen = () => {
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => {
             return (
-              <PostViewComponent post={item} images={item.images} emoji={emoji} />
+              <PostViewComponent post={item} images={item.images} emoji={emoji} user={user} />
             )
           }}
           contentContainerStyle={{ flexGrow: 1 }}

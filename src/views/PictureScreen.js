@@ -20,7 +20,6 @@ import * as MediaLibrary from 'expo-media-library';
 
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
-import { data } from '../constains/data'
 import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtComponent'
 import { AvatarEx, ButtonsComponent } from '../component'
 // import { AvatarEx } from '../component'
@@ -30,9 +29,8 @@ const PictureScreen = ({ }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
     const { Data: post, Select, User, emoji } = route.params;
-
+    const userPost = route.params.userPost;
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
-
     // const DataLength = Object.keys(Data.imgPost).length;
     const inset = useSafeAreaInsets();
     const navigation = useNavigation();
@@ -45,14 +43,14 @@ const PictureScreen = ({ }) => {
 
     const handleSaveImage = async (url) => {
         try {
-            const { status } = await MediaLibrary.requestPermissionsAsync(); // Yêu cầu quyền truy cập thư viện
+            const { status } = await MediaLibrary.requestPermissionsAsync(); // Yêu cầu quyền truy cập thư viện ảnh
             if (status !== 'granted') {
                 Alert.alert('Quyền bị từ chối!', 'Bạn cần cấp quyền truy cập để lưu hình ảnh.');
                 return;
             }
-            const fileName = url.split('/').pop(); // Lấy tên file từ url
-            const fileUri = `${FileSystem.documentDirectory}${fileName}`; // Đường dẫn lưu file
-            const download = await FileSystem.downloadAsync(url, fileUri); // Tải file về để lưu vào thiết bị
+            const fileName = url.split('/').pop();
+            const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+            const download = await FileSystem.downloadAsync(url, fileUri);
 
             if (download.status === 200) {
                 const asset = await MediaLibrary.createAssetAsync(download.uri);
@@ -172,7 +170,7 @@ const PictureScreen = ({ }) => {
                     </View>
                 </View>
                 <View style={{ height: "20%" }} >
-                    {<AnimatedQuickCmtComponent isNomal post={data.user} userPost={User} emoji={emoji} />}
+                    <AnimatedQuickCmtComponent isNomal post={post} userPost={userPost} user={User} emoji={emoji} />
                 </View>
 
             </View>}
