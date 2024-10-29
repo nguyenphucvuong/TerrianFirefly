@@ -148,7 +148,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, emoji, st
                         alignContent: "center",
                         justifyContent: "center",
                     }}>
-                    <AvatarEx size={40} round={30} url={userPost.avatar} style={{ marginRight: "3%" }} />
+                    <AvatarEx size={40} round={30} url={userPost.imgUser} style={{ marginRight: "3%" }} />
                     <Pressable
                         onPress={handleLikePressed}
                         style={{
@@ -355,7 +355,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, emoji, st
                         backgroundColor: "#D8D8D833",
                     }}
                     >
-                        <AvatarEx size={30} round={30} url={userPost.avatar} style={{ position: "relative", }} />
+                        <AvatarEx size={30} round={30} url={userPost.imgUser} style={{ position: "relative", }} />
                         <View style={{ width: 10 }} />
                         <TextInput
                             placeholderTextColor={"white"}
@@ -384,7 +384,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, emoji, st
                         paddingHorizontal: "3%",
 
                     }}>
-                    <AvatarEx size={33} round={30} url={userPost.avatar} style={{ position: "relative", marginRight: "3%" }} />
+                    <AvatarEx size={33} round={30} url={userPost.imgUser} style={{ position: "relative", marginRight: "3%" }} />
 
                     <Pressable onPress={handleShowPop} style={{
                         with: "100%",

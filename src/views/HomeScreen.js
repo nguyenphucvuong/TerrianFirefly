@@ -12,9 +12,10 @@ import { SkeletonComponent } from "../component";
 
 import PostViewComponent from "../component/PostViewComponent";
 import { ImageCheckContext } from "../context/ImageProvider";
+import { getUserByField } from "../redux/slices/UserSlices";
 const HomeScreen = () => {
   // console.log(data.post);
-  const user = data.user;
+  // const user = data.user;
   const emoji = data.emoji;
   const post = useSelector((state) => state.post.post);
   const dispatch = useDispatch();
@@ -26,7 +27,13 @@ const HomeScreen = () => {
 
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
 
+
+  // const handleGetUser = useCallback(async () => {
+  //   const user = await dispatch(getUserByField({ user_id: "1" }));
+  //   console.log(user);
+  // }, []);
 
 
 
@@ -45,7 +52,7 @@ const HomeScreen = () => {
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => {
             return (
-              <PostViewComponent post={item} user={user} images={item.images} emoji={emoji} />
+              <PostViewComponent post={item} images={item.images} emoji={emoji} />
             )
           }}
           contentContainerStyle={{ flexGrow: 1 }}
@@ -58,6 +65,7 @@ const HomeScreen = () => {
                 console.log("getPostsRefresh")
                 // Sau khi hoàn thành refresh, có thể cập nhật lại dữ liệu từ API hoặc giữ nguyên
                 setRefreshing(false);
+                setHasMorePosts(true);
               }, 2000);
             }} />
           }
@@ -79,21 +87,22 @@ const HomeScreen = () => {
           )}
 
           onEndReached={async () => {
-            if (loading) return; // Avoid multiple calls while still loading
-
+            if (loading || !hasMorePosts) return; // Check if loading or no more posts to load
             setLoading(true);
 
             try {
               const dataLoadMore = await dispatch(getPostsByField({ field: "created_at", quantity: 3 }));
 
-              // Stop loading only if there are no more posts to load
-              if (!dataLoadMore.payload.postData.length) {
-                setLoading(false);
+              if (dataLoadMore.payload.postData.length === 0) {
+                setHasMorePosts(false);
+              } else {
+                // Append new posts while ensuring no duplicates
+                // Example: setPost((prevPosts) => [...new Set([...prevPosts, ...dataLoadMore.payload.postData])]);
               }
             } catch (error) {
               console.error("Error loading more posts:", error);
             } finally {
-              setLoading(false); // Ensure loading state is reset
+              setLoading(false);
             }
           }}
           onEndReachedThreshold={0.1}

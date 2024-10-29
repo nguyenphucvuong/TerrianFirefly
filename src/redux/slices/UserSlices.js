@@ -5,6 +5,7 @@ import { collection, addDoc, getDoc, getDocs, query, where } from 'firebase/fire
 // Trạng thái ban đầu
 const initialState = {
     user: null,
+    userByField: {},
     statusUser: 'idle',
     errorUser: null,
 };
@@ -29,6 +30,29 @@ export const getUser = createAsyncThunk('data/getUser', async (email) => {
 
 });
 
+
+export const getUserByField = createAsyncThunk('data/getUserByField', async ({ user_id }) => {
+    try {
+        const q = query(collection(db, 'user'), where('user_id', '==', user_id));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            return null; // No user found
+        }
+
+        const userById = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+
+        return userById;
+    } catch (error) {
+        console.error('Error fetching user: ', error);
+        throw error; // Just return the error message
+    }
+});
+
 // Tạo slice cho user
 export const UserSlices = createSlice({
     name: 'user',
@@ -48,7 +72,21 @@ export const UserSlices = createSlice({
             .addCase(getUser.rejected, (state, action) => {
                 state.errorUser = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
                 state.statusUser = 'failed'; // Đánh dấu thất bại
+            })
+
+            // getUserByField
+            .addCase(getUserByField.fulfilled, (state, action) => {
+                const userId = action.payload[0]?.id; // Giả định rằng action.payload là mảng người dùng
+                if (userId && !state.userByField[userId]) {
+                    state.userByField[userId] = action.payload[0]; // Lưu người dùng vào state
+                }
+            })
+            .addCase(getUserByField.pending, (state) => {
+            })
+            .addCase(getUserByField.rejected, (state, action) => {
+                state.errorUser = action.error.message;
             });
+
 
     },
 });
