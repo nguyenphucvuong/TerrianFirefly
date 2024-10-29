@@ -13,11 +13,12 @@ import {
     ManagePostsScreen,
     ArticleDetailsScreen,
     SetUpAccountScreen,
-    WellcomScreen, 
-    LoginScreen, 
-    RegisterScreen, 
-    ForgotPassword, 
+    WellcomScreen,
+    LoginScreen,
+    RegisterScreen,
+    ForgotPassword,
     VerificationCodeScreen,
+    FollowerScreen,
 } from '../views';
 
 import IndexTab from '../tabs/indexTab';
@@ -43,7 +44,7 @@ const IconHeaderRight = (text, onPress, name) => ({
 });
 
 const StackNavigator = () => {
-        const [isLogin, setIsLogin] = useState(false);
+    const [isLogin, setIsLogin] = useState(false);
     return (
         <Stack.Navigator initialRouteName='WellcomScreen'>
             <Stack.Screen name='WellcomScreen' component={WellcomScreen} options={{ headerShown: false }} />
@@ -77,6 +78,8 @@ const StackNavigator = () => {
                 options={() => IconBack("Chi Tiết Bài Viết")} />
             <Stack.Screen name='SetUpAccountScreen' component={SetUpAccountScreen}
                 options={() => IconBack("Thiết Lập Tài Khoản")} />
+            <Stack.Screen name='FollowerScreen' component={FollowerScreen}
+                options={() => IconBack("Người Theo Dõi")} />
         </Stack.Navigator>
     )
 }

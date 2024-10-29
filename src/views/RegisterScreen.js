@@ -105,7 +105,7 @@ function RegisterScreen() {
         numberPhone: "",
         email: email,
         roleid: 0,
-        imimgUser: "",
+        imgUser: "",
         gender: "",
         passWord: password,
         status_user_id: 0,
