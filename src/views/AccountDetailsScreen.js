@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         margin: 10,
+        height: appInfo.heightWindows * 0.25,
     },
     buttonText: {
         color: '#000000',

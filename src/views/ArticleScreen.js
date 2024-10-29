@@ -25,4 +25,4 @@ const ArticleScreen = () => {
 const styles = StyleSheet.create({
 
 });
-export default ArticleScreen;
+export default React.memo(ArticleScreen);

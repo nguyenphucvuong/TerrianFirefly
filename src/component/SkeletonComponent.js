@@ -61,4 +61,3 @@ const SkeletonComponent = ({ Data, children, isAvatar, isButton, style, size }) 
 };
 
 export default React.memo(SkeletonComponent);
-

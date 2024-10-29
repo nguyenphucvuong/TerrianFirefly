@@ -1,5 +1,5 @@
 import { View, StyleSheet, Text, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native'
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState, useEffect } from 'react'
 import {
     BottomSheetModal,
     BottomSheetView,
@@ -7,39 +7,88 @@ import {
 } from '@gorhom/bottom-sheet';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
+import { useSelector, useDispatch } from "react-redux";
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
 //components 
-import { UserAvatarComponent, ButtonFunctionComponent, InputComponents, IconComponent } from '../component';
+import { AvatarEx, ButtonFunctionComponent, InputComponents, IconComponent } from '../component';
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
+//redux
+import { getUser } from '../redux/slices/UserSlices';
 const InfomationScreen = () => {
     const navigation = useNavigation(); // Sử dụng hook navigation
-    const snapPoints = useMemo(() => [appInfo.heightWindows * 0.25], []);
+    const [userName, setUserName] = useState('');
+    const [gender, setGender] = useState('');
+
+    //bottomSheet
+    const snapPoints = useMemo(() => [appInfo.heightWindows * 0.25]);
     const bottomSheetModalRef = useRef(null);
     const handldeOpenPress = () => {
         bottomSheetModalRef.current?.present();
     };
+    //firebase
+    const user = useSelector((state) => state.user.user);
+    const dispatch = useDispatch();
     // Choose image
-    const [avatarImage, setAvatarImage] = useState([]);
+    const [avatarImage, setAvatarImage] = useState('');
     const handleImagePickerPress = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,  
+            allowsEditing: true,
             aspect: [1, 1],
             quality: 1,
         })
         // console.log('result',result);
-        
+
         if (!result.canceled) {
             setAvatarImage(prevState => [...prevState, result.assets.uri]);
         }
     }
+    //save
+    const handleSaveInfomation = () => {
+
+    }
+    useEffect(() => {
+        //đọc dữ liệu   
+        dispatch(getUser(user[0].email));
+        hanndleDisPlay();
+    }, []);
+    // console.log('user1232',user[0].email);
+    const hanndleDisPlay = () => {
+        setUserName(user[0].username);
+        setGender(user[0].gender);
+    }
+    //Gender
+    const hanldeGender = (gender) => {
+        switch (gender) {
+            case 'Nam':
+                setGender('Nam');
+                bottomSheetModalRef.current?.dismiss();
+                break;
+            case 'Nữ':
+                setGender('Nữ');
+                bottomSheetModalRef.current?.dismiss();
+                break;
+            case 'Khác':
+                setGender('Khác');
+                bottomSheetModalRef.current?.dismiss();
+                break;
+            default:
+                return null;
+        }
+    }
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={StyleGlobal.container} >
                 <BottomSheetModalProvider>
-                    <UserAvatarComponent style={styles.avatar} />
+                    <AvatarEx
+                        url={user[0].imgUser}
+                        size={appInfo.widthWindows * 0.22}
+                        round={20}
+                        frame={user[0].frame_user}
+                    />
                     <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
                         {/* Chọn ảnh đại diện */}
                         <ButtonFunctionComponent
@@ -58,32 +107,45 @@ const InfomationScreen = () => {
                     </View>
                     <View style={{ marginTop: '3%' }}>
                         <Text style={StyleGlobal.textTitleContent}>Tên</Text>
-                        <InputComponents iconName={'user'} value={'Zenot'} />
+                        <InputComponents iconName={'user'} value={userName} onChangeText={(text) => setUserName(text)} />
                     </View>
                     <View style={{ marginTop: '3%' }}>
                         <Text style={StyleGlobal.textTitleContent}>Giới Tính</Text>
                         <TouchableOpacity style={styles.buttonRow} onPress={() => handldeOpenPress()}>
-                            <Text style={styles.buttonText}>Chọn Giới Tính</Text>
-                            <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
+                            <Text style={styles.buttonText}>{gender}</Text>
+                            <IconComponent name={'chevron-right'} size={appInfo.heightWindows * 0.024} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
                     </View>
-                    <ButtonFunctionComponent name={'Lưu'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button2} />
+                    <ButtonFunctionComponent
+                        name={'Lưu'}
+                        backgroundColor={'#8B84E9'}
+                        colorText={'#FFFFFF'}
+                        style={styles.button2}
+                        onPress={() => handleSaveInfomation()}
+                    />
                     <BottomSheetModal
                         ref={bottomSheetModalRef}
                         index={0}
                         snapPoints={snapPoints}>
                         <BottomSheetView style={styles.contentContainer}>
-                            <TouchableOpacity style={styles.buttonRow}>
+                            <TouchableOpacity style={styles.buttonRow} onPress={() => hanldeGender('Nam')}>
                                 <Text style={styles.buttonText}>Nam</Text>
-                                <IconComponent name={'check'} size={24} color={'gray'} style={styles.iconStyle} />
+
+                                {gender == 'Nam' ? (
+                                    <IconComponent name={'check'} size={24} color={'#0286FF'} style={styles.iconStyle} />
+                                ) : null}
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.buttonRow]}>
+                            <TouchableOpacity style={[styles.buttonRow]} onPress={() => hanldeGender('Nữ')}>
                                 <Text style={[styles.buttonText]}>Nữ</Text>
-                                <IconComponent name={'check'} size={24} color={'gray'} style={styles.iconStyle} />
+                                {gender == 'Nữ' ? (
+                                    <IconComponent name={'check'} size={24} color={'#0286FF'} style={styles.iconStyle} />
+                                ) : null}
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.buttonRow]}>
+                            <TouchableOpacity style={[styles.buttonRow]} onPress={() => hanldeGender('Khác')}>
                                 <Text style={[styles.buttonText]}>Khác</Text>
-                                <IconComponent name={'check'} size={24} color={'gray'} style={styles.iconStyle} />
+                                {gender == 'Khác' ? (
+                                    <IconComponent name={'check'} size={24} color={'#0286FF'} style={styles.iconStyle} />
+                                ) : null}
                             </TouchableOpacity>
                         </BottomSheetView>
                     </BottomSheetModal>
@@ -93,9 +155,6 @@ const InfomationScreen = () => {
     )
 }
 const styles = StyleSheet.create({
-    avatar: {
-        top: appInfo.heightWindows * 0.01,
-    },
     button: {
         marginTop: appInfo.heightWindows * 0.03,
         margin: appInfo.heightWindows * 0.004,
@@ -113,6 +172,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         margin: 10,
+        height: appInfo.heightWindows * 0.25,
     },
     buttonText: {
         color: '#000000',

@@ -13,4 +13,4 @@ const GroupScreen = () => {
 const styles = StyleSheet.create({
 
 });
-export default GroupScreen;
+export default React.memo(GroupScreen);

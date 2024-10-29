@@ -1,6 +1,7 @@
 import { View, FlatList, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from "react-redux";
+import { useRoute } from '@react-navigation/native';
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal'
 //constains
@@ -10,7 +11,9 @@ import { IconComponent } from '../component'
 //redux
 import { getNickname } from '../redux/slices/NicknameSlice';
 const NickNameScreen = () => {
+    //FireBase
     const nickname = useSelector((state) => state.nickname.nickname);
+    const user = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
     //cập nhật lại dữ liệu     
     useEffect(() => {
@@ -25,16 +28,18 @@ const NickNameScreen = () => {
                 data={nickname}
                 renderItem={({ item }) => {
                     return (
-                        <TouchableOpacity style={styles.buttonRow}>
+                        <TouchableOpacity style={[styles.buttonRow, {borderColor: user[0].nickname === item.nickname ? '#90CAF9' : 'gray' }]} onPress={() => hanldeSelectNickName()}>
                             <Text style={styles.buttonText}>{item.nickname}</Text>
-                            <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'gray'} style={styles.iconStyle} />
+                            {user[0].nickname === item.nickname ?
+                                <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'#90CAF9'} style={styles.iconStyle} />
+                                : null
+                            }
+
                         </TouchableOpacity>
                     )
-
                 }}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item.nickname.toString()}
             />
-
         </View>
     )
 }
