@@ -163,7 +163,7 @@ const PersonScreen = () => {
                     <View style={styles.statisticsContainer}>
                         <StatisticsComponent quantity={0} name={'Bài Viết'} />
                         <StatisticsComponent quantity={0} name={'Theo Dõi'} />
-                        <StatisticsComponent quantity={0} name={'Người Theo Dõi'} />
+                        <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
                         <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                     </View>
 

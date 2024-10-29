@@ -14,19 +14,21 @@ import { StyleGlobal } from '../styles/StyleGlobal';
 import { appInfo } from '../constains/appInfo';
 //Redux
 import { getBackground } from '../redux/slices/BackgroundSlice';
-import { getUser } from '../redux/slices/UserSlices';
 const BackgroundScreen = () => {
+    //FireBase
+    const arrBackground = useSelector((state) => state.background.background);
+    const user = useSelector((state) => state.user.user);
+    const dispatch = useDispatch();
+    //
+    const [selectedId, setSelectedId] = useState(user[0].backgroundUser);
+    //BottomSheet
     const snapPoints = useMemo(() => ['15%'], []);
     const bottomSheetModalRef = useRef(null);
     const handldeOpenPress = (url) => {
         bottomSheetModalRef.current?.present();
         setBackground(url);
+        setSelectedId(url);
     };
-
-    //FireBase
-    const arrBackground = useSelector((state) => state.background.background);
-    const user = useSelector((state) => state.user.user);
-    const dispatch = useDispatch();
     //set data
     const [background, setBackground] = useState(user[0].backgroundUser);
     //cập nhật lại dữ liệu     
@@ -62,19 +64,21 @@ const BackgroundScreen = () => {
                     numColumns={2}
                     data={arrBackground}
                     renderItem={({ item }) => {
+                        const isSelected = selectedId === item.nameBackground;
                         return (
-                            <TouchableOpacity style={{ flex: 1, margin: 5 }} onPress={() => handldeOpenPress(item.nameBackground)} >
+                            <TouchableOpacity style={{ flex: 1, margin: 5 }} 
+                            onPress={() => handldeOpenPress(item.nameBackground)} >
                                 <Image
-                                    style={{ width: '100%', height: appInfo.heightWindows * 0.1, borderRadius: 20 }}
+                                    style={[styles.image, { borderColor: isSelected ? '#90CAF9' : 'white', borderWidth: 3, }]}
                                     source={{ url: item.nameBackground }}
                                 />
                                 {user[0].backgroundUser == item.nameBackground
                                     ? <IconComponent
-                                        name={'check-circle'}
-                                        size={appInfo.heightWindows * 0.024}
-                                        color={'#0286FF'}
-                                        style={{ position: "absolute", bottom: 0, right: 4, width: 24, height: 24 }}
-                                    />
+                                    name={'check'}
+                                    size={appInfo.heightWindows * 0.02}
+                                    color={'#FFFFFF'}
+                                    style={[styles.iconComponent, { bottom: 5, backgroundColor: '#0286FF' }]}
+                                />
                                     : null}
                             </TouchableOpacity>
                         )
@@ -87,7 +91,6 @@ const BackgroundScreen = () => {
                     snapPoints={snapPoints}>
                     <BottomSheetView style={styles.contentContainer}>
                         <Text style={StyleGlobal.textName}> Cấp độ: Người nổi tiếng 🎉</Text>
-
                         <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button} />
                     </BottomSheetView>
                 </BottomSheetModal>
@@ -120,6 +123,18 @@ const styles = StyleSheet.create({
         margin: 10,
         alignItems: 'center',
         height: appInfo.heightWindows * 0.15,
+    },
+    img: {
+        width: '100%',
+        height: appInfo.heightWindows * 0.1,
+        borderRadius: 20,
+    },
+    iconComponent: {
+        position: "absolute",
+        right: 6,
+        width: appInfo.heightWindows * 0.02,
+        backgroundColor: '#0286FF',
+        borderRadius: 20,
     },
 });
 export default BackgroundScreen;

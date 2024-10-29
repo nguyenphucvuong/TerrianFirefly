@@ -11,36 +11,34 @@ import { IconComponent } from '../component'
 //redux
 import { getNickname } from '../redux/slices/NicknameSlice';
 const NickNameScreen = () => {
-    const route = useRoute();
-    const nicknameUser = route.params;
     //FireBase
     const nickname = useSelector((state) => state.nickname.nickname);
+    const user = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
     //cập nhật lại dữ liệu     
-    useEffect(() => { 
+    useEffect(() => {
         //đọc dữ liệu   
         dispatch(getNickname());
     }, []);
     //console.log('nickname', nickname);
-    console.log('nicknameUser', nicknameUser);
+
     return (
         <View style={StyleGlobal.container}>
             <FlatList
                 data={nickname}
                 renderItem={({ item }) => {
                     return (
-                        <TouchableOpacity style={styles.buttonRow} onPress={() => hanldeSelectNickName()}>
+                        <TouchableOpacity style={[styles.buttonRow, {borderColor: user[0].nickname === item.nickname ? '#90CAF9' : 'gray' }]} onPress={() => hanldeSelectNickName()}>
                             <Text style={styles.buttonText}>{item.nickname}</Text>
-                            {nicknameUser === item.nickname
-                            
-                                ? <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'gray'} style={styles.iconStyle} />
+                            {user[0].nickname === item.nickname ?
+                                <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'#90CAF9'} style={styles.iconStyle} />
                                 : null
                             }
 
                         </TouchableOpacity>
                     )
                 }}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item.nickname.toString()}
             />
         </View>
     )
