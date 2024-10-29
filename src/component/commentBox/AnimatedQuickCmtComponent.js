@@ -349,7 +349,6 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, emoji, st
                         alignItems: "center",
                         flex: 1,
                         borderRadius: 30,
-                        borderWidth: 1,
                         paddingLeft: 10,
                         paddingRight: 10,
                         backgroundColor: "#D8D8D833",

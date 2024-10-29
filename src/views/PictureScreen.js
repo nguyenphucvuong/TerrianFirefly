@@ -29,7 +29,7 @@ import { AvatarEx, ButtonsComponent } from '../component'
 const PictureScreen = ({ }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
-    const { Data, Select, User, emoji } = route.params;
+    const { Data: post, Select, User, emoji } = route.params;
 
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
 
@@ -74,7 +74,7 @@ const PictureScreen = ({ }) => {
 
 
     {/* Image Viewer Versoin 1 */ }
-    const imageUrls = Data.imgPost.map((item) => ({ url: item }));
+    const imageUrls = post.imgPost.map((item) => ({ url: item }));
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
             {/* Tab Status Bar */}
@@ -140,10 +140,14 @@ const PictureScreen = ({ }) => {
                 />
 
                 <View style={{ height: "80%", flexDirection: "row" }}>
-                    <View style={{ width: "80%", height: "100%", }} />
+                    <View style={{ width: "80%", height: "auto", justifyContent: "flex-end" }} >
+                        <View style={{ width: "100%", height: "auto", marginLeft: "5%" }} >
+                            <Text style={{ color: "white" }}>{post.title}</Text>
+                        </View>
+                    </View>
                     <View style={{ width: "20%", height: "100%", alignItems: 'center' }}>
                         <ButtonsComponent isButton style={{ alignItems: "center", marginBottom: "10%" }}>
-                            <AvatarEx size={50} round={30} url={User.avatar} style={{ marginRight: "3%" }} />
+                            <AvatarEx size={50} round={30} url={User.imgUser} style={{ marginRight: "3%" }} />
                             {/* <Image source={{ uri: User.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
                                 style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} /> */}
                         </ButtonsComponent>
