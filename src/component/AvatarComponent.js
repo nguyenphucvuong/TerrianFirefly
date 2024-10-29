@@ -5,6 +5,7 @@ import { Image } from "expo-image";
 import { StyleGlobal } from "../styles/StyleGlobal";
 
 const AvatarEx = ({ size, round, url, style, frame, name }) => {
+
   return (
     <>
       <View style={{ alignItems: 'center' }}>
@@ -37,7 +38,6 @@ const AvatarEx = ({ size, round, url, style, frame, name }) => {
         <Text style={[StyleGlobal.textTitleContent]}>{name}</Text>
       </View>
     </>
-
   );
 }
 
