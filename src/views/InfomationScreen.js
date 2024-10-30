@@ -51,13 +51,13 @@ const InfomationScreen = () => {
     }
     useEffect(() => {
         //đọc dữ liệu   
-        dispatch(getUser(user[0].email));
+        dispatch(getUser(user.email));
         hanndleDisPlay();
     }, []);
     // console.log('user1232',user[0].email);
     const hanndleDisPlay = () => {
-        setUserName(user[0].username);
-        setGender(user[0].gender);
+        setUserName(user.username);
+        setGender(user.gender);
     }
     //Gender
     const hanldeGender = (gender) => {
@@ -84,10 +84,10 @@ const InfomationScreen = () => {
             <View style={StyleGlobal.container} >
                 <BottomSheetModalProvider>
                     <AvatarEx
-                        url={user[0].imgUser}
+                        url={user.imgUser}
                         size={appInfo.widthWindows * 0.22}
                         round={20}
-                        frame={user[0].frame_user}
+                        frame={user.frame_user}
                     />
                     <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
                         {/* Chọn ảnh đại diện */}

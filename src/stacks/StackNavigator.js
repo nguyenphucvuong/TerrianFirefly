@@ -19,6 +19,8 @@ import {
     ForgotPassword,
     VerificationCodeScreen,
     FollowerScreen,
+    ResetPasswordScreen,
+    AccountSettingsScreen,
 } from '../views';
 
 import IndexTab from '../tabs/indexTab';
@@ -52,6 +54,8 @@ const StackNavigator = () => {
             <Stack.Screen name='RegisterScreen' component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{ headerShown: false }} />
             <Stack.Screen name='VerificationCodeScreen' component={VerificationCodeScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='AccountSettingsScreen' component={AccountSettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='ResetPasswordScreen' component={ResetPasswordScreen} options={{ headerShown: false }} />
             <Stack.Screen name='IndexTab' component={IndexTab} options={{ headerShown: false }} />
             <Stack.Screen name='BackgroundScreen' component={BackgroundScreen} options={{ headerShown: false }} />
             <Stack.Screen name='InfomationScreen' component={InfomationScreen}

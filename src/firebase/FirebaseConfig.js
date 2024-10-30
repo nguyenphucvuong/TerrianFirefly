@@ -1,6 +1,5 @@
 // Import the functions you need from the SDKs you need
 
-
 import { getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword , 
@@ -9,7 +8,6 @@ import { getAuth,
   sendPasswordResetEmail,
   initializeAuth
 } from "firebase/auth";
-
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { firestore } from "firebase/firestore";
@@ -42,6 +40,8 @@ export const provider = new GoogleAuthProvider();
 //export const analytics = getAnalytics(app);
 // Initialize Firebase
 export const db = getFirestore(app);
+
+//const storage = getStorage(app, "gs://terrianfirefly.appspot.com");
 
 
 //const storage = getStorage(app, "gs://terrianfirefly.appspot.com");
