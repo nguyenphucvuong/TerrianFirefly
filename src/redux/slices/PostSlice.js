@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter, doc, getCountFromServer, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase/FirebaseConfig'; // Firebase config
+import { ref,collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter, doc, getCountFromServer, updateDoc } from 'firebase/firestore';
+import { db, storage } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
 const initialState = {

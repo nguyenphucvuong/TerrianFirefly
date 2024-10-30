@@ -42,7 +42,6 @@ import { log } from "@tensorflow/tfjs";
 const { height } = Dimensions.get("window");
 
 const CreatePostScreen = () => {
-
   //khai bao redux
   const dispatch = useDispatch();
   const { post, status, error } = useSelector((state) => state.post); // post
@@ -108,7 +107,7 @@ const CreatePostScreen = () => {
       // console.log("an cai cc");
     }
   };
-  
+
   //Hàm lấy id trong link ytb
   const extractYouTubeVideoID = (url) => {
     const youtubeRegex =
@@ -128,21 +127,20 @@ const CreatePostScreen = () => {
       count_emoji: 0,
       count_comment: 0,
       count_view: 0,
-      post_id: "temp", 
+      post_id: "temp",
       user_id: user.user_id,
       title: textTitle,
       body: body,
-      hashtag: selectedHashTag, 
-      imgPost: images, 
-      isYtb: isEnabled, 
-      created_at: Date.now(), 
+      hashtag: selectedHashTag,
+      imgPost: images,
+      isYtb: isEnabled,
+      created_at: Date.now(),
     };
     // Nếu có hashtag mới, thêm vào Firestore
     if (newHashtag.length !== 0) {
       await dispatch(createHashtag(newHashtag))
         .then(() => {
           dispatch(getHashtag());
-
         })
         .catch((error) => {
           console.error("Lỗi thêm hashtag:", error);
@@ -821,7 +819,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10, // Tạo góc bo tròn cho nút
 
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1.5 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
