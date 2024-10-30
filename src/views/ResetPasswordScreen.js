@@ -42,7 +42,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
   }, []);
 
   if (user.length > 0) {
-    console.log("id", user[0].user_id);
+    console.log("id", user.user_id);
   } else {
     dispatch(getUser(email));
   }
@@ -57,7 +57,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
       return;
     }
     try {
-      await signInWithEmailAndPassword(auth, email, user[0].passWord); // Thay 'temporaryPassword' bằng mật khẩu tạm thời bạn thiết lập
+      await signInWithEmailAndPassword(auth, email, user.passWord); // Thay 'temporaryPassword' bằng mật khẩu tạm thời bạn thiết lập
 
       // Cập nhật mật khẩu mới trong Firebase Auth
       const authUser = auth.currentUser;
@@ -69,7 +69,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
         passWord: newPassword,
       };
       // Lấy reference đến tài liệu của người dùng
-      const userRef = doc(collection(db, "user"), user[0].user_id);
+      const userRef = doc(collection(db, "user"), user.user_id);
       try {
         // Cập nhật mật khẩu mới trong Firestore
         await updateDoc(userRef, newData);
