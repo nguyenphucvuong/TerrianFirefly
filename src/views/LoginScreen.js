@@ -168,6 +168,7 @@ function LoginScreen() {
           const userL = userCredential.user;
           //console.log("Đăng nhập thành công", userL);
           await dispatch(getUser(userL.email));
+
         })
         .catch((error) => {
           setisLoading(false);
