@@ -22,7 +22,7 @@ import {
   ResetPasswordScreen,
   AccountSettingsScreen,
 } from "../views";
-
+import IndexTab from '../tabs/indexTab';
 import EventScreen from "../views/EventScreen";
 //components
 import { ButtonBackComponent, IconComponent } from "../component";

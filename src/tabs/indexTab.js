@@ -2,20 +2,14 @@ import { StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image } from "expo-image";
 import {React, useEffect, useState} from "react";
-
 import { EventTab, NewPostTab, NotiTab, PersonTab } from "./";
 import { IndexRouter } from "../routers/indexRouter";
-
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
-
 import { auth } from '../firebase/FirebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-
 import EventScreen from "../views/EventScreen";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { ButtonsComponent } from "../component";
 const Tab = createBottomTabNavigator();
-
 const getRouteName = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route);
   if (routeName == "picture" || routeName == "DetailPost") {

@@ -23,8 +23,8 @@ const MainApp = () => {
   useEffect(() => {
     // dispatch(getPostsByField({ field: "created_at", quantity: "2", lastVisiblePost: null }));
     dispatch(getPostsFirstTime());
-
     dispatch(getEvent()); 
+    dispatch(getEventByField({ fieldWhere: "created_at", value: Date.now() }));
     dispatch(getHashtag()); 
   }, []);
 
