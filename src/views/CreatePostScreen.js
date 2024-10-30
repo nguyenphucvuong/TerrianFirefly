@@ -129,7 +129,7 @@ const CreatePostScreen = () => {
       count_comment: 0,
       count_view: 0,
       post_id: "temp", 
-      user_id: user[0].user_id,
+      user_id: user.user_id,
       title: textTitle,
       body: body,
       hashtag: selectedHashTag, 
