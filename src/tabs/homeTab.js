@@ -30,10 +30,9 @@ const HomeTab = () => {
           right: 0,
           zIndex: 999,
 
-        }}
-      >
-
+        }}>
         <TouchableOpacity
+          activeOpacity={1}
           style={{
             flex: 1,
             backgroundColor: appcolor.gray,

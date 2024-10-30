@@ -12,6 +12,8 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 
 import { appInfo } from '../constains/appInfo'
+import { handleTime } from "../utils/converDate";
+
 
 import MoreOptionPostComponent from '../component/moreOptionBox/MoreOptionPostComponent';
 import RowComponent from '../component/RowComponent';
@@ -27,7 +29,7 @@ const DetailPostScreen = () => {
     const navigation = useNavigation();
     const route = useRoute().params;
 
-    const { post, user, emoji } = route;
+    const { post, user, emoji, userPost } = route;
 
 
     {/* Lấy tọa độ của component để sử dụng kích hoạt animated khi lướt đến */ }
@@ -52,11 +54,11 @@ const DetailPostScreen = () => {
         await Clipboard.setStringAsync(content);
     };
 
-    const fetchCopiedText = async () => {
-        copyToClipboard();
+    const fetchCopiedText = async (content) => {
+        copyToClipboard(content);
         const text = await Clipboard.getStringAsync();
         setCopiedText(text);
-        console.log(copiedText)
+        console.log(text)
         if (Platform.OS === 'android') {
             ToastAndroid.show('Đã sao chép!', ToastAndroid.SHORT);
         } else {
@@ -72,7 +74,7 @@ const DetailPostScreen = () => {
     };
     return (
         <View style={{ flex: 1, backgroundColor: "green" }}>
-            
+
             <StatusBar barStyle={'dark-content'} backgroundColor={"white"} />
             {/* Navigate bar */}
             <RowComponent style={{
@@ -114,8 +116,8 @@ const DetailPostScreen = () => {
                                 alignItems: "center",
                                 width: "65%",
                             }}>
-                            <AvatarEx size={30} round={10} url={user.avatar} />
-                            <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{user.userName}</Text>
+                            <AvatarEx size={30} round={10} url={user.imgUser} />
+                            <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{user.username}</Text>
                         </TouchableOpacity>
 
                         <ButtonsComponent isButton onPress={handleAd}
@@ -152,7 +154,7 @@ const DetailPostScreen = () => {
                 justifyContent: "flex-end",
             }}>
                 <View style={{ height: "100%", }} >
-                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} user={user} emoji={emoji} />}
+                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={userPost} user={user} emoji={emoji} />}
                 </View>
             </View>
 
@@ -170,7 +172,7 @@ const DetailPostScreen = () => {
                 {/* Content Detail Post */}
                 <View style={{
                     flex: 1,
-                    backgroundColor: "yellow",
+                    // backgroundColor: "yellow",
                     paddingBottom: "5%",
                 }}>
                     <View style={{
@@ -201,7 +203,7 @@ const DetailPostScreen = () => {
                             alignItems: "center",
                             flexDirection: "row",
                         }}>
-                        <AvatarComponent size={50} round={10} url={user.avatar}
+                        <AvatarComponent size={50} round={10} url={user.imgUser}
                             style={{
                                 marginHorizontal: "3%",
                             }} />
@@ -215,11 +217,11 @@ const DetailPostScreen = () => {
                             <Text style={{
                                 fontSize: 15,
                                 fontWeight: "bold",
-                            }}>{user.userName}</Text>
+                            }}>{user.username}</Text>
                             <Text style={{
                                 fontSize: 12,
                                 color: "#BFBFBF",
-                            }}>{post.created_at}</Text>
+                            }}>{handleTime({ post: post })}</Text>
                         </View>
                         <View style={{
                             flex: 1,
@@ -296,13 +298,15 @@ const DetailPostScreen = () => {
                 </View >
 
                 {/* Hashtag */}
-                <RowComponent
-                    height={post.hashtag.length === 0 ? 0 : appInfo.heightWindows * 0.1}
-                    width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
+                {post.hashtag.length === 0 ? <></> :
+                    <RowComponent
+                        height={post.hashtag.length === 0 ? 0 : appInfo.heightWindows * 0.1}
+                        width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
 
-                >
-                    <ButtonsComponent isHashtag onPress={handleAd} hashtag={post?.hashtag} isDetail />
-                </RowComponent >
+                    >
+                        <ButtonsComponent isHashtag onPress={handleAd} hashtag={post?.hashtag} isDetail />
+                    </RowComponent >}
+
 
                 <View style={{
                     width: "100%",
@@ -320,14 +324,14 @@ const DetailPostScreen = () => {
                     style={{
                         height: "auto",
                         width: "100%",
-                        backgroundColor: "pink",
+                        // backgroundColor: "pink",
                     }} >
                     {/* Avatar */}
                     <RowComponent
                         height={appInfo.widthWindows / 5.7}
                         style={{ alignItems: "center" }}
                     >
-                        <AvatarEx size={30} round={30} url={user.avatar} />
+                        <AvatarEx size={30} round={30} url={user.imgUser} />
                         <View
                             style={{
                                 height: "80%",
@@ -336,8 +340,8 @@ const DetailPostScreen = () => {
                                 paddingLeft: "3%",
                             }}
                         >
-                            <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.userName}</Text>
-                            <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{post?.created_at}</Text>
+                            <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
+                            <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ post: post })}</Text>
                         </View>
                         <View
                             style={{
@@ -364,7 +368,7 @@ const DetailPostScreen = () => {
                 <RowComponent
                     height={30}
                     style={{
-                        backgroundColor: "red",
+                        // backgroundColor: "red",
                         justifyContent: "flex-end",
                     }}>
                     <ButtonsComponent onPress={handleAd}
@@ -407,6 +411,6 @@ const DetailPostScreen = () => {
     )
 }
 
-export default React.memo(DetailPostScreen)
+export default DetailPostScreen
 
 const styles = StyleSheet.create({})

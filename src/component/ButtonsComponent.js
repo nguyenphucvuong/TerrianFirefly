@@ -2,7 +2,7 @@ import { Text, TouchableOpacity, FlatList, Pressable, StyleSheet } from "react-n
 import React from "react";
 import { Image } from 'expo-image';
 
-const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail, isBack, isNext }) => {
+const ButtonsComponent = ({ children, color, style, disabled, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail, isBack, isNext }) => {
   // const ButtonsComponent = (infoButton) => {
   // const [children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail] = [
   //   infoButton.children,
@@ -42,7 +42,6 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
         // onPress={onPress}
         onPress={onPress}
         onLongPress={onLongPress}
-        on
         activeOpacity={0.6}
         delayLongPress={500}
         style={[{
@@ -65,7 +64,7 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
             justifyContent: "center",
             alignItems: "center",
             width: "auto",
-            height: "90%",
+            height: "100%",
             paddingHorizontal: 10,
             paddingVertical: 5,
             marginEnd: 8,
@@ -102,7 +101,7 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
         style={{
           width: "95%",
           height: "100%",
-          backgroundColor: "green",
+          // backgroundColor: "green",
         }}
         contentContainerStyle={{
           justifyContent: "flex-start",
@@ -114,28 +113,28 @@ const ButtonsComponent = ({ children, color, style, isButton, isPressable, onPre
     )
   }
 
-    //Nút quay lại
-    const BackButton = () => {
-      return (
-        <TouchableOpacity onPress={onPress} style={styles.buttonBack}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/3114/3114883.png',
-            }}
-            style={{ width: 25, height: 25, marginTop: 'auto' }}
-          />
-        </TouchableOpacity>
-      )
-    }
-  
-    //Nút tiếp tục
-    const NextButton = () => {
-      return (
-        <TouchableOpacity onPress={onPress} style={styles.buttonNext}>
-          {children}
-        </TouchableOpacity>
-      )
-    }
+  //Nút quay lại
+  const BackButton = () => {
+    return (
+      <TouchableOpacity onPress={onPress} style={styles.buttonBack}>
+        <Image
+          source={{
+            uri: 'https://cdn-icons-png.flaticon.com/512/3114/3114883.png',
+          }}
+          style={{ width: 25, height: 25, marginTop: 'auto' }}
+        />
+      </TouchableOpacity>
+    )
+  }
+
+  //Nút tiếp tục
+  const NextButton = () => {
+    return (
+      <TouchableOpacity onPress={onPress} style={styles.buttonNext}>
+        {children}
+      </TouchableOpacity>
+    )
+  }
 
   if (isButton) {
     return <NormalTouchableOpacity />;

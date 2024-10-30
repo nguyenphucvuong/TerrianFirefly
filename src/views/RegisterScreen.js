@@ -113,7 +113,7 @@ function RegisterScreen() {
         gender: "",
         passWord: password,
         status_user_id: 0,
-        nickname: "Dùng Mới",
+        nickname: "Người Dùng Mới",
         total_interact_id: 0,
         backgroundUser: "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/background%2Fbackground4.jpg?alt=media&token=31c49a20-9146-46cc-8df6-496093d45194",
         frame_user: "",

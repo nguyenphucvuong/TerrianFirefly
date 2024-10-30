@@ -20,18 +20,17 @@ import * as MediaLibrary from 'expo-media-library';
 
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
-import { data } from '../constains/data'
 import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtComponent'
+import { AvatarEx, ButtonsComponent } from '../component'
 // import { AvatarEx } from '../component'
 // import RowComponent from '../RowComponent';
 
 const PictureScreen = ({ }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
-    const { Data, Select, User, emoji } = route.params;
-
+    const { Data: post, Select, User, emoji } = route.params;
+    const userPost = route.params.userPost;
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
-
     // const DataLength = Object.keys(Data.imgPost).length;
     const inset = useSafeAreaInsets();
     const navigation = useNavigation();
@@ -44,14 +43,14 @@ const PictureScreen = ({ }) => {
 
     const handleSaveImage = async (url) => {
         try {
-            const { status } = await MediaLibrary.requestPermissionsAsync(); // Yêu cầu quyền truy cập thư viện
+            const { status } = await MediaLibrary.requestPermissionsAsync(); // Yêu cầu quyền truy cập thư viện ảnh
             if (status !== 'granted') {
                 Alert.alert('Quyền bị từ chối!', 'Bạn cần cấp quyền truy cập để lưu hình ảnh.');
                 return;
             }
-            const fileName = url.split('/').pop(); // Lấy tên file từ url
-            const fileUri = `${FileSystem.documentDirectory}${fileName}`; // Đường dẫn lưu file
-            const download = await FileSystem.downloadAsync(url, fileUri); // Tải file về để lưu vào thiết bị
+            const fileName = url.split('/').pop();
+            const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+            const download = await FileSystem.downloadAsync(url, fileUri);
 
             if (download.status === 200) {
                 const asset = await MediaLibrary.createAssetAsync(download.uri);
@@ -73,11 +72,11 @@ const PictureScreen = ({ }) => {
 
 
     {/* Image Viewer Versoin 1 */ }
-    const imageUrls = Data.imgPost.map((item) => ({ url: item }));
+    const imageUrls = post.imgPost.map((item) => ({ url: item }));
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
             {/* Tab Status Bar */}
-            <StatusBar barStyle={'default'} backgroundColor={"black"} />
+            <StatusBar barStyle={'default'} backgroundColor={"transparent"} />
             {isVisible && <View style={{
                 flexDirection: "row",
                 position: 'absolute',
@@ -139,13 +138,23 @@ const PictureScreen = ({ }) => {
                 />
 
                 <View style={{ height: "80%", flexDirection: "row" }}>
-                    <View style={{ width: "80%", height: "100%", }} />
+                    <View style={{ width: "80%", height: "auto", justifyContent: "flex-end" }} >
+                        <View style={{ width: "100%", height: "auto", marginLeft: "5%" }} >
+                            <Text style={{ color: "white" }}>{post.title}</Text>
+                        </View>
+                    </View>
                     <View style={{ width: "20%", height: "100%", alignItems: 'center' }}>
-                        <TouchableOpacity style={{ alignItems: "center", marginBottom: "10%" }}>
-                            <Image source={{ uri: User.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
-                                style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} />
-                            <AndtDegisn name='pluscircle' color={appcolor.primary} size={17} style={{ width: 17, height: 17, backgroundColor: "white", borderRadius: 100, marginTop: "-15%" }} />
-                        </TouchableOpacity>
+                        <ButtonsComponent isButton style={{ alignItems: "center", marginBottom: "10%" }}>
+                            <AvatarEx size={50} round={30} url={User.imgUser} style={{ marginRight: "3%" }} />
+                            {/* <Image source={{ uri: User.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
+                                style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} /> */}
+                        </ButtonsComponent>
+
+                        <ButtonsComponent isButton>
+                            <AndtDegisn name='pluscircle' color={appcolor.primary} size={17} style={{ width: 17, height: 17, backgroundColor: "white", borderRadius: 100, marginTop: "-15%", top: -5 }} />
+
+                        </ButtonsComponent>
+
                         <TouchableOpacity style={{ alignItems: "center" }}>
                             <AndtDegisn name='like1' color={"white"} size={30} />
                             <Text style={{ color: "white" }}>20</Text>
@@ -161,7 +170,7 @@ const PictureScreen = ({ }) => {
                     </View>
                 </View>
                 <View style={{ height: "20%" }} >
-                    {<AnimatedQuickCmtComponent isNomal post={data.user} user={User} emoji={emoji} />}
+                    <AnimatedQuickCmtComponent isNomal post={post} userPost={userPost} user={User} emoji={emoji} />
                 </View>
 
             </View>}

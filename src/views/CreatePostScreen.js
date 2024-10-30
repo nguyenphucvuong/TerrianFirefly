@@ -26,8 +26,8 @@ import * as ImagePicker from 'expo-image-picker';
 import ButtonsComponent from '../component/ButtonsComponent';
 import { ALERT_TYPE, Dialog, AlertNotificationRoot, Toast } from 'react-native-alert-notification';
 import { useDispatch, useSelector } from 'react-redux';
-import { createPost, getPosts } from '../redux/slices/PostSlices';
-import { getHashtag, createHashtag } from '../redux/slices/HashtagSlices';
+import { createPost, getPosts } from '../redux/slices/PostSlice';
+import { getHashtag, createHashtag } from '../redux/slices/HashtagSlice';
 import { Ionicons } from '@expo/vector-icons';
 const { height } = Dimensions.get('window');
 
@@ -100,7 +100,7 @@ const CreatePostScreen = () => {
     hashtag_id: hashtag,  // Bạn có thể thay đổi logic để tạo id tùy ý
     hashtag_background: "#ffff",
     hashtag_color: "#000",
-}));
+  }));
   //xử lý đăng bài viết mới
   const handlePost = async () => {
     let body = isEnabled ? body = link : body = textPost;
@@ -122,7 +122,7 @@ const CreatePostScreen = () => {
       isYtb: isEnabled, //là bài đăng dạng ảnh hay link ytb
       created_at: formattedDate, //thời gian tạo dd/mm/yyyy
     };
-    if(newHashtag != null){
+    if (newHashtag != null) {
       dispatch(createHashtag(JsonNewHashtag));
     }
     console.log("loi: ", error);

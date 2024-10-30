@@ -19,6 +19,8 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { db, auth } from "../firebase/FirebaseConfig";
 //redux
 import { getUser } from "../redux/slices/UserSlices";
+import { getAchievement } from "../redux/slices/AchievementSlice";
+import { getNickname } from "../redux/slices/NicknameSlice";
 import { useDispatch, useSelector } from "react-redux";
 //
 import {
@@ -41,7 +43,7 @@ function LoginScreen() {
         text: text,
         onPress: () => console.log('ok'),
         style: style,
-  
+
       },
     ]);
   }
@@ -159,13 +161,13 @@ function LoginScreen() {
       setErrorTextPass("");
       setisLoading(true);
       await signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           // Signed up
           navigation.navigate("IndexTab");
           setisLoading(false);
           const userL = userCredential.user;
           //console.log("Đăng nhập thành công", userL);
-          dispatch(getUser(userL.email));
+          await dispatch(getUser(userL.email));
         })
         .catch((error) => {
           setisLoading(false);

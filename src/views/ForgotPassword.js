@@ -40,7 +40,6 @@ function ForgotPassword() {
       // Gửi mã xác nhận qua EmailJS
       const code = Math.floor(100000 + Math.random() * 900000); // Tạo mã 6 chữ số ngẫu nhiên
       console.log("gui ma", code);
-      
       await sendVerificationCode(email, code); // Gửi mã xác nhận qua EmailJS
       navigation.navigate('VerificationCodeScreen', { email, code }); // Chuyển đến màn xác nhận
       setisLoading(false)
