@@ -45,7 +45,7 @@ function WellcomScreen() {
       scopes: ["profile", "email"],
       responseType: AuthSession.ResponseType.Token,
     };
-    console.log(authRequestConfig);
+    //console.log(authRequestConfig);
     // Tạo AuthRequest từ config
     const authRequest = new AuthSession.AuthRequest(authRequestConfig);
 

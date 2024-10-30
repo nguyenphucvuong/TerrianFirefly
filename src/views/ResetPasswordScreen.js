@@ -57,8 +57,6 @@ const ResetPasswordScreen = ({ navigation, route }) => {
       return;
     }
     try {
-      //   // Cập nhật mật khẩu trong Firebase Auth
-      //   await users.updatePassword(newPassword);
       await signInWithEmailAndPassword(auth, email, user[0].passWord); // Thay 'temporaryPassword' bằng mật khẩu tạm thời bạn thiết lập
 
       // Cập nhật mật khẩu mới trong Firebase Auth

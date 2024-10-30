@@ -69,21 +69,21 @@ function RegisterScreen() {
       scopes: ["profile", "email"],
       responseType: AuthSession.ResponseType.Token,
     };
-    console.log(authRequestConfig);
+    //console.log(authRequestConfig);
     // Tạo AuthRequest từ config
     const authRequest = new AuthSession.AuthRequest(authRequestConfig);
 
     try {
       // Bắt đầu yêu cầu xác thực với discovery
       const result = await authRequest.promptAsync(discovery);
-      console.log("réult", result.type);
+      //console.log("réult", result.type);
       if (result.type === "success") {
         // Kiểm tra sự tồn tại của access token trong phản hồi
         const { access_token } = result.params;
         if (access_token) {
           // Xử lý thành công\\
           setisLoadingGg(true);
-          console.log("Access Token:", access_token);
+          //console.log("Access Token:", access_token);
         } else {
           // Không có access token trong phản hồi
           setisLoadingGg(false);
@@ -109,19 +109,19 @@ function RegisterScreen() {
         numberPhone: "",
         email: email,
         roleid: 0,
-        imgUser: "",
+        imgUser: "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/avatar%2Favatar.jpg?alt=media&token=42cfc0ed-75cc-4feb-9a0f-19f6203643c5",
         gender: "",
         passWord: password,
         status_user_id: 0,
-        nickname: "",
+        nickname: "Dùng Mới",
         total_interact_id: 0,
-        backgroundUser: "",
+        backgroundUser: "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/background%2Fbackground4.jpg?alt=media&token=31c49a20-9146-46cc-8df6-496093d45194",
         frame_user: "",
       });
       await updateDoc(docRef, {
         user_id: docRef.id, // Lưu ID vào tài liệu
       });
-      console.log("Document written with ID: ", docRef.id);
+      //console.log("Document written with ID: ", docRef.id);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -181,7 +181,7 @@ function RegisterScreen() {
           addUser(name, email, password);
           navigation.navigate("LoginScreen");
           const user = userCredential.user;
-          console.log("log user", user);
+          //console.log("log user", user);
           // ...
         })
         .catch((error) => {

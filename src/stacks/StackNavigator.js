@@ -41,7 +41,7 @@ const IconHeaderRight = (text, onPress) => ({
 const StackNavigator = () => {
         const [isLogin, setIsLogin] = useState(false);
     return (
-        <Stack.Navigator initialRouteName='AccountSettingsScreen'>
+        <Stack.Navigator initialRouteName='WellcomScreen'>
             <Stack.Screen name='WellcomScreen' component={WellcomScreen} options={{ headerShown: false }} />
             <Stack.Screen name='LoginScreen' component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name='RegisterScreen' component={RegisterScreen} options={{ headerShown: false }} />
