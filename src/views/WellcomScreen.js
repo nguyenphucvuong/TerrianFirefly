@@ -1,6 +1,4 @@
-import {
-  React,
-  useState} from "react";
+import { React, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -12,18 +10,17 @@ import {
   Alert,
 } from "react-native";
 import { StyleGlobal } from "../styles/StyleGlobal";
-import ButtonFunctionComponent from '../component/ButtonFunctionComponent';
+import ButtonFunctionComponent from "../component/ButtonFunctionComponent";
 import { ButtonsComponent } from "../component";
 import * as AuthSession from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
+import { appInfo } from "../constains/appInfo";
 import { useNavigation } from "@react-navigation/native";
 WebBrowser.maybeCompleteAuthSession();
 function WellcomScreen() {
-
   //
   const [isLoadingGg, setisLoadingGg] = useState(false);
-  
 
   //hàm đăng nhập với google
   // Thông tin cấu hình Google
@@ -31,9 +28,9 @@ function WellcomScreen() {
     authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
     tokenEndpoint: "https://oauth2.googleapis.com/token",
   };
-  // Thiết lập thông tin client ID 
+  // Thiết lập thông tin client ID
   const clientId =
-    "713889504554-3m9k1n4jtohud708icu3cpkn1srdcder.apps.googleusercontent.com"; // OAuth Client ID 
+    "713889504554-3m9k1n4jtohud708icu3cpkn1srdcder.apps.googleusercontent.com"; // OAuth Client ID
 
   // Tạo một yêu cầu xác thực
   // Đảm bảo hàm authenticate được khai báo là async
@@ -75,10 +72,10 @@ function WellcomScreen() {
   const navigation = useNavigation();
   return (
     <ImageBackground
-      style={styles.imageBg}
       source={require("../../assets/app_bg.jpg")}
+      style={styles.imageBg}
     >
-      <View style={[StyleGlobal.container, { flex: 1 }]}>
+      <View style={[styles.container]}>
         <Image
           source={require("../../assets/app_icon.png")}
           style={styles.image}
@@ -89,11 +86,10 @@ function WellcomScreen() {
           Đăng Nhập/Tạo Tài Khoản
         </Text>
         <ButtonFunctionComponent
-          
           name={"Đăng Ký"}
           backgroundColor={"#0286FF"}
           colorText={"#fff"}
-          onPress={() => navigation.navigate('RegisterScreen')}
+          onPress={() => navigation.navigate("RegisterScreen")}
           style={[StyleGlobal.buttonLg, StyleGlobal.buttonTextLg]}
         />
         {/* Phần Ngăn Cách */}
@@ -116,7 +112,7 @@ function WellcomScreen() {
           <View style={{ flexDirection: "row" }}>
             <Text>Đã có tài khoản ?</Text>
             <TouchableOpacity
-            onPress={() => navigation.navigate('LoginScreen')}
+              onPress={() => navigation.navigate("LoginScreen")}
             >
               <Text style={{ color: "#0286FF" }}> Đăng Nhập</Text>
             </TouchableOpacity>
@@ -128,10 +124,14 @@ function WellcomScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: appInfo.widthWindows * 0.04,
+  },
   imageBg: {
-    resizeMode: "cover",
-    width: "100%",
-    height: "100%",
+    flex: 1,
+    resizeMode: "cover", // hoặc "contain" tùy theo yêu cầu
+    justifyContent: "center",
   },
   textWellcom: {
     fontSize: 20,
