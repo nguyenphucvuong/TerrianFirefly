@@ -2,17 +2,14 @@ import { StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image } from "expo-image";
 import {React, useEffect, useState} from "react";
-
 import { EventTab, NewPostTab, NotiTab, PersonTab } from "./";
 import { IndexRouter } from "../routers/indexRouter";
-
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
-
 import { auth } from '../firebase/FirebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-
+import EventScreen from "../views/EventScreen";
+import { ButtonsComponent } from "../component";
 const Tab = createBottomTabNavigator();
-
 const getRouteName = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route);
   if (routeName == "picture" || routeName == "DetailPost") {
@@ -67,7 +64,7 @@ const IndexTab = () => {
         })}
       />
       <Tab.Screen
-        name="Event"
+        name="Thông Tin"
         component={EventTab}
         options={({ route }) => ({
           tabBarIcon: ({ focused }) => (
@@ -80,6 +77,7 @@ const IndexTab = () => {
               style={{ width: 25, height: 25 }}
             />
           ),
+          headerShown: true,
         })}
       />
       <Tab.Screen
@@ -93,11 +91,11 @@ const IndexTab = () => {
             />
           ),
           tabBarStyle: { display: "none" },
-          headerShown: false, //Ẩn thanh tab
+          headerShown: false,
         }}
       />
       <Tab.Screen
-        name="Noti"
+        name="Thông tin"
         component={NotiTab}
         options={{
           tabBarIcon: ({ focused }) => (
@@ -110,6 +108,8 @@ const IndexTab = () => {
               style={{ width: 25, height: 25 }}
             />
           ),
+          headerShown: true,
+          gestureEnabled: false,
         }}
       />
       <Tab.Screen

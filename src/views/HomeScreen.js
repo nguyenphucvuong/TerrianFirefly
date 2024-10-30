@@ -1,4 +1,4 @@
-import { RefreshControl, ScrollView, Text, View, FlatList, ActivityIndicator } from "react-native";
+import { RefreshControl, ScrollView, Text, View, FlatList, ActivityIndicator, Image } from "react-native";
 import React, { useCallback, useContext, useState } from "react";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import { data } from "../constains/data";
@@ -83,6 +83,7 @@ const HomeScreen = () => {
                 flexDirection: 'column'
               }} >
                 <ActivityIndicator size="large" color='#0000ff' />
+                
               </View> : null
           )}
 

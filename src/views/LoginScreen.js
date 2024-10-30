@@ -271,7 +271,9 @@ function LoginScreen() {
         <View style={{ flexDirection: "row" }}>
           <Text>Chưa có tài khoản ?</Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate("RegisterScreen")}
+            // onPress={() => navigation.navigate("RegisterScreen")}
+            onPress={() => navigation.navigate("IndexTab")}
+
           >
             <Text style={{ color: "#0286FF" }}> Đăng Ký</Text>
           </TouchableOpacity>
