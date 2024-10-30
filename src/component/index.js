@@ -10,7 +10,6 @@ import ButtonFunctionComponent from "./ButtonFunctionComponent";
 import IconComponent from "./IconComponent";
 import SelectImageComponent from "./SelectImageComponent";
 import StatisticsComponent from "./StatisticsComponent";
-import UserAvatarComponent from "./UserAvatarComponent";
 import InputComponents from "./InputComponent";
 
 export {
@@ -25,6 +24,5 @@ export {
     IconComponent,
     SelectImageComponent,
     StatisticsComponent,
-    UserAvatarComponent,
     InputComponents,
 };

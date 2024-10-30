@@ -18,8 +18,10 @@ import {
   RegisterScreen,
   ForgotPassword,
   VerificationCodeScreen,
+  FollowerScreen,
+  ResetPasswordScreen,
+  AccountSettingsScreen,
 } from "../views";
-import IndexTab from "../tabs/indexTab";
 
 import EventScreen from "../views/EventScreen";
 //components
@@ -75,6 +77,16 @@ const StackNavigator = () => {
       <Stack.Screen
         name="VerificationCodeScreen"
         component={VerificationCodeScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AccountSettingsScreen"
+        component={AccountSettingsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ResetPasswordScreen"
+        component={ResetPasswordScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -144,6 +156,11 @@ const StackNavigator = () => {
         name="SetUpAccountScreen"
         component={SetUpAccountScreen}
         options={() => IconBack("Thiết Lập Tài Khoản")}
+      />
+      <Stack.Screen
+        name="FollowerScreen"
+        component={FollowerScreen}
+        options={() => IconBack("Người Theo Dõi")}
       />
       <Stack.Screen
         name="NotiTabScreen"

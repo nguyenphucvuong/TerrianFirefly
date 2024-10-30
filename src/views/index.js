@@ -23,7 +23,11 @@ import RegisterScreen from "./RegisterScreen";
 import ForgotPassword from "./ForgotPassword";
 import CreatePostScreen from "./CreatePostScreen";
 import VerificationCodeScreen from "./VerificationCodeScreen";
+import ResetPasswordScreen from "./ResetPasswordScreen";
+import AccountSettingsScreen from "./AccountSettingsScreen";
 import EventScreen from "./EventScreen";
+
+import FollowerScreen from "./FollowerScreen";
 export {
   HomeScreen,
   FollowScreen,
@@ -50,5 +54,8 @@ export {
   ForgotPassword,
   VerificationCodeScreen,
   CreatePostScreen,
+  FollowerScreen,
+  ResetPasswordScreen,
   EventScreen,
+  AccountSettingsScreen,
 };

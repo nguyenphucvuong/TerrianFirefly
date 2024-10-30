@@ -1,6 +1,13 @@
 // Import the functions you need from the SDKs you need
 
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, getReactNativePersistence } from "firebase/auth";
+import { getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword , 
+  GoogleAuthProvider, 
+  getReactNativePersistence, 
+  sendPasswordResetEmail,
+  initializeAuth
+} from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { firestore } from "firebase/firestore";
@@ -12,6 +19,7 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
+
   apiKey: "AIzaSyA-eHeNn8X3V3__td26bDztXuvTKv5uqLM",
 
   authDomain: "terrianfirefly.firebaseapp.com",
@@ -23,8 +31,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
+// Khởi tạo Firebase Auth với AsyncStorage để duy trì trạng thái xác thực
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
 export const provider = new GoogleAuthProvider();
 //export const analytics = getAnalytics(app);

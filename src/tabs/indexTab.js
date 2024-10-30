@@ -1,10 +1,15 @@
 import { StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image } from "expo-image";
-import React from "react";
+import {React, useEffect, useState} from "react";
 
 import { EventTab, NewPostTab, NotiTab, PersonTab } from "./";
 import { IndexRouter } from "../routers/indexRouter";
+
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
+
+import { auth } from '../firebase/FirebaseConfig';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 import EventScreen from "../views/EventScreen";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
@@ -19,9 +24,18 @@ const getRouteName = (route) => {
   return "flex";
 };
 
-
-
 const IndexTab = () => {
+  const [user, setUser] = useState("");
+  useEffect(() => {
+    // Kiểm tra trạng thái xác thực của người dùng
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    // Hủy đăng ký lắng nghe khi thành phần bị hủy
+    return () => unsubscribe();
+  }, []);
+  
+  
   return (
     <Tab.Navigator
       initialRouteName="Home"
