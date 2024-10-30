@@ -13,11 +13,8 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
     const Data = post.imgPost;
     const navigation = useNavigation();
 
-<<<<<<< HEAD
-=======
 
     // const [Data] = [imagesInfo.Data];
->>>>>>> ba3ddd68d426fcb4a03c1aba2de45ae45eb39092
     const [imageWidth, setImageWidth] = useState(0);
     const [imageHeight, setImageHeight] = useState(0);
 
@@ -99,10 +96,6 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                         style={{
                             width: "49%",
                             height: "100%",
-<<<<<<< HEAD
-                            
-                        }} />
-=======
                         }}>
                         <Image
                             source={{ uri: Data[1] }}
@@ -112,7 +105,6 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                             }} />
                     </TouchableOpacity>
 
->>>>>>> ba3ddd68d426fcb4a03c1aba2de45ae45eb39092
                 </RowComponent>
             );
         }

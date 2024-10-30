@@ -14,8 +14,6 @@ import {
 import { db } from "../../firebase/FirebaseConfig"; // Firebase config
 import { storage } from "../../firebase/FirebaseConfig"; // Firebase config
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
 const initialState = {
