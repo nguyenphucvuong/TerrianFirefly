@@ -121,14 +121,14 @@ const CreatePostScreen = () => {
     if (isEnabled) {
       body = extractYouTubeVideoID(body);
     }
-
+    const id_user = user ? user.user_id : null;
     const newDataPost = {
       status_post_id: 0,
       count_emoji: 0,
       count_comment: 0,
       count_view: 0,
       post_id: "temp",
-      user_id: user.user_id,
+      user_id: id_user,
       title: textTitle,
       body: body,
       hashtag: selectedHashTag,
@@ -154,9 +154,6 @@ const CreatePostScreen = () => {
     // Thêm bài viết mới vào Firestore
     await dispatch(createPost(newDataPost)).unwrap();
     console.log("Thêm bài viết thành công");
-
-    await dispatch(getPosts()).unwrap();
-    console.log("Cập nhật danh sách bài viết thành công");
 
     Dialog.show({
       type: ALERT_TYPE.SUCCESS,
@@ -440,6 +437,19 @@ const CreatePostScreen = () => {
           value={textPost}
           editable={!isEnabled}
           onFocus={handleFocus} // Gọi hàm khi người dùng nhấn vào TextInput
+          onPressIn={() => {
+            if (isEnabled) {
+              // Hiện thông báo cảnh báo nếu switch đang bật
+              Dialog.show({
+                type: ALERT_TYPE.WARNING,
+                title: "Cảnh báo",
+                textBody: "Bạn không thể nhập dữ liệu khi switch đang bật",
+                button: "Đóng",
+              });
+              // Ẩn bàn phím nếu nó đang mở
+              Keyboard.dismiss();
+            }
+          }}
         />
 
         {/* Hiển thị số lượng chủ đề đã chọn */}
@@ -510,6 +520,9 @@ const CreatePostScreen = () => {
                   placeholder="Nhập tên chủ đề"
                   onChangeText={onChangetextHashTag}
                   value={textHashTag}
+                  onSubmitEditing={() => {
+                    Keyboard.dismiss();
+                  }}
                 />
                 {/*text hiển thị số lượng chủ đề chọn */}
                 <Text style={styles.titleHashTag}>
