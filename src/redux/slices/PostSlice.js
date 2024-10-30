@@ -19,7 +19,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 const initialState = {
   post: [],
   lastVisiblePost: null,
-  status: 'idle',
+  status: "idle",
   error: null,
   postByField: [],
 };
@@ -37,8 +37,8 @@ export const createPost = createAsyncThunk(
       // Tải lên từng ảnh trong imgPost
       for (const img of newData.imgPost) {
         const response = await fetch(img);
-        const blob = await response.blob(); // Chuyển đổi URL thành blob
-
+        const blob = await response.blob(); // Chuyển đổi URL thành dạng nhị phân
+        console.log("so nhi phan", blob);
         const imgRef = ref(storage, `images/${img.split("/").pop()}`); // Đặt tên cho ảnh
         await uploadBytes(imgRef, blob); // Tải lên ảnh
 
@@ -52,13 +52,13 @@ export const createPost = createAsyncThunk(
       const docSnap = await getDoc(docRef);
 
       await updateDoc(docRef, {
-        id: docRef.id,
+        post_id: docRef.id,
         imgPost: imgUrls, // Lưu ID vào tài liệu
       });
 
       if (docSnap.exists()) {
         // Trả về dữ liệu của tài liệu vừa thêm
-        return { id: docSnap.id, ...docSnap.data() };
+        return { post_id: docSnap.id, ...docSnap.data() };
       } else {
         throw new Error("No such document!");
       }
@@ -72,7 +72,7 @@ export const createPost = createAsyncThunk(
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getPosts = createAsyncThunk("data/getPosts", async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "Posts"),);
+    const querySnapshot = await getDocs(collection(db, "Posts"));
     querySnapshot.forEach((doc) => {
       // console.log(`post: ${doc.id} => `, doc.data());
     });
@@ -90,78 +90,86 @@ export const getPosts = createAsyncThunk("data/getPosts", async () => {
   }
 });
 
-export const getPostsRefresh = createAsyncThunk('data/getPostsRefresh', async () => {
-  try {
-    let postsQuery = query(
-      collection(db, "Posts"),
-      orderBy("created_at", "desc"),
-      limit(3)
-    );
+export const getPostsRefresh = createAsyncThunk(
+  "data/getPostsRefresh",
+  async () => {
+    try {
+      let postsQuery = query(
+        collection(db, "Posts"),
+        orderBy("created_at", "desc"),
+        limit(3)
+      );
 
-    const querySnapshot = await getDocs(postsQuery);
+      const querySnapshot = await getDocs(postsQuery);
 
-    if (querySnapshot.empty) {
-      return { posts: [], lastVisiblePost: null };
+      if (querySnapshot.empty) {
+        return { posts: [], lastVisiblePost: null };
+      }
+
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      return {
+        postData: postData,
+        lastVisiblePost: lastVisible ? lastVisible.id : null,
+      };
+    } catch (error) {
+      console.error("Error fetching posts: ", error);
+      throw error;
     }
-
-    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return {
-      postData: postData,
-      lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
-    }; // Return only the document ID for `lastVisiblePost`
-  } catch (error) {
-    console.error('Error fetching posts: ', error);
-    throw error;
   }
-});
+);
 
-export const getPostsByField = createAsyncThunk('data/getPostsByField', async ({ field, quantity }, { getState }) => {
+export const getPostsByField = createAsyncThunk(
+  "data/getPostsByField",
+  async ({ field, quantity }, { getState }) => {
+    try {
+      const lastVisiblePostId = getState().post.lastVisiblePost;
+      let lastVisibleDoc = null;
+      if (lastVisiblePostId) {
+        const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
+        lastVisibleDoc = await getDoc(lastVisibleDocRef);
+      }
 
-  try {
-    const lastVisiblePostId = getState().post.lastVisiblePost;
-    let lastVisibleDoc = null;
-    if (lastVisiblePostId) {
-      const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
-      lastVisibleDoc = await getDoc(lastVisibleDocRef);
-    }
-
-    let postsQuery = query(
-      collection(db, "Posts"),
-      orderBy(field, "desc"),
-      limit(quantity)
-    );
-
-    if (lastVisibleDoc) {
-      postsQuery = query(
+      let postsQuery = query(
         collection(db, "Posts"),
         orderBy(field, "desc"),
-        startAfter(lastVisibleDoc),
         limit(quantity)
       );
+
+      if (lastVisibleDoc) {
+        postsQuery = query(
+          collection(db, "Posts"),
+          orderBy(field, "desc"),
+          startAfter(lastVisibleDoc),
+          limit(quantity)
+        );
+      }
+
+      const querySnapshot = await getDocs(postsQuery);
+
+      if (querySnapshot.empty) {
+        return { postData: [], lastVisiblePost: null };
+      }
+
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return {
+        postData: postData,
+        lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
+      }; // Return only the document ID for `lastVisiblePost`
+    } catch (error) {
+      console.error("Error fetching posts: ", error);
+      throw error;
     }
-
-    const querySnapshot = await getDocs(postsQuery);
-
-    if (querySnapshot.empty) {
-      return { postData: [], lastVisiblePost: null };
-    }
-
-    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    return {
-      postData: postData,
-      lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
-
-    }; // Return only the document ID for `lastVisiblePost`
-  } catch (error) {
-    console.error('Error fetching posts: ', error);
-    throw error;
   }
-});
-
-
+);
 
 // Tạo slice cho Post
 export const PostSlice = createSlice({
@@ -182,11 +190,11 @@ export const PostSlice = createSlice({
         state.status = "succeeded"; // Đánh dấu thành công
       })
       .addCase(getPosts.pending, (state) => {
-        state.status = 'loading'; // Đánh dấu trạng thái đang tải
+        state.status = "loading"; // Đánh dấu trạng thái đang tải
       })
       .addCase(getPosts.rejected, (state, action) => {
         state.error = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
-        state.status = 'failed'; // Đánh dấu thất bại
+        state.status = "failed"; // Đánh dấu thất bại
       })
 
       // getPostsByField
@@ -219,7 +227,7 @@ export const PostSlice = createSlice({
       .addCase(getPostsRefresh.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
-      })
+      });
   },
 });
 

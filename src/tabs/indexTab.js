@@ -56,7 +56,7 @@ const IndexTab = () => {
         })}
       />
       <Tab.Screen
-        name="Event"
+        name="Thông Tin"
         component={EventTab}
         options={({ route }) => ({
           tabBarIcon: ({ focused }) => (

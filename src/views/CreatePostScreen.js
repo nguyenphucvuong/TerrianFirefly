@@ -160,6 +160,12 @@ const CreatePostScreen = () => {
     await dispatch(getPosts()).unwrap();
     console.log("Cập nhật danh sách bài viết thành công");
 
+    Dialog.show({
+      type: ALERT_TYPE.SUCCESS,
+      title: "Thông báo",
+      textBody: "Thêm bài viết thành công",
+      button: "Đóng",
+    });
     resetData();
   };
 

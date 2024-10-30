@@ -8,7 +8,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/background/background1.jpg",
+      "image": "https://dashboard.dienthoaivui.com.vn/uploads/wp-content/uploads/2023/04/19.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

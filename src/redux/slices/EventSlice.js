@@ -18,6 +18,7 @@ const initialState = {
   statusEvent: "idle",
   errorEvent: null,
   eventByField: [],
+  detaiEvent: null,
 };
 
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore

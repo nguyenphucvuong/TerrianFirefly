@@ -22,35 +22,12 @@ import { getEvent } from "../redux/slices/EventSlice";
 const DetailEventScreen = () => {
   const dispatch = useDispatch();
   const { event } = useSelector((state) => state.event); // post
-  console.log("abcbcb: ", event);
 
-  useEffect(() => {
-  dispatch(getEvent);
-  }, [dispatch]);
-
-  const events = [
-    {
-      id: 1,
-      title: "Kết Quả Xếp Hạng Danh Vọng Bộ Tộc Cá Nhân Đã Ra Lò!",
-      date: "04/10",
-      imageUrl:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQq9-2pE3lt_uWaTzC_NLBPpQo7YsBTpbu5A&s",
-    },
-    {
-      id: 2,
-      title: "Sự Kiện Diễn Đàn Kỷ Niệm 4 Năm Genshin Impact Đã Mở",
-      date: "28/09",
-      imageUrl:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQq9-2pE3lt_uWaTzC_NLBPpQo7YsBTpbu5A&s",
-    },
-
-    // Thêm các sự kiện khác
-  ];
 
   return (
     <TouchableWithoutFeedback style={{ flex: 1 }}>
       <View style={styles.container}>
-        <ListEventComponent events={event}></ListEventComponent>
+       <Text style={{margin:200}} >chi tiết sự kiện</Text>  
       </View>
     </TouchableWithoutFeedback>
   );
