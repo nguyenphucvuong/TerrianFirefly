@@ -26,15 +26,14 @@ function WellcomScreen() {
   
 
   //hàm đăng nhập với google
-  //const [user, setUser] = useState(null);
   // Thông tin cấu hình Google
   const discovery = {
     authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
     tokenEndpoint: "https://oauth2.googleapis.com/token",
   };
-  // Thiết lập thông tin client ID của bạn
+  // Thiết lập thông tin client ID 
   const clientId =
-    "713889504554-3m9k1n4jtohud708icu3cpkn1srdcder.apps.googleusercontent.com"; // Thay bằng OAuth Client ID của bạn
+    "713889504554-3m9k1n4jtohud708icu3cpkn1srdcder.apps.googleusercontent.com"; // OAuth Client ID 
 
   // Tạo một yêu cầu xác thực
   // Đảm bảo hàm authenticate được khai báo là async
@@ -53,14 +52,12 @@ function WellcomScreen() {
     try {
       // Bắt đầu yêu cầu xác thực với discovery
       const result = await authRequest.promptAsync(discovery);
-      console.log("réult", result.type);
       if (result.type === "success") {
         // Kiểm tra sự tồn tại của access token trong phản hồi
         const { access_token } = result.params;
         if (access_token) {
           // Xử lý thành công\\
           setisLoadingGg(true);
-          console.log("Access Token:", access_token);
         } else {
           // Không có access token trong phản hồi
           setisLoadingGg(false);
@@ -75,15 +72,11 @@ function WellcomScreen() {
       console.error("Error during authentication:", error);
     }
   }
-
-
   const navigation = useNavigation();
   return (
     <ImageBackground
       style={styles.imageBg}
-      source={{
-        uri: "https://www.vietnamworks.com/hrinsider/wp-content/uploads/2023/12/hinh-nen-dien-thoai-13.jpg",
-      }}
+      source={require("../../assets/app_bg.jpg")}
     >
       <View style={[StyleGlobal.container, { flex: 1 }]}>
         <Image

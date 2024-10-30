@@ -2,7 +2,19 @@ import React, { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 //Screens
 
-import { BackgroundScreen, InfomationScreen, AchievementsScreen, NickNameScreen, WellcomScreen, LoginScreen, RegisterScreen, ForgotPassword, VerificationCodeScreen} from '../views';
+import { 
+    BackgroundScreen, 
+    InfomationScreen, 
+    AchievementsScreen, 
+    NickNameScreen, 
+    WellcomScreen, 
+    LoginScreen, 
+    RegisterScreen, 
+    ForgotPassword, 
+    VerificationCodeScreen, 
+    ResetPasswordScreen,
+    AccountSettingsScreen,
+} from '../views';
 
 import IndexTab from '../tabs/indexTab';
 //components
@@ -29,12 +41,14 @@ const IconHeaderRight = (text, onPress) => ({
 const StackNavigator = () => {
         const [isLogin, setIsLogin] = useState(false);
     return (
-        <Stack.Navigator initialRouteName='WellcomScreen'>
+        <Stack.Navigator initialRouteName='AccountSettingsScreen'>
             <Stack.Screen name='WellcomScreen' component={WellcomScreen} options={{ headerShown: false }} />
             <Stack.Screen name='LoginScreen' component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name='RegisterScreen' component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{ headerShown: false }} />
             <Stack.Screen name='VerificationCodeScreen' component={VerificationCodeScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='AccountSettingsScreen' component={AccountSettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='ResetPasswordScreen' component={ResetPasswordScreen} options={{ headerShown: false }} />
             <Stack.Screen name='IndexTab' component={IndexTab} options={{ headerShown: false }} />
             <Stack.Screen name='BackgroundScreen' component={BackgroundScreen} options={{ headerShown: false }} />
             <Stack.Screen name='InfomationScreen' component={InfomationScreen}

@@ -13,6 +13,8 @@ import RegisterScreen from './RegisterScreen';
 import ForgotPassword from './ForgotPassword';
 import CreatePostScreen from './CreatePostScreen';
 import VerificationCodeScreen from './VerificationCodeScreen';
+import ResetPasswordScreen from './ResetPasswordScreen'
+import AccountSettingsScreen from './AccountSettingsScreen';
 export { 
     HomeScreen,
     FollowScreen, 
@@ -29,5 +31,8 @@ export {
     ForgotPassword, 
     VerificationCodeScreen,
     CreatePostScreen,
+    ResetPasswordScreen,
+    AccountSettingsScreen,
+    
     }; 
 

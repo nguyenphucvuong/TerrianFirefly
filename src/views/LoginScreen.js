@@ -7,6 +7,8 @@ import {
   Button,
   TouchableOpacity,
   Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -67,7 +69,6 @@ function LoginScreen() {
   const [isLoading, setisLoading] = useState(false);
   const [isLoadingGg, setisLoadingGg] = useState(false);
   React.useEffect(() => {
-    setCheckPass(false);
     console.log("response");
     if (response?.type === "success") {
       const { authentication } = response;
@@ -200,7 +201,7 @@ function LoginScreen() {
           navigation.navigate("IndexTab");
           setisLoading(false);
           const userL = userCredential.user;
-          console.log("Đăng nhập thành công", userL);
+          //console.log("Đăng nhập thành công", userL);
           dispatch(getUser(userL.email));
         })
         .catch((error) => {
@@ -209,12 +210,13 @@ function LoginScreen() {
           if (errorMessage == "Firebase: Error (auth/invalid-credential).") {
             setErrorTextPass("Email hoặc mật khẩu không chính xác");
           }
-          console.log("handleLogin", errorMessage);
+          //console.log("handleLogin", errorMessage);
         });
     }
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View style={[StyleGlobal.container, { flex: 1 }]}>
       <Text style={styles.textNameApp}>Terrian Firefly</Text>
       <Text style={styles.textRegister}>Đăng Nhập</Text>
@@ -311,6 +313,7 @@ function LoginScreen() {
         </View>
       </View>
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 

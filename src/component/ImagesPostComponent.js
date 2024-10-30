@@ -13,7 +13,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
     const Data = post.imgPost;
     const navigation = useNavigation();
 
-    // console.log(imagesInfo.Data)
+     console.log("anh cua bo may day: ",Data[0])
 
     // const [Data] = [imagesInfo.Data];
     const [imageWidth, setImageWidth] = useState(0);

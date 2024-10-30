@@ -6,18 +6,21 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import Icon from "react-native-vector-icons/FontAwesome";
 import ButtonFunctionComponent from "../component/ButtonFunctionComponent";
 import { db, auth } from "../firebase/FirebaseConfig";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, updateDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { appInfo } from "../constains/appInfo";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import * as AuthSession from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -101,11 +104,12 @@ function RegisterScreen() {
   const addUser = async (userName, email, password) => {
     try {
       const docRef = await addDoc(collection(db, "user"), {
+        user_id: "temp",
         username: userName,
         numberPhone: "",
         email: email,
         roleid: 0,
-        imimgUser: "",
+        imgUser: "",
         gender: "",
         passWord: password,
         status_user_id: 0,
@@ -113,6 +117,9 @@ function RegisterScreen() {
         total_interact_id: 0,
         backgroundUser: "",
         frame_user: "",
+      });
+      await updateDoc(docRef, {
+        user_id: docRef.id, // Lưu ID vào tài liệu
       });
       console.log("Document written with ID: ", docRef.id);
     } catch (e) {
@@ -205,110 +212,116 @@ function RegisterScreen() {
     }
   };
   return (
-    <View style={[StyleGlobal.container, { flex: 1 }]}>
-      <Text style={styles.textNameApp}>Terrian Firefly</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={[StyleGlobal.container, { flex: 1 }]}>
+        <KeyboardAwareScrollView>
+          <Text style={styles.textNameApp}>Terrian Firefly</Text>
 
-      <Text style={styles.textRegister}>Đăng Ký</Text>
-      <View style={styles.viewInput}>
-        <Text style={{ marginBottom: "3%" }}>Tên Người Dùng</Text>
-        <View style={styles.input}>
-          <Icon name="user" size={25} color="#858585" />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Nhập tên người dùng"
-            onChangeText={onChangeTextName}
-            value={name}
-          />
-        </View>
-        {errorTextName ? (
-          <Text style={{ color: "red" }}>{errorTextName}</Text>
-        ) : null}
-      </View>
-
-      <View style={styles.viewInput}>
-        <Text style={{ marginBottom: "3%" }}>Email</Text>
-        <View style={styles.input}>
-          <Icon name="envelope" size={25} color="#858585" />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Nhập email"
-            onChangeText={onChangeTextEmail}
-            value={email}
-            type="email"
-            autoCapitalize="none"
-          />
-        </View>
-        {errorTextEmail ? (
-          <Text style={{ color: "red" }}>{errorTextEmail}</Text>
-        ) : null}
-      </View>
-      <View style={[styles.viewInput, { marginBottom: "18%" }]}>
-        <Text style={{ marginBottom: "3%" }}>Password</Text>
-        <View style={styles.input}>
-          <Icon name="lock" size={25} color="#858585" />
-          <TextInput
-            secureTextEntry={checkPass}
-            style={styles.textInput}
-            placeholder="Mật Khẩu"
-            autoCapitalize="none"
-            onChangeText={onChangeTextPass}
-            value={password}
-          />
-          <TouchableOpacity onPress={() => setCheckPass(!checkPass)}>
-            {checkPass ? (
-              <Icon
-                name="eye-slash"
-                size={20}
-                color="#858585"
-                style={{ marginLeft: appInfo.widthWindows * 0.19 }}
+          <Text style={styles.textRegister}>Đăng Ký</Text>
+          <View style={styles.viewInput}>
+            <Text style={{ marginBottom: "3%" }}>Tên Người Dùng</Text>
+            <View style={styles.input}>
+              <Icon name="user" size={25} color="#858585" />
+              <TextInput
+                style={styles.textInput}
+                placeholder="Nhập tên người dùng"
+                onChangeText={onChangeTextName}
+                value={name}
               />
-            ) : (
-              <Icon
-                name="eye"
-                size={20}
-                color="#858585"
-                style={{ marginLeft: appInfo.widthWindows * 0.19 }}
-              />
-            )}
-          </TouchableOpacity>
-        </View>
-        {errorTextPass ? (
-          <Text style={{ color: "red" }}>{errorTextPass}</Text>
-        ) : null}
-      </View>
-      <ButtonFunctionComponent
-        name={"Đăng Ký"}
-        backgroundColor={"#0286FF"}
-        colorText={"#fff"}
-        onPress={handleSinginWithEmail}
-        style={[StyleGlobal.buttonLg, StyleGlobal.buttonTextLg]}
-      />
-      {/* Phần Ngăn Cách */}
-      <View style={[styles.separatorContainer]}>
-        <View style={styles.separator} />
-        <Text style={styles.separatorText}>Hoặc</Text>
-        <View style={styles.separator} />
-      </View>
-      <ButtonFunctionComponent
-        check={true}
-        isLoading={isLoadingGg}
-        name={" Đăng Nhập với Google"}
-        backgroundColor={"#fff"}
-        colorText={"#000"}
-        url={require("../../assets/google-icon.png")}
-        onPress={authenticate}
-        style={[StyleGlobal.buttonLg, StyleGlobal.buttonTextLg]}
-      />
+            </View>
+            {errorTextName ? (
+              <Text style={{ color: "red" }}>{errorTextName}</Text>
+            ) : null}
+          </View>
 
-      <View style={styles.link}>
-        <View style={{ flexDirection: "row" }}>
-          <Text>Đã có tài khoản ?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("LoginScreen")}>
-            <Text style={{ color: "#0286FF" }}> Đăng Nhập</Text>
-          </TouchableOpacity>
-        </View>
+          <View style={styles.viewInput}>
+            <Text style={{ marginBottom: "3%" }}>Email</Text>
+            <View style={styles.input}>
+              <Icon name="envelope" size={25} color="#858585" />
+              <TextInput
+                style={styles.textInput}
+                placeholder="Nhập email"
+                onChangeText={onChangeTextEmail}
+                value={email}
+                type="email"
+                autoCapitalize="none"
+              />
+            </View>
+            {errorTextEmail ? (
+              <Text style={{ color: "red" }}>{errorTextEmail}</Text>
+            ) : null}
+          </View>
+          <View style={[styles.viewInput, { marginBottom: "18%" }]}>
+            <Text style={{ marginBottom: "3%" }}>Password</Text>
+            <View style={styles.input}>
+              <Icon name="lock" size={25} color="#858585" />
+              <TextInput
+                secureTextEntry={checkPass}
+                style={styles.textInput}
+                placeholder="Mật Khẩu"
+                autoCapitalize="none"
+                onChangeText={onChangeTextPass}
+                value={password}
+              />
+              <TouchableOpacity onPress={() => setCheckPass(!checkPass)}>
+                {checkPass ? (
+                  <Icon
+                    name="eye-slash"
+                    size={20}
+                    color="#858585"
+                    style={{ marginLeft: appInfo.widthWindows * 0.19 }}
+                  />
+                ) : (
+                  <Icon
+                    name="eye"
+                    size={20}
+                    color="#858585"
+                    style={{ marginLeft: appInfo.widthWindows * 0.19 }}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+            {errorTextPass ? (
+              <Text style={{ color: "red" }}>{errorTextPass}</Text>
+            ) : null}
+          </View>
+          <ButtonFunctionComponent
+            name={"Đăng Ký"}
+            backgroundColor={"#0286FF"}
+            colorText={"#fff"}
+            onPress={handleSinginWithEmail}
+            style={[StyleGlobal.buttonLg, StyleGlobal.buttonTextLg]}
+          />
+          {/* Phần Ngăn Cách */}
+          <View style={[styles.separatorContainer]}>
+            <View style={styles.separator} />
+            <Text style={styles.separatorText}>Hoặc</Text>
+            <View style={styles.separator} />
+          </View>
+          <ButtonFunctionComponent
+            check={true}
+            isLoading={isLoadingGg}
+            name={" Đăng Nhập với Google"}
+            backgroundColor={"#fff"}
+            colorText={"#000"}
+            url={require("../../assets/google-icon.png")}
+            onPress={authenticate}
+            style={[StyleGlobal.buttonLg, StyleGlobal.buttonTextLg]}
+          />
+
+          <View style={styles.link}>
+            <View style={{ flexDirection: "row" }}>
+              <Text>Đã có tài khoản ?</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("LoginScreen")}
+              >
+                <Text style={{ color: "#0286FF" }}> Đăng Nhập</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAwareScrollView>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 const styles = StyleSheet.create({
