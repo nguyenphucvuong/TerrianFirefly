@@ -163,11 +163,12 @@ function LoginScreen() {
       await signInWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
           // Signed up
+          await dispatch(getUser(email));
           navigation.navigate("IndexTab");
           setisLoading(false);
           const userL = userCredential.user;
           //console.log("Đăng nhập thành công", userL);
-          await dispatch(getUser(userL.email));
+          
 
         })
         .catch((error) => {
