@@ -1,5 +1,5 @@
 
-import { View, StatusBar, Text, TouchableOpacity, Alert, Platform, PermissionsAndroid } from 'react-native'
+import { View, StatusBar, Text, TouchableOpacity, Alert, Platform, PermissionsAndroid, ToastAndroid } from 'react-native'
 import React, { useState } from 'react'
 import { Image } from 'expo-image'
 
@@ -55,9 +55,17 @@ const PictureScreen = ({ }) => {
             if (download.status === 200) {
                 const asset = await MediaLibrary.createAssetAsync(download.uri);
                 await MediaLibrary.createAlbumAsync('Download', asset, false);
-                Alert.alert('Thành công', 'Hình ảnh đã được lưu thành công!');
+                if (Platform.OS === 'android') {
+                    ToastAndroid.show('Đã lưu!', ToastAndroid.SHORT);
+                } else {
+                    alert('Đã lưu');
+                }
             } else {
-                Alert.alert('Lỗi', 'Không thể lưu hình ảnh.');
+                if (Platform.OS === 'android') {
+                    ToastAndroid.show('Lỗi! Không thể lưu hình ảnh.', ToastAndroid.SHORT);
+                } else {
+                    alert('Lỗi', 'Không thể lưu hình ảnh.');
+                }
             }
         } catch (error) {
             console.log('Lỗi lưu hình ảnh:', error);
@@ -118,6 +126,7 @@ const PictureScreen = ({ }) => {
                 enableSwipeDown={true}
                 onSwipeDown={() => navigation.goBack()}
                 onClick={() => handleTouchOnImage()}
+                onLongPress={() => setIsVisible(false)}
                 menuContext={{ saveToLocal: 'Lưu hình', cancel: 'Hủy' }}
                 onSave={(url) => handleSaveImage(url)}
             />
@@ -145,7 +154,7 @@ const PictureScreen = ({ }) => {
                     </View>
                     <View style={{ width: "20%", height: "100%", alignItems: 'center' }}>
                         <ButtonsComponent isButton style={{ alignItems: "center", marginBottom: "10%" }}>
-                            <AvatarEx size={50} round={30} url={User.imgUser} style={{ marginRight: "3%" }} />
+                            <AvatarEx size={50} round={30} url={User.imgUser} frame={User.frame_user} style={{ marginRight: "3%" }} />
                             {/* <Image source={{ uri: User.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
                                 style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} /> */}
                         </ButtonsComponent>

@@ -57,7 +57,7 @@ const DetailPostScreen = () => {
     const fetchCopiedText = async (content) => {
         copyToClipboard(content);
         const text = await Clipboard.getStringAsync();
-        setCopiedText(text);
+        // setCopiedText(text);
         console.log(text)
         if (Platform.OS === 'android') {
             ToastAndroid.show('Đã sao chép!', ToastAndroid.SHORT);
@@ -116,7 +116,7 @@ const DetailPostScreen = () => {
                                 alignItems: "center",
                                 width: "65%",
                             }}>
-                            <AvatarEx size={30} round={10} url={user.imgUser} />
+                            <AvatarEx size={30} round={10} url={user.imgUser} frame={user.frame_user} />
                             <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{user.username}</Text>
                         </TouchableOpacity>
 
@@ -203,7 +203,7 @@ const DetailPostScreen = () => {
                             alignItems: "center",
                             flexDirection: "row",
                         }}>
-                        <AvatarComponent size={50} round={10} url={user.imgUser}
+                        <AvatarEx size={50} round={10} url={userPost.imgUser} frame={userPost.frame_user}
                             style={{
                                 marginHorizontal: "3%",
                             }} />
@@ -217,7 +217,7 @@ const DetailPostScreen = () => {
                             <Text style={{
                                 fontSize: 15,
                                 fontWeight: "bold",
-                            }}>{user.username}</Text>
+                            }}>{userPost.username}</Text>
                             <Text style={{
                                 fontSize: 12,
                                 color: "#BFBFBF",
@@ -331,7 +331,7 @@ const DetailPostScreen = () => {
                         height={appInfo.widthWindows / 5.7}
                         style={{ alignItems: "center" }}
                     >
-                        <AvatarEx size={30} round={30} url={user.imgUser} />
+                        <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
                         <View
                             style={{
                                 height: "80%",

@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserByField } from "../redux/slices/UserSlices";
+import { createFollow } from "../redux/slices/FollowerSlice";
 
 
 import { appInfo } from "../constains/appInfo";
@@ -22,6 +23,8 @@ import RowComponent from "../component/RowComponent";
 import AnimatedQuickCmtComponent from "./commentBox/AnimatedQuickCmtComponent";
 import MoreOptionPostComponent from "./moreOptionBox/MoreOptionPostComponent";
 import YoutubePlayerComponent from "./YoutubePlayerComponent";
+import { TouchableOpacity } from "react-native";
+import { op } from "@tensorflow/tfjs";
 
 
 
@@ -33,6 +36,9 @@ const PostViewComponent = ({ post, emoji, user }) => {
     const dispatch = useDispatch();
     const userId = post.user_id; // Lấy user_id từ post
     const [userPost, setUserPost] = useState(null);
+    const [isFollow, setIsFollow] = useState(false);
+    const follower = useSelector((state) => state.follower.follower);
+
 
 
     useEffect(() => {
@@ -40,9 +46,19 @@ const PostViewComponent = ({ post, emoji, user }) => {
             const userResponse = await dispatch(getUserByField({ user_id: userId }));
             const userData = userResponse.payload;
             setUserPost(userData);
+
+            if (user.user_id == userId) {
+                setIsFollow(true);
+            }
+            follower.map((item) => {
+                if (item.follower_user_id == user.user_id) {
+
+                    setIsFollow(true);
+                }
+            });
         }
         handleGetUserPost();
-    }, [dispatch, userId]);
+    }, [dispatch, userId, follower]);
     const navigation = useNavigation();
 
     const title = post?.title.substring(0, 120);
@@ -52,28 +68,18 @@ const PostViewComponent = ({ post, emoji, user }) => {
         console.log("toi day");
     };
 
+    const handleFollowButton = () => {
+        const handleFollowUser = async () => {
+            await dispatch(createFollow({ follower_user_id: userId, user_id: user.user_id }));
+            setIsFollow(true)
+        }
+        handleFollowUser();
+    };
+
 
     const handleNagigateDetailPost = () => {
         navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, emoji: emoji });
     }
-
-    // const handleTime = () => {
-    //     const now = Date.now(); // Current time in milliseconds
-    //     const secondsAgo = Math.floor((now - post.created_at) / 1000); // Difference in seconds
-
-    //     if (secondsAgo < 60) {
-    //         return `${secondsAgo} giây trước`;
-    //     } else if (secondsAgo < 3600) {
-    //         const minutesAgo = Math.floor(secondsAgo / 60);
-    //         return `${minutesAgo} phút trước`;
-    //     } else if (secondsAgo < 86400) {
-    //         const hoursAgo = Math.floor(secondsAgo / 3600);
-    //         return `${hoursAgo} giờ trước`;
-    //     } else {
-    //         const daysAgo = Math.floor(secondsAgo / 86400);
-    //         return `${daysAgo} ngày trước`;
-    //     }
-    // }
 
 
     const IsYTView = () => {
@@ -126,7 +132,7 @@ const PostViewComponent = ({ post, emoji, user }) => {
                             height={appInfo.widthWindows / 5.7}
                             style={{ alignItems: "center" }}
                         >
-                            <AvatarEx size={40} round={30} url={userPost.imgUser} frame={'../../assets/frame/frame_background.png'} />
+                            <AvatarEx size={40} round={30} url={userPost.imgUser} frame={userPost.frame_user} />
                             {/* <Image
                             source={require('../../assets/frame/frame_background.png')}
                             style={{
@@ -153,7 +159,10 @@ const PostViewComponent = ({ post, emoji, user }) => {
                             </View>
 
                             <SkeletonComponent Data={userPost.userId} isButton>
-                                <ButtonsComponent isButton onPress={handleAd}
+                                <TouchableOpacity
+                                    disabled={isFollow}
+                                    activeOpacity={0.6}
+                                    onPress={handleFollowButton}
                                     style={{
                                         borderColor: "rgba(121,141,218,1)",
                                         borderRadius: 100,
@@ -163,10 +172,11 @@ const PostViewComponent = ({ post, emoji, user }) => {
                                         width: "22%",
                                         height: "50%",
                                         paddingHorizontal: "2%",
+                                        opacity: isFollow ? 0 : 1,
                                     }}
                                 >
                                     <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>Theo dõi</Text>
-                                </ButtonsComponent>
+                                </TouchableOpacity>
                             </SkeletonComponent>
 
                             <SkeletonComponent Data={userPost.userId} isButton>
@@ -174,6 +184,8 @@ const PostViewComponent = ({ post, emoji, user }) => {
                                     style={{
                                         width: "10%",
                                         height: "30%",
+                                        position: "absolute",
+                                        right: 0,
                                         justifyContent: "center",
                                         alignItems: "center",
                                     }}
@@ -198,10 +210,10 @@ const PostViewComponent = ({ post, emoji, user }) => {
                         </RowComponent>
 
                         {/* Content */}
-                        {!post?.isYT || post?.body != '' ?
+                        {!post?.isYtb ?
                             <RowComponent
-                                minHeight={content != '' && post?.isYT ? 20 : 0}
-                                maxHeight={content != '' && post?.isYT ? 35 : 0}
+                                minHeight={content != '' && post?.body != "" ? 20 : 0}
+                                maxHeight={content != '' && post?.body != "" ? 35 : 0}
                                 style={{
                                     flexDirection: "column",
 

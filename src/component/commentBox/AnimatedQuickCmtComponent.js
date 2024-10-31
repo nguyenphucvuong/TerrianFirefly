@@ -159,7 +159,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, emoji, st
                         alignContent: "center",
                         justifyContent: "center",
                     }}>
-                    <AvatarEx size={40} round={30} url={user.imgUser} style={{ marginRight: "3%" }} />
+                    <AvatarEx size={40} round={30} url={user.imgUser} style={{ marginRight: "3%" }} frame={user.frame_user} />
                     <Pressable
                         onPress={handleLikePressed}
                         style={{
@@ -353,7 +353,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, emoji, st
                     paddingHorizontal: "3%",
                     width: "100%"
                 }}>
-                {isImgIn ? <AvatarEx size={33} round={30} url={userPost.imgUser} style={{ position: "relative", marginRight: "3%" }} /> : <></>}
+                {isImgIn ? <AvatarEx size={33} round={30} url={userPost.imgUser} frame={userPost.frame_user} style={{ position: "relative", marginRight: "3%" }} /> : <></>}
 
                 <Pressable onPress={handleShowPop} style={{
                     with: "100%",
@@ -369,7 +369,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, emoji, st
                     borderColor: !isImgIn ? "" : "#ABABAB",
                 }}
                 >
-                    {!isImgIn ? <AvatarEx size={30} round={30} url={user.imgUser} style={{ position: "relative", }} /> : <></>}
+                    {!isImgIn ? <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} style={{ position: "relative", }} /> : <></>}
                     <View style={{ width: 10 }} />
                     <TextInput
                         placeholderTextColor={!isImgIn ? "white" : "#ABABAB"}

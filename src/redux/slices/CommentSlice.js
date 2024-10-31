@@ -20,7 +20,7 @@ export const createComment = createAsyncThunk('data/createComment', async (newDa
         });
         if (docSnap.exists()) {
             // Trả về dữ liệu của tài liệu vừa thêm
-            return { id: docSnap.id, ...docSnap.data() };
+            return { comment_id: docSnap.id, ...docSnap.data() };
         } else {
             throw new Error('No such document!');
         }
@@ -32,7 +32,7 @@ export const createComment = createAsyncThunk('data/createComment', async (newDa
 
 export const getComment = createAsyncThunk('data/getComment', async ({ post_id }) => {
     try {
-        const querySnapshot = await getDocs(collection(db, "Comment"), where('post_id' == post_id));
+        const querySnapshot = await getDocs(collection(db, "Comment"), where('post_id', "==", post_id));
         querySnapshot.forEach((doc) => {
         });
         const commentData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
