@@ -20,6 +20,7 @@ const FollowScreen = () => {
     const emoji = data.emoji;
     const post = useSelector((state) => state.post.followerPost);
     const user = useSelector((state) => state.user.user);
+    const follower = useSelector((state) => state.follower.follower);
     const dispatch = useDispatch();
 
 
@@ -37,7 +38,7 @@ const FollowScreen = () => {
     useEffect(() => {
         if (user) {
             dispatch(getFollower({ user_id: user?.user_id }));
-            // dispatch(getPostsByField({ field: "created_at", quantity: 3, isFollow: false, currentUserId: user?.user_id }));
+            console.log(follower)
         }
     }, [user]);
 

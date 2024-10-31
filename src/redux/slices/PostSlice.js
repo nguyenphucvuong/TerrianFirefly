@@ -49,13 +49,15 @@ export const createPost = createAsyncThunk(
   }
 );
 
-// Helper function to get followed user IDs
-const getFollowedUserIds = async (currentUserId) => {
+// Hàm lấy danh sách user ID đã được follow
+const getFollowedUserIds = async ({ currentUserId }) => {
   const followerQuery = query(
     collection(db, "Follower"),
     where("follower_user_id", "==", currentUserId)
   );
   const followerSnapshot = await getDocs(followerQuery);
+  console.log(followerSnapshot);
+
   return followerSnapshot.docs.map((doc) => doc.data().user_id);
 };
 
@@ -77,7 +79,11 @@ export const getPostsRefresh = createAsyncThunk(
   "data/getPostsRefresh",
   async ({ currentUserId, isFollow }) => {
     try {
-      const followedUserIds = await getFollowedUserIds(currentUserId);
+      const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
+
+      if (followedUserIds.length === 0 && isFollow) {
+        return { postData: [], lastVisiblePost: null };
+      }
 
       let postsQuery = query(
         collection(db, "Posts"),
@@ -198,7 +204,7 @@ export const getPostsFromUnfollowedUsers = createAsyncThunk(
   "data/getPostsFromUnfollowedUsers",
   async ({ field, quantity, currentUserId }, { getState }) => {
     try {
-      const followedUserIds = await getFollowedUserIds(currentUserId);
+      const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
 
       const lastVisiblePostId = getState().post.lastVisiblePost;
       let lastVisibleDoc = null;
@@ -250,12 +256,24 @@ export const getPostsFromUnfollowedUsers = createAsyncThunk(
   }
 );
 
+
+
+// Hàm lấy bài đăng từ những người dùng đã được follow
 export const getPostsFromFollowedUsers = createAsyncThunk(
   "data/getPostsFromFollowedUsers",
   async ({ field, quantity, currentUserId }, { getState }) => {
     try {
-      const followedUserIds = await getFollowedUserIds(currentUserId);
+      console.log("currentUserId", currentUserId);
 
+      // Lấy danh sách user ID đã được follow
+      const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
+
+      // Nếu không có user nào được follow, trả về mảng rỗng
+      if (followedUserIds.length === 0) {
+        return { postData: [], lastVisiblePost: null };
+      }
+
+      // Kiểm tra lastVisiblePostFollower để lấy bài đăng từ trang trước đó
       const lastVisiblePostId = getState().post.lastVisiblePostFollower;
       let lastVisibleDoc = null;
 
@@ -263,16 +281,14 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
         const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
         lastVisibleDoc = await getDoc(lastVisibleDocRef);
       }
+
+      // Tạo query lấy bài đăng từ những người dùng đã được follow
       let postsQuery = query(
         collection(db, "Posts"),
         orderBy(field, "desc"),
-        limit(quantity)
+        limit(quantity),
+        where("user_id", "in", followedUserIds)
       );
-
-      // Lấy bài đăng từ những người dùng đã được follow
-      if (followedUserIds.length > 0) {
-        postsQuery = query(postsQuery, where("user_id", "in", followedUserIds));
-      }
 
       if (lastVisibleDoc) {
         postsQuery = query(postsQuery, startAfter(lastVisibleDoc));
@@ -280,12 +296,15 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
 
       const querySnapshot = await getDocs(postsQuery);
 
+      // Trả về mảng rỗng nếu không có bài đăng nào
       if (querySnapshot.empty) {
         return { postData: [], lastVisiblePost: null };
       }
 
+      // Cập nhật lượt xem
       await updatePostViewCount(querySnapshot.docs);
 
+      // Lấy ID của bài đăng cuối cùng để hỗ trợ paginating
       const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
       const postData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -302,6 +321,7 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
     }
   }
 );
+
 
 export const updatePostsByField = createAsyncThunk(
   "data/updatePostsByField",
