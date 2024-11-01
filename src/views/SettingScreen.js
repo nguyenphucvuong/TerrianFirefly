@@ -32,7 +32,7 @@ const SettingScreen = () => {
                 <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
             </TouchableOpacity>
             {
-                user[0].roleid === 0 ? (
+                user.roleid === 0 ? (
                     <View>
                         {/* Gạch ngang Admin */}
                         <View style={{ marginTop: appInfo.heightWindows * 0.02, fontSize: 16 }}>

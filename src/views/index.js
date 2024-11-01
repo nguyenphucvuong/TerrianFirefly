@@ -33,5 +33,3 @@ export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen
       TrackingScreen,
      }; 
 
-
-

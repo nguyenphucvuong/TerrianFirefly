@@ -10,17 +10,22 @@ import "react-native-gesture-handler";
 import StackNavigator from './src/stacks/StackNavigator'
 import { Provider } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
-import { getPosts, getPostsByField } from './src/redux/slices/PostSlice';
+import { getPostsFirstTime, getPostsByField } from './src/redux/slices/PostSlice';
 import { ImageProvider } from './src/context/ImageProvider';
-
+import { getHashtag } from './src/redux/slices/HashtagSlice';
+import { getEvent, getEventByField } from "./src/redux/slices/EventSlice";
 
 
 const MainApp = () => {
   const dispatch = useDispatch();
+  const today = new Date();
+  const value = today.toISOString(); // Đảm bảo là định dạng ISO
   useEffect(() => {
-    dispatch(getPostsByField({ field: "created_at", quantity: "2", lastVisiblePost: null }));
-
-
+    // dispatch(getPostsByField({ field: "created_at", quantity: "2", lastVisiblePost: null }));
+    dispatch(getPostsFirstTime());
+    dispatch(getEvent()); 
+    dispatch(getEventByField({ fieldWhere: "created_at", value: Date.now() }));
+    dispatch(getHashtag()); 
   }, []);
 
   return (
@@ -32,9 +37,10 @@ const MainApp = () => {
     </>
   );
 };
+
 const App = () => {
 
-  return (
+  return ( 
     <Provider store={store}>
       <ImageProvider>
         <SafeAreaProvider>

@@ -7,6 +7,8 @@ import {
   Button,
   TouchableOpacity,
   Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -41,7 +43,7 @@ function LoginScreen() {
         text: text,
         onPress: () => console.log('ok'),
         style: style,
-  
+
       },
     ]);
   }
@@ -69,8 +71,6 @@ function LoginScreen() {
   const [isLoading, setisLoading] = useState(false);
   const [isLoadingGg, setisLoadingGg] = useState(false);
   React.useEffect(() => {
-    setCheckPass(false);
-    console.log("response");
     if (response?.type === "success") {
       const { authentication } = response;
       // Handle the authentication object here, e.g., fetch user info
@@ -109,21 +109,21 @@ function LoginScreen() {
       scopes: ["profile", "email"],
       responseType: AuthSession.ResponseType.Token,
     };
-    console.log(authRequestConfig);
+    //console.log(authRequestConfig);
     // Tạo AuthRequest từ config
     const authRequest = new AuthSession.AuthRequest(authRequestConfig);
 
     try {
       // Bắt đầu yêu cầu xác thực với discovery
       const result = await authRequest.promptAsync(discovery);
-      console.log("réult", result.type);
+      //console.log("réult", result.type);
       if (result.type === "success") {
         // Kiểm tra sự tồn tại của access token trong phản hồi
         const { access_token } = result.params;
         if (access_token) {
           // Xử lý thành công\\
           setisLoadingGg(true);
-          console.log("Access Token:", access_token);
+          //console.log("Access Token:", access_token);
         } else {
           // Không có access token trong phản hồi
           setisLoadingGg(false);
@@ -139,42 +139,6 @@ function LoginScreen() {
     }
   }
 
-  // useEffect(() => {
-  //   if (response?.type === 'success') {
-  //     const { id_token } = response.params;
-  //     const credential = GoogleAuthProvider.credential(id_token);
-  //     signInWithCredential(auth, credential)
-  //       .then(userCredential => {
-  //         setUser(userCredential.user);
-  //       })
-  //       .catch(error => {
-  //         console.log('Login failed: ', error);
-  //       });
-  //   }
-  // }, [response]);
-
-  // const handleLoginWithGoogle = async () =>{
-  //   await GoogleSignin.hasPlayServices({
-  //     showPlayServicesUpdateDialog: true,
-  //   });
-
-  //   try {
-  //     await GoogleSignin.hasPlayServices();
-  //     const userInfo = await GoogleSignin.signIn();
-  //     const user = userInfo.user;
-
-  //     const res = await authenticationAPI.HandleAuthentication(
-  //       api,
-  //       user,
-  //       'post',
-  //     );
-
-  //     await AsyncStorage.setItem('auth', JSON.stringify(res.data));
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  //   setisLoadingGg(true);
-  // }
 
   //hàm đăng nhập với email, password
   const handleLoginWithEmail = async () => {
@@ -197,13 +161,15 @@ function LoginScreen() {
       setErrorTextPass("");
       setisLoading(true);
       await signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           // Signed up
+          await dispatch(getUser(email));
           navigation.navigate("IndexTab");
           setisLoading(false);
           const userL = userCredential.user;
-          console.log("Đăng nhập thành công", userL);
-          dispatch(getUser(userL.email));
+          //console.log("Đăng nhập thành công", userL);
+          
+
         })
         .catch((error) => {
           setisLoading(false);
@@ -211,12 +177,13 @@ function LoginScreen() {
           if (errorMessage == "Firebase: Error (auth/invalid-credential).") {
             setErrorTextPass("Email hoặc mật khẩu không chính xác");
           }
-          console.log("handleLogin", errorMessage);
+          //console.log("handleLogin", errorMessage);
         });
     }
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View style={[StyleGlobal.container, { flex: 1 }]}>
       <Text style={styles.textNameApp}>Terrian Firefly</Text>
       <Text style={styles.textRegister}>Đăng Nhập</Text>
@@ -306,13 +273,16 @@ function LoginScreen() {
         <View style={{ flexDirection: "row" }}>
           <Text>Chưa có tài khoản ?</Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate("RegisterScreen")}
+            // onPress={() => navigation.navigate("RegisterScreen")}
+            onPress={() => navigation.navigate("IndexTab")}
+
           >
             <Text style={{ color: "#0286FF" }}> Đăng Ký</Text>
           </TouchableOpacity>
         </View>
       </View>
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 

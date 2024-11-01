@@ -75,15 +75,15 @@ const PersonScreen = () => {
         <View style={{ flex: 1 }}>
             <View style={styles.upperHeaderPlacehholder} />
             <View style={styles.header}>
-                <ImageBackground source={{ uri: user[0].backgroundUser }} style={styles.imageBackground}>
+                <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
                     <View style={styles.upperrHeader}>
                         <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
                             <AvatarEx
                                 size={appInfo.heightWindows * 0.035}
                                 round={90}
-                                url={user[0].imgUser}
+                                url={user.imgUser}
                             />
-                            <Text style={styles.avatarText}>{user[0].username}</Text>
+                            <Text style={styles.avatarText}>{user.username}</Text>
                         </Animated.View>
                     </View>
                     <View style={styles.setting}>
@@ -112,10 +112,11 @@ const PersonScreen = () => {
                         {/* Avatar */}
                         <Animated.View style={[styles.avatar, avatarAnimation]}>
                             <AvatarEx
-                                url={user[0].imgUser}
+                                url={user.imgUser}
                                 size={appInfo.widthWindows * 0.22}
                                 round={20}
-                                frame={user[0].frame_user}
+                                frame={user.frame_user}
+                                name={user.username}
                             />
                             <Text style={[StyleGlobal.textTitleContent, {marginTop: '3%'}]}>{user[0].username}</Text>
                             
@@ -135,7 +136,7 @@ const PersonScreen = () => {
                     </View>
 
                     {
-                        user.length === 0 || !user[0].user_id ? (
+                        user.length === 0 || !user.user_id ? (
                             <View style={styles.iconRow}>
                                 <SkeletonComponent
                                     Data={""}
@@ -151,12 +152,12 @@ const PersonScreen = () => {
                                 <IconComponent name={'credit-card'}
                                     size={appInfo.heightWindows * 0.025}
                                     color={'#33363F'}
-                                    text={'ID: ' + user[0].user_id} />
+                                    text={'ID: ' + user.user_id} />
                                 <IconComponent name={'user'}
                                     size={appInfo.heightWindows * 0.025}
                                     color={'#33363F'}
-                                    text={user[0].nickname}
-                                    onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user[0].nickname })} />
+                                    text={'Người ' + user.nickname}
+                                    onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} />
                             </View>
                         )
                     }

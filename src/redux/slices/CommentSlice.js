@@ -9,17 +9,13 @@ const initialState = {
     error: null,
 };
 
-// Tạo async thunk để thêm dữ liệu lên Firestore
 export const createComment = createAsyncThunk('data/createComment', async (newData) => {
     try {
-        // Thêm dữ liệu mới vào Firestore
-        // const docRef = await addDoc(collection(db, 'Comment'), newData);
         const docRef = await addDoc(collection(db, 'Comment'), newData);
 
-        // Lấy tài liệu vừa thêm từ Firestore
         const docSnap = await getDoc(docRef);
         await updateDoc(docRef, {
-            id: docRef.id, // Lưu ID vào tài liệu
+            // id: docRef.id,
             comment_id: docRef.id,
         });
         if (docSnap.exists()) {
@@ -34,12 +30,10 @@ export const createComment = createAsyncThunk('data/createComment', async (newDa
     }
 });
 
-// Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getComment = createAsyncThunk('data/getComment', async ({ post_id }) => {
     try {
         const querySnapshot = await getDocs(collection(db, "Comment"), where('post_id' == post_id));
         querySnapshot.forEach((doc) => {
-            // console.log(`post: ${doc.id} => `, doc.data());
         });
         const commentData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -56,30 +50,28 @@ export const CommentSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            // Xử lý khi thêm dữ liệu thành công
             .addCase(createComment.fulfilled, (state, action) => {
-                state.comment.push(action.payload); // Thêm dữ liệu mới vào state
-                state.status = 'succeeded'; // Đánh dấu thành công
+                state.comment.push(action.payload);
+                state.status = 'succeeded';
             })
             .addCase(createComment.pending, (state) => {
-                state.status = 'loading'; // Đánh dấu trạng thái đang tải
+                state.status = 'loading';
             })
             .addCase(createComment.rejected, (state, action) => {
-                state.error = action.error.message; // Lưu lỗi nếu quá trình thêm thất bại
-                state.status = 'failed'; // Đánh dấu thất bại
+                state.error = action.error.message;
+                state.status = 'failed';
             })
 
-            // Xử lý khi lấy dữ liệu thành công
             .addCase(getComment.fulfilled, (state, action) => {
-                state.comment = action.payload; // Cập nhật danh sách bài đăng
-                state.status = 'succeeded'; // Đánh dấu thành công
+                state.comment = action.payload;
+                state.status = 'succeeded';
             })
             .addCase(getComment.pending, (state) => {
-                state.status = 'loading'; // Đánh dấu trạng thái đang tải
+                state.status = 'loading';
             })
             .addCase(getComment.rejected, (state, action) => {
-                state.error = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
-                state.status = 'failed'; // Đánh dấu thất bại
+                state.error = action.error.message;
+                state.status = 'failed';
             });
 
     },

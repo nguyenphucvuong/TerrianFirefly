@@ -8,11 +8,10 @@ import sizeImage from '../utils/sizeImage';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 // const ImagesPostComponent = (imagesInfo) => {
-const ImagesPostComponent = ({ post, user, emoji }) => {
+const ImagesPostComponent = ({ post, user, userPost, emoji }) => {
     const User = user;
     const Data = post.imgPost;
     const navigation = useNavigation();
-
 
     // const [Data] = [imagesInfo.Data];
     const [imageWidth, setImageWidth] = useState(0);
@@ -54,7 +53,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
 
         return <TouchableOpacity
             activeOpacity={1}
-            onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
+            onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, UserPost: userPost, emoji: emoji })}
             style={[{}, CheckHeightReturnStyle]}>
             <Image
                 source={{ uri: Data[0] }}
@@ -78,7 +77,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                     }}>
                     <TouchableOpacity
                         activeOpacity={1}
-                        onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, userPost: userPost, emoji: emoji })}
                         style={{
                             width: "49%",
                             height: "100%",
@@ -92,7 +91,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                     </TouchableOpacity>
                     <TouchableOpacity
                         activeOpacity={1}
-                        onPress={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, userPost: userPost, emoji: emoji })}
                         style={{
                             width: "49%",
                             height: "100%",
@@ -122,7 +121,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                     }}>
                     <TouchableOpacity
                         activeOpacity={1}
-                        onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, userPost: userPost, emoji: emoji })}
                         style={{
                             width: "33%",
                             height: "100%",
@@ -137,7 +136,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
 
                     <TouchableOpacity
                         activeOpacity={1}
-                        onPress={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, userPost: userPost, emoji: emoji })}
                         style={{
                             width: "32%",
                             height: "100%",
@@ -152,7 +151,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
 
                     <TouchableOpacity
                         activeOpacity={1}
-                        onPress={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, emoji: emoji })}
+                        onPress={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, userPost: userPost, emoji: emoji })}
                         style={{
                             width: "33%",
                             height: "100%",
@@ -213,7 +212,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                 }}>
                 <TouchableOpacity
                     activeOpacity={1}
-                    onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, emoji: emoji })}
+                    onPress={() => navigation.navigate("picture", { Data: post, Select: 0, User: User, userPost: userPost, emoji: emoji })}
                     style={{
                         width: "32%",
                         height: "100%",
@@ -227,7 +226,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     activeOpacity={1}
-                    onPress={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, emoji: emoji })}
+                    onPress={() => navigation.navigate("picture", { Data: post, Select: 1, User: User, userPost: userPost, emoji: emoji })}
                     style={{
                         width: "33%",
                         height: "100%",
@@ -241,7 +240,7 @@ const ImagesPostComponent = ({ post, user, emoji }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     activeOpacity={1}
-                    onPress={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, emoji: emoji })}
+                    onPress={() => navigation.navigate("picture", { Data: post, Select: 2, User: User, userPost: userPost, emoji: emoji })}
                     style={{
                         width: "32%",
                         height: "100%",
