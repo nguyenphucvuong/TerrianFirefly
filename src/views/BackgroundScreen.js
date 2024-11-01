@@ -90,7 +90,7 @@ const BackgroundScreen = () => {
                     index={0}
                     snapPoints={snapPoints}>
                     <BottomSheetView style={styles.contentContainer}>
-                        <Text style={StyleGlobal.textName}> Cấp độ: Người nổi tiếng 🎉</Text>
+                        <Text style={StyleGlobal.textName}> Cấp độ: 🎉</Text>
                         <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button} />
                     </BottomSheetView>
                 </BottomSheetModal>

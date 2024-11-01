@@ -116,8 +116,9 @@ const PersonScreen = () => {
                                 size={appInfo.widthWindows * 0.22}
                                 round={20}
                                 frame={user[0].frame_user}
-                                name={user[0].username}
                             />
+                            <Text style={[StyleGlobal.textTitleContent, {marginTop: '3%'}]}>{user[0].username}</Text>
+                            
                         </Animated.View>
                         {/* Chỉnh sửa */}
                         <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
@@ -154,7 +155,7 @@ const PersonScreen = () => {
                                 <IconComponent name={'user'}
                                     size={appInfo.heightWindows * 0.025}
                                     color={'#33363F'}
-                                    text={'Người ' + user[0].nickname}
+                                    text={user[0].nickname}
                                     onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user[0].nickname })} />
                             </View>
                         )
@@ -162,7 +163,7 @@ const PersonScreen = () => {
 
                     <View style={styles.statisticsContainer}>
                         <StatisticsComponent quantity={0} name={'Bài Viết'} />
-                        <StatisticsComponent quantity={0} name={'Theo Dõi'} />
+                        <StatisticsComponent quantity={0} name={'Theo Dõi'} onPress={() => navigation.navigate('TrackingScreen')} />
                         <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
                         <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                     </View>
@@ -230,6 +231,7 @@ const styles = StyleSheet.create({
         marginRight: 'auto',
         bottom: appInfo.heightWindows * 0.003,
         left: appInfo.widthWindows * 0.05,
+        alignItems: 'center',
     },
     avatarHeader: {
         position: 'absolute',

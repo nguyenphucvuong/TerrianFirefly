@@ -81,11 +81,9 @@ function WellcomScreen() {
   return (
     <ImageBackground
       style={styles.imageBg}
-      source={{
-        uri: "https://www.vietnamworks.com/hrinsider/wp-content/uploads/2023/12/hinh-nen-dien-thoai-13.jpg",
-      }}
+      source={require("../../assets/app_bg.jpg")}
     >
-      <View style={[StyleGlobal.container, { flex: 1 }]}>
+      <View style={ {flex: 1 }}>
         <Image
           source={require("../../assets/app_icon.png")}
           style={styles.image}

@@ -21,7 +21,9 @@ const NickNameScreen = () => {
         dispatch(getNickname());
     }, []);
     //console.log('nickname', nickname);
+    const hanldeSelectNickName = () => {
 
+    }
     return (
         <View style={StyleGlobal.container}>
             <FlatList
@@ -34,7 +36,6 @@ const NickNameScreen = () => {
                                 <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'#90CAF9'} style={styles.iconStyle} />
                                 : null
                             }
-
                         </TouchableOpacity>
                     )
                 }}

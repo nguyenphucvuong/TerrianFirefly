@@ -43,7 +43,7 @@ const AchievementsScreen = () => {
     return (
         <BottomSheetModalProvider>
             <View style={{ backgroundColor: '#7982FB', height: appInfo.heightWindows * 0.2, justifyContent: 'center', borderRadius: 20 }}>
-                <View style={{ top: appInfo.heightWindows * 0.03 }}>
+                <View style={{ top: appInfo.heightWindows * 0.03, zIndex: 1 }}>
                     <ButtonBackComponent color={'white'} />
                 </View>
                 <AvatarEx
@@ -90,7 +90,7 @@ const AchievementsScreen = () => {
                 index={0}
                 snapPoints={snapPoints}>
                 <BottomSheetView style={styles.contentContainer}>
-                        <Text style={StyleGlobal.textName}> Cấp độ: Người nổi tiếng 🎉</Text>
+                        <Text style={StyleGlobal.textName}> Cấp độ: 🎉</Text>
 
                         <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button} />
                     </BottomSheetView>

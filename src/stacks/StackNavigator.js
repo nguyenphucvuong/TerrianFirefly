@@ -19,6 +19,7 @@ import {
     ForgotPassword,
     VerificationCodeScreen,
     FollowerScreen,
+    TrackingScreen,
 } from '../views';
 
 import IndexTab from '../tabs/indexTab';
@@ -52,7 +53,7 @@ const StackNavigator = () => {
             <Stack.Screen name='RegisterScreen' component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{ headerShown: false }} />
             <Stack.Screen name='VerificationCodeScreen' component={VerificationCodeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name='IndexTab' component={IndexTab} options={{ headerShown: false }} />
+            <Stack.Screen name='IndexTab' component={IndexTab} options={{ headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name='BackgroundScreen' component={BackgroundScreen} options={{ headerShown: false }} />
             <Stack.Screen name='InfomationScreen' component={InfomationScreen}
                 options={() => IconBack("Thông Tin Cá Nhân")} />
@@ -80,6 +81,8 @@ const StackNavigator = () => {
                 options={() => IconBack("Thiết Lập Tài Khoản")} />
             <Stack.Screen name='FollowerScreen' component={FollowerScreen}
                 options={() => IconBack("Người Theo Dõi")} />
+            <Stack.Screen name='TrackingScreen' component={TrackingScreen}
+                options={() => IconBack("Theo Dõi")} />
         </Stack.Navigator>
     )
 }
