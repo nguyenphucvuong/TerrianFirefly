@@ -23,6 +23,7 @@
     "@rneui/base": "^4.0.0-rc.8",
     "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-react-native": "^1.0.0",
+    "buffer": "^6.0.3",
     "date-fns": "^4.1.0",
     "emailjs-com": "^3.2.0",
     "expo": "^51.0.38",

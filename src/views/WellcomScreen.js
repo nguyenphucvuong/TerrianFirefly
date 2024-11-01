@@ -75,7 +75,7 @@ function WellcomScreen() {
       source={require("../../assets/app_bg.jpg")}
       style={styles.imageBg}
     >
-      <View style={[styles.container]}>
+      <View style={ {flex: 1 }}>
         <Image
           source={require("../../assets/app_icon.png")}
           style={styles.image}
