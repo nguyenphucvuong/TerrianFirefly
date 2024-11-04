@@ -49,7 +49,9 @@ export const deleteFollow = createAsyncThunk('data/deleteFollow', async ({ follo
         for (const docSnapshot of querySnapshot.docs) {
             await deleteDoc(docSnapshot.ref);
         }
+
         console.log(`Successfully deleted follow relationship between ${follower_user_id} and ${user_id}`);
+        return { follower_user_id, user_id };
     } catch (error) {
         console.error('Error deleting document: ', error);
         throw error;
@@ -141,6 +143,7 @@ export const FollowerSlice = createSlice({
 
             //  deleteFollow
             .addCase(deleteFollow.fulfilled, (state, action) => {
+                state.follower = state.follower.filter((item) => item.id !== action.payload.id);
                 state.status = 'succeeded';
             })
             .addCase(deleteFollow.pending, (state) => {

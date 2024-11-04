@@ -47,6 +47,7 @@ export const deleteFavorite = createAsyncThunk('data/deleteFavorite', async ({ p
             await deleteDoc(docSnapshot.ref);
         }
         console.log(`Successfully deleted Favorite relationship between ${post_id} and ${user_id}`);
+        return { post_id, user_id };
     } catch (error) {
         console.error('Error deleting document: ', error);
         throw error;
@@ -136,6 +137,7 @@ export const FavoriteSlice = createSlice({
             })
 
             .addCase(deleteFavorite.fulfilled, (state, action) => {
+                state.currentFavorite = state.currentFavorite.filter(favorite => favorite.id !== action.payload.id);
                 state.status = 'succeeded';
             })
             .addCase(deleteFavorite.pending, (state) => {

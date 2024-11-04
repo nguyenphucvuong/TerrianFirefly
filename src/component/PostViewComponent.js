@@ -88,7 +88,7 @@ const PostViewComponent = ({ post, user }) => {
     const handleFollowButton = useCallback(() => {
         const handleFollowUser = async () => {
             await dispatch(createFollow({ follower_user_id: userId, user_id: user.user_id }));
-            await dispatch(startListeningFollowers({ follower_user_id: user.user_id, user_id: userId }));
+            // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
         }
         handleFollowUser();
     });

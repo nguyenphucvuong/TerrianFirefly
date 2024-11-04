@@ -57,7 +57,7 @@ const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_
 
     const handleDeleteFollow = () => {
         dispatch(deleteFollow({ follower_user_id: user_id, user_id: post_user_id }));
-        dispatch(startListeningFollowers({ follower_user_id: user_id, user_id: post_user_id }));
+        dispatch(startListeningFollowers({ follower_user_id: user_id }));
         handleHideInput();
         return;
     }
