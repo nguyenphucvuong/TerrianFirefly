@@ -14,7 +14,7 @@ import { StyleGlobal } from '../styles/StyleGlobal';
 import { appInfo } from '../constains/appInfo';
 //redux
 import { getAchievement } from '../redux/slices/AchievementSlice';
-import { getUser, updateUser } from '../redux/slices/UserSlices';
+import { getUser, updateUser, listenToUserRealtime} from '../redux/slices/UserSlices';
 const AchievementsScreen = () => {
     //Firebase
     const achievement = useSelector((state) => state.achievement.achievement);
@@ -25,13 +25,15 @@ const AchievementsScreen = () => {
     //
     const [selectedId, setSelectedId] = useState(user.frame_user);
     const [frame, setFrame] = useState(user.frame_user);
+    const [level, setLevel] = useState('');
     // bottomSheetModal
     const snapPoints = useMemo(() => ['15%'], []);
     const bottomSheetModalRef = useRef(null);
     const handldeOpenPress = (item) => {
         bottomSheetModalRef.current?.present();
         setSelectedId(item.nameAchie);
-        setFrame(item.nameAchie)
+        setFrame(item.nameAchie);
+        setLevel(item.level);
 
     };
     const hanldeFrame = () => {
@@ -46,16 +48,16 @@ const AchievementsScreen = () => {
             console.error("Update failed:", error);
         }
     }
-    //cập nhật lại dữ liệu     
+    //cập nhật lại dữ liệu 
     useEffect(() => {
-        //đọc dữ liệu   
         dispatch(getAchievement());
-        dispatch(getUser(user.email));
-    }, []);
-    // console.log('achievement', achievement);
+        const unsubscribe = dispatch(listenToUserRealtime(user.email));
+        return () => unsubscribe();
+    }, [dispatch, user.email]);
+    //console.log('achievement', achievement);
     // console.log('selectedId', selectedId);
     return (
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
             {
                 !user || !achievement ?
                     (
@@ -63,7 +65,7 @@ const AchievementsScreen = () => {
                             <SkeletonComponent
                                 isAvatar
                                 Data={""}
-                                style={{ width: 80, height: 80, margin: '10%' ,   alignSelf: 'center' }}
+                                style={{ width: 80, height: 80, margin: '10%', alignSelf: 'center' }}
                             />
                             <SkeletonComponent
                                 Data={""}
@@ -97,15 +99,22 @@ const AchievementsScreen = () => {
                                 data={achievement}
                                 renderItem={({ item }) => {
                                     const isSelected = selectedId === item.nameAchie;
+                                    const isLocked = item.level > user.total_interact_id; //kiểm tra level > hơn total_interact_id sẽ không click
                                     return (
                                         <TouchableOpacity style={[styles.touchableContainer, { backgroundColor: isSelected ? '#90CAF9' : '#EEEEEE' }]}
-                                            onPress={() => handldeOpenPress(item)} >
-                                            {/* <IconComponent
-                                name={'lock'}
-                                size={appInfo.heightWindows * 0.02}
-                                color={'#FFFFFF'}
-                                style={[styles.iconComponent, { top: 0, backgroundColor: '#D9D9D9'}]}
-                            /> */}
+                                            onPress={() => !isLocked && handldeOpenPress(item)} >
+                                            {isLocked ? (
+                                                <IconComponent
+                                                    name={'lock'}
+                                                    size={appInfo.heightWindows * 0.02}
+                                                    color={'#FFFFFF'}
+                                                    style={[
+                                                        styles.iconComponent,
+                                                        { bottom: 5, left: 5, backgroundColor: '#BFBFBF' },
+                                                    ]}
+                                                />
+                                            ) : null}
+
                                             <Image
                                                 style={{ width: '100%', height: appInfo.heightWindows * 0.13 }}
                                                 source={{ url: item.nameAchie }}
@@ -115,7 +124,7 @@ const AchievementsScreen = () => {
                                                     name={'check'}
                                                     size={appInfo.heightWindows * 0.02}
                                                     color={'#FFFFFF'}
-                                                    style={[styles.iconComponent, { bottom: 0, backgroundColor: '#0286FF' }]}
+                                                    style={[styles.iconComponent, { bottom: 4, right: 5, backgroundColor: '#0286FF' }]}
                                                 />
                                                 : null}
                                         </TouchableOpacity>
@@ -128,14 +137,14 @@ const AchievementsScreen = () => {
                                 index={0}
                                 snapPoints={snapPoints}>
                                 <BottomSheetView style={styles.contentContainer}>
-                                    <Text style={StyleGlobal.textName}> Cấp độ: 🎉</Text>
+                                    <Text style={StyleGlobal.textName}> Cấp độ: {level}🎉</Text>
 
-                                    <ButtonFunctionComponent 
-                                    name={'Dùng'} 
-                                    backgroundColor={'#8B84E9'} 
-                                    colorText={'#FFFFFF'} 
-                                    onPress={() => hanldeFrame()}
-                                    style={styles.button} />
+                                    <ButtonFunctionComponent
+                                        name={'Dùng'}
+                                        backgroundColor={'#8B84E9'}
+                                        colorText={'#FFFFFF'}
+                                        onPress={() => hanldeFrame()}
+                                        style={styles.button} />
                                 </BottomSheetView>
                             </BottomSheetModal>
 
@@ -164,7 +173,6 @@ const styles = StyleSheet.create({
     },
     iconComponent: {
         position: "absolute",
-        right: 4,
         width: appInfo.heightWindows * 0.02,
         backgroundColor: '#0286FF',
         borderRadius: 20,

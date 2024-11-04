@@ -16,13 +16,12 @@ import { AvatarEx, ButtonFunctionComponent, InputComponents, IconComponent } fro
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 //redux
-import { getUser, updateUser, uploadImage } from '../redux/slices/UserSlices';
+import { getUser, updateUser, uploadImage, listenToUserRealtime } from '../redux/slices/UserSlices';
 const InfomationScreen = () => {
     const navigation = useNavigation(); // Sử dụng hook navigation
     const [userName, setUserName] = useState('');
     const [gender, setGender] = useState('');
     const [avatarImage, setAvatarImage] = useState('');
-    const [frame_user, setFrame_user] = useState('');
     //uploadImage
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isModalVisible, setModalVisible] = useState(false); // Modal visibility
@@ -54,10 +53,15 @@ const InfomationScreen = () => {
     const handleSaveInfomation = async () => {
         setModalVisible(true);
         try {
-            const imgUser = await dispatch(uploadImage({
-                imgUser: avatarImage,
-                setUploadProgress // Pass setUploadProgress to update progress
-            })).unwrap();
+            let imgUser = user.imgUser; // Gán ảnh hiện tại của người dùng vào imgUse
+            if (avatarImage !== user.imgUser) {                
+                imgUser = await dispatch(uploadImage({
+                    imgUser: avatarImage,
+                    setUploadProgress 
+                })).unwrap();
+                console.log('imgUser', imgUser);
+            }
+            //update newData
             const newData = {
                 username: userName,
                 gender: gender,
@@ -71,19 +75,21 @@ const InfomationScreen = () => {
         } catch (error) {
             console.error("Upload failed:", error);
         }
-
     }
+    //cập nhật lại dữ liệu 
     useEffect(() => {
-        //đọc dữ liệu   
-        dispatch(getUser(user.email));
         hanndleDisPlay();
-    }, []);
+        //dispatch(getUser(user.email));
+        const unsubscribe = dispatch(listenToUserRealtime(user.email));
+        return () => unsubscribe();
+    }, [dispatch, user.email]);
+
+
     // console.log('user1232',user[0].email);
     const hanndleDisPlay = () => {
         setUserName(user.username);
         setGender(user.gender);
         setAvatarImage(user.imgUser);
-        setFrame_user(user.frame_user);
     }
     //Gender
     const hanldeGender = (gender) => {
@@ -114,7 +120,7 @@ const InfomationScreen = () => {
                         url={avatarImage}
                         size={appInfo.widthWindows * 0.22}
                         round={20}
-                        frame={frame_user}
+                        frame={user.frame_user}
                     />
                     <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
                         {/* Chọn ảnh đại diện */}
@@ -211,10 +217,6 @@ const styles = StyleSheet.create({
     contentContainer: {
         margin: 10,
         height: appInfo.heightWindows * 0.25,
-    },
-    buttonText: {
-        color: '#000000',
-        fontSize: 16,
     },
     buttonRow: {
         flexDirection: 'row',

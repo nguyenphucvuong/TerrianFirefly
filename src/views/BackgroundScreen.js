@@ -14,11 +14,12 @@ import { StyleGlobal } from '../styles/StyleGlobal';
 import { appInfo } from '../constains/appInfo';
 //Redux
 import { getBackground } from '../redux/slices/BackgroundSlice';
-import { getUser, updateUser, uploadImage } from '../redux/slices/UserSlices';
+import { getUser, updateUser, uploadImage, listenToUserRealtime } from '../redux/slices/UserSlices';
 const BackgroundScreen = () => {
     //FireBase
     const arrBackground = useSelector((state) => state.background.background);
     const user = useSelector((state) => state.user.user);
+    const [level, setLevel] = useState('');
     // const arrBackground = "";
     // const user = "";
     const dispatch = useDispatch();
@@ -29,10 +30,11 @@ const BackgroundScreen = () => {
     //BottomSheet
     const snapPoints = useMemo(() => ['15%'], []);
     const bottomSheetModalRef = useRef(null);
-    const handldeOpenPress = (url) => {
+    const handldeOpenPress = (item) => {
         bottomSheetModalRef.current?.present();
-        setBackground(url);
-        setSelectedId(url);
+        setBackground(item.nameBackground);
+        setSelectedId(item.nameBackground);
+        setLevel(item.level);
     };
     //Update background
     const handleBackground = async () => {
@@ -47,14 +49,12 @@ const BackgroundScreen = () => {
             console.error("Update failed:", error);
         }
     }
-
-    //cập nhật lại dữ liệu     
+    //cập nhật lại dữ liệu 
     useEffect(() => {
-        //đọc dữ liệu   
         dispatch(getBackground());
-        // dispatch(getUser(user.email));
-
-    }, []);
+        const unsubscribe = dispatch(listenToUserRealtime(user.email));
+        return () => unsubscribe();
+    }, [dispatch, user.email]);
     //console.log('background',background);
 
     return (
@@ -109,13 +109,26 @@ const BackgroundScreen = () => {
                                 data={arrBackground}
                                 renderItem={({ item }) => {
                                     const isSelected = selectedId === item.nameBackground;
+                                    const isLocked = item.level > user.total_interact_id; //kiểm tra level > hơn total_interact_id sẽ không click
                                     return (
                                         <TouchableOpacity style={{ flex: 1, margin: 5 }}
-                                            onPress={() => handldeOpenPress(item.nameBackground)} >
+                                            onPress={() => !isLocked && handldeOpenPress(item)} >
+
                                             <Image
                                                 style={[styles.image, { borderColor: isSelected ? '#90CAF9' : 'white', borderWidth: 3, }]}
                                                 source={{ url: item.nameBackground }}
                                             />
+                                            {isLocked ? (
+                                                <IconComponent
+                                                    name={'lock'}
+                                                    size={appInfo.heightWindows * 0.02}
+                                                    color={'#FFFFFF'}
+                                                    style={[
+                                                        styles.iconComponent,
+                                                        { bottom: 6, left: 7, backgroundColor: '#BFBFBF' },
+                                                    ]}
+                                                />
+                                            ) : null}
                                             {user.backgroundUser == item.nameBackground
                                                 ? <IconComponent
                                                     name={'check'}
@@ -134,7 +147,7 @@ const BackgroundScreen = () => {
                                 index={0}
                                 snapPoints={snapPoints}>
                                 <BottomSheetView style={styles.contentContainer}>
-                                    <Text style={StyleGlobal.textName}> Cấp độ: 🎉</Text>
+                                    <Text style={StyleGlobal.textName}> Cấp độ: {level} 🎉</Text>
                                     <ButtonFunctionComponent
                                         name={'Dùng'}
                                         backgroundColor={'#8B84E9'}

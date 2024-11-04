@@ -11,7 +11,6 @@ import {
     AccountDetailsScreen,
     NotificationManagement,
     ManagePostsScreen,
-    ArticleDetailsScreen,
     SetUpAccountScreen,
     WellcomScreen,
     LoginScreen,
@@ -20,6 +19,8 @@ import {
     VerificationCodeScreen,
     FollowerScreen,
     TrackingScreen,
+    EventManagementScreen,
+    EventManagementDetailsScreen,
 } from '../views';
 
 import IndexTab from '../tabs/indexTab';
@@ -32,22 +33,22 @@ import NewEventScreen from "../views/NewEventScreen";
 const Stack = createStackNavigator();
 
 const IconBack = (title) => ({
-  headerShown: true,
-  title: title,
-  headerTitleAlign: "center", // Đưa tiêu đề vào giữa
-  headerLeft: () => <ButtonBackComponent color="#000000" />,
+    headerShown: true,
+    title: title,
+    headerTitleAlign: "center", // Đưa tiêu đề vào giữa
+    headerLeft: () => <ButtonBackComponent color="#000000" />,
 });
 
 const IconHeaderRight = (text, onPress, name) => ({
-  headerRight: () => (
-    <IconComponent
-      text={text}
-      name={name}
-      color={"#000000"}
-      onPress={onPress}
-      size={26}
-    />
-  ),
+    headerRight: () => (
+        <IconComponent
+            text={text}
+            name={name}
+            color={"#000000"}
+            onPress={onPress}
+            size={26}
+        />
+    ),
 });
 
 const StackNavigator = () => {
@@ -81,14 +82,16 @@ const StackNavigator = () => {
                 options={() => IconBack("Quản Lý Thông Báo")} />
             <Stack.Screen name='ManagePostsScreen' component={ManagePostsScreen}
                 options={() => IconBack("Quản Lý Bài Viết")} />
-            <Stack.Screen name='ArticleDetailsScreen' component={ArticleDetailsScreen}
-                options={() => IconBack("Chi Tiết Bài Viết")} />
             <Stack.Screen name='SetUpAccountScreen' component={SetUpAccountScreen}
                 options={() => IconBack("Thiết Lập Tài Khoản")} />
             <Stack.Screen name='FollowerScreen' component={FollowerScreen}
                 options={() => IconBack("Người Theo Dõi")} />
             <Stack.Screen name='TrackingScreen' component={TrackingScreen}
                 options={() => IconBack("Theo Dõi")} />
+            <Stack.Screen name='EventManagementScreen' component={EventManagementScreen}
+                options={() => IconBack("Quản Lý Sự Kiện")} />
+            <Stack.Screen name='EventManagementDetailsScreen' component={EventManagementDetailsScreen}
+                options={() => IconBack("Chi Tiết Sự Kiện")} />
         </Stack.Navigator>
     )
 }

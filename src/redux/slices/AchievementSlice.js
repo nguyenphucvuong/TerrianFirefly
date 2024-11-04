@@ -14,7 +14,6 @@ export const getAchievement = createAsyncThunk('data/getAchievement', async () =
     try {
         const querySnapshot = await getDocs(collection(db, "Achievements"));
         const achievementData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        return achievementData;
 
         return achievementData; // Trả về danh sách bài đăng
     } catch (error) {
