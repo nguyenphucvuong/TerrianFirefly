@@ -21,8 +21,8 @@ const AchievementsScreen = () => {
     const user = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
     //
-    const [selectedId, setSelectedId] = useState(user[0].frame_user);
-    const [frame, setFrame] = useState(user[0].frame_user);
+    const [selectedId, setSelectedId] = useState(user.frame_user);
+    const [frame, setFrame] = useState(user.frame_user);
     // bottomSheetModal
     const snapPoints = useMemo(() => ['15%'], []);
     const bottomSheetModalRef = useRef(null);
@@ -36,18 +36,18 @@ const AchievementsScreen = () => {
     useEffect(() => {
         //đọc dữ liệu   
         dispatch(getAchievement());
-        dispatch(getUser(user[0].email));
+        dispatch(getUser(user.email));
     }, []);
     // console.log('achievement', achievement);
     // console.log('selectedId', selectedId);
     return (
         <BottomSheetModalProvider>
             <View style={{ backgroundColor: '#7982FB', height: appInfo.heightWindows * 0.2, justifyContent: 'center', borderRadius: 20 }}>
-                <View style={{ top: appInfo.heightWindows * 0.03 }}>
+                <View style={{ top: appInfo.heightWindows * 0.03, zIndex: 1 }}>
                     <ButtonBackComponent color={'white'} />
                 </View>
                 <AvatarEx
-                    url={user[0].imgUser}
+                    url={user.imgUser}
                     size={appInfo.widthWindows * 0.22}
                     round={20}
                     frame={frame}
@@ -72,7 +72,7 @@ const AchievementsScreen = () => {
                                 style={{ width: '100%', height: appInfo.heightWindows * 0.13 }}
                                 source={{ url: item.nameAchie }}
                             />
-                            {user[0].frame_user == item.nameAchie
+                            {user.frame_user == item.nameAchie
                                 ? <IconComponent
                                     name={'check'}
                                     size={appInfo.heightWindows * 0.02}
@@ -90,7 +90,7 @@ const AchievementsScreen = () => {
                 index={0}
                 snapPoints={snapPoints}>
                 <BottomSheetView style={styles.contentContainer}>
-                        <Text style={StyleGlobal.textName}> Cấp độ: Người nổi tiếng 🎉</Text>
+                        <Text style={StyleGlobal.textName}> Cấp độ: 🎉</Text>
 
                         <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button} />
                     </BottomSheetView>

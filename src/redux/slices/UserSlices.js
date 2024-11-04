@@ -140,6 +140,19 @@ export const updateUser = createAsyncThunk('data/upDateUser', async ({ user_id, 
 //   }
 // );
 
+export const updateUserPassword = createAsyncThunk('data/updateUserPassword', async ({ userId, newPassWord }) => {
+    try {
+        const userRef = doc(db, 'user', userId); // Tạo tham chiếu đến tài liệu của người dùng trong Firestore
+        await updateDoc(userRef, {
+            passWord: newPassWord, // Cập nhật trường passWord với mật khẩu mới
+        });
+
+        return { userId, newPassWord }; // Trả về userId và mật khẩu mới sau khi cập nhật thành công
+    } catch (err) {
+        return rejectWithValue(err.message);
+    }
+});
+
 // Tạo slice cho user
 export const UserSlices = createSlice({
   name: "user",

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import React, { useState } from "react";
+import { createStackNavigator } from "@react-navigation/stack";
 //Screens
 import {
     BackgroundScreen,
@@ -21,28 +21,35 @@ import {
     FollowerScreen,
     ResetPasswordScreen,
     HashtagManagerScreen,
+    TrackingScreen,
 } from '../views';
 
 import IndexTab from '../tabs/indexTab';
+import EventScreen from "../views/EventScreen";
 //components
-import { ButtonBackComponent, IconComponent } from '../component';
+import { ButtonBackComponent, IconComponent } from "../component";
+import NotiTabScreen from "../views/NotiTabScreen";
+import DetailEventScreen from "../views/DetailEventScreen";
+import NewEventScreen from "../views/NewEventScreen";
 const Stack = createStackNavigator();
 
 const IconBack = (title) => ({
-    headerShown: true,
-    title: title,
-    headerTitleAlign: 'center',  // Đưa tiêu đề vào giữa
-    headerLeft: () => (
-        <ButtonBackComponent
-            color="#000000"
-        />
-    ),
+  headerShown: true,
+  title: title,
+  headerTitleAlign: "center", // Đưa tiêu đề vào giữa
+  headerLeft: () => <ButtonBackComponent color="#000000" />,
 });
 
 const IconHeaderRight = (text, onPress, name) => ({
-    headerRight: () => (
-        <IconComponent text={text} name={name} color={'#000000'} onPress={onPress} size={26} />
-    ),
+  headerRight: () => (
+    <IconComponent
+      text={text}
+      name={name}
+      color={"#000000"}
+      onPress={onPress}
+      size={26}
+    />
+  ),
 });
 
 const StackNavigator = () => {
@@ -55,7 +62,7 @@ const StackNavigator = () => {
             <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{ headerShown: false }} />
             <Stack.Screen name='VerificationCodeScreen' component={VerificationCodeScreen} options={{ headerShown: false }} />
             <Stack.Screen name='ResetPasswordScreen' component={ResetPasswordScreen} options={{ headerShown: false }} />
-            <Stack.Screen name='IndexTab' component={IndexTab} options={{ headerShown: false }} />
+            <Stack.Screen name='IndexTab' component={IndexTab} options={{ headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name='BackgroundScreen' component={BackgroundScreen} options={{ headerShown: false }} />
             <Stack.Screen name='InfomationScreen' component={InfomationScreen}
                 options={() => IconBack("Thông Tin Cá Nhân")} />
@@ -85,6 +92,8 @@ const StackNavigator = () => {
                 options={() => IconBack("Thiết Lập Tài Khoản")} />
             <Stack.Screen name='FollowerScreen' component={FollowerScreen}
                 options={() => IconBack("Người Theo Dõi")} />
+            <Stack.Screen name='TrackingScreen' component={TrackingScreen}
+                options={() => IconBack("Theo Dõi")} />
         </Stack.Navigator>
     )
 }

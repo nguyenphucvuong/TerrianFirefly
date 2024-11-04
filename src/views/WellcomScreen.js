@@ -75,7 +75,7 @@ function WellcomScreen() {
       source={require("../../assets/app_bg.jpg")}
       style={styles.imageBg}
     >
-      <View style={[styles.container]}>
+      <View style={ {flex: 1 }}>
         <Image
           source={require("../../assets/app_icon.png")}
           style={styles.image}
@@ -110,9 +110,10 @@ function WellcomScreen() {
         />
         <View style={styles.link}>
           <View style={{ flexDirection: "row" }}>
-            <Text>Đã có tài khoản ?</Text>
+            <Text>Đã có tài khoản ?</Text> 
             <TouchableOpacity
-              onPress={() => navigation.navigate("LoginScreen")}
+            onPress={() => navigation.navigate('LoginScreen')}
+            // onPress={() => navigation.navigate('EventScreen')}
             >
               <Text style={{ color: "#0286FF" }}> Đăng Nhập</Text>
             </TouchableOpacity>

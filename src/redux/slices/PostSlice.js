@@ -1,36 +1,61 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter, doc, getCountFromServer, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase/FirebaseConfig'; // Firebase config
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Firebase Storage
+import { collection, addDoc, getDoc, getDocs, query, orderBy, limit, startAfter, doc, getCountFromServer, updateDoc } from 'firebase/firestore'; // Firestore
+import { db, storage } from '../../firebase/FirebaseConfig'; // Cấu hình Firebase
 
 // Trạng thái ban đầu
 const initialState = {
   post: [],
   lastVisiblePost: null,
-  status: 'idle',
+  status: "idle",
   error: null,
+  postByField: [],
 };
 
 // Tạo async thunk để thêm dữ liệu lên Firestore
-export const createPost = createAsyncThunk('data/createPost', async (newData) => {
-  try {
-    // Thêm dữ liệu mới vào Firestore
-    const docRef = await addDoc(collection(db, 'Posts'), newData);
+export const createPost = createAsyncThunk(
+  "data/createPost",
+  async (newData) => {
+    try {
+      // Thêm dữ liệu mới vào Firestore
+      const docRef = await addDoc(collection(db, "Posts"), newData);
 
-    // Lấy tài liệu vừa thêm từ Firestore
-    const docSnap = await getDoc(docRef);
+      const imgUrls = [];
 
-    if (docSnap.exists()) {
-      // Trả về dữ liệu của tài liệu vừa thêm
-      return { id: docSnap.id, ...docSnap.data() };
-    } else {
-      throw new Error('No such document!');
+      // Tải lên từng ảnh trong imgPost
+      for (const img of newData.imgPost) {
+        const response = await fetch(img);
+        const blob = await response.blob(); // Chuyển đổi URL thành dạng nhị phân
+        console.log("so nhi phan", blob);
+        const imgRef = ref(storage, `images/${img.split("/").pop()}`); // Đặt tên cho ảnh
+        await uploadBytes(imgRef, blob); // Tải lên ảnh
+
+        // Lấy URL tải về
+        const imgUrl = await getDownloadURL(imgRef);
+        imgUrls.push(imgUrl); // Lưu URL vào mảng
+      }
+
+      console.log(imgUrls);
+      // Lấy tài liệu vừa thêm từ Firestore
+      const docSnap = await getDoc(docRef);
+
+      await updateDoc(docRef, {
+        post_id: docRef.id,
+        imgPost: imgUrls, // Lưu ID vào tài liệu
+      });
+
+      if (docSnap.exists()) {
+        // Trả về dữ liệu của tài liệu vừa thêm
+        return { post_id: docSnap.id, ...docSnap.data() };
+      } else {
+        throw new Error("No such document!");
+      }
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      throw error;
     }
-  } catch (error) {
-    console.error('Error adding document: ', error);
-    throw error;
   }
-});
-
+);
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getPostsFirstTime = createAsyncThunk('data/getPostsFirstTime', async () => {
   try {

@@ -182,6 +182,7 @@ function RegisterScreen() {
       );
       return;
     }
+    setisLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -195,7 +196,11 @@ function RegisterScreen() {
       customAlert("Thông báo", "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.", "OK", "cancel");
       navigation.navigate("LoginScreen");
     } catch (error) {
+      setisLoading(false);
       handleError(error);
+    }
+    finally {
+      setisLoading(false); // Đặt trạng thái loading về false ở đây
     }
   };
   // Hàm xử lý lỗi từ Firebase
@@ -316,6 +321,7 @@ function RegisterScreen() {
             ) : null}
           </View>
           <ButtonFunctionComponent
+            isLoading={isLoading}
             name={"Đăng Ký"}
             backgroundColor={"#0286FF"}
             colorText={"#fff"}
