@@ -1,5 +1,5 @@
-import { View, FlatList, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useEffect } from 'react';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native'
+import React, { useEffect, useState} from 'react';
 import { useSelector, useDispatch } from "react-redux";
 import { useRoute } from '@react-navigation/native';
 //styles
@@ -7,40 +7,74 @@ import { StyleGlobal } from '../styles/StyleGlobal'
 //constains
 import { appInfo } from '../constains/appInfo'
 //components
-import { IconComponent } from '../component'
+import { IconComponent, SkeletonComponent } from '../component'
 //redux
 import { getNickname } from '../redux/slices/NicknameSlice';
+import { getUserByField, updateUser, getUser } from '../redux/slices/UserSlices';
 const NickNameScreen = () => {
     //FireBase
     const nickname = useSelector((state) => state.nickname.nickname);
     const user = useSelector((state) => state.user.user);
+    const [isNickname, setNickname] = useState(user.nickname);
     const dispatch = useDispatch();
-    //cập nhật lại dữ liệu     
-    useEffect(() => {
-        //đọc dữ liệu   
-        dispatch(getNickname());
-    }, []);
-    //console.log('nickname', nickname);
-    const hanldeSelectNickName = () => {
-
+    //Xử lý chọn nickname
+    const hanldeSelectNickName = (item) => {
+        try {
+            setNickname(item);
+            const newData = {
+                nickname: item,
+            }
+            console.log('newData', newData);
+            dispatch(updateUser({ user_id: user.user_id, newData: newData }));
+            Alert.alert("Thông Báo", "Cập Nhật Thành Công");
+        } catch (error) {
+            console.error("Update failed:", error);
+        }
     }
+        //cập nhật lại dữ liệu     
+        useEffect(() => {
+            //đọc dữ liệu   
+            dispatch(getNickname());
+            // dispatch(getUser(user.email));
+        }, []);
+    //console.log('nickname', nickname);
     return (
         <View style={StyleGlobal.container}>
-            <FlatList
-                data={nickname}
-                renderItem={({ item }) => {
-                    return (
-                        <TouchableOpacity style={[styles.buttonRow, {borderColor: user.nickname === item.nickname ? '#90CAF9' : 'gray' }]} onPress={() => hanldeSelectNickName()}>
-                            <Text style={styles.buttonText}>{item.nickname}</Text>
-                            {user.nickname === item.nickname ?
-                                <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'#90CAF9'} style={styles.iconStyle} />
-                                : null
-                            }
-                        </TouchableOpacity>
+            {
+                !user || !nickname ?
+                    (
+                        <View>
+                            <SkeletonComponent
+                                Data={""}
+                                style={{ width: '100%', height: appInfo.heightWindows * 0.05 }}
+                            />
+                            <SkeletonComponent
+                                Data={""}
+                                style={{ width: '100%', height: appInfo.heightWindows * 0.05 }}
+                            />
+                            <SkeletonComponent
+                                Data={""}
+                                style={{ width: '100%', height: appInfo.heightWindows * 0.05 }}
+                            />
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={nickname}
+                            renderItem={({ item }) => {
+                                return (
+                                    <TouchableOpacity style={[styles.buttonRow, { borderColor: isNickname === item.nickname ? '#90CAF9' : 'gray' }]} onPress={() => hanldeSelectNickName(item.nickname)}>
+                                        <Text style={styles.buttonText}>{item.nickname}</Text>
+                                        {isNickname === item.nickname ?
+                                            <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'#90CAF9'} style={styles.iconStyle} />
+                                            : null
+                                        }
+                                    </TouchableOpacity>
+                                )
+                            }}
+                            keyExtractor={(item) => item.nickname.toString()}
+                        />
                     )
-                }}
-                keyExtractor={(item) => item.nickname.toString()}
-            />
+            }
         </View>
     )
 }

@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native'
+import { View, StyleSheet, Text, TouchableOpacity, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native'
 import React, { useMemo, useRef, useState, useEffect } from 'react'
 import {
     BottomSheetModal,
@@ -6,6 +6,7 @@ import {
     BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Modal from 'react-native-modal';
 import * as ImagePicker from 'expo-image-picker';
 import { useSelector, useDispatch } from "react-redux";
 // Lấy chiều cao màn hình để tính toán
@@ -15,12 +16,16 @@ import { AvatarEx, ButtonFunctionComponent, InputComponents, IconComponent } fro
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 //redux
-import { getUser } from '../redux/slices/UserSlices';
+import { getUser, updateUser, uploadImage } from '../redux/slices/UserSlices';
 const InfomationScreen = () => {
     const navigation = useNavigation(); // Sử dụng hook navigation
     const [userName, setUserName] = useState('');
     const [gender, setGender] = useState('');
-
+    const [avatarImage, setAvatarImage] = useState('');
+    const [frame_user, setFrame_user] = useState('');
+    //uploadImage
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isModalVisible, setModalVisible] = useState(false); // Modal visibility
     //bottomSheet
     const snapPoints = useMemo(() => [appInfo.heightWindows * 0.25]);
     const bottomSheetModalRef = useRef(null);
@@ -31,7 +36,6 @@ const InfomationScreen = () => {
     const user = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
     // Choose image
-    const [avatarImage, setAvatarImage] = useState('');
     const handleImagePickerPress = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -42,11 +46,31 @@ const InfomationScreen = () => {
         // console.log('result',result);
 
         if (!result.canceled) {
-            setAvatarImage(prevState => [...prevState, result.assets.uri]);
+            // Lưu URI của ảnh vào avatarImage
+            setAvatarImage(result.assets[0].uri);
         }
     }
     //save
-    const handleSaveInfomation = () => {
+    const handleSaveInfomation = async () => {
+        setModalVisible(true);
+        try {
+            const imgUser = await dispatch(uploadImage({
+                imgUser: avatarImage,
+                setUploadProgress // Pass setUploadProgress to update progress
+            })).unwrap();
+            const newData = {
+                username: userName,
+                gender: gender,
+                imgUser: imgUser,
+            }
+            // console.log('imgUser', imgUser);
+            //console.log('newData', newData);
+            dispatch(updateUser({ user_id: user.user_id, newData: newData }))
+            setModalVisible(false);
+            Alert.alert("Thông Báo", "Cập Nhật Thành Công");
+        } catch (error) {
+            console.error("Upload failed:", error);
+        }
 
     }
     useEffect(() => {
@@ -58,6 +82,8 @@ const InfomationScreen = () => {
     const hanndleDisPlay = () => {
         setUserName(user.username);
         setGender(user.gender);
+        setAvatarImage(user.imgUser);
+        setFrame_user(user.frame_user);
     }
     //Gender
     const hanldeGender = (gender) => {
@@ -78,16 +104,17 @@ const InfomationScreen = () => {
                 return null;
         }
     }
+    //console.log('avatarImage',avatarImage);
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={StyleGlobal.container} >
                 <BottomSheetModalProvider>
                     <AvatarEx
-                        url={user.imgUser}
+                        url={avatarImage}
                         size={appInfo.widthWindows * 0.22}
                         round={20}
-                        frame={user.frame_user}
+                        frame={frame_user}
                     />
                     <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
                         {/* Chọn ảnh đại diện */}
@@ -116,6 +143,16 @@ const InfomationScreen = () => {
                             <IconComponent name={'chevron-right'} size={appInfo.heightWindows * 0.024} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
                     </View>
+                    {/* Modal */}
+                    <Modal isVisible={isModalVisible}>
+                        <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+                            <Text style={{ alignSelf: 'center' }}>Cập Nhật</Text>
+                            <View style={{ marginTop: appInfo.heightWindows * 0.01, marginBottom: appInfo.heightWindows * 0.01 }}>
+                                <View style={styles.separator} />
+                            </View>
+                            <Text>Đang tải... {uploadProgress}%</Text>
+                        </View>
+                    </Modal>
                     <ButtonFunctionComponent
                         name={'Lưu'}
                         backgroundColor={'#8B84E9'}
@@ -123,6 +160,7 @@ const InfomationScreen = () => {
                         style={styles.button2}
                         onPress={() => handleSaveInfomation()}
                     />
+
                     <BottomSheetModal
                         ref={bottomSheetModalRef}
                         index={0}
@@ -191,6 +229,12 @@ const styles = StyleSheet.create({
     },
     iconStyle: {
         marginLeft: 'auto',
+    },
+    separator: {
+        width: '100%',  // Or you can use a fixed width, like 50 or 100
+        height: 1,
+        backgroundColor: '#B6B3B3',
+        marginVertical: 5,
     },
 
 })
