@@ -1,5 +1,5 @@
 import { Animated, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, ToastAndroid, Platform } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ImageViewer from 'react-native-image-zoom-viewer';
@@ -23,13 +23,22 @@ import { StyleGlobal } from '../styles/StyleGlobal';
 import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtComponent';
 import ImagesPaperComponent from '../component/ImagesPaperComponent';
 import YoutubePlayerComponent from '../component/YoutubePlayerComponent';
+import { useDispatch, useSelector } from 'react-redux';
+import { createFollow, startListeningFollowers } from '../redux/slices/FollowerSlice';
 
 const DetailPostScreen = () => {
     const inset = useSafeAreaInsets();
     const navigation = useNavigation();
     const route = useRoute().params;
 
-    const { post, user, emoji, userPost } = route;
+    const { post, user, emoji, userPost, isFollow, post_user_id } = route;
+    console.log("user.user_id", user.user_id)
+    console.log("post_user_id", post_user_id)
+    console.log("isFollow", isFollow)
+    const [isFlag, setIsFlag] = useState(isFollow);
+
+    const follower = useSelector(state => state.follower.follower);
+    const dispatch = useDispatch();
 
 
     {/* Lấy tọa độ của component để sử dụng kích hoạt animated khi lướt đến */ }
@@ -49,6 +58,40 @@ const DetailPostScreen = () => {
         })
     }
 
+    const userPostCheck = () => {
+        if (user.user_id === post_user_id) {
+            return false;
+        }
+        return true;
+    }
+    useEffect(() => {
+        setIsFlag(false);
+        if (user.user_id == userPost.user_id) {
+            setIsFlag(true); return;
+        }
+        follower.map((item) => {
+
+            if (item.follower_user_id == user.user_id && item.user_id == userPost.user_id) {
+                setIsFlag(true); return;
+            } else {
+                setIsFlag(false); return;
+            }
+        })
+    }, [follower]);
+    const handleFollowButton = async () => {
+        await dispatch(createFollow({ follower_user_id: userPost.user_id, user_id: user.user_id }));
+        await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+        // await dispatch(getFollower({ follower_user_id: user.user_id }));
+        follower.map((item) => {
+            if (item.follower_user_id == user.user_id && item.user_id == userPost.user_id) {
+                setIsFlag(true); return;
+            } else {
+                setIsFlag(false); return;
+            }
+        })
+
+    };
+
     const [copiedText, setCopiedText] = useState('');
     const copyToClipboard = async (content) => {
         await Clipboard.setStringAsync(content);
@@ -67,13 +110,17 @@ const DetailPostScreen = () => {
         }
     };
 
+    useEffect(() => {
+        console.log(isFlag);
+    }, [isFlag]);
+
 
     const handleAd = () => {
         console.log("toi day");
         console.log(componentPosition);
     };
     return (
-        <View style={{ flex: 1, backgroundColor: "green" }}>
+        <View style={{ flex: 1 }}>
 
             <StatusBar barStyle={'dark-content'} backgroundColor={"white"} />
             {/* Navigate bar */}
@@ -120,19 +167,23 @@ const DetailPostScreen = () => {
                             <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{user.username}</Text>
                         </TouchableOpacity>
 
-                        <ButtonsComponent isButton onPress={handleAd}
-                            style={{
-                                borderColor: "rgba(121,141,218,1)",
-                                borderRadius: 100,
-                                borderWidth: 2,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                width: 80,
-                                height: "100%",
-                            }}
-                        >
-                            <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
-                        </ButtonsComponent>
+                        {userPostCheck() ?
+                            isFlag ?
+                                <></>
+                                : <ButtonsComponent isButton onPress={handleFollowButton}
+                                    style={{
+                                        borderColor: "rgba(121,141,218,1)",
+                                        borderRadius: 100,
+                                        borderWidth: 2,
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        width: 80,
+                                        height: "100%",
+                                    }}
+                                >
+                                    <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
+                                </ButtonsComponent>
+                            : <></>}
                     </Animated.View>
                 </View>
 
@@ -144,7 +195,7 @@ const DetailPostScreen = () => {
                         alignItems: "center",
                     }}
                 >
-                    <MoreOptionPostComponent />
+                    <MoreOptionPostComponent post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
                 </View>
             </RowComponent>
             {/* Quick Comment */}
@@ -223,32 +274,37 @@ const DetailPostScreen = () => {
                                 color: "#BFBFBF",
                             }}>{handleTime({ post: post })}</Text>
                         </View>
-                        <View style={{
-                            flex: 1,
-                            paddingHorizontal: "2%",
-                            // backgroundColor: "red",
-                        }}>
-                            <ButtonsComponent isButton onPress={handleAd}
-                                style={{
-                                    borderColor: "rgba(121,141,218,1)",
-                                    borderRadius: 100,
-                                    borderWidth: 2,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    width: "100%",
-                                    height: "30%",
-                                }}
-                            >
-                                <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
-                            </ButtonsComponent>
-                        </View>
+                        {userPostCheck() ?
+                            isFlag ? <></>
+                                :
+                                <View style={{
+                                    flex: 1,
+                                    paddingHorizontal: "2%",
+                                    // backgroundColor: "red",
+                                }}>
+                                    <ButtonsComponent isButton onPress={handleFollowButton}
+                                        style={{
+                                            borderColor: "rgba(121,141,218,1)",
+                                            borderRadius: 100,
+                                            borderWidth: 2,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            width: "100%",
+                                            height: "30%",
+                                        }}
+                                    >
+                                        <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
+                                    </ButtonsComponent>
+                                </View>
+                            :
+                            <></>}
 
                     </View>
 
                     {/* Content Post */}
                     <View style={{
                         marginTop: "3%",
-                        backgroundColor: "rgba(0, 0, 0, 0.05)",
+                        // backgroundColor: "rgba(0, 0, 0, 0.05)",
                     }}>
                         <Text style={{
                             fontSize: 15,
@@ -350,7 +406,7 @@ const DetailPostScreen = () => {
                                 justifyContent: "center",
                             }}
                         >
-                            <MoreOptionPostComponent />
+                            <MoreOptionPostComponent post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
                         </View>
                     </RowComponent>
                     {/* Content Comment */}

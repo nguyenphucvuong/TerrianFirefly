@@ -35,7 +35,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (user) {
-      dispatch(getFollower({ user_id: user?.user_id }));
+      dispatch(getFollower({ follower_user_id: user?.user_id }));
       // dispatch(getPostsByField({ field: "created_at", quantity: 3, isFollow: false, currentUserId: user?.user_id }));
     }
   }, [user]);

@@ -4,6 +4,12 @@ import { Animated, ScrollView, StyleSheet, Text, Easing, View } from 'react-nati
 import React, { useState, useEffect } from 'react'
 
 import { Image } from "expo-image";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteFollow, startListeningFollowers, getFollower } from '../../redux/slices/FollowerSlice';
+import { deleteFavorite, createFavorite, startListeningFavorites } from '../../redux/slices/FavoriteSlice';
+import { updatePostsByField } from '../../redux/slices/PostSlice';
+
+
 import { appInfo } from '../../constains/appInfo';
 import { ModalPop } from '../../modals';
 import {
@@ -14,13 +20,81 @@ import RowComponent from "../RowComponent";
 import MoreOptionItemComponent from './MoreOptionItemComponent';
 
 
-const MoreOptionPostComponent = (info) => {
-    const [style] = [info.style];
+const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_id }) => {
     const [isVisible, setIsVisible] = useState(false);
     // let isVisible = false;
     const translateY = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
     // const translateY = useRef(new Animated.Value(0)).current; // Start offscreen
 
+    const favorite = useSelector(state => state.favorite.currentFavorite);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const dispath = useDispatch();
+
+    useEffect(() => {
+        const getFavorite = async () => {
+            await dispath(startListeningFavorites({ post_id: post_id, user_id: user_id }));
+        }
+        getFavorite();
+    }, [])
+    useEffect(() => {
+        console.log(favorite)
+        console.log("favorite", favorite.length)
+        if (favorite.length === 0) {
+            setIsFavorite(false);
+        } else {
+            setIsFavorite(true);
+            // favorite.map((item) => {
+            //     if (item.user_id === user_id, item.post_id === post_id) {
+            //         setIsFavorite(true); return;
+            //     } else {
+            //         setIsFavorite(false); return;
+            //     }
+            // })
+        }
+    }, [favorite])
+    useEffect(() => {
+        console.log("isFavorite Check", isFavorite)
+    }, [isFavorite])
+
+    const handleDeleteFollow = () => {
+        dispath(deleteFollow({ follower_user_id: user_id, user_id: post_user_id }));
+        // dispath(getFollower({ follower_user_id: user_id }));
+        handleHideInput();
+        return;
+    }
+
+    const handleFavorite = () => {
+        if (isFavorite) {
+            dispath(deleteFavorite({ post_id: post_id, user_id: user_id }));
+            // dispath(startListeningFavorites({ post_id: post_id, user_id: user_id }));
+            handleHideInput();
+        } else {
+            dispath(createFavorite({ post_id: post_id, user_id: user_id }));
+            // dispath(startListeningFavorites({ post_id: post_id, user_id: user_id }));
+            handleHideInput();
+        }
+    }
+
+    const handleReport = () => {
+        dispath(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
+    }
+
+    const userFollowCheck = () => {
+        if (user_id === post_user_id) {
+            return false;
+        } else if (isFollow) {
+
+            return isFollow;
+        }
+        return false;
+    }
+
+    const userFavoriteCheck = () => {
+        if (user_id === post_user_id) {
+            return false;
+        }
+        return true;
+    }
 
     const handleShowInput = () => {
 
@@ -33,7 +107,6 @@ const MoreOptionPostComponent = (info) => {
     };
 
     const handleHideInput = () => {
-        ;
         // isVisible = !isVisible
         Animated.timing(translateY, {
             toValue: appInfo.heightWindows,
@@ -91,23 +164,39 @@ const MoreOptionPostComponent = (info) => {
                             }}>
 
                             {/* Hủy theo dõi */}
-                            <MoreOptionItemComponent
-                                isRow
-                                url={require('../../../assets/appIcons/sad-unfollow.png')}
-                                text={"Hủy theo dõi"}
-                                onPress={() => console.log("Reddit")} />
+                            {userFollowCheck() ?
+                                <MoreOptionItemComponent
+                                    isRow
+                                    url={require('../../../assets/appIcons/sad-unfollow.png')}
+                                    text={"Hủy theo dõi"}
+                                    onPress={handleDeleteFollow} /> : <></>}
                             {/* Yêu thích */}
-                            <MoreOptionItemComponent
-                                isRow
-                                url={require('../../../assets/appIcons/favorite.png')}
-                                text={"Yêu thích"}
-                                onPress={() => console.log("Twitter")} />
+                            {userFavoriteCheck() ?
+                                !isFavorite ?
+                                    <MoreOptionItemComponent
+                                        isRow
+                                        url={require('../../../assets/appIcons/favorite.png')}
+                                        text={"Yêu thích"}
+                                        onPress={handleFavorite} />
+                                    :
+                                    <MoreOptionItemComponent
+                                        isRow
+                                        url={require('../../../assets/appIcons/unfavorite.png')}
+                                        text={"Hủy yêu thích"}
+                                        onPress={handleFavorite} />
+                                : <></>}
                             {/* Báo cáo */}
                             <MoreOptionItemComponent
                                 isRow
                                 url={require('../../../assets/appIcons/report-flag.png')}
                                 text={"Báo cáo"}
-                                onPress={() => console.log("Reddit")} />
+                                onPress={handleReport} />
+                            {/* Xoá bài viết */}
+                            {/* {!userPostCheck() ? <MoreOptionItemComponent
+                                isRow
+                                url={require('../../../assets/appIcons/favorite.png')}
+                                text={"Xoá bài viết"}
+                                onPress={() => console.log("Twitter")} /> : <></>} */}
                         </ScrollView>
                     </RowComponent>
                 </Animated.View>

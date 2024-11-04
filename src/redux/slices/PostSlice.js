@@ -49,17 +49,7 @@ export const createPost = createAsyncThunk(
   }
 );
 
-// Hàm lấy danh sách user ID đã được follow
-const getFollowedUserIds = async ({ currentUserId }) => {
-  const followerQuery = query(
-    collection(db, "Follower"),
-    where("follower_user_id", "==", currentUserId)
-  );
-  const followerSnapshot = await getDocs(followerQuery);
-  console.log(followerSnapshot);
 
-  return followerSnapshot.docs.map((doc) => doc.data().user_id);
-};
 
 
 // Hàm để cập nhật số lượt xem cho bài viết
@@ -74,6 +64,18 @@ const updatePostViewCount = async (docs) => {
   );
 };
 
+// Hàm lấy danh sách user ID đã được follow
+const getFollowedUserIds = async ({ currentUserId }) => {
+  const followerQuery = query(
+    collection(db, "Follower"),
+    where("follower_user_id", "==", currentUserId)
+  );
+  const followerSnapshot = await getDocs(followerQuery);
+  // console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
+
+  return followerSnapshot.docs.map((doc) => doc.data().user_id);
+};
+
 // Hàm chính để lấy bài viết mới
 export const getPostsRefresh = createAsyncThunk(
   "data/getPostsRefresh",
@@ -82,7 +84,7 @@ export const getPostsRefresh = createAsyncThunk(
       const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
 
       if (followedUserIds.length === 0 && isFollow) {
-        return { postData: [], lastVisiblePost: null };
+        return { postData: [], lastVisiblePost: null, isFollow: isFollow, };
       }
 
       let postsQuery = query(
@@ -263,7 +265,7 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
   "data/getPostsFromFollowedUsers",
   async ({ field, quantity, currentUserId }, { getState }) => {
     try {
-      console.log("currentUserId", currentUserId);
+
 
       // Lấy danh sách user ID đã được follow
       const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
@@ -275,6 +277,7 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
 
       // Kiểm tra lastVisiblePostFollower để lấy bài đăng từ trang trước đó
       const lastVisiblePostId = getState().post.lastVisiblePostFollower;
+      console.log("currentUserId", getState().post.lastVisiblePostFollower);
       let lastVisibleDoc = null;
 
       if (lastVisiblePostId) {
@@ -325,20 +328,19 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
 
 export const updatePostsByField = createAsyncThunk(
   "data/updatePostsByField",
-  async ({ postId, field, value }, { getState, dispatch }) => {
+  async ({ post_id, field, value }, { getState, dispatch }) => {
+    console.log("postId", post_id);
+    console.log("field", [field]);
+    console.log("value", value);
     try {
-      // Tạo tham chiếu đến tài liệu trong Firestore
-      const postRef = doc(db, "Posts", postId);
+      const postRef = doc(db, "Posts", post_id);
 
-      // Cập nhật trường cụ thể
       await updateDoc(postRef, {
         [field]: value,
       });
 
       console.log(`Field '${field}' updated successfully with value: ${value}`);
 
-      // Bạn có thể dispatch thêm action nếu cần
-      // dispatch(someAction(...));
     } catch (error) {
       console.error("Error updating post: ", error);
       throw error;
@@ -346,7 +348,7 @@ export const updatePostsByField = createAsyncThunk(
   }
 );
 
-// Tạo slice cho Post
+// Tạo slice cho Post 
 export const PostSlice = createSlice({
   name: "post",
   initialState,
@@ -395,9 +397,11 @@ export const PostSlice = createSlice({
       })
       .addCase(getPostsRefresh.fulfilled, (state, action) => {
         state.loading = false;
+        // console.log("action.payload.isFollow", action.payload.isFollow)
         if (action.payload.isFollow) {
+          // console.log("action.payload.postData", action.payload.postData)
           state.followerPost = action.payload.postData;
-          state.lastVisiblePostFollower = action.payload.lastVisiblePostFollower;
+          state.lastVisiblePostFollower = action.payload.lastVisiblePost;
         } else {
           state.post = action.payload.postData;
           state.lastVisiblePost = action.payload.lastVisiblePost;

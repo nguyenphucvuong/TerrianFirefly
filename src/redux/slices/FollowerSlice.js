@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, where, updateDoc, query } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, where, updateDoc, query, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
@@ -37,32 +37,69 @@ export const createFollow = createAsyncThunk('data/createFollow', async ({ follo
     }
 });
 
+export const deleteFollow = createAsyncThunk('data/deleteFollow', async ({ follower_user_id, user_id }) => {
+    try {
+        const followQuery = query(
+            collection(db, 'Follower'),
+            where('follower_user_id', '==', follower_user_id),
+            where('user_id', '==', user_id)
+        );
+        const querySnapshot = await getDocs(followQuery);
+        for (const docSnapshot of querySnapshot.docs) {
+            await deleteDoc(docSnapshot.ref);
+        }
+        console.log(`Successfully deleted follow relationship between ${follower_user_id} and ${user_id}`);
+    } catch (error) {
+        console.error('Error deleting document: ', error);
+        throw error;
+    }
+});
 
-export const getFollower = createAsyncThunk('data/getFollower', async ({ user_id }) => {
-    // console.log("empty", user_id)
+export const getFollower = createAsyncThunk('data/getFollower', async ({ follower_user_id }) => {
+    // console.log("follower_user_id", follower_user_id)
+    if (follower_user_id === undefined) {
+        return [];
+    }
     try {
 
-        const followerQuery = query(collection(db, "Follower"), where('follower_user_id', "==", user_id));
+        const followerQuery = query(collection(db, "Follower"), where('follower_user_id', "==", follower_user_id));
 
         const querySnapshot = await getDocs(followerQuery);
+        // console.log("querySnapshot", querySnapshot)
 
         if (querySnapshot.empty) {
-            console.log("empty")
             return [];
         }
         const commentData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         return commentData;
     } catch (error) {
-        console.error('Error fetching: ', error);
+        console.error('Error fetching follower: ', error);
         throw error;
     }
 });
+export const startListeningFollowers = ({ follower_user_id }) => (dispatch) => {
+    if (!follower_user_id) return;
 
+    const followerQuery = query(collection(db, "Follower"), where('follower_user_id', "==", follower_user_id));
+    const unsubscribe = onSnapshot(followerQuery, (querySnapshot) => {
+        const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        dispatch(setFollowers(followers));
+    }, (error) => {
+        console.error('Error fetching follower: ', error);
+    });
+
+    return unsubscribe; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
+};
 export const FollowerSlice = createSlice({
     name: 'follower',
     initialState,
-    reducers: {},
+    reducers: {
+        setFollowers: (state, action) => {
+            state.follower = action.payload;
+            state.status = 'succeeded';
+        },
+    },
     extraReducers: (builder) => {
         builder
             //createFollow
@@ -89,11 +126,22 @@ export const FollowerSlice = createSlice({
             .addCase(getFollower.rejected, (state, action) => {
                 state.error = action.error.message;
                 state.status = 'failed';
-            });
+            })
 
+            //  deleteFollow
+            .addCase(deleteFollow.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+            })
+            .addCase(deleteFollow.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteFollow.rejected, (state, action) => {
+                state.error = action.error.message;
+                state.status = 'failed';
+            })
     },
 });
 
-// export const { setPost } = PostSlice.actions
+export const { setFollowers } = FollowerSlice.actions
 
 export default FollowerSlice.reducer;

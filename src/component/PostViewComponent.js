@@ -4,14 +4,14 @@ import { useNavigation } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserByField } from "../redux/slices/UserSlices";
-import { createFollow } from "../redux/slices/FollowerSlice";
+import { createFollow, getFollower, startListeningFollowers } from "../redux/slices/FollowerSlice";
 
 
 import { appInfo } from "../constains/appInfo";
-import { data } from "../constains/data";
 import { handleTime } from "../utils/converDate";
 
 import { StyleGlobal } from "../styles/StyleGlobal";
+
 import {
     AvatarEx,
     ButtonsComponent,
@@ -47,18 +47,25 @@ const PostViewComponent = ({ post, emoji, user }) => {
             const userData = userResponse.payload;
             setUserPost(userData);
 
-            if (user.user_id == userId) {
-                setIsFollow(true);
-            }
-            follower.map((item) => {
-                if (item.follower_user_id == user.user_id) {
-
-                    setIsFollow(true);
-                }
-            });
         }
         handleGetUserPost();
-    }, [dispatch, userId, follower]);
+    }, [userId]);
+    useEffect(() => {
+        setIsFollow(false);
+        if (user.user_id == userId) {
+            setIsFollow(true); return;
+        }
+        follower.map((item) => {
+
+            if (item.follower_user_id == user.user_id && item.user_id == userId) {
+                setIsFollow(true); return;
+            } else {
+                setIsFollow(false); return;
+            }
+        })
+    }, [follower]);
+
+
     const navigation = useNavigation();
 
     const title = post?.title.substring(0, 120);
@@ -71,14 +78,23 @@ const PostViewComponent = ({ post, emoji, user }) => {
     const handleFollowButton = () => {
         const handleFollowUser = async () => {
             await dispatch(createFollow({ follower_user_id: userId, user_id: user.user_id }));
-            setIsFollow(true)
+            await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+            // await dispatch(getFollower({ follower_user_id: user.user_id }));
+            follower.map((item) => {
+                if (item.follower_user_id == user.user_id && item.user_id == userId) {
+
+                    setIsFollow(true);
+                } else {
+                    setIsFollow(false);
+                }
+            })
         }
         handleFollowUser();
     };
 
 
     const handleNagigateDetailPost = () => {
-        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, emoji: emoji });
+        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, emoji: emoji, isFollow: isFollow, post_user_id: userId });
     }
 
 
@@ -158,26 +174,24 @@ const PostViewComponent = ({ post, emoji, user }) => {
                                 </SkeletonComponent>
                             </View>
 
-                            <SkeletonComponent Data={userPost.userId} isButton>
-                                <TouchableOpacity
-                                    disabled={isFollow}
-                                    activeOpacity={0.6}
-                                    onPress={handleFollowButton}
-                                    style={{
-                                        borderColor: "rgba(121,141,218,1)",
-                                        borderRadius: 100,
-                                        borderWidth: 1,
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        width: "22%",
-                                        height: "50%",
-                                        paddingHorizontal: "2%",
-                                        opacity: isFollow ? 0 : 1,
-                                    }}
-                                >
-                                    <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>Theo dõi</Text>
-                                </TouchableOpacity>
-                            </SkeletonComponent>
+                            <TouchableOpacity
+                                disabled={isFollow}
+                                activeOpacity={0.6}
+                                onPress={handleFollowButton}
+                                style={{
+                                    borderColor: "rgba(121,141,218,1)",
+                                    borderRadius: 100,
+                                    borderWidth: 1,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    width: "22%",
+                                    height: "50%",
+                                    paddingHorizontal: "2%",
+                                    opacity: isFollow ? 0 : 1,
+                                }}
+                            >
+                                <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>Theo dõi</Text>
+                            </TouchableOpacity>
 
                             <SkeletonComponent Data={userPost.userId} isButton>
                                 <View
@@ -190,7 +204,7 @@ const PostViewComponent = ({ post, emoji, user }) => {
                                         alignItems: "center",
                                     }}
                                 >
-                                    <MoreOptionPostComponent />
+                                    <MoreOptionPostComponent post_id={post.post_id} user_id={user.user_id} isFollow={isFollow} post_user_id={userId} setIsFollow={setIsFollow} />
                                 </View>
                             </SkeletonComponent>
                         </RowComponent>

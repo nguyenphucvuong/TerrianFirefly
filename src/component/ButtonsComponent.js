@@ -1,6 +1,8 @@
 import { Text, TouchableOpacity, FlatList, Pressable, StyleSheet } from "react-native";
 import React from "react";
 import { Image } from 'expo-image';
+import { useNavigation } from '@react-navigation/native';
+
 
 const ButtonsComponent = ({ children, color, style, disabled, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail, isBack, isNext }) => {
   // const ButtonsComponent = (infoButton) => {
@@ -18,6 +20,11 @@ const ButtonsComponent = ({ children, color, style, disabled, isButton, isPressa
   // ];
 
   const PressableButton = () => {
+    const navigate = useNavigation();
+
+    const handleNagigateHashtag = () => {
+      navigate.navigate("Hashtag", { hashtag: hashtag });
+    }
 
     return (
       <Pressable
