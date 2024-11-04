@@ -20,7 +20,7 @@ import {
     VerificationCodeScreen,
     FollowerScreen,
     ResetPasswordScreen,
-    AccountSettingsScreen,
+    HashtagManagerScreen,
 } from '../views';
 
 import IndexTab from '../tabs/indexTab';
@@ -54,7 +54,6 @@ const StackNavigator = () => {
             <Stack.Screen name='RegisterScreen' component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{ headerShown: false }} />
             <Stack.Screen name='VerificationCodeScreen' component={VerificationCodeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name='AccountSettingsScreen' component={AccountSettingsScreen} options={{ headerShown: false }} />
             <Stack.Screen name='ResetPasswordScreen' component={ResetPasswordScreen} options={{ headerShown: false }} />
             <Stack.Screen name='IndexTab' component={IndexTab} options={{ headerShown: false }} />
             <Stack.Screen name='BackgroundScreen' component={BackgroundScreen} options={{ headerShown: false }} />
@@ -74,6 +73,8 @@ const StackNavigator = () => {
                     ...IconHeaderRight("", () => navigation.navigate('AccountDetailsScreen'), 'alert-circle'),
                 })}
             />
+            <Stack.Screen name='HashtagManagerScreen' component={HashtagManagerScreen}
+                options={() => IconBack("Quản Lý Hashtag")} />
             <Stack.Screen name='NotificationManagement' component={NotificationManagement}
                 options={() => IconBack("Quản Lý Thông Báo")} />
             <Stack.Screen name='ManagePostsScreen' component={ManagePostsScreen}

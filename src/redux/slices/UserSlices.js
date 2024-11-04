@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { db, auth } from '../../firebase/FirebaseConfig';
-import { collection, addDoc, getDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
 
 // Trạng thái ban đầu
 const initialState = {
@@ -91,6 +91,41 @@ export const getUserByField = createAsyncThunk('data/getUserByField', async ({ u
 });
 
 // // Tạo async thunk để cập nhật dữ liệu Firestore
+export const updateUser = createAsyncThunk('data/upDateUser', async ({ user_id, newData }) => {
+
+    try {
+        if (!user_id) {
+            throw new Error("User ID is required.");
+        }
+        
+        const userDocRef = doc(collection(db, "user"), user_id);
+        await updateDoc(userDocRef, newData);
+        console.log("User updated!");
+        
+        
+        //Alert.alert("Thành công", "Đã cập nhật Firestore.");
+    } catch (error) {
+        console.error("Error updating user:", error);
+        //Alert.alert("Lỗi", "Không thể cập nhật.");
+    }
+});
+
+
+
+// doc(collection(db, "user"), user_id);
+//               try {
+//                 // Cập nhật mật khẩu mới trong Firestore
+//                 await updateDoc(userRef, newData);
+//                 console.log("User updated!");
+//                 Alert.alert(
+//                   "Thành công",
+//                   "đã cập nhật Firestore."
+//                 );
+
+//               } catch (error) {
+//                 console.error("Error updating user:", error);
+//                 Alert.alert("Lỗi", "Không thể cập nhật.");
+//               }
 // export const updateUser = createAsyncThunk(
 //   "data/updateUser",
 //   async ({ userId, newData }, { rejectWithValue }) => {
@@ -140,8 +175,20 @@ export const UserSlices = createSlice({
             })
             .addCase(getUserByField.rejected, (state, action) => {
                 state.errorUser = action.error.message;
+            })
+            //updateUser
+            .addCase(updateUser.fulfilled, (state, action) => {
+                // const userId = action.payload[0]?.id; // Giả định rằng action.payload là mảng người dùng
+                // if (userId && !state.userByField[userId]) {
+                //     state.userByField[userId] = action.payload[0]; // Lưu người dùng vào state
+                // }
+                state.userByField = action.payload;
+            })
+            .addCase(updateUser.pending, (state) => {
+            })
+            .addCase(updateUser.rejected, (state, action) => {
+                state.errorUser = action.error.message;
             });
-
 
     },
 });

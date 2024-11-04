@@ -138,7 +138,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
         </View>
       </View>
       <View style={[styles.viewInput, { marginBottom: "23%" }]}>
-        <Text style={{ marginBottom: "3%" }}>Password</Text>
+        <Text style={{ marginBottom: "3%" }}>Xác Nhận Mật Khẩu</Text>
         <View style={styles.input}>
           <Icon name="lock" size={25} color="#858585" />
           <TextInput
