@@ -54,12 +54,12 @@ const PostViewComponent = ({ post, user }) => {
 
     useEffect(() => {
         setIsFollow(false);
-        console.log("follower", follower);
-        console.log("userId", userId);
-        console.log("user.user_id", user.user_id);
+        // console.log("follower", follower);
+        // console.log("userId", userId);
+        // console.log("user.user_id", user.user_id);
 
         if (user.user_id == userId) {
-            console.log("user_id == userId");
+            // console.log("user_id == userId");
             setIsFollow(true); return;
         }
         follower.map((item) => {
@@ -71,10 +71,10 @@ const PostViewComponent = ({ post, user }) => {
 
     }, [follower]);
 
-    useEffect(() => {
-        console.log("isFollow", isFollow);
+    // useEffect(() => {
+    //     console.log("isFollow", isFollow);
 
-    }, [isFollow]);
+    // }, [isFollow]);
 
     const navigation = useNavigation();
 
@@ -88,7 +88,7 @@ const PostViewComponent = ({ post, user }) => {
     const handleFollowButton = useCallback(() => {
         const handleFollowUser = async () => {
             await dispatch(createFollow({ follower_user_id: userId, user_id: user.user_id }));
-            // await dispatch(startListeningFollowers({ follower_user_id: user.user_id, user_id: userId }));
+            await dispatch(startListeningFollowers({ follower_user_id: user.user_id, user_id: userId }));
         }
         handleFollowUser();
     });
@@ -205,7 +205,7 @@ const PostViewComponent = ({ post, user }) => {
                                         alignItems: "center",
                                     }}
                                 >
-                                    <MoreOptionPostComponent post_id={post.post_id} user_id={user.user_id} isFollow={isFollow} post_user_id={userId} setIsFollow={setIsFollow} />
+                                    <MoreOptionPostComponent post_id={post.post_id} user_id={user.user_id} isFollow={isFollow} post_user_id={userId} />
                                 </View>
                             </SkeletonComponent>
                         </RowComponent>

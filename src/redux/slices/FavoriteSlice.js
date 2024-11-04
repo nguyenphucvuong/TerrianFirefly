@@ -76,18 +76,17 @@ export const getFavorites = createAsyncThunk('data/getFavorite', async ({ post_i
     }
 });
 
-export const startListeningFavorites = ({ post_id, user_id }) => (dispatch) => {
-    if (!post_id || !user_id) return;
+export const startListeningFavorites = ({ user_id }) => (dispatch) => {
+    if (!user_id) return;
 
     const favoriteQuery =
         query(
             collection(db, "Favorite"),
-            where('post_id', "==", post_id),
             where('user_id', "==", user_id),
         );
     const unFavorite = onSnapshot(favoriteQuery, (querySnapshot) => {
         const favorites = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // console.log("favorites", favorites);
+        console.log("favorites", favorites);
         if (favorites.length > 0) {
             // Dispatch only the first document if available
             dispatch(setCurrentFavorite(favorites));

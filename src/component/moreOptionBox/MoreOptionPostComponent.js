@@ -32,7 +32,7 @@ const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_
 
     useEffect(() => {
         const getFavorite = async () => {
-            await dispatch(startListeningFavorites({ post_id: post_id, user_id: user_id }));
+            await dispatch(startListeningFavorites({ user_id: user_id }));
         }
         getFavorite();
     }, [])
@@ -40,15 +40,15 @@ const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_
         // console.log("object", favorite.length > 0);
         // console.log("favorite data", favorite);
         // console.log("favorite bool", favorite.length == 0);
+        setIsFavorite(false);
         if (favorite.length == 0) {
+            // console.log("object")
             setIsFavorite(false); return;
         }
+        // console.log("aaa")
         favorite.map((item) => {
             if (item.user_id === user_id && item.post_id === post_id) {
                 setIsFavorite(true);
-                return;
-            } else {
-                setIsFavorite(false);
                 return;
             }
         })
@@ -57,7 +57,7 @@ const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_
 
     const handleDeleteFollow = () => {
         dispatch(deleteFollow({ follower_user_id: user_id, user_id: post_user_id }));
-        // dispatch(startListeningFollowers({ follower_user_id: user_id, user_id: post_user_id }));
+        dispatch(startListeningFollowers({ follower_user_id: user_id, user_id: post_user_id }));
         handleHideInput();
         return;
     }
@@ -65,11 +65,11 @@ const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_
     const handleFavorite = () => {
         if (isFavorite) {
             dispatch(deleteFavorite({ post_id: post_id, user_id: user_id }));
-            // dispath(startListeningFavorites({ post_id: post_id, user_id: user_id }));
+            // dispatch(startListeningFavorites({ post_id: post_id, user_id: user_id }));
             handleHideInput();
         } else {
             dispatch(createFavorite({ post_id: post_id, user_id: user_id }));
-            // dispath(startListeningFavorites({ post_id: post_id, user_id: user_id }));
+            // dispatch(startListeningFavorites({ post_id: post_id, user_id: user_id }));
             handleHideInput();
         }
     }

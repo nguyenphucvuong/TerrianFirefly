@@ -28,7 +28,7 @@ export const createFollow = createAsyncThunk('data/createFollow', async ({ follo
         });
 
         if (docSnap.exists()) {
-            return { follower: docSnap.id, ...docSnap.data() };
+            return { ...docSnap.data() };
         } else {
             throw new Error('No such document!');
         }
@@ -90,7 +90,7 @@ export const startListeningFollowers = ({ follower_user_id }) => (dispatch) => {
     const unsubscribe = onSnapshot(followerQuery, (querySnapshot) => {
         const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         dispatch(setFollowers(followers));
-        console.log(followers)
+        console.log("followers", followers)
     }, (error) => {
         console.error('Error fetching follower: ', error);
     });
@@ -114,7 +114,8 @@ export const FollowerSlice = createSlice({
         builder
             //createFollow
             .addCase(createFollow.fulfilled, (state, action) => {
-                state.follower.push(action.payload.follower);
+                console.log(action.payload);
+                state.follower.push(action.payload);
                 state.status = 'succeeded';
             })
             .addCase(createFollow.pending, (state) => {
