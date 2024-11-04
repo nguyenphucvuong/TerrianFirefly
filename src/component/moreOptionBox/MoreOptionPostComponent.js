@@ -28,55 +28,54 @@ const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_
 
     const favorite = useSelector(state => state.favorite.currentFavorite);
     const [isFavorite, setIsFavorite] = useState(false);
-    const dispath = useDispatch();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const getFavorite = async () => {
-            await dispath(startListeningFavorites({ post_id: post_id, user_id: user_id }));
+            await dispatch(startListeningFavorites({ post_id: post_id, user_id: user_id }));
         }
         getFavorite();
     }, [])
     useEffect(() => {
-        console.log(favorite)
-        console.log("favorite", favorite.length)
-        if (favorite.length === 0) {
-            setIsFavorite(false);
-        } else {
-            setIsFavorite(true);
-            // favorite.map((item) => {
-            //     if (item.user_id === user_id, item.post_id === post_id) {
-            //         setIsFavorite(true); return;
-            //     } else {
-            //         setIsFavorite(false); return;
-            //     }
-            // })
+        // console.log("object", favorite.length > 0);
+        // console.log("favorite data", favorite);
+        // console.log("favorite bool", favorite.length == 0);
+        if (favorite.length == 0) {
+            setIsFavorite(false); return;
         }
+        favorite.map((item) => {
+            if (item.user_id === user_id && item.post_id === post_id) {
+                setIsFavorite(true);
+                return;
+            } else {
+                setIsFavorite(false);
+                return;
+            }
+        })
     }, [favorite])
-    useEffect(() => {
-        console.log("isFavorite Check", isFavorite)
-    }, [isFavorite])
+
 
     const handleDeleteFollow = () => {
-        dispath(deleteFollow({ follower_user_id: user_id, user_id: post_user_id }));
-        // dispath(getFollower({ follower_user_id: user_id }));
+        dispatch(deleteFollow({ follower_user_id: user_id, user_id: post_user_id }));
+        // dispatch(startListeningFollowers({ follower_user_id: user_id, user_id: post_user_id }));
         handleHideInput();
         return;
     }
 
     const handleFavorite = () => {
         if (isFavorite) {
-            dispath(deleteFavorite({ post_id: post_id, user_id: user_id }));
+            dispatch(deleteFavorite({ post_id: post_id, user_id: user_id }));
             // dispath(startListeningFavorites({ post_id: post_id, user_id: user_id }));
             handleHideInput();
         } else {
-            dispath(createFavorite({ post_id: post_id, user_id: user_id }));
+            dispatch(createFavorite({ post_id: post_id, user_id: user_id }));
             // dispath(startListeningFavorites({ post_id: post_id, user_id: user_id }));
             handleHideInput();
         }
     }
 
     const handleReport = () => {
-        dispath(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
+        dispatch(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
     }
 
     const userFollowCheck = () => {

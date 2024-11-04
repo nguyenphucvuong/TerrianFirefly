@@ -329,9 +329,9 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
 export const updatePostsByField = createAsyncThunk(
   "data/updatePostsByField",
   async ({ post_id, field, value }, { getState, dispatch }) => {
-    console.log("postId", post_id);
-    console.log("field", [field]);
-    console.log("value", value);
+    // console.log("postId", post_id);
+    // console.log("field", [field]);
+    // console.log("value", value);
     try {
       const postRef = doc(db, "Posts", post_id);
 

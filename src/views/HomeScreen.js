@@ -16,7 +16,6 @@ import { ImageCheckContext } from "../context/ImageProvider";
 import { getUserByField } from "../redux/slices/UserSlices";
 const HomeScreen = () => {
 
-  const emoji = data.emoji;
   const post = useSelector((state) => state.post.post);
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
@@ -57,7 +56,7 @@ const HomeScreen = () => {
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => {
             return (
-              <PostViewComponent post={item} images={item.images} emoji={emoji} user={user} />
+              <PostViewComponent post={item} images={item.images} user={user} />
             )
           }}
           contentContainerStyle={{ flexGrow: 1 }}

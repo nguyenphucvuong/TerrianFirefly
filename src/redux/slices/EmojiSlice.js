@@ -5,23 +5,38 @@ import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 // Trạng thái ban đầu
 const initialState = {
     emojiList: [],
-    currentEmoji: null,
+    currentEmoji: [],
     status: 'idle',
     error: null,
 };
 
-export const createEmoji = createAsyncThunk('data/createEmoji', async ({ post_id, user_id }) => {
+export const createEmoji = createAsyncThunk('data/createEmoji', async (
+    { emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad }) => {
     try {
         const docRef = await addDoc(collection(db, 'Emoji'), {
+            emoji_id: emoji_id,
             post_id: post_id,
             user_id: user_id,
+            isComment: isComment,
+            comment_id: comment_id,
+            count_like: count_like,
+            count_heart: count_heart,
+            count_laugh: count_laugh,
+            count_sad: count_sad,
         });
 
         const docSnap = await getDoc(docRef);
 
         await updateDoc(docRef, {
+            emoji_id: docRef.id,
             post_id: post_id,
             user_id: user_id,
+            isComment: isComment,
+            comment_id: comment_id,
+            count_like: count_like,
+            count_heart: count_heart,
+            count_laugh: count_laugh,
+            count_sad: count_sad,
         });
 
         if (docSnap.exists()) {
@@ -53,8 +68,8 @@ export const deleteEmoji = createAsyncThunk('data/deleteEmoji', async ({ post_id
     }
 });
 
-export const getEmoji = createAsyncThunk('data/getEmoji', async ({ post_id }) => {
-    if (post_id === undefined) {
+export const getEmoji = createAsyncThunk('data/getEmoji', async ({ post_id, user_id }) => {
+    if (post_id === undefined || user_id === undefined) {
         return [];
     }
     try {
@@ -75,39 +90,44 @@ export const getEmoji = createAsyncThunk('data/getEmoji', async ({ post_id }) =>
     }
 });
 
-export const startListeningEmoji = ({ post_id }) => (dispatch) => {
-    if (!post_id) return;
+export const startListeningEmoji = ({ post_id, user_id }) => (dispatch) => {
+    // console.log("!post_id || !user_id", !post_id || !user_id)
+    if (!post_id || !user_id) return;
 
-    const favoriteQuery = query(collection(db, "Favorite"), where('post_id', "==", post_id), limit(1));
-    const unFavorite = onSnapshot(favoriteQuery, (querySnapshot) => {
-        const favorites = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log("favorites", favorites);
-        if (favorites.length > 0) {
+    const emojiQuery = query(
+        collection(db, "Emoji"),
+        where('post_id', "==", post_id),
+        where('user_id', "==", user_id),
+        limit(1));
+    const unEmoji = onSnapshot(emojiQuery, (querySnapshot) => {
+        const emojis = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("emojis", emojis);
+        if (emojis.length > 0) {
             // Dispatch only the first document if available
-            dispatch(setCurrentFavorite([favorites[0]]));
+            dispatch(setCurrentEmoji([emojis[0]]));
         } else {
             console.log("No document found");
-            dispatch(setCurrentFavorite([])); // Empty array if no document is found
+            dispatch(setCurrentEmoji([])); // Empty array if no document is found
         }
     }, (error) => {
-        console.error('Error fetching Favorite: ', error);
+        console.error('Error fetching Emoji: ', error);
     });
 
-    return unFavorite;
+    return unEmoji;
 };
 export const EmojiSlice = createSlice({
-    name: 'favorite',
+    name: 'emoji',
     initialState,
     reducers: {
         setCurrentEmoji: (state, action) => {
-            state.currentFavorite = action.payload;
+            state.currentEmoji = action.payload;
             state.status = 'succeeded';
         },
     },
     extraReducers: (builder) => {
         builder
             .addCase(createEmoji.fulfilled, (state, action) => {
-                state.currentFavorite.push(action.payload);
+                state.currentEmoji = action.payload;
                 state.status = 'succeeded';
             })
             .addCase(createEmoji.pending, (state) => {
@@ -118,14 +138,14 @@ export const EmojiSlice = createSlice({
                 state.status = 'failed';
             })
 
-            .addCase(getFavorites.fulfilled, (state, action) => {
-                state.currentFavorite = action.payload;
+            .addCase(getEmoji.fulfilled, (state, action) => {
+                state.currentEmoji = action.payload;
                 state.status = 'succeeded';
             })
-            .addCase(getFavorites.pending, (state) => {
+            .addCase(getEmoji.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(getFavorites.rejected, (state, action) => {
+            .addCase(getEmoji.rejected, (state, action) => {
                 state.error = action.error.message;
                 state.status = 'failed';
             })

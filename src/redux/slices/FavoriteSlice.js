@@ -77,22 +77,22 @@ export const getFavorites = createAsyncThunk('data/getFavorite', async ({ post_i
 });
 
 export const startListeningFavorites = ({ post_id, user_id }) => (dispatch) => {
-    if (!post_id) return;
+    if (!post_id || !user_id) return;
 
     const favoriteQuery =
         query(
             collection(db, "Favorite"),
             where('post_id', "==", post_id),
             where('user_id', "==", user_id),
-            limit(1));
+        );
     const unFavorite = onSnapshot(favoriteQuery, (querySnapshot) => {
         const favorites = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         // console.log("favorites", favorites);
         if (favorites.length > 0) {
             // Dispatch only the first document if available
-            dispatch(setCurrentFavorite([favorites[0]]));
+            dispatch(setCurrentFavorite(favorites));
         } else {
-            console.log("No document found");
+            // console.log("No document found");
             dispatch(setCurrentFavorite([])); // Empty array if no document is found
         }
     }, (error) => {
@@ -113,7 +113,7 @@ export const FavoriteSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(createFavorite.fulfilled, (state, action) => {
-                state.currentFavorite = action.payload;
+                state.currentFavorite.push(action.payload);
                 state.status = 'succeeded';
             })
             .addCase(createFavorite.pending, (state) => {

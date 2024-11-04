@@ -2,13 +2,16 @@
 import { Text, View, Animated, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useState, useRef, useEffect } from 'react'
 import { Image } from 'expo-image'
+import { useDispatch, useSelector } from 'react-redux'
+import { createEmoji, deleteEmoji, startListeningEmoji } from '../../redux/slices/EmojiSlice'
+
+
 import RowComponent from '../RowComponent'
 import ButtonsComponent from '../ButtonsComponent'
 import { StyleGlobal } from '../../styles/StyleGlobal'
 // import { data } from '../../constains/data'
 import { ModalPop } from '../../modals'
 import { appInfo } from '../../constains/appInfo'
-import { clearLogEntriesAsync } from 'expo-updates'
 
 
 const formatNumber = (num) => {
@@ -23,11 +26,9 @@ const formatNumber = (num) => {
         return num.toString(); // số bình thường
     }
 };
-const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji, handleNagigateDetailPost }) => {
-    // const [toggleExpand, handleShowPopEmoji] = [infoBtn.toggleExpand, infoBtn.handleShowPopEmoji];
-    // const [toggleExpand, handleShowPop] = [infoBtn.toggleExpand, infoBtn.handleShowPop];
+const PostButton = ({ toggleExpand, handleShowPop, post, user, handleNagigateDetailPost }) => {
 
-    // console.log(post.emoji)
+
     const dataPostView = formatNumber(post.count_view);
     const dataPostCmt = null; // chưa có dữ liệu tạm thời để trống
     const dataPostEmoji = formatNumber(post.count_emoji);
@@ -36,6 +37,138 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji, handleNagi
     const translateYEmoji = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
 
     const [isPressLike, setIsPressLike] = useState(false);
+
+    const dispatch = useDispatch();
+
+    const [iconEmoji, setIconEmoji] = useState("../../../assets/emojiIcons/like-out-emoji.png");
+    const emoji = useSelector(state => state.emoji.currentEmoji);
+
+
+    useEffect(() => {
+        const getEmoji = async () => {
+            // await dispatch(startListeningEmoji({ post_id: post.id, user_id: user.user_id }));
+            if (emoji.count_like > 0) {
+                setIconEmoji("like");
+            } else if (emoji.count_heart > 0) {
+                setIconEmoji("heart");
+            } else if (emoji.count_laugh > 0) {
+                setIconEmoji("laugh");
+            } else if (emoji.count_sad > 0) {
+                setIconEmoji("sad");
+            } else {
+                setIconEmoji("default");
+            }
+        };
+        getEmoji();
+    }, []);
+
+    const handleDeleteEmoji = async () => {
+        await dispatch(deleteEmoji({ post_id: post.post_id, user_id: user.user_id }));
+        setIconEmoji("default");
+    }
+    const handleBtnEmoji = async (emoji) => {
+        if (emoji === "like") {
+            if (emoji.count_heart > 0) {
+                handleDeleteEmoji();
+                return;
+            }
+            dispatch(createEmoji({
+                emoji_id: "",
+                post_id: post.post_id,
+                user_id: user.user_id,
+                isComment: false,
+                comment_id: "",
+                count_like: 1,
+                count_heart: 0,
+                count_laugh: 0,
+                count_sad: 0,
+            }));
+            setIconEmoji("like");
+        } else if (emoji === "heart") {
+            if (emoji.count_heart > 0) {
+                handleDeleteEmoji();
+                return;
+            }
+            dispatch(createEmoji({
+                emoji_id: "",
+                post_id: post.post_id,
+                user_id: user.user_id,
+                isComment: false,
+                comment_id: "",
+                count_like: 0,
+                count_heart: 1,
+                count_laugh: 0,
+                count_sad: 0,
+            }));
+            setIconEmoji("heart");
+        } else if (emoji === "laugh") {
+            if (emoji.count_laugh > 0) {
+                handleDeleteEmoji();
+                return;
+            }
+            dispatch(createEmoji({
+                emoji_id: "",
+                post_id: post.post_id,
+                user_id: user.user_id,
+                isComment: false,
+                comment_id: "",
+                count_like: 0,
+                count_heart: 0,
+                count_laugh: 1,
+                count_sad: 0,
+            }));
+            setIconEmoji("../../../assets/emojiIcons/laugh-emoji.png");
+        } else if (emoji === "sad") {
+            if (emoji.count_sad > 0) {
+                handleDeleteEmoji();
+                return;
+            }
+            dispatch(createEmoji({
+                emoji_id: "",
+                post_id: post.post_id,
+                user_id: user.user_id,
+                isComment: false,
+                comment_id: "",
+                count_like: 0,
+                count_heart: 0,
+                count_laugh: 0,
+                count_sad: 1,
+            }));
+            setIconEmoji("sad");
+        }
+        await dispatch(startListeningEmoji({ post_id: post.id, user_id: user.user_id }));
+        handleHidePop();
+    }
+
+    const getIconImg = (emoji) => {
+        switch (emoji) {
+            case "like":
+                return require("../../../assets/emojiIcons/like-emoji.png");
+            case "heart":
+                return require("../../../assets/emojiIcons/heart-emoji.png");
+            case "laugh":
+                return require("../../../assets/emojiIcons/laugh-emoji.png");
+            case "sad":
+                return require("../../../assets/emojiIcons/sad-emoji.png");
+            case "default":
+                return require("../../../assets/appIcons/like-out-post.png");
+            default:
+                return require("../../../assets/appIcons/like-out-post.png");
+        }
+    }
+
+    // const dataEmoji = {
+    //     emoji_id: "",
+    //     post_id: post.post_id,
+    //     user_id: user.user_id,
+    //     isComment: false,
+    //     comment_id: "",
+    //     count_like: count_like,
+    //     count_heart: count_heart,
+    //     count_laugh: count_laugh,
+    //     count_sad: count_sad,
+    // }
+
 
 
     const setFalse = () => {
@@ -156,7 +289,7 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji, handleNagi
                                 width: 20,
                                 height: 20,
                             }}
-                            source={isPressLike ? require('../../../assets/emojiIcons/like-emoji.png') : require('../../../assets/appIcons/like-out-post.png')}
+                            source={getIconImg(iconEmoji)}
                             contentFit="cover"
                         /></ButtonsComponent>
                     <Text
@@ -184,28 +317,32 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, emoji, handleNagi
                     <RowComponent width={"100%"} height={"auto"} style={{
                         // backgroundColor: "pink",
                     }}>
-                        <TouchableOpacity onPress={handleHidePop} style={{ paddingHorizontal: 10 }}>
+                        <TouchableOpacity onPress={() => handleBtnEmoji("like")}
+                            style={{ paddingHorizontal: 10 }}>
                             <Image source={require("../../../assets/emojiIcons/like-emoji.png")}
                                 style={{
                                     width: 30,
                                     height: 30,
                                 }} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleHidePop} style={{ paddingHorizontal: 10 }}>
+                        <TouchableOpacity onPress={() => handleBtnEmoji("heart")}
+                            style={{ paddingHorizontal: 10 }}>
                             <Image source={require("../../../assets/emojiIcons/heart-emoji.png")}
                                 style={{
                                     width: 30,
                                     height: 30,
                                 }} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleHidePop} style={{ paddingHorizontal: 10 }}>
+                        <TouchableOpacity onPress={() => handleBtnEmoji("laugh")}
+                            style={{ paddingHorizontal: 10 }}>
                             <Image source={require("../../../assets/emojiIcons/laugh-emoji.png")}
                                 style={{
                                     width: 30,
                                     height: 30,
                                 }} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleHidePop} style={{ paddingHorizontal: 10 }}>
+                        <TouchableOpacity onPress={() => handleBtnEmoji("sad")}
+                            style={{ paddingHorizontal: 10 }}>
                             <Image source={require("../../../assets/emojiIcons/sad-emoji.png")}
                                 style={{
                                     width: 30,

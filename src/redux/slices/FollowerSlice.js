@@ -1,10 +1,11 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, current } from '@reduxjs/toolkit';
 import { collection, addDoc, getDoc, getDocs, where, updateDoc, query, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
 const initialState = {
     follower: [],
+    currentFollower: [],
     status: 'idle',
     error: null,
 };
@@ -27,7 +28,7 @@ export const createFollow = createAsyncThunk('data/createFollow', async ({ follo
         });
 
         if (docSnap.exists()) {
-            return { follower_user_id: docSnap.id, ...docSnap.data() };
+            return { follower: docSnap.id, ...docSnap.data() };
         } else {
             throw new Error('No such document!');
         }
@@ -81,10 +82,15 @@ export const getFollower = createAsyncThunk('data/getFollower', async ({ followe
 export const startListeningFollowers = ({ follower_user_id }) => (dispatch) => {
     if (!follower_user_id) return;
 
-    const followerQuery = query(collection(db, "Follower"), where('follower_user_id', "==", follower_user_id));
+    const followerQuery = query(
+        collection(db, "Follower"),
+        where('follower_user_id', "==", follower_user_id),
+
+    );
     const unsubscribe = onSnapshot(followerQuery, (querySnapshot) => {
         const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         dispatch(setFollowers(followers));
+        console.log(followers)
     }, (error) => {
         console.error('Error fetching follower: ', error);
     });
@@ -99,12 +105,16 @@ export const FollowerSlice = createSlice({
             state.follower = action.payload;
             state.status = 'succeeded';
         },
+        setCurrentFollower: (state, action) => {
+            state.currentFollower = action.payload;
+        }
+
     },
     extraReducers: (builder) => {
         builder
             //createFollow
             .addCase(createFollow.fulfilled, (state, action) => {
-                state.follower.push(action.payload);
+                state.follower.push(action.payload.follower);
                 state.status = 'succeeded';
             })
             .addCase(createFollow.pending, (state) => {
@@ -142,6 +152,6 @@ export const FollowerSlice = createSlice({
     },
 });
 
-export const { setFollowers } = FollowerSlice.actions
+export const { setFollowers, setCurrentFollower } = FollowerSlice.actions
 
 export default FollowerSlice.reducer;

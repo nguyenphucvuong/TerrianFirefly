@@ -1,5 +1,5 @@
 import { Text, View, } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,7 +28,7 @@ import { op } from "@tensorflow/tfjs";
 
 
 
-const PostViewComponent = ({ post, emoji, user }) => {
+const PostViewComponent = ({ post, user }) => {
     if (!post) {
 
         return <></>;
@@ -50,51 +50,52 @@ const PostViewComponent = ({ post, emoji, user }) => {
         }
         handleGetUserPost();
     }, [userId]);
+
+
     useEffect(() => {
         setIsFollow(false);
+        console.log("follower", follower);
+        console.log("userId", userId);
+        console.log("user.user_id", user.user_id);
+
         if (user.user_id == userId) {
+            console.log("user_id == userId");
             setIsFollow(true); return;
         }
         follower.map((item) => {
-
-            if (item.follower_user_id == user.user_id && item.user_id == userId) {
-                setIsFollow(true); return;
-            } else {
-                setIsFollow(false); return;
+            if (item.follower_user_id === user.user_id && item.user_id === userId) {
+                setIsFollow(true);
+                return;
             }
         })
+
     }, [follower]);
 
+    useEffect(() => {
+        console.log("isFollow", isFollow);
+
+    }, [isFollow]);
 
     const navigation = useNavigation();
 
     const title = post?.title.substring(0, 120);
     const content = post?.body.substring(0, 120);
-
     const handleAd = () => {
         console.log("toi day");
+
     };
 
-    const handleFollowButton = () => {
+    const handleFollowButton = useCallback(() => {
         const handleFollowUser = async () => {
             await dispatch(createFollow({ follower_user_id: userId, user_id: user.user_id }));
-            await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
-            // await dispatch(getFollower({ follower_user_id: user.user_id }));
-            follower.map((item) => {
-                if (item.follower_user_id == user.user_id && item.user_id == userId) {
-
-                    setIsFollow(true);
-                } else {
-                    setIsFollow(false);
-                }
-            })
+            // await dispatch(startListeningFollowers({ follower_user_id: user.user_id, user_id: userId }));
         }
         handleFollowUser();
-    };
+    });
 
 
     const handleNagigateDetailPost = () => {
-        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, emoji: emoji, isFollow: isFollow, post_user_id: userId });
+        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, isFollow: isFollow, post_user_id: userId });
     }
 
 
@@ -120,7 +121,7 @@ const PostViewComponent = ({ post, emoji, user }) => {
                     marginTop: "2%",
                     marginBottom: 15,
                 }}>
-                <ImagesPostComponent post={post} user={user} userPost={userPost} emoji={emoji} />
+                <ImagesPostComponent post={post} user={user} userPost={userPost} />
             </RowComponent>
         );
     }
@@ -252,7 +253,7 @@ const PostViewComponent = ({ post, emoji, user }) => {
                             <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
                         </RowComponent >
 
-                        <AnimatedQuickCmtComponent post={post} userPost={userPost} user={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
+                        <AnimatedQuickCmtComponent post={post} userPost={userPost} user={user} handleNagigateDetailPost={handleNagigateDetailPost} />
 
                     </View>
                 </View >
