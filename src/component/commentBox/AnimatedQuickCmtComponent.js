@@ -199,7 +199,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
                 length={post.post_id.length}
                 view={
                     // <PostButton toggleExpand={toggleExpand} handleShowPopEmoji={handleShowPopEmoji} data={data} />
-                    < PostButton toggleExpand={toggleExpand} post={post} user={userPost} handleShowPop={handleShowPop} handleNagigateDetailPost={handleNagigateDetailPost} />
+                    < PostButton toggleExpand={toggleExpand} post={post} user={user} user_post={userPost} handleShowPop={handleShowPop} handleNagigateDetailPost={handleNagigateDetailPost} />
                 }
             />
         </>

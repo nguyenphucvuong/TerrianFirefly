@@ -36,8 +36,11 @@ const PostViewComponent = ({ post, user }) => {
     const dispatch = useDispatch();
     const userId = post.user_id; // Lấy user_id từ post
     const [userPost, setUserPost] = useState(null);
-    const [isFollow, setIsFollow] = useState(false);
+    // const [isFollow, setIsFollow] = useState(false);
     const follower = useSelector((state) => state.follower.follower);
+
+    const isFollow = follower.some(f => f.user_id === post.user_id);
+
 
 
 
@@ -52,29 +55,43 @@ const PostViewComponent = ({ post, user }) => {
     }, [userId]);
 
 
-    useEffect(() => {
-        setIsFollow(false);
-        // console.log("follower", follower);
-        // console.log("userId", userId);
-        // console.log("user.user_id", user.user_id);
+    // useEffect(() => {
+    //     // setIsFollow(false);
+    //     // console.log("follower", follower);
+    //     // console.log("userId", userId);
+    //     // console.log("user.user_id", user.user_id);
 
-        if (user.user_id == userId) {
-            // console.log("user_id == userId");
-            setIsFollow(true); return;
-        }
-        follower.map((item) => {
-            if (item.follower_user_id === user.user_id && item.user_id === userId) {
-                setIsFollow(true);
-                return;
-            }
-        })
+    //     if (user.user_id == userId) {
+    //         // console.log("user_id == userId");
+    //         // setIsFollow(true); return;
+    //     }
+    //     follower.map((item) => {
+    //         console.log(item)
+    //         console.log("item.follower_user_id", item.follower_user_id);
+    //         console.log("user.user_id", user.user_id);
+    //         console.log("item.user_id", item.user_id);
+    //         console.log("userId", userId);
 
-    }, [follower]);
+    //         if (item.follower_user_id === user.user_id && item.user_id === userId) {
+    //             console.log(true)
+    //             // setIsFollow(true);
+    //             return;
+    //         }
+    //     })
+
+    // }, [follower]);
 
     // useEffect(() => {
     //     console.log("isFollow", isFollow);
 
     // }, [isFollow]);
+
+    const userPostCheck = () => {
+        if (userId === user.user_id) {
+            return false;
+        }
+        return true;
+    }
 
     const navigation = useNavigation();
 
@@ -87,7 +104,7 @@ const PostViewComponent = ({ post, user }) => {
 
     const handleFollowButton = useCallback(() => {
         const handleFollowUser = async () => {
-            await dispatch(createFollow({ follower_user_id: userId, user_id: user.user_id }));
+            await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userId }));
             // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
         }
         handleFollowUser();
@@ -175,7 +192,7 @@ const PostViewComponent = ({ post, user }) => {
                                 </SkeletonComponent>
                             </View>
 
-                            <TouchableOpacity
+                            {userPostCheck() ? <TouchableOpacity
                                 disabled={isFollow}
                                 activeOpacity={0.6}
                                 onPress={handleFollowButton}
@@ -192,7 +209,7 @@ const PostViewComponent = ({ post, user }) => {
                                 }}
                             >
                                 <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>Theo dõi</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity> : <></>}
 
                             <SkeletonComponent Data={userPost.userId} isButton>
                                 <View

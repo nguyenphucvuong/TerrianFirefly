@@ -5,6 +5,8 @@ import { data } from "../constains/data";
 import { useSelector, useDispatch } from "react-redux";
 import { getPostsByField, getPostsRefresh, getPostsFromFollowedUsers } from '../../src/redux/slices/PostSlice';
 import { getFollower } from "../redux/slices/FollowerSlice";
+import { startListeningFollowers } from "../redux/slices/FollowerSlice";
+import { startListeningFavorites } from "../redux/slices/FavoriteSlice";
 import { SkeletonComponent } from "../component";
 
 
@@ -35,12 +37,16 @@ const FollowScreen = () => {
 
 
 
-    useEffect(() => {
-        if (user) {
-            dispatch(getFollower({ user_id: user?.user_id }));
-            console.log(follower)
-        }
-    }, [user]);
+    // useEffect(() => {
+    //     if (user) {
+    //         const fetchData = async () => {
+    //             await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+    //             await dispatch(startListeningFavorites({ user_id: user.user_id }));
+    //             // dispatch(getPostsByField({ field: "created_at", quantity: 3, isFollow: false, currentUserId: user?.user_id }));
+    //         }
+    //         fetchData();
+    //     }
+    // }, [user]);
 
 
 
@@ -68,6 +74,8 @@ const FollowScreen = () => {
                             setRefreshing(true);
                             setTimeout(async () => {
                                 const dataRefresh = await dispatch(getPostsRefresh({ isFollow: true, currentUserId: user?.user_id }));
+                                // await startListeningFollowers({ follower_user_id: user?.user_id });
+                                // await startListeningFavorites({ user_id: user?.user_id });
                                 // setLastVisiblePost(dataRefresh.payload.lastVisiblePost);
                                 console.log("getPostsRefresh")
                                 // Sau khi hoàn thành refresh, có thể cập nhật lại dữ liệu từ API hoặc giữ nguyên
@@ -99,6 +107,8 @@ const FollowScreen = () => {
 
                         try {
                             const dataLoadMore = await dispatch(getPostsFromFollowedUsers({ field: "created_at", quantity: 3, currentUserId: user?.user_id }));
+                            // await startListeningFollowers({ follower_user_id: user?.user_id });
+                            // await startListeningFavorites({ user_id: user?.user_id });
                             if (dataLoadMore.payload.postData.length === 0) {
                                 setHasMorePosts(false);
                             }

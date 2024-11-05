@@ -4,7 +4,9 @@ import { StyleGlobal } from "../styles/StyleGlobal";
 import { data } from "../constains/data";
 import { useSelector, useDispatch } from "react-redux";
 import { getPostsByField, getPostsRefresh, getPostsFromUnfollowedUsers } from '../../src/redux/slices/PostSlice';
-import { getFollower } from "../redux/slices/FollowerSlice";
+import { startListeningFollowers } from "../redux/slices/FollowerSlice";
+import { startListeningFavorites } from "../redux/slices/FavoriteSlice";
+import { startListeningEmoji } from "../redux/slices/EmojiSlice";
 import { SkeletonComponent } from "../component";
 
 
@@ -34,8 +36,13 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (user) {
-      dispatch(getFollower({ follower_user_id: user?.user_id }));
-      // dispatch(getPostsByField({ field: "created_at", quantity: 3, isFollow: false, currentUserId: user?.user_id }));
+      const fetchData = async () => {
+        await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+        await dispatch(startListeningFavorites({ user_id: user.user_id }));
+        await dispatch(startListeningEmoji({ user_id: user.user_id }));
+        // dispatch(getPostsByField({ field: "created_at", quantity: 3, isFollow: false, currentUserId: user?.user_id }));
+      }
+      fetchData();
     }
   }, [user]);
 
@@ -65,6 +72,8 @@ const HomeScreen = () => {
               setRefreshing(true);
               setTimeout(async () => {
                 const dataRefresh = await dispatch(getPostsRefresh({ isFollow: false, currentUserId: user?.user_id }));
+                // await startListeningFollowers({ follower_user_id: user?.user_id });
+                // await startListeningFavorites({ user_id: user?.user_id });
                 // setLastVisiblePost(dataRefresh.payload.lastVisiblePost);
                 console.log("getPostsRefresh")
                 // Sau khi hoàn thành refresh, có thể cập nhật lại dữ liệu từ API hoặc giữ nguyên
@@ -96,6 +105,8 @@ const HomeScreen = () => {
 
             try {
               const dataLoadMore = await dispatch(getPostsFromUnfollowedUsers({ field: "created_at", quantity: 3, currentUserId: user?.user_id }));
+              // await startListeningFollowers({ follower_user_id: user?.user_id });
+              // await startListeningFavorites({ user_id: user?.user_id });
               // console.log("objecta", dataLoadMore.payload.postData.length)
               if (dataLoadMore.payload.postData.length === 0) {
                 setHasMorePosts(false);

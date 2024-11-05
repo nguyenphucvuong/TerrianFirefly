@@ -1,13 +1,14 @@
 /* eslint-disable no-undef */
 
 import { Animated, ScrollView, StyleSheet, Text, Easing, View } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteFollow, startListeningFollowers, getFollower } from '../../redux/slices/FollowerSlice';
 import { deleteFavorite, createFavorite, startListeningFavorites } from '../../redux/slices/FavoriteSlice';
 import { updatePostsByField } from '../../redux/slices/PostSlice';
+import { updateUser } from '../../redux/slices/UserSlices';
 
 
 import { appInfo } from '../../constains/appInfo';
@@ -20,49 +21,55 @@ import RowComponent from "../RowComponent";
 import MoreOptionItemComponent from './MoreOptionItemComponent';
 
 
-const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_id }) => {
+// const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_id }) => {
+const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id }) => {
     const [isVisible, setIsVisible] = useState(false);
-    // let isVisible = false;
     const translateY = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
     // const translateY = useRef(new Animated.Value(0)).current; // Start offscreen
 
+    const follower = useSelector((state) => state.follower.follower);
+    const isFollow = follower.some(f => f.user_id === post_user_id);
+
     const favorite = useSelector(state => state.favorite.currentFavorite);
-    const [isFavorite, setIsFavorite] = useState(false);
+    // const [isFavorite, setIsFavorite] = useState(false);
+    const isFavorite = favorite.some(f => f.post_id === post_id);
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        const getFavorite = async () => {
-            await dispatch(startListeningFavorites({ user_id: user_id }));
-        }
-        getFavorite();
-    }, [])
-    useEffect(() => {
-        // console.log("object", favorite.length > 0);
-        // console.log("favorite data", favorite);
-        // console.log("favorite bool", favorite.length == 0);
-        setIsFavorite(false);
-        if (favorite.length == 0) {
-            // console.log("object")
-            setIsFavorite(false); return;
-        }
-        // console.log("aaa")
-        favorite.map((item) => {
-            if (item.user_id === user_id && item.post_id === post_id) {
-                setIsFavorite(true);
-                return;
-            }
-        })
-    }, [favorite])
+    // useEffect(() => {
+    //     const getFavorite = async () => {
+    //         await dispatch(startListeningFavorites({ user_id: user_id }));
+    //     }
+    //     getFavorite();
+    // }, [])
 
 
-    const handleDeleteFollow = () => {
+    // useEffect(() => {
+    //     // console.log("object", favorite.length > 0);
+    //     // console.log("favorite data", favorite);
+    //     // console.log("favorite bool", favorite.length == 0);
+    //     // setIsFavorite(false);
+    //     if (favorite.length == 0) {
+    //         // console.log("object")
+    //         // setIsFavorite(false); return;
+    //     }
+    //     // console.log("aaa")
+    //     favorite.map((item) => {
+    //         if (item.user_id === user_id && item.post_id === post_id) {
+    //             // setIsFavorite(true);
+    //             return;
+    //         }
+    //     })
+    // }, [favorite])
+
+
+    const handleDeleteFollow = useCallback(() => {
         dispatch(deleteFollow({ follower_user_id: user_id, user_id: post_user_id }));
-        dispatch(startListeningFollowers({ follower_user_id: user_id }));
+        // dispatch(startListeningFollowers({ follower_user_id: user_id }));
         handleHideInput();
         return;
-    }
+    })
 
-    const handleFavorite = () => {
+    const handleFavorite = useCallback(() => {
         if (isFavorite) {
             dispatch(deleteFavorite({ post_id: post_id, user_id: user_id }));
             // dispatch(startListeningFavorites({ post_id: post_id, user_id: user_id }));
@@ -72,11 +79,13 @@ const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_
             // dispatch(startListeningFavorites({ post_id: post_id, user_id: user_id }));
             handleHideInput();
         }
-    }
+    })
 
-    const handleReport = () => {
+    const handleReport = useCallback(() => {
         dispatch(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
-    }
+        dispatch(updateUser({ user_id: post_user_id, field: "status_user_id", value: 1 }));
+        handleHideInput();
+    })
 
     const userFollowCheck = () => {
         if (user_id === post_user_id) {

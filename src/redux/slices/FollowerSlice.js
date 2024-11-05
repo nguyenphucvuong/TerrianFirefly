@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, current } from '@reduxjs/toolkit';
 import { collection, addDoc, getDoc, getDocs, where, updateDoc, query, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
+import { add } from '@tensorflow/tfjs';
 
 // Trạng thái ban đầu
 const initialState = {
@@ -23,8 +24,8 @@ export const createFollow = createAsyncThunk('data/createFollow', async ({ follo
 
         // Update the document with desired values
         await updateDoc(docRef, {
-            follower_user_id: user_id,   // follower_user_id will store the logged-in user's ID
-            user_id: follower_user_id    // user_id will store the followed user's ID
+            follower_user_id: follower_user_id,   // follower_user_id will store the logged-in user's ID
+            user_id: user_id,   // user_id will store the followed user's ID
         });
 
         if (docSnap.exists()) {
@@ -38,7 +39,7 @@ export const createFollow = createAsyncThunk('data/createFollow', async ({ follo
     }
 });
 
-export const deleteFollow = createAsyncThunk('data/deleteFollow', async ({ follower_user_id, user_id }) => {
+export const deleteFollow = createAsyncThunk('data/deleteFollow', async ({ follower_user_id, user_id }, { getState, dispatch }) => {
     try {
         const followQuery = query(
             collection(db, 'Follower'),
@@ -49,7 +50,7 @@ export const deleteFollow = createAsyncThunk('data/deleteFollow', async ({ follo
         for (const docSnapshot of querySnapshot.docs) {
             await deleteDoc(docSnapshot.ref);
         }
-
+        // await dispatch(removeFollower({ follower_user_id, user_id }));
         console.log(`Successfully deleted follow relationship between ${follower_user_id} and ${user_id}`);
         return { follower_user_id, user_id };
     } catch (error) {
@@ -90,7 +91,8 @@ export const startListeningFollowers = ({ follower_user_id }) => (dispatch) => {
 
     );
     const unsubscribe = onSnapshot(followerQuery, (querySnapshot) => {
-        const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
         dispatch(setFollowers(followers));
         console.log("followers", followers)
     }, (error) => {
@@ -105,12 +107,18 @@ export const FollowerSlice = createSlice({
     reducers: {
         setFollowers: (state, action) => {
             state.follower = action.payload;
+            console.log("follower setFollowers", action.payload)
             state.status = 'succeeded';
         },
         setCurrentFollower: (state, action) => {
             state.currentFollower = action.payload;
-        }
-
+        },
+        addFollower: (state, action) => {
+            state.follower.push(action.payload);
+        },
+        removeFollower: (state, action) => {
+            state.follower = state.follower.filter(f => f.user_id !== action.payload.user_id);
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -118,6 +126,7 @@ export const FollowerSlice = createSlice({
             .addCase(createFollow.fulfilled, (state, action) => {
                 console.log(action.payload);
                 state.follower.push(action.payload);
+                console.log("follower createFollow", state.follower)
                 state.status = 'succeeded';
             })
             .addCase(createFollow.pending, (state) => {
@@ -143,7 +152,8 @@ export const FollowerSlice = createSlice({
 
             //  deleteFollow
             .addCase(deleteFollow.fulfilled, (state, action) => {
-                state.follower = state.follower.filter((item) => item.id !== action.payload.id);
+                state.follower = state.follower.filter(item => item.user_id !== action.payload.user_id);
+                console.log("follower deleteFollow", state.follower)
                 state.status = 'succeeded';
             })
             .addCase(deleteFollow.pending, (state) => {
@@ -156,6 +166,6 @@ export const FollowerSlice = createSlice({
     },
 });
 
-export const { setFollowers, setCurrentFollower } = FollowerSlice.actions
+export const { setFollowers, setCurrentFollower, addFollower, removeFollower } = FollowerSlice.actions
 
 export default FollowerSlice.reducer;

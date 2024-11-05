@@ -1,9 +1,9 @@
 /* eslint-disable no-undef */
 import { Text, View, Animated, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Image } from 'expo-image'
 import { useDispatch, useSelector } from 'react-redux'
-import { createEmoji, deleteEmoji, startListeningEmoji } from '../../redux/slices/EmojiSlice'
+import { createEmoji, deleteEmoji, updateEmojiByField, startListeningEmoji } from '../../redux/slices/EmojiSlice'
 
 
 import RowComponent from '../RowComponent'
@@ -26,9 +26,7 @@ const formatNumber = (num) => {
         return num.toString(); // số bình thường
     }
 };
-const PostButton = ({ toggleExpand, handleShowPop, post, user, handleNagigateDetailPost }) => {
-
-
+const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handleNagigateDetailPost }) => {
     const dataPostView = formatNumber(post.count_view);
     const dataPostCmt = null; // chưa có dữ liệu tạm thời để trống
     const dataPostEmoji = formatNumber(post.count_emoji);
@@ -40,105 +38,38 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, handleNagigateDet
 
     const dispatch = useDispatch();
 
-    const [iconEmoji, setIconEmoji] = useState("../../../assets/emojiIcons/like-out-emoji.png");
-    const emoji = useSelector(state => state.emoji.currentEmoji);
-
+    const [iconEmoji, setIconEmoji] = useState("../../../assets/appIcons/like-out-emoji.png");
+    const emoji = useSelector(state => state.emoji.emojiList);
+    // useEffect(() => {
+    //     dispatch(startListeningEmoji({ user_id: user.user_id }));
+    // }, [])
 
     useEffect(() => {
         const getEmoji = async () => {
-            // await dispatch(startListeningEmoji({ post_id: post.id, user_id: user.user_id }));
-            if (emoji.count_like > 0) {
-                setIconEmoji("like");
-            } else if (emoji.count_heart > 0) {
-                setIconEmoji("heart");
-            } else if (emoji.count_laugh > 0) {
-                setIconEmoji("laugh");
-            } else if (emoji.count_sad > 0) {
-                setIconEmoji("sad");
-            } else {
-                setIconEmoji("default");
+            let foundEmojiType = "default";
+            for (let i = 0; i < emoji.length; i++) {
+                if (emoji[i].user_id !== user.user_id || emoji[i].post_id !== post.post_id) {
+                    continue;
+                }
+                if (emoji[i].count_like > 0) {
+                    foundEmojiType = "like";
+                    break;
+                } else if (emoji[i].count_heart > 0) {
+                    foundEmojiType = "heart";
+                    break;
+                } else if (emoji[i].count_laugh > 0) {
+                    foundEmojiType = "laugh";
+                    break;
+                } else if (emoji[i].count_sad > 0) {
+                    foundEmojiType = "sad";
+                    break;
+                }
             }
+            setIconEmoji(foundEmojiType);
         };
         getEmoji();
-    }, []);
+    }, [emoji]);
 
-    const handleDeleteEmoji = async () => {
-        await dispatch(deleteEmoji({ post_id: post.post_id, user_id: user.user_id }));
-        setIconEmoji("default");
-    }
-    const handleBtnEmoji = async (emoji) => {
-        if (emoji === "like") {
-            if (emoji.count_heart > 0) {
-                handleDeleteEmoji();
-                return;
-            }
-            dispatch(createEmoji({
-                emoji_id: "",
-                post_id: post.post_id,
-                user_id: user.user_id,
-                isComment: false,
-                comment_id: "",
-                count_like: 1,
-                count_heart: 0,
-                count_laugh: 0,
-                count_sad: 0,
-            }));
-            setIconEmoji("like");
-        } else if (emoji === "heart") {
-            if (emoji.count_heart > 0) {
-                handleDeleteEmoji();
-                return;
-            }
-            dispatch(createEmoji({
-                emoji_id: "",
-                post_id: post.post_id,
-                user_id: user.user_id,
-                isComment: false,
-                comment_id: "",
-                count_like: 0,
-                count_heart: 1,
-                count_laugh: 0,
-                count_sad: 0,
-            }));
-            setIconEmoji("heart");
-        } else if (emoji === "laugh") {
-            if (emoji.count_laugh > 0) {
-                handleDeleteEmoji();
-                return;
-            }
-            dispatch(createEmoji({
-                emoji_id: "",
-                post_id: post.post_id,
-                user_id: user.user_id,
-                isComment: false,
-                comment_id: "",
-                count_like: 0,
-                count_heart: 0,
-                count_laugh: 1,
-                count_sad: 0,
-            }));
-            setIconEmoji("../../../assets/emojiIcons/laugh-emoji.png");
-        } else if (emoji === "sad") {
-            if (emoji.count_sad > 0) {
-                handleDeleteEmoji();
-                return;
-            }
-            dispatch(createEmoji({
-                emoji_id: "",
-                post_id: post.post_id,
-                user_id: user.user_id,
-                isComment: false,
-                comment_id: "",
-                count_like: 0,
-                count_heart: 0,
-                count_laugh: 0,
-                count_sad: 1,
-            }));
-            setIconEmoji("sad");
-        }
-        await dispatch(startListeningEmoji({ post_id: post.id, user_id: user.user_id }));
-        handleHidePop();
-    }
 
     const getIconImg = (emoji) => {
         switch (emoji) {
@@ -156,6 +87,62 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, handleNagigateDet
                 return require("../../../assets/appIcons/like-out-post.png");
         }
     }
+
+    const handleBtnEmoji = async (emojiType) => {
+        const existingEmoji = emoji.find(e => e.user_id === user.user_id && e.post_id === post.post_id);
+        if (existingEmoji) {
+            console.log("existingEmoji", existingEmoji);
+            console.log("existingEmoji[`count_like`]", existingEmoji[`count_like`]);
+            console.log("existingEmoji[`count_heart`]", existingEmoji[`count_heart`]);
+            console.log("existingEmoji[`count_laugh`]", existingEmoji[`count_laugh`]);
+            console.log("existingEmoji[`count_sad`]", existingEmoji[`count_sad`]);
+        }
+
+        if (existingEmoji) {
+
+            // Nếu người dùng đã tương tác
+            if (existingEmoji[`count_${emojiType}`] > 0) {
+                console.log("deleteEmoji");
+                // Nếu người dùng ấn lại đúng emoji mà họ đã tương tác trước đó -> DELETE
+                await dispatch(deleteEmoji({ post_id: post.post_id, user_id: user.user_id }));
+                setIconEmoji("default");
+            } else {
+                console.log("updateEmojiByField");
+                // Nếu người dùng chọn emoji khác với emoji đã tương tác trước đó -> UPDATE
+                // Xóa emoji hiện tại
+                await dispatch(updateEmojiByField({
+                    post_id: post.post_id,
+                    user_id: user.user_id,
+                    count_like: emojiType === "like" ? 1 : 0,
+                    count_heart: emojiType === "heart" ? 1 : 0,
+                    count_laugh: emojiType === "laugh" ? 1 : 0,
+                    count_sad: emojiType === "sad" ? 1 : 0,
+                }));
+                await dispatch(startListeningEmoji({ user_id: user.user_id }));
+                setIconEmoji(emojiType);
+            }
+        } else {
+            console.log("createEmoji");
+            // Nếu người dùng chưa tương tác -> CREATE
+            await dispatch(createEmoji({
+                emoji_id: "",
+                post_id: post.post_id,
+                user_id: user.user_id,
+                isComment: false,
+                comment_id: "",
+                count_like: emojiType === "like" ? 1 : 0,
+                count_heart: emojiType === "heart" ? 1 : 0,
+                count_laugh: emojiType === "laugh" ? 1 : 0,
+                count_sad: emojiType === "sad" ? 1 : 0,
+            }));
+            setIconEmoji(emojiType);
+        }
+
+        handleHidePop();
+    };
+
+
+
 
     // const dataEmoji = {
     //     emoji_id: "",
@@ -178,6 +165,7 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, handleNagigateDet
     }
     const handlePressLike = () => {
         setIsPressLike(!isPressLike);
+        handleBtnEmoji("like");
         toggleExpand();
     }
 

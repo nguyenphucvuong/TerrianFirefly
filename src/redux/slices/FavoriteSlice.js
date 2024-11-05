@@ -87,7 +87,7 @@ export const startListeningFavorites = ({ user_id }) => (dispatch) => {
         );
     const unFavorite = onSnapshot(favoriteQuery, (querySnapshot) => {
         const favorites = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log("favorites", favorites);
+        // console.log("favorites", favorites);
         if (favorites.length > 0) {
             // Dispatch only the first document if available
             dispatch(setCurrentFavorite(favorites));
@@ -137,7 +137,7 @@ export const FavoriteSlice = createSlice({
             })
 
             .addCase(deleteFavorite.fulfilled, (state, action) => {
-                state.currentFavorite = state.currentFavorite.filter(favorite => favorite.id !== action.payload.id);
+                state.currentFavorite = state.currentFavorite.filter(favorite => favorite.user_id !== action.payload.user_id && favorite.post_id !== action.payload.post_id);
                 state.status = 'succeeded';
             })
             .addCase(deleteFavorite.pending, (state) => {

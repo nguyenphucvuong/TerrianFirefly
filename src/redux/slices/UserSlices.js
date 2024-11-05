@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { db, auth } from '../../firebase/FirebaseConfig';
-import { collection, addDoc, getDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
 
 // Trạng thái ban đầu
 const initialState = {
@@ -33,33 +33,61 @@ export const getUser = createAsyncThunk('data/getUser', async (email) => {
 
 });
 // Tạo async thunk để cập nhật thông tin người dùng trong Firestore
-export const updateUser = createAsyncThunk('user/updateUser', async (user) => {
-    try {
-        const userRef = doc(db, 'user', user.user_id); // Tham chiếu đến tài liệu người dùng
+// export const updateUser = createAsyncThunk('user/updateUser', async (user) => {
+//     try {
+//         const userRef = doc(db, 'user', user.user_id); // Tham chiếu đến tài liệu người dùng
 
-        // Cập nhật các trường trong tài liệu
-        await updateDoc(userRef, {
-            imgUser: user.imgUser,
-            frame_user: user.frame_user,
-            gender: user.gender,
-            username: user.username, // Sử dụng user.username thay vì chỉ username
-        });
+//         // Cập nhật các trường trong tài liệu
+//         await updateDoc(userRef, {
+//             imgUser: user.imgUser,
+//             frame_user: user.frame_user,
+//             gender: user.gender,
+//             username: user.username, // Sử dụng user.username thay vì chỉ username
+//         });
 
-        // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
-        const updatedSnap = await getDoc(userRef);
-        if (updatedSnap.exists()) {
-            return {
-                id: updatedSnap.id,
-                ...updatedSnap.data(),
-            };
-        } else {
-            throw new Error('User not found');
+//         // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
+//         const updatedSnap = await getDoc(userRef);
+//         if (updatedSnap.exists()) {
+//             return {
+//                 id: updatedSnap.id,
+//                 ...updatedSnap.data(),
+//             };
+//         } else {
+//             throw new Error('User not found');
+//         }
+//     } catch (error) {
+//         console.error('Error adding document: ', error);
+//         throw error;
+//     }
+// }
+// );
+
+export const updateUser = createAsyncThunk('user/updateUser',
+    async ({ user_id, field, value }, { getState, dispatch }) => {
+        try {
+            const userRef = doc(db, 'user', user_id); // Tham chiếu đến tài liệu người dùng
+
+            // Cập nhật các trường trong tài liệu
+            await updateDoc(userRef, {
+                [field]: value,
+            });
+
+            // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
+            const updatedSnap = await getDoc(userRef);
+            console.log("updatedSnap", updatedSnap.data());
+            if (updatedSnap.exists()) {
+                return {
+                    id: updatedSnap.id,
+                    ...updatedSnap.data(),
+                };
+            } else {
+                throw new Error('User not found');
+            }
+        } catch (error) {
+            console.error('Error adding document: ', error);
+            throw error;
         }
-    } catch (error) {
-        console.error('Error adding document: ', error);
-        throw error;
     }
-}
 );
 
 
@@ -125,9 +153,20 @@ export const UserSlices = createSlice({
             })
             .addCase(getUserByField.rejected, (state, action) => {
                 state.errorUser = action.error.message;
-            });
+            })
 
-
+            // updateUser
+            .addCase(updateUser.fulfilled, (state, action) => {
+                state.user = action.payload;
+                state.statusUser = 'succeeded';
+            })
+            .addCase(updateUser.pending, (state) => {
+                state.statusUser = 'loading';
+            })
+            .addCase(updateUser.rejected, (state, action) => {
+                state.errorUser = action.error.message;
+                state.statusUser = 'failed';
+            })
     },
 });
 

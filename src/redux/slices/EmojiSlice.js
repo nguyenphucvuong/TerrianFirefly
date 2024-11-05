@@ -12,6 +12,7 @@ const initialState = {
 
 export const createEmoji = createAsyncThunk('data/createEmoji', async (
     { emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad }) => {
+    console.log("emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad", emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad)
     try {
         const docRef = await addDoc(collection(db, 'Emoji'), {
             emoji_id: emoji_id,
@@ -40,7 +41,7 @@ export const createEmoji = createAsyncThunk('data/createEmoji', async (
         });
 
         if (docSnap.exists()) {
-            return { currentEmoji: docSnap.id, ...docSnap.data() };
+            return { ...docSnap.data() };
         } else {
             throw new Error('No such document!');
         }
@@ -50,7 +51,8 @@ export const createEmoji = createAsyncThunk('data/createEmoji', async (
     }
 });
 
-export const deleteEmoji = createAsyncThunk('data/deleteEmoji', async ({ post_id, user_id }) => {
+export const deleteEmoji = createAsyncThunk('data/deleteEmoji', async ({ post_id, user_id }, { getState, dispatch }) => {
+    console.log("post_id, user_id", post_id, user_id)
     try {
         const emojiQuery = query(
             collection(db, 'Emoji'),
@@ -61,28 +63,26 @@ export const deleteEmoji = createAsyncThunk('data/deleteEmoji', async ({ post_id
         for (const docSnapshot of querySnapshot.docs) {
             await deleteDoc(docSnapshot.ref);
         }
+        // await dispatch(removeEmoji({ post_id, user_id }));
         console.log(`Successfully deleted Emoji relationship between ${post_id} and ${user_id}`);
+        return { post_id, user_id };
     } catch (error) {
         console.error('Error deleting document: ', error);
         throw error;
     }
 });
 
-export const getEmoji = createAsyncThunk('data/getEmoji', async ({ post_id, user_id }) => {
+export const getEmoji = createAsyncThunk('data/getEmoji', async ({ post_id, user_id }, { getState, dispatch }) => {
     if (post_id === undefined || user_id === undefined) {
         return [];
     }
     try {
-
         const emojiQuery = query(collection(db, "Emoji"), where('post_id', "==", post_id));
-
         const querySnapshot = await getDocs(emojiQuery);
-
         if (querySnapshot.empty) {
             return [];
         }
         const emojiData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
         return emojiData;
     } catch (error) {
         console.error('Error fetching currentEmoji: ', error);
@@ -90,24 +90,55 @@ export const getEmoji = createAsyncThunk('data/getEmoji', async ({ post_id, user
     }
 });
 
-export const startListeningEmoji = ({ post_id, user_id }) => (dispatch) => {
+export const updateEmojiByField = createAsyncThunk(
+    "data/updateEmojiByField",
+    async ({ post_id, user_id, count_like, count_heart, count_laugh, count_sad }, { getState, dispatch }) => {
+        console.log("post_id, user_id, count_like, count_heart, count_laugh, count_sad", post_id, user_id, count_like, count_heart, count_laugh, count_sad)
+        try {
+            const emojiQuery = query(
+                collection(db, "Emoji"),
+                where("post_id", "==", post_id),
+                where("user_id", "==", user_id)
+            );
+            const querySnapshot = await getDocs(emojiQuery);
+
+            if (!querySnapshot.empty) {
+                const docRef = querySnapshot.docs[0].ref; // Lấy tài liệu đầu tiên trong kết quả truy vấn
+                await updateDoc(docRef, {
+                    count_like: count_like,
+                    count_heart: count_heart,
+                    count_laugh: count_laugh,
+                    count_sad: count_sad,
+                });
+                // console.log(`Field '${field}' updated successfully with value: ${value}`);
+            } else {
+                throw new Error('No matching document found!');
+            }
+        } catch (error) {
+            console.error("Error updating emoji: ", error);
+            throw error;
+        }
+    }
+);
+
+
+export const startListeningEmoji = ({ user_id }) => (dispatch) => {
     // console.log("!post_id || !user_id", !post_id || !user_id)
-    if (!post_id || !user_id) return;
+    if (!user_id) return;
 
     const emojiQuery = query(
         collection(db, "Emoji"),
-        where('post_id', "==", post_id),
         where('user_id', "==", user_id),
-        limit(1));
+    );
     const unEmoji = onSnapshot(emojiQuery, (querySnapshot) => {
         const emojis = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log("emojis", emojis);
+        // console.log("emojis", emojis);
         if (emojis.length > 0) {
             // Dispatch only the first document if available
-            dispatch(setCurrentEmoji([emojis[0]]));
+            dispatch(setEmoji(emojis));
         } else {
             console.log("No document found");
-            dispatch(setCurrentEmoji([])); // Empty array if no document is found
+            dispatch(setEmoji([])); // Empty array if no document is found
         }
     }, (error) => {
         console.error('Error fetching Emoji: ', error);
@@ -119,15 +150,27 @@ export const EmojiSlice = createSlice({
     name: 'emoji',
     initialState,
     reducers: {
+        setEmoji: (state, action) => {
+            state.emojiList = action.payload;
+            console.log("emojiList setemojiLists", action.payload)
+            state.status = 'succeeded';
+        },
         setCurrentEmoji: (state, action) => {
             state.currentEmoji = action.payload;
             state.status = 'succeeded';
+        },
+
+        // addEmoji: (state, action) => {
+        //     state.emojiList.push(action.payload);
+        // },
+        removeEmoji: (state, action) => {
+            state.emojiList = state.emojiList.filter(e => e.post_id !== action.payload.post_id && e.user_id !== action.payload.user_id);
         },
     },
     extraReducers: (builder) => {
         builder
             .addCase(createEmoji.fulfilled, (state, action) => {
-                state.currentEmoji = action.payload;
+                state.emojiList.push(action.payload);
                 state.status = 'succeeded';
             })
             .addCase(createEmoji.pending, (state) => {
@@ -139,7 +182,7 @@ export const EmojiSlice = createSlice({
             })
 
             .addCase(getEmoji.fulfilled, (state, action) => {
-                state.currentEmoji = action.payload;
+                state.emojiList = action.payload;
                 state.status = 'succeeded';
             })
             .addCase(getEmoji.pending, (state) => {
@@ -151,6 +194,7 @@ export const EmojiSlice = createSlice({
             })
 
             .addCase(deleteEmoji.fulfilled, (state, action) => {
+                state.emojiList = state.emojiList.filter(e => e.post_id !== action.payload.post_id && e.user_id !== action.payload.user_id);
                 state.status = 'succeeded';
             })
             .addCase(deleteEmoji.pending, (state) => {
@@ -163,6 +207,6 @@ export const EmojiSlice = createSlice({
     },
 });
 
-export const { setCurrentEmoji } = EmojiSlice.actions
+export const { setCurrentEmoji, setEmoji, addEmoji, removeEmoji } = EmojiSlice.actions
 
 export default EmojiSlice.reducer;
