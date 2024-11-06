@@ -19,8 +19,6 @@ import {
     VerificationCodeScreen,
     FollowerScreen,
     TrackingScreen,
-    EventManagementScreen,
-    EventManagementDetailsScreen,
 } from '../views';
 
 import IndexTab from '../tabs/indexTab';
@@ -88,10 +86,6 @@ const StackNavigator = () => {
                 options={() => IconBack("Người Theo Dõi")} />
             <Stack.Screen name='TrackingScreen' component={TrackingScreen}
                 options={() => IconBack("Theo Dõi")} />
-            <Stack.Screen name='EventManagementScreen' component={EventManagementScreen}
-                options={() => IconBack("Quản Lý Sự Kiện")} />
-            <Stack.Screen name='EventManagementDetailsScreen' component={EventManagementDetailsScreen}
-                options={() => IconBack("Chi Tiết Sự Kiện")} />
         </Stack.Navigator>
     )
 }

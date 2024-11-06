@@ -6,11 +6,12 @@ import { useSelector, useDispatch } from "react-redux";
 //style
 import { StyleGlobal } from '../styles/StyleGlobal'
 //components
-import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx } from '../component';
+import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx} from '../component';
+import TabRecipe from '../component/TabRecipe';
 //screen
-import ArticleScreen from './ArticleScreen';
-import FavouriteScreen from './FavouriteScreen';
-import GroupScreen from './GroupScreen';
+// import ArticleScreen from './ArticleScreen';
+// import FavouriteScreen from './FavouriteScreen';
+// import GroupScreen from './GroupScreen';
 //constains
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
@@ -45,32 +46,6 @@ const PersonScreen = () => {
             extrapolate: 'clamp',
         }),
     };
-    const [selectedTab, setSelectedTab] = useState('articles');
-    // Hàm để render nội dung tương ứng với tab
-    const renderContent = () => {
-        switch (selectedTab) {
-            case 'articles':
-                return (
-                    <View>
-                        <ArticleScreen />
-                    </View>
-                );
-            case 'favorites':
-                return (
-                    <View style={styles.tabContent}>
-                        <Text style={styles.item}>Yêu thích 1: React Navigation</Text>
-                    </View>
-                );
-            case 'topics':
-                return (
-                    <View style={styles.tabContent}>
-                        <GroupScreen />
-                    </View>
-                );
-            default:
-                return null;
-        }
-    };
     //cập nhật lại dữ liệu 
     useEffect(() => {
         const unsubscribe = dispatch(listenToUserRealtime(user.email));
@@ -81,145 +56,85 @@ const PersonScreen = () => {
 
     return (
         <View style={{ flex: 1 }}>
-            {!user ?
-                (
-                    <View>
-                        <SkeletonComponent
-                            Data={""}
-                            style={{ width: '100%', height: appInfo.heightWindows * 0.15 }}
-                        />
-                        <View style={{ margin: '5%' }}>
-                            <SkeletonComponent
-                                isAvatar
-                                Data={""}
-                                style={{ width: 80, height: 80 }}
-                            />
-                            <SkeletonComponent
-                                Data={""}
-                                style={{ width: '60%', height: appInfo.heightWindows * 0.02 }}
-                            />
-                            <SkeletonComponent
-                                Data={""}
-                                style={{ width: '70%', height: appInfo.heightWindows * 0.02 }}
-                            />
-                            <SkeletonComponent
-                                Data={""}
-                                style={{ width: '80%', height: appInfo.heightWindows * 0.02 }}
-                            />
-                        </View>
+            {!user ? (
+                <View>
+                    <SkeletonComponent Data={""} style={{ width: '100%', height: appInfo.heightWindows * 0.15 }} />
+                    <View style={{ margin: '5%' }}>
+                        <SkeletonComponent isAvatar Data={""} style={{ width: 80, height: 80 }} />
+                        <SkeletonComponent Data={""} style={{ width: '60%', height: appInfo.heightWindows * 0.02 }} />
+                        <SkeletonComponent Data={""} style={{ width: '70%', height: appInfo.heightWindows * 0.02 }} />
+                        <SkeletonComponent Data={""} style={{ width: '80%', height: appInfo.heightWindows * 0.02 }} />
                     </View>
-                )
-                : (
-                    <View>
-                        <View style={styles.upperHeaderPlacehholder} />
-                        <View style={styles.header}>
-                            <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
-                                <View style={styles.upperrHeader}>
-                                    <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
-                                        <AvatarEx
-                                            size={appInfo.heightWindows * 0.035}
-                                            round={90}
-                                            url={user.imgUser}
-                                        />
-                                        <Text style={styles.avatarText}>{user.username}</Text>
-                                    </Animated.View>
-                                </View>
-                                <View style={styles.setting}>
-                                    <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
-                                </View>
-                                <View style={styles.lowerHeader} />
-                            </ImageBackground>
-                        </View>
+                </View>
+            ) : (
+                <View style={{ flexGrow: 1 }}>
+                    <View style={styles.upperHeaderPlacehholder} />
+                    <View style={styles.header}>
+                        <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
+                            <View style={styles.upperrHeader}>
+                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
+                                    <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={user.imgUser} />
+                                    <Text style={styles.avatarText}>{user.username}</Text>
+                                </Animated.View>
+                            </View>
+                            <View style={styles.setting}>
+                                <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
+                            </View>
+                            <View style={styles.lowerHeader} />
+                        </ImageBackground>
+                    </View>
 
-                        <ScrollView
-                            nestedScrollEnabled={true}
-                            scrollEventThrottle={16}
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={styles.scrollViewContainer} // Sử dụng contentContainerStyle
-                            onScroll={e => {
-                                const offsetY = e.nativeEvent.contentOffset.y;
-                                animatedValue.setValue(offsetY);
-                            }}
-                        >
-                            <TouchableOpacity
-                                style={styles.paddingForHeader}
-                                onPress={() => navigation.navigate('BackgroundScreen')}
-                            />
-                            <View style={styles.scrollViewContent}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    {/* Avatar */}
-                                    <Animated.View style={[styles.avatar, avatarAnimation]}>
-                                        <AvatarEx
-                                            url={user.imgUser}
-                                            size={appInfo.widthWindows * 0.22}
-                                            round={20}
-                                            frame={user.frame_user}
-                                            name={user.username}
-                                        />
-                                        <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username}</Text>
-
-                                    </Animated.View>
-                                    {/* Chỉnh sửa */}
-                                    <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
-                                        <IconComponent
-                                            name={'edit'}
-                                            size={appInfo.heightWindows * 0.025}
-                                            color={'#190AEF'}
-                                            text={'Chỉnh sửa'}
-                                            textColor={'#190AEF'}
-                                            style={styles.buttonEdit}
-                                            onPress={() => navigation.navigate('InfomationScreen')}
-                                        />
-                                    </View>
-                                </View>
-
-                                <View style={styles.iconRow}>
-                                    <IconComponent name={'credit-card'}
+                    <ScrollView
+                        style={{ flex: 1 }}
+                        nestedScrollEnabled={true}
+                        scrollEventThrottle={16}
+                        showsVerticalScrollIndicator={false}
+                        onScroll={e => {
+                            const offsetY = e.nativeEvent.contentOffset.y;
+                            animatedValue.setValue(offsetY);
+                        }}
+                    >
+                        <TouchableOpacity
+                            style={styles.paddingForHeader}
+                            onPress={() => navigation.navigate('BackgroundScreen')}
+                        />
+                        <View style={styles.scrollViewContent}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Animated.View style={[styles.avatar, avatarAnimation]}>
+                                    <AvatarEx url={user.imgUser} size={appInfo.widthWindows * 0.22} round={20} frame={user.frame_user} name={user.username} />
+                                    <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username}</Text>
+                                </Animated.View>
+                                <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
+                                    <IconComponent
+                                        name={'edit'}
                                         size={appInfo.heightWindows * 0.025}
-                                        color={'#33363F'}
-                                        text={'ID: ' + user.user_id} />
-                                    <IconComponent name={'user'}
-                                        size={appInfo.heightWindows * 0.025}
-                                        color={'#33363F'}
-                                        text={user.nickname}
-                                        onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} />
-                                </View>
-
-
-                                <View style={styles.statisticsContainer}>
-                                    <StatisticsComponent quantity={0} name={'Bài Viết'} />
-                                    <StatisticsComponent quantity={0} name={'Theo Dõi'} onPress={() => navigation.navigate('TrackingScreen')} />
-                                    <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
-                                    <StatisticsComponent quantity={0} name={'Lượt Thích'} />
-                                </View>
-
-                                {/* Tab Navigator */}
-                                <View style={{ flex: 1 }}>
-                                    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                                        <View style={styles.tabBar}>
-                                            <TouchableOpacity onPress={() => setSelectedTab('articles')} style={styles.tab}>
-                                                <Text style={[styles.tabText, selectedTab === 'articles' && styles.activeTabText]}>Bài viết</Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity onPress={() => setSelectedTab('favorites')} style={styles.tab}>
-                                                <Text style={[styles.tabText, selectedTab === 'favorites' && styles.activeTabText]}>Yêu thích</Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity onPress={() => setSelectedTab('topics')} style={styles.tab}>
-                                                <Text style={[styles.tabText, selectedTab === 'topics' && styles.activeTabText]}>Chủ Đề</Text>
-                                            </TouchableOpacity>
-                                        </View>
-
-                                        <View style={styles.contentContainer}>
-                                            {renderContent()}
-                                        </View>
-                                    </ScrollView>
+                                        color={'#190AEF'}
+                                        text={'Chỉnh sửa'}
+                                        textColor={'#190AEF'}
+                                        style={styles.buttonEdit}
+                                        onPress={() => navigation.navigate('InfomationScreen')}
+                                    />
                                 </View>
                             </View>
-                        </ScrollView >
-                    </View>
-                )
-            }
 
-        </View >
+                            <View style={styles.iconRow}>
+                                <IconComponent name={'credit-card'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'ID: ' + user.user_id} />
+                                <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} />
+                            </View>
+
+                            <View style={styles.statisticsContainer}>
+                                <StatisticsComponent quantity={0} name={'Bài Viết'} />
+                                <StatisticsComponent quantity={0} name={'Theo Dõi'} onPress={() => navigation.navigate('TrackingScreen')} />
+                                <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
+                                <StatisticsComponent quantity={0} name={'Lượt Thích'} />
+                            </View>
+                            {/*  Tab Navigation */}
+                            <TabRecipe />
+                        </View>
+                    </ScrollView>
+                </View>
+            )}
+        </View>
     );
 };
 

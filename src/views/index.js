@@ -24,13 +24,11 @@ import CreatePostScreen from './CreatePostScreen';
 import VerificationCodeScreen from './VerificationCodeScreen';
 import FollowerScreen from './FollowerScreen';
 import TrackingScreen from './TrackingScreen';
-import EventManagementScreen from './EventManagementScreen';
-import EventManagementDetailsScreen from './EventManagementDetailsScreen';
 export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen,
      InfomationScreen, AchievementsScreen, NickNameScreen, DetailPostScreen, UserManagementScreen,
       SettingScreen, AccountDetailsScreen, ArticleScreen, FavouriteScreen, GroupScreen, NotificationManagement,
       ManagePostsScreen, SetUpAccountScreen, WellcomScreen, LoginScreen, 
       RegisterScreen, ForgotPassword, VerificationCodeScreen, CreatePostScreen, FollowerScreen,
-      TrackingScreen, EventManagementScreen, EventManagementDetailsScreen,
+      TrackingScreen
      }; 
 

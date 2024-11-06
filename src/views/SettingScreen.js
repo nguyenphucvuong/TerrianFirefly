@@ -50,7 +50,7 @@ const SettingScreen = () => {
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
                         {/* Sự Kiện */}
-                        <TouchableOpacity style={styles.buttonRow} onPress={() => navigation.navigate('EventManagementScreen')}>
+                        <TouchableOpacity style={styles.buttonRow}>
                             <Text style={styles.buttonText}>Quản Lý Sự Kiện</Text>
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
