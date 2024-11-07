@@ -6,7 +6,7 @@ import { appInfo } from '../constains/appInfo';
 import { useNavigation } from '@react-navigation/native';
 
 
-const ImagesPagerComponent = ({ post, user, emoji }) => {
+const ImagesPagerComponent = ({ post, user, userPost }) => {
 
     const [index, setIndex] = useState(0);
 
@@ -19,13 +19,25 @@ const ImagesPagerComponent = ({ post, user, emoji }) => {
     }
     const handleChangeScreen = () => {
         if (scrollState === 'idle') {
-            navigation.navigate("picture", { Data: post, Select: index, User: user, emoji: emoji });
+            navigation.navigate("picture", { Data: post, Select: index, user: user, userPost: userPost });
+            // navigation.navigate("picture", { Data: post, Select: 0, user: User, userPost: userPost })
         }
     }
 
     const handleIndex = num => {
         setIndex(num.nativeEvent.position);
     }
+
+
+    // useEffect(() => {
+    //     const handleGetUserPost = async () => {
+    //         const userResponse = await dispatch(getUserByField({ user_id: userId }));
+    //         const userData = userResponse.payload;
+    //         setUserPost(userData);
+
+    //     }
+    //     handleGetUserPost();
+    // }, [userId]);
 
 
     return (

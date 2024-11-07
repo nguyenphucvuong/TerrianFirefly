@@ -122,6 +122,31 @@ export const updateEmojiByField = createAsyncThunk(
 );
 
 
+export const countEmojis = async ({ post_id }) => {
+    try {
+        const emojiQuery = query(
+            collection(db, "Emoji"),
+            where('post_id', "==", post_id),
+        );
+
+        const emojiSnapshot = await getDocs(emojiQuery);
+        let emojiCount = emojiSnapshot.size; // Kích thước của snapshot là số lượng tài liệu
+        console.log("emojiCount", emojiCount)
+        if (emojiSnapshot.empty) {
+            return 0;
+        }
+
+        return Number(emojiCount);
+    } catch (error) {
+        console.error("Error getting count emoji: ", error);
+        throw error;
+    }
+};
+
+
+
+
+
 export const startListeningEmoji = ({ user_id }) => (dispatch) => {
     // console.log("!post_id || !user_id", !post_id || !user_id)
     if (!user_id) return;

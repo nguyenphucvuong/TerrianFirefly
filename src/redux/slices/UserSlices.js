@@ -5,7 +5,7 @@ import { collection, addDoc, getDoc, getDocs, query, where, updateDoc, doc } fro
 // Trạng thái ban đầu
 const initialState = {
     user: null,
-    // userByField: {},
+    userByField: {},
     statusUser: 'idle',
     errorUser: null,
 };
@@ -109,7 +109,7 @@ export const getUserByField = createAsyncThunk('data/getUserByField', async ({ u
             id: querySnapshot.docs[0].id,
             ...querySnapshot.docs[0].data(),
         };
-
+        // console.log("userById", userById);
 
         return userById;
     } catch (error) {
@@ -143,11 +143,8 @@ export const UserSlices = createSlice({
 
             // getUserByField
             .addCase(getUserByField.fulfilled, (state, action) => {
-                // const userId = action.payload[0]?.id; // Giả định rằng action.payload là mảng người dùng
-                // if (userId && !state.userByField[userId]) {
-                //     state.userByField[userId] = action.payload[0]; // Lưu người dùng vào state
-                // }
                 state.userByField = action.payload;
+                // console.log("userByField", state.userByField);
             })
             .addCase(getUserByField.pending, (state) => {
             })

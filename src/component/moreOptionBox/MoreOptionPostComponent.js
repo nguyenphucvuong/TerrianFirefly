@@ -22,7 +22,7 @@ import MoreOptionItemComponent from './MoreOptionItemComponent';
 
 
 // const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_id }) => {
-const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id }) => {
+const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhiteDot, size }) => {
     const [isVisible, setIsVisible] = useState(false);
     const translateY = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
     // const translateY = useRef(new Animated.Value(0)).current; // Start offscreen
@@ -34,32 +34,6 @@ const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id }) => {
     // const [isFavorite, setIsFavorite] = useState(false);
     const isFavorite = favorite.some(f => f.post_id === post_id);
     const dispatch = useDispatch();
-
-    // useEffect(() => {
-    //     const getFavorite = async () => {
-    //         await dispatch(startListeningFavorites({ user_id: user_id }));
-    //     }
-    //     getFavorite();
-    // }, [])
-
-
-    // useEffect(() => {
-    //     // console.log("object", favorite.length > 0);
-    //     // console.log("favorite data", favorite);
-    //     // console.log("favorite bool", favorite.length == 0);
-    //     // setIsFavorite(false);
-    //     if (favorite.length == 0) {
-    //         // console.log("object")
-    //         // setIsFavorite(false); return;
-    //     }
-    //     // console.log("aaa")
-    //     favorite.map((item) => {
-    //         if (item.user_id === user_id && item.post_id === post_id) {
-    //             // setIsFavorite(true);
-    //             return;
-    //         }
-    //     })
-    // }, [favorite])
 
 
     const handleDeleteFollow = useCallback(() => {
@@ -179,20 +153,21 @@ const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id }) => {
                                     text={"Hủy theo dõi"}
                                     onPress={handleDeleteFollow} /> : <></>}
                             {/* Yêu thích */}
-                            {userFavoriteCheck() ?
-                                !isFavorite ?
-                                    <MoreOptionItemComponent
-                                        isRow
-                                        url={require('../../../assets/appIcons/favorite.png')}
-                                        text={"Yêu thích"}
-                                        onPress={handleFavorite} />
-                                    :
-                                    <MoreOptionItemComponent
-                                        isRow
-                                        url={require('../../../assets/appIcons/unfavorite.png')}
-                                        text={"Hủy yêu thích"}
-                                        onPress={handleFavorite} />
-                                : <></>}
+                            {/* {userFavoriteCheck() ? */}
+                            {!isFavorite ?
+                                <MoreOptionItemComponent
+                                    isRow
+                                    url={require('../../../assets/appIcons/favorite.png')}
+                                    text={"Yêu thích"}
+                                    onPress={handleFavorite} />
+                                :
+                                <MoreOptionItemComponent
+                                    isRow
+                                    url={require('../../../assets/appIcons/unfavorite.png')}
+                                    text={"Hủy yêu thích"}
+                                    onPress={handleFavorite} />
+                            }
+                            {/* : <></>} */}
                             {/* Báo cáo */}
                             <MoreOptionItemComponent
                                 isRow
@@ -221,18 +196,12 @@ const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id }) => {
             <ButtonsComponent isButton onPress={handleShowInput}
                 style={[{
                     justifyContent: "center",
-                    alignItems: "center",
-                    width: "30%",
+                    alignItems: isWhiteDot ? "flex-end" : "center",
+                    width: isWhiteDot ? "100%" : "100%",
                     height: "auto",
                     // backgroundColor: "pink",
                 }, style && style]}>
-                <Image
-                    style={{
-                        width: "100%",
-                        height: "100%",
-                    }}
-                    source={require('../../../assets/appIcons/dots_vertical-512.jpg')}
-                    contentFit="cover" />
+                <Feather name='more-vertical' color={isWhiteDot ? "white" : "black"} size={size ? size : 24} />
 
 
             </ButtonsComponent>

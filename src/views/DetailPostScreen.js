@@ -31,14 +31,14 @@ const DetailPostScreen = () => {
     const navigation = useNavigation();
     const route = useRoute().params;
 
-    const { post, user, emoji, userPost, isFollow, post_user_id } = route;
+    const { post, user, userPost, post_user_id } = route;
     console.log("user.user_id", user.user_id)
     console.log("post_user_id", post_user_id)
-    console.log("isFollow", isFollow)
-    const [isFlag, setIsFlag] = useState(isFollow);
+
 
     const follower = useSelector(state => state.follower.follower);
     const dispatch = useDispatch();
+    const isFlag = follower.some(f => f.user_id === post.user_id);
 
 
     {/* Lấy tọa độ của component để sử dụng kích hoạt animated khi lướt đến */ }
@@ -49,7 +49,6 @@ const DetailPostScreen = () => {
     };
 
     const animation = useRef(new Animated.Value(0)).current;
-
     const opacityNavigaion = {
         opacity: animation.interpolate({
             inputRange: [componentPosition + 70, componentPosition + 250],
@@ -64,31 +63,12 @@ const DetailPostScreen = () => {
         }
         return true;
     }
-    useEffect(() => {
-        setIsFlag(false);
-        if (user.user_id == userPost.user_id) {
-            setIsFlag(true); return;
-        }
-        follower.map((item) => {
 
-            if (item.follower_user_id == user.user_id && item.user_id == userPost.user_id) {
-                setIsFlag(true); return;
-            } else {
-                setIsFlag(false); return;
-            }
-        })
-    }, [follower]);
     const handleFollowButton = async () => {
-        await dispatch(createFollow({ follower_user_id: userPost.user_id, user_id: user.user_id }));
-        await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+        await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userPost.user_id }));
+        // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
         // await dispatch(getFollower({ follower_user_id: user.user_id }));
-        follower.map((item) => {
-            if (item.follower_user_id == user.user_id && item.user_id == userPost.user_id) {
-                setIsFlag(true); return;
-            } else {
-                setIsFlag(false); return;
-            }
-        })
+
 
     };
 
@@ -205,7 +185,7 @@ const DetailPostScreen = () => {
                 justifyContent: "flex-end",
             }}>
                 <View style={{ height: "100%", }} >
-                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={userPost} user={user} emoji={emoji} />}
+                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={userPost} user={user} />}
                 </View>
             </View>
 
@@ -335,7 +315,7 @@ const DetailPostScreen = () => {
                     </PagerView> */}
                     {!post.isYtb ?
                         post.imgPost.length > 0 ?
-                            <ImagesPaperComponent post={post} user={user} emoji={emoji} />
+                            <ImagesPaperComponent post={post} user={user} userPost={userPost} />
                             :
                             <></>
                         :
@@ -402,11 +382,11 @@ const DetailPostScreen = () => {
                         <View
                             style={{
                                 width: "10%",
-                                height: "27%",
+                                height: "100%",
                                 justifyContent: "center",
                             }}
                         >
-                            <MoreOptionPostComponent post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
+                            <MoreOptionPostComponent size={20} post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
                         </View>
                     </RowComponent>
                     {/* Content Comment */}

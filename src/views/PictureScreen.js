@@ -1,6 +1,15 @@
-
-import { View, StatusBar, Text, TouchableOpacity, Alert, Platform, PermissionsAndroid, ToastAndroid } from 'react-native'
-import React, { useState } from 'react'
+import {
+    View,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    Alert,
+    Platform,
+    PermissionsAndroid,
+    ToastAndroid,
+    Animated,
+} from "react-native";
+import React, { useState, useCallback, useEffect } from 'react'
 import { Image } from 'expo-image'
 
 import { useRoute } from '@react-navigation/native'
@@ -8,38 +17,230 @@ import PagerView from 'react-native-pager-view'
 import Feather from 'react-native-vector-icons/Feather'
 import AndtDegisn from 'react-native-vector-icons/AntDesign'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { useDispatch, useSelector } from "react-redux";
 
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from "expo-linear-gradient";
-import { Modal } from 'react-native';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
+import { createFollow } from "../redux/slices/FollowerSlice";
+import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
+import { createFavorite, deleteFavorite } from "../redux/slices/FavoriteSlice";
 
-
+import { ModalPop } from "../modals";
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
 import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtComponent'
 import { AvatarEx, ButtonsComponent } from '../component'
+import EmojiBoxComponent from "../component/commentBox/EmojiBoxComponent";
+import MoreOptionPostComponent from "../component/moreOptionBox/MoreOptionPostComponent";
 // import { AvatarEx } from '../component'
 // import RowComponent from '../RowComponent';
 
+const formatNumber = (num) => {
+    // console.log(num)
+    if (num >= 1e9) {
+        return (num / 1e9).toFixed(1) + 'B'; // tỷ
+    } else if (num >= 1e6) {
+        return (num / 1e6).toFixed(1) + 'M'; // triệu
+    } else if (num >= 1e3) {
+        return (num / 1e3).toFixed(1) + 'K'; // nghìn
+    } else {
+        return num.toString(); // số bình thường
+    }
+};
 const PictureScreen = ({ }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
-    const { Data: post, Select, User, emoji } = route.params;
+    const { Data: post, Select, user } = route.params;
     const userPost = route.params.userPost;
+
+    console.log(post, Select, user, userPost);
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
     // const DataLength = Object.keys(Data.imgPost).length;
     const inset = useSafeAreaInsets();
     const navigation = useNavigation();
+
+    const dispatch = useDispatch();
+    // follow
+    const follower = useSelector((state) => state.follower.follower);
+    const isFollow = follower.some(f => f.user_id === post.user_id);
+
+    // favorite
+    const favorite = useSelector(state => state.favorite.currentFavorite);
+    // const [isFavorite, setIsFavorite] = useState(false);
+    const isFavorite = favorite.some(f => f.post_id === post.post_id);
+
+
+    const dataPostView = formatNumber(post.count_view);
+    const dataPostCmt = null; // chưa có dữ liệu tạm thời để trống
+
+    const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
+
+    const translateYEmoji = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
+
+    // const [isPressLike, setIsPressLike] = useState("false");
+
+
+    const [iconEmoji, setIconEmoji] = useState("default");
+    const emoji = useSelector(state => state.emoji.emojiList);
+    const dataPostEmoji = formatNumber(1231321); // chưa xong
 
     // console.log(Select);
 
     const handleIndex = num => {
         setIndex(num.nativeEvent.position + 1);
     }
+
+
+    useEffect(() => {
+        const getEmoji = async () => {
+            let foundEmojiType = "default";
+            for (let i = 0; i < emoji.length; i++) {
+                if (emoji[i].user_id !== user.user_id || emoji[i].post_id !== post.post_id) {
+                    continue;
+                }
+                if (emoji[i].count_like > 0) {
+                    foundEmojiType = "like";
+                    break;
+                } else if (emoji[i].count_heart > 0) {
+                    foundEmojiType = "heart";
+                    break;
+                } else if (emoji[i].count_laugh > 0) {
+                    foundEmojiType = "laugh";
+                    break;
+                } else if (emoji[i].count_sad > 0) {
+                    foundEmojiType = "sad";
+                    break;
+                }
+            }
+            setIconEmoji(foundEmojiType);
+        };
+        getEmoji();
+    }, [emoji]);
+    const getIconImg = (emoji) => {
+        switch (emoji) {
+            case "like":
+                return require("../../assets/emojiIcons/like-emoji.png");
+            case "heart":
+                return require("../../assets/emojiIcons/heart-emoji.png");
+            case "laugh":
+                return require("../../assets/emojiIcons/laugh-emoji.png");
+            case "sad":
+                return require("../../assets/emojiIcons/sad-emoji.png");
+            case "default":
+                return require("../../assets/appIcons/like-out-post.png");
+            default:
+                return require("../../assets/appIcons/like-out-post.png");
+        }
+    }
+
+    const handleFollowButton = useCallback(() => {
+        const handleFollowUser = async () => {
+            await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userPost.user_id }));
+            // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+        }
+        handleFollowUser();
+    });
+    const handlePressLike = () => {
+        // setIsPressLike("like");
+        handleBtnEmoji("like");
+    }
+
+    const handleBtnEmoji = async (emojiType) => {
+        const existingEmoji = emoji.find(e => e.user_id === user.user_id && e.post_id === post.post_id);
+        if (existingEmoji) {
+            console.log("existingEmoji", existingEmoji);
+            console.log("existingEmoji[`count_like`]", existingEmoji[`count_like`]);
+            console.log("existingEmoji[`count_heart`]", existingEmoji[`count_heart`]);
+            console.log("existingEmoji[`count_laugh`]", existingEmoji[`count_laugh`]);
+            console.log("existingEmoji[`count_sad`]", existingEmoji[`count_sad`]);
+        }
+
+        if (existingEmoji) {
+
+            // Nếu người dùng đã tương tác
+            if (existingEmoji[`count_${emojiType}`] > 0) {
+                console.log("deleteEmoji");
+                // Nếu người dùng ấn lại đúng emoji mà họ đã tương tác trước đó -> DELETE
+                await dispatch(deleteEmoji({ post_id: post.post_id, user_id: user.user_id }));
+                setIconEmoji("default");
+            } else {
+                console.log("updateEmojiByField");
+                // Nếu người dùng chọn emoji khác với emoji đã tương tác trước đó -> UPDATE
+                // Xóa emoji hiện tại
+                await dispatch(updateEmojiByField({
+                    post_id: post.post_id,
+                    user_id: user.user_id,
+                    count_like: emojiType === "like" ? 1 : 0,
+                    count_heart: emojiType === "heart" ? 1 : 0,
+                    count_laugh: emojiType === "laugh" ? 1 : 0,
+                    count_sad: emojiType === "sad" ? 1 : 0,
+                }));
+                await dispatch(startListeningEmoji({ user_id: user.user_id }));
+                setIconEmoji(emojiType);
+            }
+        } else {
+            console.log("createEmoji");
+            // Nếu người dùng chưa tương tác -> CREATE
+            await dispatch(createEmoji({
+                emoji_id: "",
+                post_id: post.post_id,
+                user_id: user.user_id,
+                isComment: false,
+                comment_id: "",
+                count_like: emojiType === "like" ? 1 : 0,
+                count_heart: emojiType === "heart" ? 1 : 0,
+                count_laugh: emojiType === "laugh" ? 1 : 0,
+                count_sad: emojiType === "sad" ? 1 : 0,
+            }));
+            setIconEmoji(emojiType);
+        }
+
+        handleHidePop();
+    };
+
+
+
+    const handleShowPopEmoji = () => {
+        console.log("ajkhsdjkashdkjahsdkjahskjd")
+        setIsShowEmojiBox(true);
+        Animated.timing(translateYEmoji, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+    const handleHidePop = () => {
+
+        Animated.timing(translateYEmoji, {
+            toValue: appInfo.heightWindows,
+            duration: 300,
+            useNativeDriver: true,
+        }).start(setIsShowEmojiBox(false));
+    };
+
+
+    const userFavoriteCheck = () => {
+        if (user.user_id === post.user_id) {
+            return false;
+        }
+        return true;
+    }
+
+    const handleFavorite = useCallback(() => {
+        if (isFavorite) {
+            dispatch(deleteFavorite({ post_id: post.post_id, user_id: user.user_id }));
+            // dispatch(startListeningFavorites({ post_id: post_id, user_id: user_id }));
+        } else {
+            dispatch(createFavorite({ post_id: post.post_id, user_id: user.user_id }));
+            // dispatch(startListeningFavorites({ post_id: post_id, user_id: user_id }));
+        }
+    })
+
+
 
     const handleSaveImage = async (url) => {
         try {
@@ -95,11 +296,18 @@ const PictureScreen = ({ }) => {
                 <Feather name='x' color={'white'} size={24}
                     onPress={() => navigation.goBack()} />
 
-                <View style={{ flex: 1, alignItems: 'center' }}>
+                <View style={{ width: "85%", alignItems: 'center' }}>
                     {/* Image Index Versoin 1 */}
                     {/* <Text style={{ color: "white" }}>{index}/{DataLength}</Text> */}
                 </View>
-                <Feather name='more-vertical' color={'white'} size={24} />
+                {/* <Feather name='more-vertical' color={'white'} size={24} /> */}
+
+                <View style={{
+                    flex: 1,
+                    backgroundColor: "red",
+                }}>
+                    <MoreOptionPostComponent isWhiteDot post_id={post.post_id} user_id={user.user_id} post_user_id={userPost.user_id} />
+                </View>
             </View>}
 
             {/* Image Viewer Versoin 1 */}
@@ -154,36 +362,94 @@ const PictureScreen = ({ }) => {
                     </View>
                     <View style={{ width: "20%", height: "100%", alignItems: 'center' }}>
                         <ButtonsComponent isButton style={{ alignItems: "center", marginBottom: "10%" }}>
-                            <AvatarEx size={50} round={30} url={User.imgUser} frame={User.frame_user} style={{ marginRight: "3%" }} />
-                            {/* <Image source={{ uri: User.avatar }}// info.user.avatar "https://avatars.githubusercontent.com/u/118148132?v=4"
-                                style={{ width: 50, height: 50, borderRadius: 100, backgroundColor: 'white' }} /> */}
-                        </ButtonsComponent>
-
-                        <ButtonsComponent isButton>
-                            <AndtDegisn name='pluscircle' color={appcolor.primary} size={17} style={{ width: 17, height: 17, backgroundColor: "white", borderRadius: 100, marginTop: "-15%", top: -5 }} />
+                            <AvatarEx size={50} round={30} url={userPost.imgUser} frame={userPost.frame_user} style={{ marginRight: "3%" }} />
 
                         </ButtonsComponent>
 
-                        <TouchableOpacity style={{ alignItems: "center" }}>
-                            <AndtDegisn name='like1' color={"white"} size={30} />
+
+                        { /* Follow Button */}
+                        {!isFollow && user.user_id !== post.user_id ?
+                            <ButtonsComponent
+                                isButton
+                                onPress={handleFollowButton}>
+                                <AndtDegisn name='pluscircle' color={appcolor.primary} size={17} style={{ width: 17, height: 17, backgroundColor: "white", borderRadius: 100, marginTop: "-15%", top: -5 }} />
+
+                            </ButtonsComponent>
+                            : <></>}
+                        <TouchableOpacity
+                            onPress={handlePressLike}
+                            onLongPress={handleShowPopEmoji}
+                            style={{
+                                alignItems: "center",
+                            }}>
+                            {iconEmoji === "default" ?
+                                <AndtDegisn name='like1' color={"white"} size={30} />
+                                :
+                                <Image
+                                    style={{
+                                        width: 30,
+                                        height: 30,
+                                    }}
+                                    source={getIconImg(iconEmoji)}
+                                    contentFit="cover"
+                                />
+                            }
                             <Text style={{ color: "white" }}>20</Text>
                         </TouchableOpacity>
+
+                        {/* Comment Button */}
                         <TouchableOpacity style={{ alignItems: "center" }}>
                             <MaterialCommunityIcons name='comment-processing' color={"white"} size={30} />
                             <Text style={{ color: "white" }}>20</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ alignItems: "center" }}>
-                            <AndtDegisn name='star' color={"white"} size={30} />
-                            <Text style={{ color: "white" }}>20</Text>
-                        </TouchableOpacity>
+
+                        {/* Favorite Button */}
+                        {!isFavorite ?
+                            <TouchableOpacity
+                                onPress={handleFavorite}
+                                style={{ alignItems: "center" }}>
+                                <AndtDegisn name='star' color={"white"} size={30} />
+                                <Text style={{ color: "white" }}>20</Text>
+                            </TouchableOpacity>
+                            :
+                            <TouchableOpacity
+                                onPress={handleFavorite}
+                                style={{ alignItems: "center" }}>
+                                <Image
+                                    style={{
+                                        width: 30,
+                                        height: 30,
+                                    }}
+                                    source={require("../../assets/appIcons/favorite.png")}
+                                    contentFit="cover"
+                                />
+                                <Text style={{ color: "white" }}>20</Text>
+                            </TouchableOpacity>
+                        }
                     </View>
                 </View>
                 <View style={{ height: "20%" }} >
-                    <AnimatedQuickCmtComponent isNomal post={post} userPost={userPost} user={User} emoji={emoji} />
+                    <AnimatedQuickCmtComponent isNomal post={post} userPost={userPost} user={user} />
                 </View>
 
             </View>}
+            {/* Emoji Box */}
+            <ModalPop
+                visible={isShowEmojiBox}
+                transparent={true}
+                onRequestClose={handleHidePop}
+            >
+                <EmojiBoxComponent
+                    translateYEmoji={translateYEmoji}
+                    handleBtnEmoji={handleBtnEmoji}
+                    emoji={emoji}
+                    user={user}
+                    post={post}
+                    iconEmoji={iconEmoji}
+                    setIconEmoji={setIconEmoji} />
 
+
+            </ModalPop>
         </View>
 
     )

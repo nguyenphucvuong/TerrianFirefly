@@ -19,6 +19,7 @@ import { db } from "../../firebase/FirebaseConfig"; // Firebase config
 const initialState = {
   post: [],
   followerPost: [],
+  currentPost: null,
   lastVisiblePost: null,
   lastVisiblePostFollower: null,
   status: "idle",
@@ -123,78 +124,27 @@ export const getPostsRefresh = createAsyncThunk(
 
 export const getPostsByField = createAsyncThunk(
   "data/getPostsByField",
-  async (
-    { field, quantity, currentUserId, isFollow = false },
-    { getState }
-  ) => {
+  async ({ field, value }, { getState, dispatch }) => {
     try {
-      let followedUserIds = [];
-      if (isFollow) {
-        const followerQuery = query(
-          collection(db, "Follower"),
-          where("follower_user_id", "==", currentUserId)
-        );
-        const followerSnapshot = await getDocs(followerQuery);
-        followedUserIds = followerSnapshot.docs.map(
-          (doc) => doc.data().user_id
-        );
-      }
 
-      // Lấy lastVisiblePost hoặc lastVisiblePostFollower dựa trên isFollow
-      const lastVisiblePostId = isFollow
-        ? getState().post.lastVisiblePostFollower
-        : getState().post.lastVisiblePost;
-
-      let lastVisibleDoc = null;
-      if (lastVisiblePostId) {
-        const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
-        lastVisibleDoc = await getDoc(lastVisibleDocRef);
-      }
-
-      // Tạo query dựa trên isFollow
-      let postsQuery = query(
+      const postQuery = query(
         collection(db, "Posts"),
         orderBy(field, "desc"),
-        limit(quantity)
+        limit(1),
+        where(field, "==", value)
       );
 
-      // Điều kiện truy vấn khi isFollow là true
-      if (isFollow && followedUserIds.length > 0) {
-        postsQuery = query(postsQuery, where("user_id", "in", followedUserIds));
-      }
-      // Điều kiện khi isFollow là false: lấy bài đăng của user chưa được follow
-      else if (!isFollow && followedUserIds.length > 0) {
-        postsQuery = query(
-          postsQuery,
-          where("user_id", "not-in", followedUserIds.slice(0, 10))
-        );
-      }
-
-      if (lastVisibleDoc) {
-        postsQuery = query(postsQuery, startAfter(lastVisibleDoc));
-      }
-
-      const querySnapshot = await getDocs(postsQuery);
-
-      // Xử lý dữ liệu khi không có kết quả trả về
-      if (querySnapshot.empty && !isFollow) {
+      const querySnapshot = await getDocs(postQuery);
+      if (querySnapshot.empty) {
         return { postData: [], lastVisiblePost: null };
-      } else if (isFollow && followedUserIds.length === 0) {
-        return { postData: [], lastVisiblePost: null, isFollow };
       }
 
-      await updatePostViewCount(querySnapshot.docs);
-      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
       const postData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+      return postData;
 
-      return {
-        postData: postData,
-        lastVisiblePost: lastVisible ? lastVisible.id : null,
-        isFollow,
-      };
     } catch (error) {
       console.error("Error fetching posts by field: ", error);
       throw error;
@@ -369,21 +319,15 @@ export const PostSlice = createSlice({
       })
 
       // getPostsByField
+      .addCase(getPostsByField.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentPost = action.payload.postData;
+        // console.log("getPostsByField", state.currentPost);
+        state.status = "succeeded"; // Đánh dấu thành công
+      })
       .addCase(getPostsByField.pending, (state) => {
         state.loading = true;
         state.error = null;
-      })
-      .addCase(getPostsByField.fulfilled, (state, action) => {
-        state.loading = false;
-        if (action.payload.isFollow) {
-          state.followerPost.push(...action.payload.postData); // Thêm dữ liệu vào followerPost
-          state.lastVisiblePostFollower =
-            action.payload.lastVisiblePostFollower; // Cập nhật lastVisiblePostFollower
-        } else {
-          state.post.push(...action.payload.postData); // Thêm dữ liệu vào post
-          state.lastVisiblePost = action.payload.lastVisiblePost; // Cập nhật lastVisiblePost
-        }
-        state.status = "succeeded"; // Đánh dấu thành công
       })
       .addCase(getPostsByField.rejected, (state, action) => {
         state.loading = false;
