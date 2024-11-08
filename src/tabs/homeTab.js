@@ -46,7 +46,7 @@ const HomeTab = () => {
         >
           <Feather name="search" color={appcolor.textGray} size={13} />
           <View style={{ width: 10, height: 'auto' }} />
-          <Text style={{ color: appcolor.textGray }}> Điểm danh</Text>
+          <Text style={{ color: appcolor.textGray }}> Tìm kiếm</Text>
         </TouchableOpacity>
       </View>
       <Tab.Navigator

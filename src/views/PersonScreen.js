@@ -29,7 +29,7 @@ const PersonScreen = () => {
     const dispatch = useDispatch();
     //route
     const route = useRoute();
-    const [user] = route.params?.user ?? users;
+    const user = route.params?.user ?? users;
     console.log('users',users);
     
     const navigation = useNavigation();
