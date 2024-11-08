@@ -24,10 +24,16 @@ const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 
 
 const PersonScreen = () => {
-    const navigation = useNavigation();
     //firebase
-    const user = useSelector((state) => state.user.user);
+    const users = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
+    //route
+    const route = useRoute();
+    const [user] = route.params?.user ?? users;
+    console.log('users',users);
+    
+    const navigation = useNavigation();
+
     //Copy
     const [showToast, setShowToast] = useState(false);
     const copyToClipboard = (id) => {
