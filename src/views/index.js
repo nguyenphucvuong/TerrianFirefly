@@ -22,6 +22,8 @@ import RegisterScreen from './RegisterScreen';
 import ForgotPassword from './ForgotPassword';
 import CreatePostScreen from './CreatePostScreen';
 import VerificationCodeScreen from './VerificationCodeScreen';
+import ResetPasswordScreen from './ResetPasswordScreen'
+import HashtagManagerScreen from './HashtagManagerScreen';
 import FollowerScreen from './FollowerScreen';
 import TrackingScreen from './TrackingScreen';
 export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen,
