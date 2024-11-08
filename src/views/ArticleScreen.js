@@ -20,78 +20,78 @@ const ArticleScreen = () => {
     //console.log('user1',user);
     //console.log('post1',post);
 
-    return (
+    // return (
 
-        <FlatList
-            data={post}
-            scrollEnabled={false}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => {
-                return (
-                    // bài viết người dùng đăng
-                    <>
-                        {user.user_id === item.user_id ?
-                            <PostViewComponent post={item} user={user} images={item.images} emoji={emoji} />
-                            : null
-                        }
-                    </>
-                )
-            }}
-            contentContainerStyle={{ flexGrow: 1 }}
-            refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={() => {
-                    setRefreshing(true);
-                    setTimeout(async () => {
-                        const dataRefresh = await dispatch(getPostsRefresh({ field: "created_at", quantity: 3 }));
-                        // setLastVisiblePost(dataRefresh.payload.lastVisiblePost);
-                        console.log("getPostsRefresh")
-                        // Sau khi hoàn thành refresh, có thể cập nhật lại dữ liệu từ API hoặc giữ nguyên
-                        setRefreshing(false);
-                        setHasMorePosts(true);
-                    }, 2000);
-                }} />
-            }
-            ListFooterComponent={() => (
-                loading ? //  a==b ? b : a
-                    <View style={{
-                        marginTop: 10,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexDirection: 'row',
-                        justifyContent: 'space-around',
-                        padding: 10,
-                        // width : WIDTH,
-                        // height : 50 ,
-                        flexDirection: 'column'
-                    }} >
-                        <ActivityIndicator size="large" color='#0000ff' />
+    //     <FlatList
+    //         data={post}
+    //         scrollEnabled={false}
+    //         keyExtractor={(item, index) => index.toString()}
+    //         renderItem={({ item }) => {
+    //             return (
+    //                 // bài viết người dùng đăng
+    //                 <>
+    //                     {user.user_id === item.user_id ?
+    //                         <PostViewComponent post={item} user={user} images={item.images} emoji={emoji} />
+    //                         : null
+    //                     }
+    //                 </>
+    //             )
+    //         }}
+    //         contentContainerStyle={{ flexGrow: 1 }}
+    //         refreshControl={
+    //             <RefreshControl refreshing={refreshing} onRefresh={() => {
+    //                 setRefreshing(true);
+    //                 setTimeout(async () => {
+    //                     const dataRefresh = await dispatch(getPostsRefresh({ field: "created_at", quantity: 3 }));
+    //                     // setLastVisiblePost(dataRefresh.payload.lastVisiblePost);
+    //                     console.log("getPostsRefresh")
+    //                     // Sau khi hoàn thành refresh, có thể cập nhật lại dữ liệu từ API hoặc giữ nguyên
+    //                     setRefreshing(false);
+    //                     setHasMorePosts(true);
+    //                 }, 2000);
+    //             }} />
+    //         }
+    //         ListFooterComponent={() => (
+    //             loading ? //  a==b ? b : a
+    //                 <View style={{
+    //                     marginTop: 10,
+    //                     alignItems: 'center',
+    //                     justifyContent: 'center',
+    //                     flexDirection: 'row',
+    //                     justifyContent: 'space-around',
+    //                     padding: 10,
+    //                     // width : WIDTH,
+    //                     // height : 50 ,
+    //                     flexDirection: 'column'
+    //                 }} >
+    //                     <ActivityIndicator size="large" color='#0000ff' />
 
-                    </View> : null
-            )}
+    //                 </View> : null
+    //         )}
 
-            onEndReached={async () => {
-                if (loading || !hasMorePosts) return; // Check if loading or no more posts to load
-                setLoading(true);
+    //         onEndReached={async () => {
+    //             if (loading || !hasMorePosts) return; // Check if loading or no more posts to load
+    //             setLoading(true);
 
-                try {
-                    const dataLoadMore = await dispatch(getPostsByField({ field: "created_at", quantity: 3 }));
+    //             try {
+    //                 const dataLoadMore = await dispatch(getPostsByField({ field: "created_at", quantity: 3 }));
 
-                    if (dataLoadMore.payload.postData.length === 0) {
-                        setHasMorePosts(false);
-                    } else {
-                        // Append new posts while ensuring no duplicates
-                        // Example: setPost((prevPosts) => [...new Set([...prevPosts, ...dataLoadMore.payload.postData])]);
-                    }
-                } catch (error) {
-                    console.error("Error loading more posts:", error);
-                } finally {
-                    setLoading(false);
-                }
-            }}
-            onEndReachedThreshold={0.1}
+    //                 if (dataLoadMore.payload.postData.length === 0) {
+    //                     setHasMorePosts(false);
+    //                 } else {
+    //                     // Append new posts while ensuring no duplicates
+    //                     // Example: setPost((prevPosts) => [...new Set([...prevPosts, ...dataLoadMore.payload.postData])]);
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Error loading more posts:", error);
+    //             } finally {
+    //                 setLoading(false);
+    //             }
+    //         }}
+    //         onEndReachedThreshold={0.1}
 
-        />
+    //     />
 
-    )
+    // )
 }
 export default React.memo(ArticleScreen);
