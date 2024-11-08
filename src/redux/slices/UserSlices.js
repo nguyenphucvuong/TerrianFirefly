@@ -16,12 +16,6 @@ export const getUser = createAsyncThunk('data/getUser', async (email) => {
     try {
         const q = query(collection(db, 'user'), where('email', '==', email));
         const querySnapshot = await getDocs(q);
-
-        // const posts = querySnapshot.docs.map(doc => ({
-        //     id: doc.id,
-        //     ...doc.data(),
-        // }));
-
         const posts = {
             id: querySnapshot.docs[0].id,
             ...querySnapshot.docs[0].data(),
@@ -33,38 +27,6 @@ export const getUser = createAsyncThunk('data/getUser', async (email) => {
     }
 
 });
-// // Tạo async thunk để cập nhật thông tin người dùng trong Firestore
-// export const updateUser = createAsyncThunk('user/updateUser', async (user) => {
-//     try {
-//         const userRef = doc(db, 'user', user.user_id); // Tham chiếu đến tài liệu người dùng
-
-//         // Cập nhật các trường trong tài liệu
-//         await updateDoc(userRef, {
-//             imgUser: user.imgUser,
-//             frame_user: user.frame_user,
-//             gender: user.gender,
-//             username: user.username, // Sử dụng user.username thay vì chỉ username
-//         });
-
-//         // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
-//         const updatedSnap = await getDoc(userRef);
-//         if (updatedSnap.exists()) {
-//             return {
-//                 id: updatedSnap.id,
-//                 ...updatedSnap.data(),
-//             };
-//         } else {
-//             throw new Error('User not found');
-//         }
-//     } catch (error) {
-//         console.error('Error adding document: ', error);
-//         throw error;
-//     }
-// }
-// );
-
-
-
 export const getUserByField = createAsyncThunk('data/getUserByField', async ({ user_id }) => {
     try {
         const queryDoc = query(collection(db, 'user'), where('user_id', '==', user_id));
@@ -102,7 +64,6 @@ export const updateUser = createAsyncThunk('data/upDateUser', async ({ user_id, 
         const userDocRef = doc(collection(db, "user"), user_id);
         await updateDoc(userDocRef, newData);
         console.log("User updated!");
-        
         
         //Alert.alert("Thành công", "Đã cập nhật Firestore.");
     } catch (error) {
@@ -143,34 +104,6 @@ export const uploadImage = createAsyncThunk('data/uploadImage', async ({ imgUser
         return rejectWithValue(error.message);
     }
 });
-
-// doc(collection(db, "user"), user_id);
-//               try {
-//                 // Cập nhật mật khẩu mới trong Firestore
-//                 await updateDoc(userRef, newData);
-//                 console.log("User updated!");
-//                 Alert.alert(
-//                   "Thành công",
-//                   "đã cập nhật Firestore."
-//                 );
-
-//               } catch (error) {
-//                 console.error("Error updating user:", error);
-//                 Alert.alert("Lỗi", "Không thể cập nhật.");
-//               }
-// export const updateUser = createAsyncThunk(
-//   "data/updateUser",
-//   async ({ userId, newData }, { rejectWithValue }) => {
-//     const userRef = doc(collection(db, "user"), userId);
-//     try {
-//       // Cập nhật dữ liệu trong Firestore
-//       await updateDoc(userRef, newData);
-//       return { userId, newData };
-//     } catch (error) {
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
 
 export const updateUserPassword = createAsyncThunk('data/updateUserPassword', async ({ userId, newPassWord }) => {
     try {

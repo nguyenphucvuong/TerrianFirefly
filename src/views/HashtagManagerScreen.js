@@ -42,8 +42,6 @@ const HashtagManagerScreen = () => {
   const colorPickerBackgroundRef = useRef(null);
   // Lắng nghe sự thay đổi từ Firestore khi component mount
   useEffect(() => {
-    // Gọi fetchHashtags để lấy dữ liệu
-
     const fetchData = async () => {
       try {
         await dispatch(fetchHashtags()); 

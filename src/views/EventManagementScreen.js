@@ -28,10 +28,10 @@ export default function EventManagementScreen() {
   const errorEvent = useSelector((state) => state.event.errorEvent);
 
   // Gọi hàm getEvent để lấy dữ liệu khi màn hình được render lần đầu
-  useEffect(() => {
-    const unsubscribe = dispatch(fetchEvents()); 
-    return () => unsubscribe(); // Cleanup
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const unsubscribe = dispatch(fetchEvents()); 
+  //   return () => unsubscribe(); // Cleanup
+  // }, [dispatch]);
 
   // Hàm định dạng số lượng
   const formatCount = (count) => {
@@ -135,9 +135,9 @@ export default function EventManagementScreen() {
                     </Text>
                     <View style={styles.eventStats}>
                       <Text style={{ marginRight: 20 }}>
-                        👍 {item.count_like}
+                        👍 {formatCount(item.count_like)}
                       </Text>
-                      <Text>👁️ {item.count_view}</Text>
+                      <Text>👁️ {formatCount(item.count_view)}</Text>
                     </View>
                   </View>
                   {/* Thêm trạng thái sự kiện ở góc dưới bên phải */}
