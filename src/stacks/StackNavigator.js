@@ -22,6 +22,9 @@ import {
     ResetPasswordScreen,
     HashtagManagerScreen,
     TrackingScreen,
+    EventManagementScreen,
+    AddEditEventScreen,
+
 } from '../views';
 
 import IndexTab from '../tabs/indexTab';
@@ -80,6 +83,15 @@ const StackNavigator = () => {
                     ...IconHeaderRight("", () => navigation.navigate('AccountDetailsScreen'), 'alert-circle'),
                 })}
             />
+            <Stack.Screen name='EventManagementScreen' component={EventManagementScreen}
+                options={({ navigation }) => ({
+                    // Kết hợp các cấu hình từ cả hai hàm
+                    ...IconBack("Quản Lý Sự Kiện"),
+                    ...IconHeaderRight("", () => navigation.navigate('AddEditEventScreen'), 'plus-circle'),
+                })}
+            />
+            <Stack.Screen name='AddEditEventScreen' component={AddEditEventScreen}
+                options={() => IconBack("Chi Tiết Sự Kiện")} />
             <Stack.Screen name='HashtagManagerScreen' component={HashtagManagerScreen}
                 options={() => IconBack("Quản Lý Hashtag")} />
             <Stack.Screen name='NotificationManagement' component={NotificationManagement}

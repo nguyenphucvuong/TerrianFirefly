@@ -131,7 +131,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
       <View style={[styles.viewInput, { marginBottom: "15%" }]}>
         <Text style={{ marginBottom: "3%" }}>Password</Text>
         <View style={styles.input}>
-          <Icon name="lock" size={25} color="#858585" />
+          <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
           <TextInput
             secureTextEntry={checkPass}
             style={styles.textInput}
@@ -144,14 +144,14 @@ const ResetPasswordScreen = ({ navigation, route }) => {
             {checkPass ? (
               <Icon
                 name="eye-slash"
-                size={20}
+                size={appInfo.heightWindows * 0.028}
                 color="#858585"
                 style={{ marginLeft: appInfo.widthWindows * 0.19 }}
               />
             ) : (
               <Icon
                 name="eye"
-                size={20}
+                size={appInfo.heightWindows * 0.028}
                 color="#858585"
                 style={{ marginLeft: appInfo.widthWindows * 0.19 }}
               />
@@ -162,7 +162,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
       <View style={[styles.viewInput, { marginBottom: "23%" }]}>
         <Text style={{ marginBottom: "3%" }}>Xác Nhận Mật Khẩu</Text>
         <View style={styles.input}>
-          <Icon name="lock" size={25} color="#858585" />
+          <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
           <TextInput
             secureTextEntry={checkPass}
             style={styles.textInput}
@@ -175,14 +175,14 @@ const ResetPasswordScreen = ({ navigation, route }) => {
             {checkPass ? (
               <Icon
                 name="eye-slash"
-                size={20}
+                size={appInfo.heightWindows * 0.028}
                 color="#858585"
                 style={{ marginLeft: appInfo.widthWindows * 0.19 }}
               />
             ) : (
               <Icon
                 name="eye"
-                size={20}
+                size={appInfo.heightWindows * 0.028}
                 color="#858585"
                 style={{ marginLeft: appInfo.widthWindows * 0.19 }}
               />

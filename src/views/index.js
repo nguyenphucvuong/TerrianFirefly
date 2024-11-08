@@ -25,7 +25,8 @@ import CreatePostScreen from './CreatePostScreen';
 import VerificationCodeScreen from './VerificationCodeScreen';
 import ResetPasswordScreen from './ResetPasswordScreen'
 import HashtagManagerScreen from './HashtagManagerScreen';
-
+import EventManagementScreen from './EventManagementScreen';
+import AddEditEventScreen from './AddEditEventScreen';
 import FollowerScreen from './FollowerScreen';
 import TrackingScreen from './TrackingScreen';
 export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen,
@@ -33,7 +34,7 @@ export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen
       SettingScreen, AccountDetailsScreen, ArticleScreen, FavouriteScreen, GroupScreen, NotificationManagement,
       ManagePostsScreen, ArticleDetailsScreen, SetUpAccountScreen, WellcomScreen, LoginScreen, 
       RegisterScreen, ForgotPassword, VerificationCodeScreen, CreatePostScreen, FollowerScreen, ResetPasswordScreen,
-      HashtagManagerScreen, TrackingScreen,
+      HashtagManagerScreen, TrackingScreen, EventManagementScreen, AddEditEventScreen,
       }; 
 
 

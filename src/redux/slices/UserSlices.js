@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { db, auth } from '../../firebase/FirebaseConfig';
+import { db, auth, storage} from '../../firebase/FirebaseConfig';
 import { collection, addDoc, getDoc, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Firebase Storage
 
 // Trạng thái ban đầu
 const initialState = {
@@ -110,7 +111,38 @@ export const updateUser = createAsyncThunk('data/upDateUser', async ({ user_id, 
     }
 });
 
+// Tạo async thunk để upload ảnh
+export const uploadImage = createAsyncThunk('data/uploadImage', async ({ imgUser, setUploadProgress }, { rejectWithValue }) => {
+    try {
+        const response = await fetch(imgUser);
+        const blob = await response.blob();
+        const imgRef = ref(storage, `avatar/${imgUser.split("/").pop()}`);
+        const uploadTask = uploadBytesResumable(imgRef, blob);
 
+        return new Promise((resolve, reject) => {
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setUploadProgress(Math.round(progress));
+                    console.log('Upload is ' + progress + '% done');
+                },
+                (error) => {
+                    console.error('Upload failed', error);
+                    reject(error);
+                },
+                async () => {
+                    const imgUrl = await getDownloadURL(imgRef);
+                    console.log('File available at', imgUrl);
+                    blob.close();
+                    resolve(imgUrl);
+                }
+            );
+        });
+    } catch (error) {
+        console.error("Error uploading image:", error);
+        return rejectWithValue(error.message);
+    }
+});
 
 // doc(collection(db, "user"), user_id);
 //               try {
@@ -201,6 +233,12 @@ export const UserSlices = createSlice({
             })
             .addCase(updateUser.rejected, (state, action) => {
                 state.errorUser = action.error.message;
+            })
+            .addCase(uploadImage.fulfilled, (state, action) => {
+                // Update state or user with the new image URL if needed
+            })
+            .addCase(uploadImage.rejected, (state, action) => {
+                state.errorUser = action.payload;
             });
 
     },
