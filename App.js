@@ -21,7 +21,7 @@ const MainApp = () => {
   const value = today.toISOString(); // Đảm bảo là định dạng ISO
   useEffect(() => {
     // dispatch(getPostsByField({ field: "created_at", quantity: "2", lastVisiblePost: null }));
-
+ 
     // dispatch(getPostsFirstTime());
     dispatch(getEvent());
     dispatch(getEventByField({ fieldWhere: "created_at", value: Date.now() }));

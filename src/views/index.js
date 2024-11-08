@@ -15,7 +15,6 @@ import FavouriteScreen from './FavouriteScreen';
 import GroupScreen from './GroupScreen';
 import NotificationManagement from './NotificationManagement';
 import ManagePostsScreen from './ManagePostsScreen'; 
-import ArticleDetailsScreen from './ArticleDetailsScreen';
 import SetUpAccountScreen from './SetUpAccountScreen';
 import WellcomScreen from './WellcomScreen';
 import LoginScreen from './LoginScreen';
@@ -31,9 +30,10 @@ import TrackingScreen from './TrackingScreen';
 export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen,
      InfomationScreen, AchievementsScreen, NickNameScreen, DetailPostScreen, UserManagementScreen,
       SettingScreen, AccountDetailsScreen, ArticleScreen, FavouriteScreen, GroupScreen, NotificationManagement,
-      ManagePostsScreen, ArticleDetailsScreen, SetUpAccountScreen, WellcomScreen, LoginScreen, 
-      RegisterScreen, ForgotPassword, VerificationCodeScreen, CreatePostScreen, FollowerScreen, ResetPasswordScreen,
-      HashtagManagerScreen, TrackingScreen,
-      }; 
+      ManagePostsScreen, SetUpAccountScreen, WellcomScreen, LoginScreen, 
+      RegisterScreen, ForgotPassword, VerificationCodeScreen, CreatePostScreen, FollowerScreen,
+      TrackingScreen, ResetPasswordScreen, HashtagManagerScreen,
+     }; 
+
 
 

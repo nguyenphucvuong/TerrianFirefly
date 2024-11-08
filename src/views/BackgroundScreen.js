@@ -1,4 +1,4 @@
-import { View, ImageBackground, FlatList, StyleSheet, Text, TouchableOpacity, Image } from 'react-native'
+import { View, ImageBackground, FlatList, StyleSheet, Text, TouchableOpacity, Image, Alert } from 'react-native'
 import React, { useMemo, useRef, useEffect, useState } from 'react'
 import {
     BottomSheetModal,
@@ -7,94 +7,160 @@ import {
 } from '@gorhom/bottom-sheet';
 import { useSelector, useDispatch } from "react-redux";
 //components
-import { IconComponent, ButtonBackComponent, AvatarEx, ButtonFunctionComponent } from '../component';
+import { IconComponent, ButtonBackComponent, AvatarEx, ButtonFunctionComponent, SkeletonComponent } from '../component';
 //style
 import { StyleGlobal } from '../styles/StyleGlobal';
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
 //Redux
 import { getBackground } from '../redux/slices/BackgroundSlice';
+import { getUser, updateUser, uploadImage, listenToUserRealtime } from '../redux/slices/UserSlices';
 const BackgroundScreen = () => {
     //FireBase
     const arrBackground = useSelector((state) => state.background.background);
     const user = useSelector((state) => state.user.user);
+    const [level, setLevel] = useState('');
+    // const arrBackground = "";
+    // const user = "";
     const dispatch = useDispatch();
     //
     const [selectedId, setSelectedId] = useState(user.backgroundUser);
+    //set data
+    const [background, setBackground] = useState(user.backgroundUser);
     //BottomSheet
     const snapPoints = useMemo(() => ['15%'], []);
     const bottomSheetModalRef = useRef(null);
-    const handldeOpenPress = (url) => {
+    const handldeOpenPress = (item) => {
         bottomSheetModalRef.current?.present();
-        setBackground(url);
-        setSelectedId(url);
+        setBackground(item.nameBackground);
+        setSelectedId(item.nameBackground);
+        setLevel(item.level);
     };
-    //set data
-    const [background, setBackground] = useState(user.backgroundUser);
-    //cập nhật lại dữ liệu     
+    //Update background
+    const handleBackground = async () => {
+        try {
+            const newData = {
+                backgroundUser: background,
+            }
+            //console.log('newData', newData);
+            dispatch(updateUser({ user_id: user.user_id, newData: newData }));
+            Alert.alert("Thông Báo", "Cập Nhật Thành Công");
+        } catch (error) {
+            console.error("Update failed:", error);
+        }
+    }
+    //cập nhật lại dữ liệu 
     useEffect(() => {
-        //đọc dữ liệu   
         dispatch(getBackground());
-        // dispatch(getUser(user.email));
-
-    }, []);
+        const unsubscribe = dispatch(listenToUserRealtime(user.email));
+        return () => unsubscribe();
+    }, [dispatch, user.email]);
     //console.log('background',background);
 
     return (
         <View style={{ flex: 1 }}>
-            <BottomSheetModalProvider>
-                <ImageBackground style={{ width: '100%', height: appInfo.heightWindows * 0.2, }}
-                    source={{ url: background }}>
-                    <View style={{ top: appInfo.heightWindows * 0.05 }}>
-                        <ButtonBackComponent color={'white'} />
-                    </View>
-                    <View style={styles.background}>
-                        <View style={{ marginRight: 'auto', marginLeft: '5%', bottom: appInfo.heightWindows * 0.04 }}>
-                            <AvatarEx
-                                url={user.imgUser}
-                                size={appInfo.widthWindows * 0.22}
-                                round={20}
-                                frame={user.frame_user}
+            {
+                !user || !arrBackground ?
+                    (
+                        <View>
+                            <SkeletonComponent
+                                Data={""}
+                                style={{ width: '100%', height: appInfo.heightWindows * 0.15 }}
+                            />
+                            <SkeletonComponent
+                                isAvatar
+                                Data={""}
+                                style={{ width: 80, height: 80, marginLeft: appInfo.widthWindows * 0.1 }}
+                            />
+                            <SkeletonComponent
+                                Data={""}
+                                style={{ width: '100%', height: appInfo.heightWindows * 0.05 }}
+                            />
+                            <SkeletonComponent
+                                Data={""}
+                                style={{ width: '100%', height: appInfo.heightWindows * 0.05 }}
+                            />
+                            <SkeletonComponent
+                                Data={""}
+                                style={{ width: '100%', height: appInfo.heightWindows * 0.05 }}
                             />
                         </View>
-                    </View>
-                </ImageBackground>
-                <FlatList
-                    style={{ margin: '2%', marginTop: '20%' }}
-                    numColumns={2}
-                    data={arrBackground}
-                    renderItem={({ item }) => {
-                        const isSelected = selectedId === item.nameBackground;
-                        return (
-                            <TouchableOpacity style={{ flex: 1, margin: 5 }} 
-                            onPress={() => handldeOpenPress(item.nameBackground)} >
-                                <Image
-                                    style={[styles.image, { borderColor: isSelected ? '#90CAF9' : 'white', borderWidth: 3, }]}
-                                    source={{ url: item.nameBackground }}
-                                />
-                                {user.backgroundUser == item.nameBackground
-                                    ? <IconComponent
-                                    name={'check'}
-                                    size={appInfo.heightWindows * 0.02}
-                                    color={'#FFFFFF'}
-                                    style={[styles.iconComponent, { bottom: 5, backgroundColor: '#0286FF' }]}
-                                />
-                                    : null}
-                            </TouchableOpacity>
-                        )
-                    }}
-                    keyExtractor={(item) => item.background_id.toString()}
-                />
-                <BottomSheetModal
-                    ref={bottomSheetModalRef}
-                    index={0}
-                    snapPoints={snapPoints}>
-                    <BottomSheetView style={styles.contentContainer}>
-                        <Text style={StyleGlobal.textName}> Cấp độ: 🎉</Text>
-                        <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button} />
-                    </BottomSheetView>
-                </BottomSheetModal>
-            </BottomSheetModalProvider>
+                    ) : (
+                        <BottomSheetModalProvider>
+                            <ImageBackground style={{ width: '100%', height: appInfo.heightWindows * 0.2, }}
+                                source={{ uri: background }}>
+                                <View style={{ top: appInfo.heightWindows * 0.05 }}>
+                                    <ButtonBackComponent color={'white'} />
+                                </View>
+                                <View style={styles.background}>
+                                    <View style={{ marginRight: 'auto', marginLeft: '5%', bottom: appInfo.heightWindows * 0.04 }}>
+                                        <AvatarEx
+                                            url={user.imgUser}
+                                            size={appInfo.widthWindows * 0.22}
+                                            round={20}
+                                            frame={user.frame_user}
+                                        />
+                                    </View>
+                                </View>
+                            </ImageBackground>
+                            <FlatList
+                                style={[StyleGlobal.container, { marginTop: '20%' }]}
+                                numColumns={2}
+                                data={arrBackground}
+                                renderItem={({ item }) => {
+                                    const isSelected = selectedId === item.nameBackground;
+                                    const isLocked = item.level > user.total_interact_id; //kiểm tra level > hơn total_interact_id sẽ không click
+                                    return (
+                                        <TouchableOpacity style={{ flex: 1, margin: 5 }}
+                                            onPress={() => !isLocked && handldeOpenPress(item)} >
+
+                                            <Image
+                                                style={[styles.image, { borderColor: isSelected ? '#90CAF9' : 'white', borderWidth: 3, }]}
+                                                source={{ url: item.nameBackground }}
+                                            />
+                                            {isLocked ? (
+                                                <IconComponent
+                                                    name={'lock'}
+                                                    size={appInfo.heightWindows * 0.02}
+                                                    color={'#FFFFFF'}
+                                                    style={[
+                                                        styles.iconComponent,
+                                                        { bottom: 6, left: 7, backgroundColor: '#BFBFBF' },
+                                                    ]}
+                                                />
+                                            ) : null}
+                                            {user.backgroundUser == item.nameBackground
+                                                ? <IconComponent
+                                                    name={'check'}
+                                                    size={appInfo.heightWindows * 0.02}
+                                                    color={'#FFFFFF'}
+                                                    style={[styles.iconComponent, { bottom: 5, backgroundColor: '#0286FF' }]}
+                                                />
+                                                : null}
+                                        </TouchableOpacity>
+                                    )
+                                }}
+                                keyExtractor={(item) => item.background_id.toString()}
+                            />
+                            <BottomSheetModal
+                                ref={bottomSheetModalRef}
+                                index={0}
+                                snapPoints={snapPoints}>
+                                <BottomSheetView style={styles.contentContainer}>
+                                    <Text style={StyleGlobal.textName}> Cấp độ: {level} 🎉</Text>
+                                    <ButtonFunctionComponent
+                                        name={'Dùng'}
+                                        backgroundColor={'#8B84E9'}
+                                        colorText={'#FFFFFF'}
+                                        onPress={() => handleBackground()}
+                                        style={styles.button} />
+                                </BottomSheetView>
+                            </BottomSheetModal>
+                        </BottomSheetModalProvider>
+                    )
+
+            }
+
         </View>
     )
 }
