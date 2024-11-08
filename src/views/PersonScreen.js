@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text, Alert, LogBox, Clipboard } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 //style
 import { StyleGlobal } from '../styles/StyleGlobal'
 //components
-import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx} from '../component';
+import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx } from '../component';
 import TabRecipe from '../component/TabRecipe';
 //screen
 // import ArticleScreen from './ArticleScreen';
@@ -25,10 +25,26 @@ const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 
 const PersonScreen = () => {
     const navigation = useNavigation();
-    const dispatch = useDispatch();
     //firebase
     const user = useSelector((state) => state.user.user);
+    const dispatch = useDispatch();
+    //Copy
+    const [showToast, setShowToast] = useState(false);
+    const copyToClipboard = (id) => {
+        Clipboard.setString(id);
+        // Hiển thị thông báo
+        setShowToast(true);
 
+        // Tự động ẩn thông báo sau 2 giây
+        setTimeout(() => {
+            setShowToast(false);
+        }, 2000);
+        setShowToast(true);
+    };
+    // Ẩn cảnh báo liên quan đến Clipboard
+    LogBox.ignoreLogs([
+        'Clipboard has been extracted from react-native core',
+    ]);
     //Animated
     const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -53,6 +69,7 @@ const PersonScreen = () => {
         return () => unsubscribe();
     }, [dispatch, user.email]);
     //console.log('user', user);
+    //console.log('showToast', showToast);
 
     return (
         <View style={{ flex: 1 }}>
@@ -83,7 +100,11 @@ const PersonScreen = () => {
                             <View style={styles.lowerHeader} />
                         </ImageBackground>
                     </View>
-
+                    {showToast && (
+                        <View style={styles.toastContainer}>
+                            <Text style={styles.toastText}>Đã sao chép thành công!</Text>
+                        </View>
+                    )}
                     <ScrollView
                         style={{ flex: 1 }}
                         nestedScrollEnabled={true}
@@ -118,7 +139,7 @@ const PersonScreen = () => {
                             </View>
 
                             <View style={styles.iconRow}>
-                                <IconComponent name={'credit-card'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'ID: ' + user.user_id} />
+                                <IconComponent name={'credit-card'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'ID: ' + user.user_id} onPress={() => copyToClipboard(user.user_id)} />
                                 <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} />
                             </View>
 
@@ -257,6 +278,19 @@ const styles = StyleSheet.create({
     item: {
         fontSize: 18,
         marginBottom: 8,
+    },
+    toastContainer: {
+        position: 'absolute',
+        justifyContent: 'center',
+        alignSelf: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        padding: 10,
+        borderRadius: 8,
+        top: '50%', // Căn giữa theo chiều dọc
+        zIndex: 1, // Đảm bảo thông báo hiển thị trên các phần khác
+    },
+    toastText: {
+        color: '#fff',
     },
 
 });
