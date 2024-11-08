@@ -1,16 +1,17 @@
 import { Text, View, } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserByField } from "../redux/slices/UserSlices";
+import { createFollow, getFollower, startListeningFollowers } from "../redux/slices/FollowerSlice";
 
 
 import { appInfo } from "../constains/appInfo";
-import { data } from "../constains/data";
 import { handleTime } from "../utils/converDate";
 
 import { StyleGlobal } from "../styles/StyleGlobal";
+
 import {
     AvatarEx,
     ButtonsComponent,
@@ -22,58 +23,74 @@ import RowComponent from "../component/RowComponent";
 import AnimatedQuickCmtComponent from "./commentBox/AnimatedQuickCmtComponent";
 import MoreOptionPostComponent from "./moreOptionBox/MoreOptionPostComponent";
 import YoutubePlayerComponent from "./YoutubePlayerComponent";
+import { TouchableOpacity } from "react-native";
+import { op } from "@tensorflow/tfjs";
 
 
 
-const PostViewComponent = ({ post, emoji, user }) => {
+const PostViewComponent = ({ post, user }) => {
     if (!post) {
 
         return <></>;
     }
+
+
     const dispatch = useDispatch();
     const userId = post.user_id; // Lấy user_id từ post
-    const [userPost, setUserPost] = useState(null);
+    // const [userPost, setUserPost] = useState(null);
+    const userPost = useSelector((state) => state.user[userId]);
+    // const [isFollow, setIsFollow] = useState(false);
+    const follower = useSelector((state) => state.follower.follower);
+    const isFollow = follower.some(f => f.user_id === post.user_id);
 
+
+    // useEffect(() => {
+    //     const handleGetUserPost = async () => {
+    //         const userResponse = await dispatch(getUserByField({ user_id: userId }));
+    //         const userData = userResponse.payload;
+    //         setUserPost(userData);
+    //         console.log("userData", userData);
+    //     }
+    //     handleGetUserPost();
+    // }, [userId]);
 
     useEffect(() => {
-        const handleGetUserPost = async () => {
-            const userResponse = await dispatch(getUserByField({ user_id: userId }));
-            const userData = userResponse.payload;
-            setUserPost(userData);
+        if (!userPost) {
+            dispatch(getUserByField({ user_id: userId }));
         }
-        handleGetUserPost();
-    }, [dispatch, userId]);
+    }, [userId]);
+
+
+
+    const userPostCheck = () => {
+        if (userId === user.user_id) {
+            return false;
+        }
+        return true;
+    }
+
     const navigation = useNavigation();
 
     const title = post?.title.substring(0, 120);
     const content = post?.body.substring(0, 120);
-
     const handleAd = () => {
         console.log("toi day");
+
     };
+
+    const handleFollowButton = useCallback(() => {
+        const handleFollowUser = async () => {
+            await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userId }));
+            // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+        }
+        handleFollowUser();
+    });
 
 
     const handleNagigateDetailPost = () => {
-        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, emoji: emoji });
+        // navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, isFollow: isFollow, post_user_id: userId });
+        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, post_user_id: userId });
     }
-
-    // const handleTime = () => {
-    //     const now = Date.now(); // Current time in milliseconds
-    //     const secondsAgo = Math.floor((now - post.created_at) / 1000); // Difference in seconds
-
-    //     if (secondsAgo < 60) {
-    //         return `${secondsAgo} giây trước`;
-    //     } else if (secondsAgo < 3600) {
-    //         const minutesAgo = Math.floor(secondsAgo / 60);
-    //         return `${minutesAgo} phút trước`;
-    //     } else if (secondsAgo < 86400) {
-    //         const hoursAgo = Math.floor(secondsAgo / 3600);
-    //         return `${hoursAgo} giờ trước`;
-    //     } else {
-    //         const daysAgo = Math.floor(secondsAgo / 86400);
-    //         return `${daysAgo} ngày trước`;
-    //     }
-    // }
 
 
     const IsYTView = () => {
@@ -98,7 +115,7 @@ const PostViewComponent = ({ post, emoji, user }) => {
                     marginTop: "2%",
                     marginBottom: 15,
                 }}>
-                <ImagesPostComponent post={post} user={user} userPost={userPost} emoji={emoji} />
+                <ImagesPostComponent post={post} user={user} userPost={userPost} />
             </RowComponent>
         );
     }
@@ -126,7 +143,7 @@ const PostViewComponent = ({ post, emoji, user }) => {
                             height={appInfo.widthWindows / 5.7}
                             style={{ alignItems: "center" }}
                         >
-                            <AvatarEx size={40} round={30} url={userPost.imgUser} frame={'../../assets/frame/frame_background.png'} />
+                            <AvatarEx size={40} round={30} url={userPost.imgUser} frame={userPost.frame_user} />
                             {/* <Image
                             source={require('../../assets/frame/frame_background.png')}
                             style={{
@@ -152,8 +169,11 @@ const PostViewComponent = ({ post, emoji, user }) => {
                                 </SkeletonComponent>
                             </View>
 
-                            <SkeletonComponent Data={userPost.userId} isButton>
-                                <ButtonsComponent isButton onPress={handleAd}
+                            {userPostCheck() ?
+                                <TouchableOpacity
+                                    disabled={isFollow}
+                                    activeOpacity={0.6}
+                                    onPress={handleFollowButton}
                                     style={{
                                         borderColor: "rgba(121,141,218,1)",
                                         borderRadius: 100,
@@ -163,22 +183,24 @@ const PostViewComponent = ({ post, emoji, user }) => {
                                         width: "22%",
                                         height: "50%",
                                         paddingHorizontal: "2%",
+                                        opacity: isFollow ? 0 : 1,
                                     }}
                                 >
                                     <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>Theo dõi</Text>
-                                </ButtonsComponent>
-                            </SkeletonComponent>
+                                </TouchableOpacity> : <></>}
 
                             <SkeletonComponent Data={userPost.userId} isButton>
                                 <View
                                     style={{
                                         width: "10%",
-                                        height: "30%",
+                                        height: "100%",
+                                        position: "absolute",
+                                        right: 0,
                                         justifyContent: "center",
                                         alignItems: "center",
                                     }}
                                 >
-                                    <MoreOptionPostComponent />
+                                    <MoreOptionPostComponent post_id={post.post_id} user_id={user.user_id} post_user_id={userId} />
                                 </View>
                             </SkeletonComponent>
                         </RowComponent>
@@ -198,10 +220,10 @@ const PostViewComponent = ({ post, emoji, user }) => {
                         </RowComponent>
 
                         {/* Content */}
-                        {!post?.isYT || post?.body != '' ?
+                        {!post?.isYtb ?
                             <RowComponent
-                                minHeight={content != '' && post?.isYT ? 20 : 0}
-                                maxHeight={content != '' && post?.isYT ? 35 : 0}
+                                minHeight={content != '' && post?.body != "" ? 20 : 0}
+                                maxHeight={content != '' && post?.body != "" ? 35 : 0}
                                 style={{
                                     flexDirection: "column",
 
@@ -226,7 +248,7 @@ const PostViewComponent = ({ post, emoji, user }) => {
                             <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
                         </RowComponent >
 
-                        <AnimatedQuickCmtComponent post={post} userPost={userPost} user={user} emoji={emoji} handleNagigateDetailPost={handleNagigateDetailPost} />
+                        <AnimatedQuickCmtComponent post={post} userPost={userPost} user={user} handleNagigateDetailPost={handleNagigateDetailPost} />
 
                     </View>
                 </View >

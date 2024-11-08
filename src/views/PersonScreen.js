@@ -69,6 +69,7 @@ const PersonScreen = () => {
                 return null;
         }
     };
+    //console.log('user', user);
 
     return (
         <View style={{ flex: 1 }}>
@@ -117,8 +118,8 @@ const PersonScreen = () => {
                                 frame={user.frame_user}
                                 name={user.username}
                             />
-                            <Text style={[StyleGlobal.textTitleContent, {marginTop: '3%'}]}>{user.username}</Text>
-                            
+                            <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username}</Text>
+
                         </Animated.View>
                         {/* Chỉnh sửa */}
                         <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>

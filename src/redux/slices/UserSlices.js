@@ -5,7 +5,7 @@ import { collection, addDoc, getDoc, getDocs, query, where, updateDoc, doc } fro
 // Trạng thái ban đầu
 const initialState = {
     user: null,
-    // userByField: {},
+    userByField: {},
     statusUser: 'idle',
     errorUser: null,
 };
@@ -62,6 +62,34 @@ export const getUser = createAsyncThunk('data/getUser', async (email) => {
 // }
 // );
 
+export const updateUserState = createAsyncThunk('user/updateUser',
+    async ({ user_id, field, value }, { getState, dispatch }) => {
+        try {
+            const userRef = doc(db, 'user', user_id); // Tham chiếu đến tài liệu người dùng
+
+            // Cập nhật các trường trong tài liệu
+            await updateDoc(userRef, {
+                [field]: value,
+            });
+
+            // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
+            const updatedSnap = await getDoc(userRef);
+            console.log("updatedSnap", updatedSnap.data());
+            if (updatedSnap.exists()) {
+                return {
+                    id: updatedSnap.id,
+                    ...updatedSnap.data(),
+                };
+            } else {
+                throw new Error('User not found');
+            }
+        } catch (error) {
+            console.error('Error adding document: ', error);
+            throw error;
+        }
+    }
+);
+
 
 
 export const getUserByField = createAsyncThunk('data/getUserByField', async ({ user_id }) => {
@@ -81,9 +109,9 @@ export const getUserByField = createAsyncThunk('data/getUserByField', async ({ u
             id: querySnapshot.docs[0].id,
             ...querySnapshot.docs[0].data(),
         };
+        // console.log("userById", userById);
 
-
-        return userById;
+        return { user_id, userById };
     } catch (error) {
         console.error('Error fetching user: ', error);
         throw error; // Just return the error message
@@ -97,12 +125,12 @@ export const updateUser = createAsyncThunk('data/upDateUser', async ({ user_id, 
         if (!user_id) {
             throw new Error("User ID is required.");
         }
-        
+
         const userDocRef = doc(collection(db, "user"), user_id);
         await updateDoc(userDocRef, newData);
         console.log("User updated!");
-        
-        
+
+
         //Alert.alert("Thành công", "Đã cập nhật Firestore.");
     } catch (error) {
         console.error("Error updating user:", error);
@@ -155,11 +183,11 @@ export const updateUserPassword = createAsyncThunk('data/updateUserPassword', as
 
 // Tạo slice cho user
 export const UserSlices = createSlice({
-  name: "user",
-  initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
+    name: "user",
+    initialState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
 
             // Xử lý khi lấy dữ liệu thành công
             .addCase(getUser.fulfilled, (state, action) => {
@@ -177,32 +205,45 @@ export const UserSlices = createSlice({
             })
 
             // getUserByField
+            // .addCase(getUserByField.fulfilled, (state, action) => {
+            //     state.userByField = action.payload.userById;
+            //     // console.log("userByField", state.userByField);
+            // })
             .addCase(getUserByField.fulfilled, (state, action) => {
-                // const userId = action.payload[0]?.id; // Giả định rằng action.payload là mảng người dùng
-                // if (userId && !state.userByField[userId]) {
-                //     state.userByField[userId] = action.payload[0]; // Lưu người dùng vào state
-                // }
-                state.userByField = action.payload;
+                const { user_id, userById } = action.payload;
+                state[user_id] = userById;
             })
             .addCase(getUserByField.pending, (state) => {
             })
             .addCase(getUserByField.rejected, (state, action) => {
                 state.errorUser = action.error.message;
             })
-            //updateUser
+
+            // updateUser
             .addCase(updateUser.fulfilled, (state, action) => {
-                // const userId = action.payload[0]?.id; // Giả định rằng action.payload là mảng người dùng
-                // if (userId && !state.userByField[userId]) {
-                //     state.userByField[userId] = action.payload[0]; // Lưu người dùng vào state
-                // }
-                state.userByField = action.payload;
+                state.user = action.payload;
+                state.statusUser = 'succeeded';
             })
             .addCase(updateUser.pending, (state) => {
+                state.statusUser = 'loading';
             })
             .addCase(updateUser.rejected, (state, action) => {
                 state.errorUser = action.error.message;
-            });
+                state.statusUser = 'failed';
+            })
 
+            // updateUserState
+            .addCase(updateUserState.fulfilled, (state, action) => {
+                state.user = action.payload;
+                state.statusUser = 'succeeded';
+            })
+            .addCase(updateUserState.pending, (state) => {
+                state.statusUser = 'loading';
+            })
+            .addCase(updateUserState.rejected, (state, action) => {
+                state.errorUser = action.error.message;
+                state.statusUser = 'failed';
+            })
     },
 });
 

@@ -1,5 +1,5 @@
 import { Animated, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, ToastAndroid, Platform } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ImageViewer from 'react-native-image-zoom-viewer';
@@ -12,6 +12,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 
 import { appInfo } from '../constains/appInfo'
+import { appcolor } from '../constains/appcolor'
 import { handleTime } from "../utils/converDate";
 
 
@@ -23,13 +24,120 @@ import { StyleGlobal } from '../styles/StyleGlobal';
 import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtComponent';
 import ImagesPaperComponent from '../component/ImagesPaperComponent';
 import YoutubePlayerComponent from '../component/YoutubePlayerComponent';
+import { useDispatch, useSelector } from 'react-redux';
+import { createFollow, startListeningFollowers } from '../redux/slices/FollowerSlice';
+import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
+
 
 const DetailPostScreen = () => {
     const inset = useSafeAreaInsets();
     const navigation = useNavigation();
     const route = useRoute().params;
 
-    const { post, user, emoji, userPost } = route;
+    const { post, user, userPost, post_user_id } = route;
+    // console.log("user.user_id", user.user_id)
+    // console.log("post_user_id", post_user_id)
+
+
+    const follower = useSelector(state => state.follower.follower);
+    const dispatch = useDispatch();
+    const isFlag = follower.some(f => f.user_id === post.user_id);
+
+    const [iconEmoji, setIconEmoji] = useState("default");
+    const emoji = useSelector(state => state.emoji.emojiList);
+
+    useEffect(() => {
+        const getEmoji = async () => {
+            let foundEmojiType = "default";
+            for (let i = 0; i < emoji.length; i++) {
+                if (emoji[i].user_id !== user.user_id || emoji[i].post_id !== post.post_id) {
+                    continue;
+                }
+                if (emoji[i].count_like > 0) {
+                    foundEmojiType = "like";
+                    break;
+                } else if (emoji[i].count_heart > 0) {
+                    foundEmojiType = "heart";
+                    break;
+                } else if (emoji[i].count_laugh > 0) {
+                    foundEmojiType = "laugh";
+                    break;
+                } else if (emoji[i].count_sad > 0) {
+                    foundEmojiType = "sad";
+                    break;
+                }
+            }
+            setIconEmoji(foundEmojiType);
+        };
+        getEmoji();
+    }, [emoji]);
+    const getIconImg = (emoji) => {
+        switch (emoji) {
+            case "like":
+                return require("../../assets/emojiIcons/like-emoji.png");
+            case "heart":
+                return require("../../assets/emojiIcons/heart-emoji.png");
+            case "laugh":
+                return require("../../assets/emojiIcons/laugh-emoji.png");
+            case "sad":
+                return require("../../assets/emojiIcons/sad-emoji.png");
+            case "default":
+                return require("../../assets/appIcons/like-out-post.png");
+            default:
+                return require("../../assets/appIcons/like-out-post.png");
+        }
+    }
+
+    const handleBtnEmoji = async (emojiType) => {
+        const existingEmoji = emoji.find(e => e.user_id === user.user_id && e.post_id === post.post_id);
+        if (existingEmoji) {
+            console.log("existingEmoji", existingEmoji);
+            console.log("existingEmoji[`count_like`]", existingEmoji[`count_like`]);
+            console.log("existingEmoji[`count_heart`]", existingEmoji[`count_heart`]);
+            console.log("existingEmoji[`count_laugh`]", existingEmoji[`count_laugh`]);
+            console.log("existingEmoji[`count_sad`]", existingEmoji[`count_sad`]);
+        }
+
+        if (existingEmoji) {
+
+            // Nếu người dùng đã tương tác
+            if (existingEmoji[`count_${emojiType}`] > 0) {
+                console.log("deleteEmoji");
+                // Nếu người dùng ấn lại đúng emoji mà họ đã tương tác trước đó -> DELETE
+                await dispatch(deleteEmoji({ post_id: post.post_id, user_id: user.user_id }));
+                setIconEmoji("default");
+            } else {
+                console.log("updateEmojiByField");
+                // Nếu người dùng chọn emoji khác với emoji đã tương tác trước đó -> UPDATE
+                // Xóa emoji hiện tại
+                await dispatch(updateEmojiByField({
+                    post_id: post.post_id,
+                    user_id: user.user_id,
+                    count_like: emojiType === "like" ? 1 : 0,
+                    count_heart: emojiType === "heart" ? 1 : 0,
+                    count_laugh: emojiType === "laugh" ? 1 : 0,
+                    count_sad: emojiType === "sad" ? 1 : 0,
+                }));
+                // await dispatch(startListeningEmoji({ user_id: user.user_id }));
+                setIconEmoji(emojiType);
+            }
+        } else {
+            console.log("createEmoji");
+            // Nếu người dùng chưa tương tác -> CREATE
+            await dispatch(createEmoji({
+                emoji_id: "",
+                post_id: post.post_id,
+                user_id: user.user_id,
+                isComment: false,
+                comment_id: "",
+                count_like: emojiType === "like" ? 1 : 0,
+                count_heart: emojiType === "heart" ? 1 : 0,
+                count_laugh: emojiType === "laugh" ? 1 : 0,
+                count_sad: emojiType === "sad" ? 1 : 0,
+            }));
+            setIconEmoji(emojiType);
+        }
+    };
 
 
     {/* Lấy tọa độ của component để sử dụng kích hoạt animated khi lướt đến */ }
@@ -40,7 +148,6 @@ const DetailPostScreen = () => {
     };
 
     const animation = useRef(new Animated.Value(0)).current;
-
     const opacityNavigaion = {
         opacity: animation.interpolate({
             inputRange: [componentPosition + 70, componentPosition + 250],
@@ -48,6 +155,21 @@ const DetailPostScreen = () => {
             extrapolate: 'clamp',
         })
     }
+
+    const userPostCheck = () => {
+        if (user.user_id === post_user_id) {
+            return false;
+        }
+        return true;
+    }
+
+    const handleFollowButton = async () => {
+        await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userPost.user_id }));
+        // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+        // await dispatch(getFollower({ follower_user_id: user.user_id }));
+
+
+    };
 
     const [copiedText, setCopiedText] = useState('');
     const copyToClipboard = async (content) => {
@@ -57,7 +179,7 @@ const DetailPostScreen = () => {
     const fetchCopiedText = async (content) => {
         copyToClipboard(content);
         const text = await Clipboard.getStringAsync();
-        setCopiedText(text);
+        // setCopiedText(text);
         console.log(text)
         if (Platform.OS === 'android') {
             ToastAndroid.show('Đã sao chép!', ToastAndroid.SHORT);
@@ -67,13 +189,17 @@ const DetailPostScreen = () => {
         }
     };
 
+    // useEffect(() => {
+    //     console.log(isFlag);
+    // }, [isFlag]);
+
 
     const handleAd = () => {
         console.log("toi day");
         console.log(componentPosition);
     };
     return (
-        <View style={{ flex: 1, backgroundColor: "green" }}>
+        <View style={{ flex: 1 }}>
 
             <StatusBar barStyle={'dark-content'} backgroundColor={"white"} />
             {/* Navigate bar */}
@@ -116,23 +242,27 @@ const DetailPostScreen = () => {
                                 alignItems: "center",
                                 width: "65%",
                             }}>
-                            <AvatarEx size={30} round={10} url={user.imgUser} />
+                            <AvatarEx size={30} round={10} url={user.imgUser} frame={user.frame_user} />
                             <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{user.username}</Text>
                         </TouchableOpacity>
 
-                        <ButtonsComponent isButton onPress={handleAd}
-                            style={{
-                                borderColor: "rgba(121,141,218,1)",
-                                borderRadius: 100,
-                                borderWidth: 2,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                width: 80,
-                                height: "100%",
-                            }}
-                        >
-                            <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
-                        </ButtonsComponent>
+                        {userPostCheck() ?
+                            isFlag ?
+                                <></>
+                                : <ButtonsComponent isButton onPress={handleFollowButton}
+                                    style={{
+                                        borderColor: "rgba(121,141,218,1)",
+                                        borderRadius: 100,
+                                        borderWidth: 2,
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        width: 80,
+                                        height: "100%",
+                                    }}
+                                >
+                                    <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
+                                </ButtonsComponent>
+                            : <></>}
                     </Animated.View>
                 </View>
 
@@ -144,7 +274,7 @@ const DetailPostScreen = () => {
                         alignItems: "center",
                     }}
                 >
-                    <MoreOptionPostComponent />
+                    <MoreOptionPostComponent post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
                 </View>
             </RowComponent>
             {/* Quick Comment */}
@@ -154,7 +284,7 @@ const DetailPostScreen = () => {
                 justifyContent: "flex-end",
             }}>
                 <View style={{ height: "100%", }} >
-                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={userPost} user={user} emoji={emoji} />}
+                    {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={userPost} user={user} />}
                 </View>
             </View>
 
@@ -203,7 +333,7 @@ const DetailPostScreen = () => {
                             alignItems: "center",
                             flexDirection: "row",
                         }}>
-                        <AvatarComponent size={50} round={10} url={user.imgUser}
+                        <AvatarEx size={50} round={10} url={userPost.imgUser} frame={userPost.frame_user}
                             style={{
                                 marginHorizontal: "3%",
                             }} />
@@ -217,38 +347,43 @@ const DetailPostScreen = () => {
                             <Text style={{
                                 fontSize: 15,
                                 fontWeight: "bold",
-                            }}>{user.username}</Text>
+                            }}>{userPost.username}</Text>
                             <Text style={{
                                 fontSize: 12,
                                 color: "#BFBFBF",
                             }}>{handleTime({ post: post })}</Text>
                         </View>
-                        <View style={{
-                            flex: 1,
-                            paddingHorizontal: "2%",
-                            // backgroundColor: "red",
-                        }}>
-                            <ButtonsComponent isButton onPress={handleAd}
-                                style={{
-                                    borderColor: "rgba(121,141,218,1)",
-                                    borderRadius: 100,
-                                    borderWidth: 2,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    width: "100%",
-                                    height: "30%",
-                                }}
-                            >
-                                <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
-                            </ButtonsComponent>
-                        </View>
+                        {userPostCheck() ?
+                            isFlag ? <></>
+                                :
+                                <View style={{
+                                    flex: 1,
+                                    paddingHorizontal: "2%",
+                                    // backgroundColor: "red",
+                                }}>
+                                    <ButtonsComponent isButton onPress={handleFollowButton}
+                                        style={{
+                                            borderColor: "rgba(121,141,218,1)",
+                                            borderRadius: 100,
+                                            borderWidth: 2,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            width: "100%",
+                                            height: "30%",
+                                        }}
+                                    >
+                                        <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
+                                    </ButtonsComponent>
+                                </View>
+                            :
+                            <></>}
 
                     </View>
 
                     {/* Content Post */}
                     <View style={{
                         marginTop: "3%",
-                        backgroundColor: "rgba(0, 0, 0, 0.05)",
+                        // backgroundColor: "rgba(0, 0, 0, 0.05)",
                     }}>
                         <Text style={{
                             fontSize: 15,
@@ -279,7 +414,7 @@ const DetailPostScreen = () => {
                     </PagerView> */}
                     {!post.isYtb ?
                         post.imgPost.length > 0 ?
-                            <ImagesPaperComponent post={post} user={user} emoji={emoji} />
+                            <ImagesPaperComponent post={post} user={user} userPost={userPost} />
                             :
                             <></>
                         :
@@ -299,14 +434,113 @@ const DetailPostScreen = () => {
 
                 {/* Hashtag */}
                 {post.hashtag.length === 0 ? <></> :
-                    <RowComponent
-                        height={post.hashtag.length === 0 ? 0 : appInfo.heightWindows * 0.1}
-                        width={appInfo.widthWindows - (appInfo.widthWindows / 100 * 5)}
+                    <ButtonsComponent isHashtag onPress={handleAd} hashtag={post?.hashtag} isDetail />
+                }
+                {/* Emoji Count Button */}
+                <View style={{
+                    height: "auto",
+                    width: "100%",
+                    paddingVertical: "2%",
+                    flexDirection: "row",
+                }} >
+                    <TouchableOpacity
+                        onPress={() => handleBtnEmoji("like")}
+                        activeOpacity={0.8}
+                        style={{
+                            width: "auto",
+                            minWidth: 60,
+                            height: 30,
+                            borderRadius: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: iconEmoji === "like" ? appcolor.primary : 'rgba(0,0,0,0.05)',
+                            flexDirection: "row",
+                            marginRight: 4,
+                        }}>
+                        <Image
+                            style={{
+                                width: 18,
+                                height: 18,
+                            }}
+                            source={getIconImg("like")}
+                            contentFit="cover"
+                        />
+                        <Text style={{ marginLeft: 4, color: "rgba(0,0,0,0.4)", fontSize: 12 }}>20k</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => handleBtnEmoji("heart")}
+                        activeOpacity={0.8}
+                        style={{
+                            width: "auto",
+                            minWidth: 60,
+                            height: 30,
+                            borderRadius: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: iconEmoji === "heart" ? appcolor.primary : 'rgba(0,0,0,0.05)',
+                            flexDirection: "row",
+                            marginRight: 4,
+                        }}>
+                        <Image
+                            style={{
+                                width: 18,
+                                height: 18,
+                            }}
+                            source={getIconImg("heart")}
+                            contentFit="cover"
+                        />
+                        <Text style={{ marginLeft: 4, color: "rgba(0,0,0,0.4)", fontSize: 12 }}>20k</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => handleBtnEmoji("laugh")}
+                        activeOpacity={0.8}
+                        style={{
+                            width: "auto",
+                            minWidth: 60,
+                            height: 30,
+                            borderRadius: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: iconEmoji === "laugh" ? appcolor.primary : 'rgba(0,0,0,0.05)',
+                            flexDirection: "row",
+                            marginRight: 4,
+                        }}>
+                        <Image
+                            style={{
+                                width: 18,
+                                height: 18,
+                            }}
+                            source={getIconImg("laugh")}
+                            contentFit="cover"
+                        />
+                        <Text style={{ marginLeft: 4, color: "rgba(0,0,0,0.4)", fontSize: 12 }}>20k</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => handleBtnEmoji("sad")}
+                        activeOpacity={0.8}
+                        style={{
+                            width: "auto",
+                            minWidth: 60,
+                            height: 30,
+                            borderRadius: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: iconEmoji === "sad" ? appcolor.primary : 'rgba(0,0,0,0.05)',
+                            flexDirection: "row",
+                            marginRight: 4,
+                        }}>
+                        <Image
+                            style={{
+                                width: 18,
+                                height: 18,
+                            }}
+                            source={getIconImg("sad")}
+                            contentFit="cover"
+                        />
+                        <Text style={{ marginLeft: 4, color: "rgba(0,0,0,0.4)", fontSize: 12 }}>20k</Text>
+                    </TouchableOpacity>
 
-                    >
-                        <ButtonsComponent isHashtag onPress={handleAd} hashtag={post?.hashtag} isDetail />
-                    </RowComponent >}
-
+                </View>
 
                 <View style={{
                     width: "100%",
@@ -315,6 +549,9 @@ const DetailPostScreen = () => {
                 }}>
                     <Text style={{ fontSize: 16, fontWeight: "bold" }}>Toàn bộ bình luận 20</Text>
                 </View>
+
+
+
 
 
                 {/* Comment */}
@@ -331,7 +568,7 @@ const DetailPostScreen = () => {
                         height={appInfo.widthWindows / 5.7}
                         style={{ alignItems: "center" }}
                     >
-                        <AvatarEx size={30} round={30} url={user.imgUser} />
+                        <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
                         <View
                             style={{
                                 height: "80%",
@@ -346,11 +583,11 @@ const DetailPostScreen = () => {
                         <View
                             style={{
                                 width: "10%",
-                                height: "27%",
+                                height: "100%",
                                 justifyContent: "center",
                             }}
                         >
-                            <MoreOptionPostComponent />
+                            <MoreOptionPostComponent size={20} post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
                         </View>
                     </RowComponent>
                     {/* Content Comment */}

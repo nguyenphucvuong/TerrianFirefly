@@ -1,22 +1,20 @@
 import { RefreshControl, ScrollView, Text, View, FlatList, ActivityIndicator, Image } from "react-native";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useState, useEffect } from "react";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import { data } from "../constains/data";
 import { useSelector, useDispatch } from "react-redux";
-import { getPosts, getPostsByField, getPostsRefresh } from '../../src/redux/slices/PostSlice';
+import { getPostsByField, getPostsRefresh, getPostsFromUnfollowedUsers } from '../../src/redux/slices/PostSlice';
+import { startListeningFollowers } from "../redux/slices/FollowerSlice";
+import { startListeningFavorites } from "../redux/slices/FavoriteSlice";
+import { startListeningEmoji } from "../redux/slices/EmojiSlice";
 import { SkeletonComponent } from "../component";
-
-
-
 
 
 import PostViewComponent from "../component/PostViewComponent";
 import { ImageCheckContext } from "../context/ImageProvider";
 import { getUserByField } from "../redux/slices/UserSlices";
 const HomeScreen = () => {
-  // console.log(data.post);
-  // const user = data.user;
-  const emoji = data.emoji;
+
   const post = useSelector((state) => state.post.post);
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
@@ -30,16 +28,26 @@ const HomeScreen = () => {
   const [hasMorePosts, setHasMorePosts] = useState(true);
 
 
-  // const handleGetUser = useCallback(async () => {
-  //   const user = await dispatch(getUserByField({ user_id: "1" }));
-  //   console.log(user);
-  // }, []);
+
+
+
+  useEffect(() => {
+    if (user) {
+      const fetchData = async () => {
+        await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+        await dispatch(startListeningFavorites({ user_id: user.user_id }));
+        await dispatch(startListeningEmoji({ user_id: user.user_id }));
+        // dispatch(getPostsByField({ field: "created_at", quantity: 3, isFollow: false, currentUserId: user?.user_id }));
+      }
+      fetchData();
+    }
+  }, [user]);
 
 
 
   return (
     <>
-      {post.length === 0 || user === null ? (
+      {post == [] || user === null ? (
         <View style={{ height: 100, width: "100%", paddingHorizontal: "5%", }}>
           <SkeletonComponent isAvatar Data={""} />
           <SkeletonComponent style={{ width: "60%", height: 20 }} Data={""} />
@@ -52,7 +60,7 @@ const HomeScreen = () => {
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => {
             return (
-              <PostViewComponent post={item} images={item.images} emoji={emoji} user={user} />
+              <PostViewComponent post={item} images={item.images} user={user} />
             )
           }}
           contentContainerStyle={{ flexGrow: 1 }}
@@ -60,7 +68,9 @@ const HomeScreen = () => {
             <RefreshControl refreshing={refreshing} onRefresh={() => {
               setRefreshing(true);
               setTimeout(async () => {
-                const dataRefresh = await dispatch(getPostsRefresh({ field: "created_at", quantity: 3 }));
+                const dataRefresh = await dispatch(getPostsRefresh({ isFollow: false, currentUserId: user?.user_id }));
+                // await startListeningFollowers({ follower_user_id: user?.user_id });
+                // await startListeningFavorites({ user_id: user?.user_id });
                 // setLastVisiblePost(dataRefresh.payload.lastVisiblePost);
                 console.log("getPostsRefresh")
                 // Sau khi hoàn thành refresh, có thể cập nhật lại dữ liệu từ API hoặc giữ nguyên
@@ -83,22 +93,21 @@ const HomeScreen = () => {
                 flexDirection: 'column'
               }} >
                 <ActivityIndicator size="large" color='#0000ff' />
-                
+
               </View> : null
           )}
 
           onEndReached={async () => {
-            if (loading || !hasMorePosts) return; // Check if loading or no more posts to load
+            if (loading || !hasMorePosts || !user) return; // Check if loading or no more posts to load
             setLoading(true);
 
             try {
-              const dataLoadMore = await dispatch(getPostsByField({ field: "created_at", quantity: 3 }));
-
+              const dataLoadMore = await dispatch(getPostsFromUnfollowedUsers({ field: "created_at", quantity: 3, currentUserId: user?.user_id }));
+              // await startListeningFollowers({ follower_user_id: user?.user_id });
+              // await startListeningFavorites({ user_id: user?.user_id });
+              // console.log("objecta", dataLoadMore.payload.postData.length)
               if (dataLoadMore.payload.postData.length === 0) {
                 setHasMorePosts(false);
-              } else {
-                // Append new posts while ensuring no duplicates
-                // Example: setPost((prevPosts) => [...new Set([...prevPosts, ...dataLoadMore.payload.postData])]);
               }
             } catch (error) {
               console.error("Error loading more posts:", error);
