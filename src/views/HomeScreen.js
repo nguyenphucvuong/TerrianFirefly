@@ -1,5 +1,5 @@
 import { RefreshControl, ScrollView, Text, View, FlatList, ActivityIndicator, Image } from "react-native";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useState, useEffect } from "react";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import { data } from "../constains/data";
 import { useSelector, useDispatch } from "react-redux";
@@ -8,9 +8,6 @@ import { startListeningFollowers } from "../redux/slices/FollowerSlice";
 import { startListeningFavorites } from "../redux/slices/FavoriteSlice";
 import { startListeningEmoji } from "../redux/slices/EmojiSlice";
 import { SkeletonComponent } from "../component";
-
-
-
 
 
 import PostViewComponent from "../component/PostViewComponent";

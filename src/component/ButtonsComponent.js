@@ -6,9 +6,8 @@ import {
   StyleSheet,
 } from "react-native";
 import React from "react";
-import { Image } from 'expo-image';
-import { useNavigation } from '@react-navigation/native';
-
+import { Image } from "expo-image";
+import { useNavigation } from "@react-navigation/native";
 
 const ButtonsComponent = ({
   children,
@@ -44,7 +43,7 @@ const ButtonsComponent = ({
 
     const handleNagigateHashtag = () => {
       navigate.navigate("Hashtag", { hashtag: hashtag });
-    }
+    };
 
     return (
       <Pressable
@@ -90,19 +89,21 @@ const ButtonsComponent = ({
       return (
         <TouchableOpacity
           onPress={onPress}
-          style={[{
-            borderRadius: 30,
-            justifyContent: "center",
-            alignItems: "center",
-            width: "auto",
-            height: "100%",
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            marginEnd: 8,
-            flexDirection: "row",
-            backgroundColor: "rgba(215,223,221,0.3)",
-
-          }, style && style]}
+          style={[
+            {
+              borderRadius: 30,
+              justifyContent: "center",
+              alignItems: "center",
+              width: "auto",
+              height: "100%",
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+              marginEnd: 8,
+              flexDirection: "row",
+              backgroundColor: "rgba(215,223,221,0.3)",
+            },
+            style && style,
+          ]}
         >
           <Image
             style={{
@@ -168,7 +169,11 @@ const ButtonsComponent = ({
   //Nút chuyển trang notiButton
   const NotiButton = () => {
     return (
-      <TouchableOpacity activeOpacity={1.0} onPress={onPress} style={styles.buttonNotiTab}>
+      <TouchableOpacity
+        activeOpacity={1.0}
+        onPress={onPress}
+        style={styles.buttonNotiTab}
+      >
         {children}
       </TouchableOpacity>
     );
