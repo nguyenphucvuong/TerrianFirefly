@@ -24,6 +24,7 @@ const initialState = {
   lastVisiblePostFollower: null,
   status: "idle",
   error: null,
+  postByField: [],
 };
 
 // Tạo async thunk để thêm dữ liệu lên Firestore
@@ -34,12 +35,33 @@ export const createPost = createAsyncThunk(
       // Thêm dữ liệu mới vào Firestore
       const docRef = await addDoc(collection(db, "Posts"), newData);
 
+      const imgUrls = [];
+
+      // Tải lên từng ảnh trong imgPost
+      for (const img of newData.imgPost) {
+        const response = await fetch(img);
+        const blob = await response.blob(); // Chuyển đổi URL thành dạng nhị phân
+        console.log("so nhi phan", blob);
+        const imgRef = ref(storage, `images/${img.split("/").pop()}`); // Đặt tên cho ảnh
+        await uploadBytes(imgRef, blob); // Tải lên ảnh
+
+        // Lấy URL tải về
+        const imgUrl = await getDownloadURL(imgRef);
+        imgUrls.push(imgUrl); // Lưu URL vào mảng
+      }
+
+      console.log(imgUrls);
       // Lấy tài liệu vừa thêm từ Firestore
       const docSnap = await getDoc(docRef);
 
+      await updateDoc(docRef, {
+        post_id: docRef.id,
+        imgPost: imgUrls, // Lưu ID vào tài liệu
+      });
+
       if (docSnap.exists()) {
         // Trả về dữ liệu của tài liệu vừa thêm
-        return { id: docSnap.id, ...docSnap.data() };
+        return { post_id: docSnap.id, ...docSnap.data() };
       } else {
         throw new Error("No such document!");
       }
@@ -49,9 +71,41 @@ export const createPost = createAsyncThunk(
     }
   }
 );
+// Tạo async thunk để lấy tất cả dữ liệu từ Firestore
+export const getPostsFirstTime = createAsyncThunk('data/getPostsFirstTime', async () => {
+  try {
+    let postsQuery = query(
+      collection(db, "Posts"),
+      orderBy("created_at", "desc"),
+      limit(3)
+    );
 
+    const querySnapshot = await getDocs(postsQuery);
 
+    if (querySnapshot.empty) {
+      return { posts: [], lastVisiblePost: null };
 
+    }
+    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Thêm lượt xem mỗi khi duyệt qua bài viết
+    querySnapshot.docs.forEach(async doc => {
+      const currentCountView = doc.data().count_view || 0;
+      await updateDoc(doc.ref, {
+        count_view: currentCountView + 1
+      });
+    });
+
+    return {
+      postData: postData,
+      lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
+    }; // Return only the document ID for `lastVisiblePost`
+  } catch (error) {
+    console.error('Error fetching posts: ', error);
+    throw error;
+  }
+});
 
 // Hàm để cập nhật số lượt xem cho bài viết
 const updatePostViewCount = async (docs) => {

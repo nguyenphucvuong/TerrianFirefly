@@ -20,7 +20,7 @@ const BackgroundScreen = () => {
     const user = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
     //
-    const [selectedId, setSelectedId] = useState(user[0].backgroundUser);
+    const [selectedId, setSelectedId] = useState(user.backgroundUser);
     //BottomSheet
     const snapPoints = useMemo(() => ['15%'], []);
     const bottomSheetModalRef = useRef(null);
@@ -30,12 +30,12 @@ const BackgroundScreen = () => {
         setSelectedId(url);
     };
     //set data
-    const [background, setBackground] = useState(user[0].backgroundUser);
+    const [background, setBackground] = useState(user.backgroundUser);
     //cập nhật lại dữ liệu     
     useEffect(() => {
         //đọc dữ liệu   
         dispatch(getBackground());
-        // dispatch(getUser(user[0].email));
+        // dispatch(getUser(user.email));
 
     }, []);
     //console.log('background',background);
@@ -51,10 +51,10 @@ const BackgroundScreen = () => {
                     <View style={styles.background}>
                         <View style={{ marginRight: 'auto', marginLeft: '5%', bottom: appInfo.heightWindows * 0.04 }}>
                             <AvatarEx
-                                url={user[0].imgUser}
+                                url={user.imgUser}
                                 size={appInfo.widthWindows * 0.22}
                                 round={20}
-                                frame={user[0].frame_user}
+                                frame={user.frame_user}
                             />
                         </View>
                     </View>
@@ -72,7 +72,7 @@ const BackgroundScreen = () => {
                                     style={[styles.image, { borderColor: isSelected ? '#90CAF9' : 'white', borderWidth: 3, }]}
                                     source={{ url: item.nameBackground }}
                                 />
-                                {user[0].backgroundUser == item.nameBackground
+                                {user.backgroundUser == item.nameBackground
                                     ? <IconComponent
                                     name={'check'}
                                     size={appInfo.heightWindows * 0.02}
@@ -90,7 +90,7 @@ const BackgroundScreen = () => {
                     index={0}
                     snapPoints={snapPoints}>
                     <BottomSheetView style={styles.contentContainer}>
-                        <Text style={StyleGlobal.textName}> Cấp độ: Người nổi tiếng 🎉</Text>
+                        <Text style={StyleGlobal.textName}> Cấp độ: 🎉</Text>
                         <ButtonFunctionComponent name={'Dùng'} backgroundColor={'#8B84E9'} colorText={'#FFFFFF'} style={styles.button} />
                     </BottomSheetView>
                 </BottomSheetModal>

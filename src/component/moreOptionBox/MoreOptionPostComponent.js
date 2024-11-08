@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteFollow, startListeningFollowers, getFollower } from '../../redux/slices/FollowerSlice';
 import { deleteFavorite, createFavorite, startListeningFavorites } from '../../redux/slices/FavoriteSlice';
 import { updatePostsByField } from '../../redux/slices/PostSlice';
-import { updateUser } from '../../redux/slices/UserSlices';
+import { updateUserState } from '../../redux/slices/UserSlices';
 
 
 import { appInfo } from '../../constains/appInfo';
@@ -57,7 +57,7 @@ const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhit
 
     const handleReport = useCallback(() => {
         dispatch(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
-        dispatch(updateUser({ user_id: post_user_id, field: "status_user_id", value: 1 }));
+        dispatch(updateUserState({ user_id: post_user_id, field: "status_user_id", value: 1 }));
         handleHideInput();
     })
 

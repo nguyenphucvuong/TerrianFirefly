@@ -1,11 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-
+import NotiTabScreen from '../views/NotiTabScreen'
 const NotiTab = () => {
     return (
-        <View>
-            <Text>notiTab</Text>
-        </View>
+        <NotiTabScreen></NotiTabScreen>
     )
 }
 

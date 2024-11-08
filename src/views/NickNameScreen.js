@@ -21,20 +21,21 @@ const NickNameScreen = () => {
         dispatch(getNickname());
     }, []);
     //console.log('nickname', nickname);
+    const hanldeSelectNickName = () => {
 
+    }
     return (
         <View style={StyleGlobal.container}>
             <FlatList
                 data={nickname}
                 renderItem={({ item }) => {
                     return (
-                        <TouchableOpacity style={[styles.buttonRow, {borderColor: user[0].nickname === item.nickname ? '#90CAF9' : 'gray' }]} onPress={() => hanldeSelectNickName()}>
+                        <TouchableOpacity style={[styles.buttonRow, {borderColor: user.nickname === item.nickname ? '#90CAF9' : 'gray' }]} onPress={() => hanldeSelectNickName()}>
                             <Text style={styles.buttonText}>{item.nickname}</Text>
-                            {user[0].nickname === item.nickname ?
+                            {user.nickname === item.nickname ?
                                 <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'#90CAF9'} style={styles.iconStyle} />
                                 : null
                             }
-
                         </TouchableOpacity>
                     )
                 }}

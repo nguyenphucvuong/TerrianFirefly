@@ -1,11 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { EventScreen } from '../views'
 
 const EventTab = () => {
     return (
-        <View>
-            <Text>eventTab</Text>
-        </View>
+        <EventScreen></EventScreen>
     )
 }
 
