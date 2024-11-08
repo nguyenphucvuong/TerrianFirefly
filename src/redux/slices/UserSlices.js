@@ -113,23 +113,25 @@ export const getUserByField = createAsyncThunk('data/getUserByField', async ({ u
 });
 
 
-// // Tạo async thunk để cập nhật dữ liệu Firestore
-export const updateUser = createAsyncThunk('data/upDateUser', async ({ user_id, newData }) => {
-
+// Tạo async thunk để cập nhật dữ liệu Firestore
+export const updateUser = createAsyncThunk('data/updateUser', async ({ user_id, newData }, { rejectWithValue }) => {
     try {
         if (!user_id) {
             throw new Error("User ID is required.");
+        }
+
+        if (!newData || typeof newData !== 'object') {
+            throw new Error("Valid data object is required to update.");
         }
 
         const userDocRef = doc(collection(db, "user"), user_id);
         await updateDoc(userDocRef, newData);
         console.log("User updated!");
 
-
-        //Alert.alert("Thành công", "Đã cập nhật Firestore.");
+        return { user_id, newData };
     } catch (error) {
         console.error("Error updating user:", error);
-        //Alert.alert("Lỗi", "Không thể cập nhật.");
+        return rejectWithValue('error.message',error.message);
     }
 });
 
@@ -229,18 +231,18 @@ export const UserSlices = createSlice({
                 state.errorUser = action.error.message;
             })
 
-            // updateUser
-            .addCase(updateUser.fulfilled, (state, action) => {
-                state.user = action.payload;
-                state.statusUser = 'succeeded';
-            })
-            .addCase(updateUser.pending, (state) => {
-                state.statusUser = 'loading';
-            })
-            .addCase(updateUser.rejected, (state, action) => {
-                state.errorUser = action.error.message;
-                state.statusUser = 'failed';
-            })
+            // // updateUser
+            // .addCase(updateUser.fulfilled, (state, action) => {
+            //     state.user = action.payload;
+            //     state.statusUser = 'succeeded';
+            // })
+            // .addCase(updateUser.pending, (state) => {
+            //     state.statusUser = 'loading';
+            // })
+            // .addCase(updateUser.rejected, (state, action) => {
+            //     state.errorUser = action.error.message;
+            //     state.statusUser = 'failed';
+            // })
 
             // updateUserState
             .addCase(updateUserState.fulfilled, (state, action) => {

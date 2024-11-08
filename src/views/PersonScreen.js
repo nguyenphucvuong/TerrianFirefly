@@ -30,7 +30,7 @@ const PersonScreen = () => {
     //route
     const route = useRoute();
     const user = route.params?.user ?? users;
-    console.log('users',users);
+    //console.log('user',user);
     
     const navigation = useNavigation();
 
@@ -71,7 +71,6 @@ const PersonScreen = () => {
     //cập nhật lại dữ liệu 
     useEffect(() => {
         const unsubscribe = dispatch(listenToUserRealtime(user.email));
-
         return () => unsubscribe();
     }, [dispatch, user.email]);
     //console.log('user', user);

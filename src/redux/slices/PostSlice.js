@@ -25,6 +25,7 @@ const initialState = {
   status: "idle",
   error: null,
   postByField: [],
+  postByUser: [],
 };
 
 // Tạo async thunk để thêm dữ liệu lên Firestore
@@ -261,6 +262,43 @@ export const getPostsFromUnfollowedUsers = createAsyncThunk(
     }
   }
 );
+export const getPostUsers = createAsyncThunk(
+  "data/getPostUsers",
+  async ({ field, currentUserId }, { getState }) => {
+    console.log('currentUserId',currentUserId);
+    
+    try {
+      
+     
+      let postsQuery = query(
+        collection(db, "Posts"),
+        orderBy(field, "desc"),
+        where('user_id', '==', currentUserId)
+      );
+
+
+      const querySnapshot = await getDocs(postsQuery);
+
+      if (querySnapshot.empty) {
+        return { postData: [] };
+      }
+
+      await updatePostViewCount(querySnapshot.docs);
+
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return {
+        postData: postData,
+      };
+    } catch (error) {
+      console.error("Error fetching posts from unfollowed users: ", error);
+      throw error;
+    }
+  }
+);
 
 
 
@@ -439,6 +477,21 @@ export const PostSlice = createSlice({
         state.status = "succeeded";
       })
       .addCase(getPostsFromFollowedUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+
+      //getPostUsers
+      .addCase(getPostUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPostUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.postByUser = action.payload.postData;
+        state.status = "succeeded";
+      })
+      .addCase(getPostUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       });
