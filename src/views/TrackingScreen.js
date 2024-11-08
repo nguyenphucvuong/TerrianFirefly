@@ -11,27 +11,24 @@ const DATA = [
     { id: 2 },
 ];
 const TrackingScreen = () => {
-    const [isClick, setIsClick] = useState(true);
+    const [isClick, setIsClick] = useState({}); // Lưu trạng thái cho từng item bằng id
+
     const handleFollow = (item) => {
-        switch (item) {
-            case 'Followed':
-                setIsClick(false);
-                break;
-            case 'FollowBack':
-                setIsClick(true);
-                break;
-            default:
-                return null;
-        }
-    }
-    console.log('isClick',isClick);
+        // Thay đổi trạng thái dựa trên id của item
+        setIsClick((prev) => ({
+            ...prev,
+            [item.id]: prev[item.id] === 'Followed' ? 'FollowBack' : 'Followed'
+        }));
+    };
+    //console.log('isClick',isClick);
     
     return (
         <View style={StyleGlobal.container}>
             <FlatList
                 data={DATA}
                 renderItem={({ item }) => {
-                    return (
+                    const isFollowing = isClick[item.id] === 'Followed';
+                    return ( 
                         <TouchableOpacity >
                             <View style={[styles.viewFlatList]}>
                                 <AvatarEx
@@ -43,11 +40,13 @@ const TrackingScreen = () => {
                                     <Text style={StyleGlobal.textName}>Email</Text>
                                     <Text style={StyleGlobal.text}>Tên</Text>
                                 </View>
-                                {
-                                    isClick ? <ButtonFunctionComponent name2={'Đã Theo Dõi'} backgroundColor={'#D9D9D9'} style={styles.button} onPress={() => handleFollow('Followed')} />
-                                        :
-                                        <ButtonFunctionComponent name2={'Theo Dõi Lại'} backgroundColor={'#FFFFFF'} colorText={'#0286FF'} style={styles.button2} onPress={() => handleFollow('FollowBack')}/>
-                                }
+                                <ButtonFunctionComponent
+                                    name2={isFollowing ? 'Đã Theo Dõi' : 'Theo Dõi Lại'}
+                                    backgroundColor={isFollowing ? '#D9D9D9' : '#FFFFFF'}
+                                    colorText={isFollowing ? '#000' : '#0286FF'}
+                                    style={isFollowing ? styles.button : styles.button2}
+                                    onPress={() => handleFollow(item)}
+                                />
 
                             </View>
                         </TouchableOpacity>

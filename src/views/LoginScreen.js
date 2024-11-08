@@ -18,7 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { db, auth } from "../firebase/FirebaseConfig";
 //redux
-import { getUser } from "../redux/slices/UserSlices";
+import { getUser, listenToUserRealtime } from "../redux/slices/UserSlices";
 import { getAchievement } from "../redux/slices/AchievementSlice";
 import { getNickname } from "../redux/slices/NicknameSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,7 +30,6 @@ import {
 } from "firebase/auth";
 import { makeRedirectUri } from "expo-auth-session";
 import * as AuthSession from "expo-auth-session";
-
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 
@@ -163,7 +162,7 @@ function LoginScreen() {
           // Signed up
           const userL = userCredential.user;
           if (userL.emailVerified) {
-            await dispatch(getUser(email));
+            await dispatch(listenToUserRealtime(email));
             navigation.navigate("IndexTab");
             setisLoading(false);
           }
@@ -207,9 +206,9 @@ function LoginScreen() {
               autoCapitalize="none"
             />
           </View>
-          {errorTextEmail ? (
+          {/* {errorTextEmail ? (
             <Text style={{ color: "red" }}>{errorTextName}</Text>
-          ) : null}
+          ) : null} */}
         </View>
         <View style={[styles.viewInput, { marginBottom: "20%" }]}>
           <Text style={{ marginBottom: "3%" }}>Password</Text>

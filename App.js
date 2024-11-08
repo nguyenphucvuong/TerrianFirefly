@@ -10,12 +10,11 @@ import "react-native-gesture-handler";
 import StackNavigator from './src/stacks/StackNavigator'
 import { Provider } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
-import { getPostsFirstTime, getPostsByField } from './src/redux/slices/PostSlice';
 import { ImageProvider } from './src/context/ImageProvider';
 import { getHashtag } from './src/redux/slices/HashtagSlice';
 import { getEvent, getEventByField,fetchEvents } from "./src/redux/slices/EventSlice";
 import { LogBox } from 'react-native';
-
+import { getPostsFirstTime } from './src/redux/slices/PostSlice';
 const MainApp = () => {
   useEffect(() => {
     // Tắt cảnh báo cụ thể
@@ -30,7 +29,7 @@ const MainApp = () => {
   useEffect(() => {
     // dispatch(getPostsByField({ field: "created_at", quantity: "2", lastVisiblePost: null }));
     dispatch(getPostsFirstTime());
-    dispatch(getHashtag()); 
+    //dispatch(getHashtag());
   }, []);
 
   useEffect(() => {
@@ -49,7 +48,7 @@ const MainApp = () => {
 
 const App = () => {
 
-  return ( 
+  return (
     <Provider store={store}>
       <ImageProvider>
         <SafeAreaProvider>

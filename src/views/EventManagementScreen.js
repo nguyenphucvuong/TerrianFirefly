@@ -34,19 +34,18 @@ export default function EventManagementScreen() {
   // }, [dispatch]);
 
   // Hàm định dạng số lượng
-  const formatCount = (count) => {
-    //định dạng nếu đạt >= 1tr lượt tương tác
-    if (count >= 1000000) {
-      const millions = Math.floor(count / 1000000);
-      const remainder = Math.floor((count % 1000000) / 100000);
-      return `${millions}Tr${remainder > 0 ? remainder : ""}`;
-    } else if (count >= 1000) {
-      const thousands = Math.floor(count / 1000);
-      const remainder = Math.floor((count % 1000) / 100);
-      return `${thousands}N${remainder > 0 ? remainder : ""}`;
+  const formatNumber = (num) => {
+    // console.log(num)
+    if (num >= 1e9) {
+        return (num / 1e9).toFixed(0) + 'B'; // tỷ
+    } else if (num >= 1e6) {
+        return (num / 1e6).toFixed(0) + 'M'; // triệu
+    } else if (num >= 1e3) {
+        return (num / 1e3).toFixed(0) + 'K'; // nghìn
+    } else {
+        return num; // số bình thường
     }
-    return count.toString();
-  };
+};
 
   // Điều hướng tới màn hình Add/Edit Event
   const goToAddEditEvent = (eventData) => {
@@ -135,9 +134,9 @@ export default function EventManagementScreen() {
                     </Text>
                     <View style={styles.eventStats}>
                       <Text style={{ marginRight: 20 }}>
-                        👍 {formatCount(item.count_like)}
+                        👍 {formatNumber(item.count_like)}
                       </Text>
-                      <Text>👁️ {formatCount(item.count_view)}</Text>
+                      <Text>👁️ {formatNumber(item.count_view)}</Text>
                     </View>
                   </View>
                   {/* Thêm trạng thái sự kiện ở góc dưới bên phải */}

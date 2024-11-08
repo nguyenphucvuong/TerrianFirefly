@@ -11,7 +11,6 @@ import {
     AccountDetailsScreen,
     NotificationManagement,
     ManagePostsScreen,
-    ArticleDetailsScreen,
     SetUpAccountScreen,
     WellcomScreen,
     LoginScreen,
@@ -37,26 +36,26 @@ import NewEventScreen from "../views/NewEventScreen";
 const Stack = createStackNavigator();
 
 const IconBack = (title) => ({
-  headerShown: true,
-  title: title,
-  headerTitleAlign: "center", // Đưa tiêu đề vào giữa
-  headerLeft: () => <ButtonBackComponent color="#000000" />,
+    headerShown: true,
+    title: title,
+    headerTitleAlign: "center", // Đưa tiêu đề vào giữa
+    headerLeft: () => <ButtonBackComponent color="#000000" />,
 });
 
 const IconHeaderRight = (text, onPress, name) => ({
-  headerRight: () => (
-    <IconComponent
-      text={text}
-      name={name}
-      color={"#000000"}
-      onPress={onPress}
-      size={26}
-    />
-  ),
+    headerRight: () => (
+        <IconComponent
+            text={text}
+            name={name}
+            color={"#000000"}
+            onPress={onPress}
+            size={26}
+        />
+    ),
 });
 
 const StackNavigator = () => {
-    const [isLogin, setIsLogin] = useState(false);
+    //const [isLogin, setIsLogin] = useState(false);
     return (
         <Stack.Navigator initialRouteName='WellcomScreen'>
             <Stack.Screen name='WellcomScreen' component={WellcomScreen} options={{ headerShown: false }} />
@@ -98,8 +97,6 @@ const StackNavigator = () => {
                 options={() => IconBack("Quản Lý Thông Báo")} />
             <Stack.Screen name='ManagePostsScreen' component={ManagePostsScreen}
                 options={() => IconBack("Quản Lý Bài Viết")} />
-            <Stack.Screen name='ArticleDetailsScreen' component={ArticleDetailsScreen}
-                options={() => IconBack("Chi Tiết Bài Viết")} />
             <Stack.Screen name='SetUpAccountScreen' component={SetUpAccountScreen}
                 options={() => IconBack("Thiết Lập Tài Khoản")} />
             <Stack.Screen name='FollowerScreen' component={FollowerScreen}

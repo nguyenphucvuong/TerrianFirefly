@@ -44,7 +44,7 @@ const HashtagManagerScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await dispatch(fetchHashtags()); 
+        await dispatch(fetchHashtags());
       } catch (error) {
         console.error("Failed to fetch hashtags:", error);
       }
@@ -82,10 +82,22 @@ const HashtagManagerScreen = () => {
   };
 
   const handleAddHashtag = async () => {
+    const hashtag_id = hashtags.filter((e) => {
+      return e.hashtag_id == hashtagName;
+      
+    });
     if (!hashtagName) {
       Alert.alert("Lỗi", "Vui lòng nhập tên hashtag.");
       return;
     }
+    
+    
+    if (hashtag_id[0].hashtag_id === hashtagName) {
+      setModalVisible(false);
+      Alert.alert("Lỗi", "Hashtag Đã tồn tại.");
+      return;
+    }
+
     setisLoading(true);
     try {
       setModalVisible(true);
@@ -95,10 +107,8 @@ const HashtagManagerScreen = () => {
           uploadImage({ imgUser: avatar, setUploadProgress })
         ).unwrap();
       }
-
       const newHashtag = {
         hashtag_id: hashtagName,
-        hashtag_color: textColor,
         role_id: user.roleid,
         hashtag_background: backgroundColor,
         hashtag_avatar: imgAvatar,
@@ -125,7 +135,6 @@ const HashtagManagerScreen = () => {
 
   const resetForm = () => {
     setHashtagName("");
-    setTextColor("#000000");
     setBackgroundColor("#FFFFFF");
     setAvatarImage("");
   };
@@ -149,23 +158,13 @@ const HashtagManagerScreen = () => {
         </TouchableOpacity>
 
         <View style={[styles.sampleHashtagContainer, { backgroundColor }]}>
-          <Text style={[styles.sampleHashtagText, { color: textColor }]}>
+          <Text style={[styles.sampleHashtagText,]}>
             #{hashtagName}
           </Text>
         </View>
       </View>
 
       <View style={styles.colorPickersContainer}>
-        <View style={styles.colorPicker}>
-          <Text>Màu chữ</Text>
-          <ColorPicker
-            onColorSelected={setTextColor}
-            style={{ height: 100, width: "100%" }}
-            hideSliders
-            ref={colorPickerTextRef}
-          />
-        </View>
-
         <View style={styles.colorPicker}>
           <Text>Màu nền</Text>
           <ColorPicker
@@ -193,7 +192,11 @@ const HashtagManagerScreen = () => {
         style={[StyleGlobal.buttonLg, StyleGlobal.buttonTextLg]}
       />
       <FlatList
-        data={Array.isArray(hashtags) ? hashtags.filter(item => item.role_id === user.roleid) : []} // Sử dụng dữ liệu hashtags từ Redux
+        data={
+          Array.isArray(hashtags)
+            ? hashtags.filter((item) => item.role_id === user.roleid)
+            : []
+        } // Sử dụng dữ liệu hashtags từ Redux
         keyExtractor={(item) => item.hashtag_id}
         renderItem={({ item }) => (
           <View
