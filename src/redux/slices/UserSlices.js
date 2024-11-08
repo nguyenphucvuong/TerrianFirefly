@@ -111,7 +111,7 @@ export const getUserByField = createAsyncThunk('data/getUserByField', async ({ u
         };
         // console.log("userById", userById);
 
-        return userById;
+        return { user_id, userById };
     } catch (error) {
         console.error('Error fetching user: ', error);
         throw error; // Just return the error message
@@ -142,9 +142,13 @@ export const UserSlices = createSlice({
             })
 
             // getUserByField
+            // .addCase(getUserByField.fulfilled, (state, action) => {
+            //     state.userByField = action.payload.userById;
+            //     // console.log("userByField", state.userByField);
+            // })
             .addCase(getUserByField.fulfilled, (state, action) => {
-                state.userByField = action.payload;
-                // console.log("userByField", state.userByField);
+                const { user_id, userById } = action.payload;
+                state[user_id] = userById;
             })
             .addCase(getUserByField.pending, (state) => {
             })

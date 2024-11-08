@@ -9,7 +9,7 @@ import {
     ToastAndroid,
     Animated,
 } from "react-native";
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, } from 'react'
 import { Image } from 'expo-image'
 
 import { useRoute } from '@react-navigation/native'
@@ -36,6 +36,7 @@ import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtC
 import { AvatarEx, ButtonsComponent } from '../component'
 import EmojiBoxComponent from "../component/commentBox/EmojiBoxComponent";
 import MoreOptionPostComponent from "../component/moreOptionBox/MoreOptionPostComponent";
+import { app } from "../firebase/FirebaseConfig";
 // import { AvatarEx } from '../component'
 // import RowComponent from '../RowComponent';
 
@@ -57,7 +58,7 @@ const PictureScreen = ({ }) => {
     const { Data: post, Select, user } = route.params;
     const userPost = route.params.userPost;
 
-    console.log(post, Select, user, userPost);
+    console.log("asldaslkdjaksjdlkajsd", post, Select, user, userPost);
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
     // const DataLength = Object.keys(Data.imgPost).length;
     const inset = useSafeAreaInsets();
@@ -137,18 +138,6 @@ const PictureScreen = ({ }) => {
         }
     }
 
-    const handleFollowButton = useCallback(() => {
-        const handleFollowUser = async () => {
-            await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userPost.user_id }));
-            // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
-        }
-        handleFollowUser();
-    });
-    const handlePressLike = () => {
-        // setIsPressLike("like");
-        handleBtnEmoji("like");
-    }
-
     const handleBtnEmoji = async (emojiType) => {
         const existingEmoji = emoji.find(e => e.user_id === user.user_id && e.post_id === post.post_id);
         if (existingEmoji) {
@@ -179,7 +168,7 @@ const PictureScreen = ({ }) => {
                     count_laugh: emojiType === "laugh" ? 1 : 0,
                     count_sad: emojiType === "sad" ? 1 : 0,
                 }));
-                await dispatch(startListeningEmoji({ user_id: user.user_id }));
+                // await dispatch(startListeningEmoji({ user_id: user.user_id }));
                 setIconEmoji(emojiType);
             }
         } else {
@@ -203,9 +192,23 @@ const PictureScreen = ({ }) => {
     };
 
 
+    const handleFollowButton = useCallback(() => {
+        const handleFollowUser = async () => {
+            await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userPost.user_id }));
+            // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+        }
+        handleFollowUser();
+    });
+    const handlePressLike = () => {
+        // setIsPressLike("like");
+        handleBtnEmoji("like");
+    }
+
+
+
 
     const handleShowPopEmoji = () => {
-        console.log("ajkhsdjkashdkjahsdkjahskjd")
+        // console.log("ajkhsdjkashdkjahsdkjahskjd")
         setIsShowEmojiBox(true);
         Animated.timing(translateYEmoji, {
             toValue: 0,
@@ -223,12 +226,7 @@ const PictureScreen = ({ }) => {
     };
 
 
-    const userFavoriteCheck = () => {
-        if (user.user_id === post.user_id) {
-            return false;
-        }
-        return true;
-    }
+
 
     const handleFavorite = useCallback(() => {
         if (isFavorite) {
@@ -304,7 +302,7 @@ const PictureScreen = ({ }) => {
 
                 <View style={{
                     flex: 1,
-                    backgroundColor: "red",
+                    // backgroundColor: "red",
                 }}>
                     <MoreOptionPostComponent isWhiteDot post_id={post.post_id} user_id={user.user_id} post_user_id={userPost.user_id} />
                 </View>
@@ -339,7 +337,7 @@ const PictureScreen = ({ }) => {
                 onSave={(url) => handleSaveImage(url)}
             />
 
-            {isVisible && <View style={{ flex: 1, position: 'absolute', zIndex: 999, bottom: 0, right: 0, left: 0, height: 300 }}>
+            {isVisible && <View style={{ flex: 1, position: 'absolute', zIndex: 999, bottom: 0, right: 0, left: 0, height: 350 }}>
                 <LinearGradient
                     start={{ x: 0, y: 0.2 }} end={{ x: 0, y: 1 }}
                     colors={["transparent", "black"]}
@@ -354,13 +352,31 @@ const PictureScreen = ({ }) => {
                     }}
                 />
 
-                <View style={{ height: "80%", flexDirection: "row" }}>
-                    <View style={{ width: "80%", height: "auto", justifyContent: "flex-end" }} >
+                <View style={{
+                    height: "auto",
+                    flexDirection: "row",
+                    minHeight: "30%",
+                    // backgroundColor: "red",
+                }}>
+                    <View style={{
+                        width: "80%",
+                        height: "auto",
+                        position: 'absolute',
+                        left: 0,
+                        bottom: 0,
+                        // backgroundColor: "red",
+                    }} >
                         <View style={{ width: "100%", height: "auto", marginLeft: "5%" }} >
-                            <Text style={{ color: "white" }}>{post.title}</Text>
+                            <Text style={{ color: "white" }}>{post.body}</Text>
                         </View>
                     </View>
-                    <View style={{ width: "20%", height: "100%", alignItems: 'center' }}>
+                    <View style={{
+                        width: "20%",
+                        height: "100%",
+                        alignItems: 'center',
+                        position: 'absolute',
+                        right: 0,
+                    }}>
                         <ButtonsComponent isButton style={{ alignItems: "center", marginBottom: "10%" }}>
                             <AvatarEx size={50} round={30} url={userPost.imgUser} frame={userPost.frame_user} style={{ marginRight: "3%" }} />
 
@@ -428,9 +444,126 @@ const PictureScreen = ({ }) => {
                         }
                     </View>
                 </View>
-                <View style={{ height: "20%" }} >
+
+
+                {/* Emoji Count Button */}
+                <View style={{
+                    height: "20%",
+                    width: "100%",
+                    padding: 10,
+                    flexDirection: "row",
+                }} >
+                    <TouchableOpacity
+                        onPress={() => handleBtnEmoji("like")}
+                        activeOpacity={0.8}
+                        style={{
+                            width: "auto",
+                            minWidth: 60,
+                            height: 30,
+                            borderRadius: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: iconEmoji === "like" ? appcolor.primary : 'rgba(255,255,255,0.2)',
+                            flexDirection: "row",
+                            marginRight: 4,
+                        }}>
+                        <Image
+                            style={{
+                                width: 18,
+                                height: 18,
+                            }}
+                            source={getIconImg("like")}
+                            contentFit="cover"
+                        />
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => handleBtnEmoji("heart")}
+                        activeOpacity={0.8}
+                        style={{
+                            width: "auto",
+                            minWidth: 60,
+                            height: 30,
+                            borderRadius: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: iconEmoji === "heart" ? appcolor.primary : 'rgba(255,255,255,0.2)',
+                            flexDirection: "row",
+                            marginRight: 4,
+                        }}>
+                        <Image
+                            style={{
+                                width: 18,
+                                height: 18,
+                            }}
+                            source={getIconImg("heart")}
+                            contentFit="cover"
+                        />
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => handleBtnEmoji("laugh")}
+                        activeOpacity={0.8}
+                        style={{
+                            width: "auto",
+                            minWidth: 60,
+                            height: 30,
+                            borderRadius: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: iconEmoji === "laugh" ? appcolor.primary : 'rgba(255,255,255,0.2)',
+                            flexDirection: "row",
+                            marginRight: 4,
+                        }}>
+                        <Image
+                            style={{
+                                width: 18,
+                                height: 18,
+                            }}
+                            source={getIconImg("laugh")}
+                            contentFit="cover"
+                        />
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => handleBtnEmoji("sad")}
+                        activeOpacity={0.8}
+                        style={{
+                            width: "auto",
+                            minWidth: 60,
+                            height: 30,
+                            borderRadius: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: iconEmoji === "sad" ? appcolor.primary : 'rgba(255,255,255,0.2)',
+                            flexDirection: "row",
+                            marginRight: 4,
+                        }}>
+                        <Image
+                            style={{
+                                width: 18,
+                                height: 18,
+                            }}
+                            source={getIconImg("sad")}
+                            contentFit="cover"
+                        />
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                    </TouchableOpacity>
+
+
+                </View>
+
+
+                <View style={{
+                    height: 65,
+                    width: "100%",
+                    position: "absolute",
+                    bottom: 0,
+
+                }} >
                     <AnimatedQuickCmtComponent isNomal post={post} userPost={userPost} user={user} />
                 </View>
+
 
             </View>}
             {/* Emoji Box */}

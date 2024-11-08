@@ -37,22 +37,28 @@ const PostViewComponent = ({ post, user }) => {
 
     const dispatch = useDispatch();
     const userId = post.user_id; // Lấy user_id từ post
-    const [userPost, setUserPost] = useState(null);
+    // const [userPost, setUserPost] = useState(null);
+    const userPost = useSelector((state) => state.user[userId]);
     // const [isFollow, setIsFollow] = useState(false);
     const follower = useSelector((state) => state.follower.follower);
     const isFollow = follower.some(f => f.user_id === post.user_id);
 
 
-    useEffect(() => {
-        const handleGetUserPost = async () => {
-            const userResponse = await dispatch(getUserByField({ user_id: userId }));
-            const userData = userResponse.payload;
-            setUserPost(userData);
-            console.log("userData", userData);
-        }
-        handleGetUserPost();
-    }, [userId]);
+    // useEffect(() => {
+    //     const handleGetUserPost = async () => {
+    //         const userResponse = await dispatch(getUserByField({ user_id: userId }));
+    //         const userData = userResponse.payload;
+    //         setUserPost(userData);
+    //         console.log("userData", userData);
+    //     }
+    //     handleGetUserPost();
+    // }, [userId]);
 
+    useEffect(() => {
+        if (!userPost) {
+            dispatch(getUserByField({ user_id: userId }));
+        }
+    }, [userId]);
 
 
 

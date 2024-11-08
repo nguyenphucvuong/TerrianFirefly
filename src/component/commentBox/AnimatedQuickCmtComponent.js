@@ -64,13 +64,15 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
         const length = data.length;
         return length === 0 ? <></> : view;
     }
-    const [isVisible, setIsVisible] = useState(false);
+    // const [isVisible, setIsVisible] = useState(false);
+    let isVisible = false;
     // const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
     const translateY = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
     // const translateYEmoji = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
 
     const handleShowPop = () => {
-        setIsVisible(true);
+        // setIsVisible(true);
+        isVisible = true;
         Animated.timing(translateY, {
             toValue: 0,
             duration: 300,
@@ -87,7 +89,8 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
     // };
 
     const setFalse = () => {
-        setIsVisible(false);
+        // setIsVisible(false);
+        isVisible = false;
         // setIsShowEmojiBox(false);
     }
 
