@@ -87,7 +87,7 @@ function ForgotPassword() {
         <View style={styles.viewInput}>
           <Text style={{ marginBottom: "3%" }}>Email</Text>
           <View style={styles.input}>
-            <Icon name="envelope" size={25} color="#858585" />
+            <Icon name="envelope" size={appInfo.heightWindows * 0.028} color="#858585" />
             <TextInput
               style={styles.textInput}
               placeholder="Nhập email"

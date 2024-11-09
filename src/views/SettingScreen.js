@@ -46,7 +46,7 @@ const SettingScreen = () => {
                 <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
             </TouchableOpacity>
             {
-                user.roleid === 0 ? (
+                user.roleid != 0 ? (
                     <View>
                         {/* Gạch ngang Admin */}
                         <View style={{ marginTop: appInfo.heightWindows * 0.02, fontSize: 16 }}>
@@ -64,7 +64,9 @@ const SettingScreen = () => {
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
                         {/* Sự Kiện */}
-                        <TouchableOpacity style={styles.buttonRow}>
+                        <TouchableOpacity style={styles.buttonRow}
+                        onPress={() => navigation.navigate('EventManagementScreen')}
+                        >
                             <Text style={styles.buttonText}>Quản Lý Sự Kiện</Text>
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
