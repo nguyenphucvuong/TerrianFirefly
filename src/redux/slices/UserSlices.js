@@ -1,252 +1,347 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { db, auth } from '../../firebase/FirebaseConfig';
-import { collection, addDoc, getDoc, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
+import { db, auth, storage } from '../../firebase/FirebaseConfig';
+import { collection, addDoc, doc, getDoc, getDocs, query, where, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Firebase Storage
 
 // Trạng thái ban đầu
 const initialState = {
-    user: null,
-    userByField: {},
-    statusUser: 'idle',
-    errorUser: null,
+  user: null,
+  userByField: {},
+  statusUser: 'idle',
+  errorUser: null,
+  usersFollowed: [],
+
+};
+
+// Thiết lập listener thời gian thực cho dữ liệu người dùng
+export const listenToUserRealtime = (email) => (dispatch) => {
+  const q = query(collection(db, "user"), where("email", "==", email));
+
+  const unsubscribe = onSnapshot(
+    q,
+    (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        const userData = {
+          id: querySnapshot.docs[0].id,
+          ...querySnapshot.docs[0].data(),
+        };
+        dispatch(setUser(userData));
+      }
+    },
+    (error) => {
+      console.error("Error in realtime listener:", error);
+      dispatch(setError(error.message));
+    }
+  );
+
+  return unsubscribe; // Trả về hàm unsubscribe để có thể ngừng listener khi không cần thiết
 };
 
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
-export const getUser = createAsyncThunk('data/getUser', async (email) => {
-    try {
-        const q = query(collection(db, 'user'), where('email', '==', email));
-        const querySnapshot = await getDocs(q);
+export const getUser = createAsyncThunk("data/getUser", async (email) => {
+  try {
+    const q = query(collection(db, "user"), where("email", "==", email));
+    const querySnapshot = await getDocs(q);
 
-        // const posts = querySnapshot.docs.map(doc => ({
-        //     id: doc.id,
-        //     ...doc.data(),
-        // }));
+    // const posts = querySnapshot.docs.map(doc => ({
+    //     id: doc.id,
+    //     ...doc.data(),
+    // }));
 
-        const posts = {
-            id: querySnapshot.docs[0].id,
-            ...querySnapshot.docs[0].data(),
-        };
+    const posts = {
+      id: querySnapshot.docs[0].id,
+      ...querySnapshot.docs[0].data(),
+    };
 
-        return posts;
-    } catch (err) {
-        return err.message;
-    }
-
+    return posts;
+  } catch (err) {
+    return err.message;
+  }
 });
-// // Tạo async thunk để cập nhật thông tin người dùng trong Firestore
-// export const updateUser = createAsyncThunk('user/updateUser', async (user) => {
-//     try {
-//         const userRef = doc(db, 'user', user.user_id); // Tham chiếu đến tài liệu người dùng
 
-//         // Cập nhật các trường trong tài liệu
-//         await updateDoc(userRef, {
-//             imgUser: user.imgUser,
-//             frame_user: user.frame_user,
-//             gender: user.gender,
-//             username: user.username, // Sử dụng user.username thay vì chỉ username
-//         });
+export const updateUserState = createAsyncThunk(
+  "user/updateUser",
+  async ({ user_id, field, value }, { getState, dispatch }) => {
+    try {
+      const userRef = doc(db, "user", user_id); // Tham chiếu đến tài liệu người dùng
 
-//         // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
-//         const updatedSnap = await getDoc(userRef);
-//         if (updatedSnap.exists()) {
-//             return {
-//                 id: updatedSnap.id,
-//                 ...updatedSnap.data(),
-//             };
-//         } else {
-//             throw new Error('User not found');
-//         }
-//     } catch (error) {
-//         console.error('Error adding document: ', error);
-//         throw error;
-//     }
-// }
-// );
+      // Cập nhật các trường trong tài liệu
+      await updateDoc(userRef, {
+        [field]: value,
+      });
 
-export const updateUserState = createAsyncThunk('user/updateUser',
-    async ({ user_id, field, value }, { getState, dispatch }) => {
-        try {
-            const userRef = doc(db, 'user', user_id); // Tham chiếu đến tài liệu người dùng
-
-            // Cập nhật các trường trong tài liệu
-            await updateDoc(userRef, {
-                [field]: value,
-            });
-
-            // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
-            const updatedSnap = await getDoc(userRef);
-            console.log("updatedSnap", updatedSnap.data());
-            if (updatedSnap.exists()) {
-                return {
-                    id: updatedSnap.id,
-                    ...updatedSnap.data(),
-                };
-            } else {
-                throw new Error('User not found');
-            }
-        } catch (error) {
-            console.error('Error adding document: ', error);
-            throw error;
-        }
+      // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
+      const updatedSnap = await getDoc(userRef);
+      console.log("updatedSnap", updatedSnap.data());
+      if (updatedSnap.exists()) {
+        return {
+          id: updatedSnap.id,
+          ...updatedSnap.data(),
+        };
+      } else {
+        throw new Error("User not found");
+      }
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      throw error;
     }
+  }
+);
+
+export const getUserByField = createAsyncThunk(
+  "data/getUserByField",
+  async ({ user_id }) => {
+    try {
+      const queryDoc = query(
+        collection(db, "user"),
+        where("user_id", "==", user_id)
+      );
+      const querySnapshot = await getDocs(queryDoc);
+
+      if (querySnapshot.empty) {
+        return null; // No user found
+      }
+
+      // const userById = querySnapshot.docs.map(doc => ({
+      //     id: doc.id,
+      //     ...doc.data(),
+      // }));
+      const userById = {
+        id: querySnapshot.docs[0].id,
+        ...querySnapshot.docs[0].data(),
+      };
+      // console.log("userById", userById);
+
+      return { user_id, userById };
+    } catch (error) {
+      console.error("Error fetching user: ", error);
+      throw error; // Just return the error message
+    }
+  }
 );
 
 
-
-export const getUserByField = createAsyncThunk('data/getUserByField', async ({ user_id }) => {
-    try {
-        const queryDoc = query(collection(db, 'user'), where('user_id', '==', user_id));
-        const querySnapshot = await getDocs(queryDoc);
-
-        if (querySnapshot.empty) {
-            return null; // No user found
-        }
-
-        // const userById = querySnapshot.docs.map(doc => ({
-        //     id: doc.id,
-        //     ...doc.data(),
-        // }));
-        const userById = {
-            id: querySnapshot.docs[0].id,
-            ...querySnapshot.docs[0].data(),
-        };
-        // console.log("userById", userById);
-
-        return { user_id, userById };
-    } catch (error) {
-        console.error('Error fetching user: ', error);
-        throw error; // Just return the error message
-    }
-});
-
-// // Tạo async thunk để cập nhật dữ liệu Firestore
+// Tạo async thunk để cập nhật dữ liệu Firestore
 export const updateUser = createAsyncThunk('data/upDateUser', async ({ user_id, newData }) => {
 
-    try {
-        if (!user_id) {
-            throw new Error("User ID is required.");
-        }
-
-        const userDocRef = doc(collection(db, "user"), user_id);
-        await updateDoc(userDocRef, newData);
-        console.log("User updated!");
-
-
-        //Alert.alert("Thành công", "Đã cập nhật Firestore.");
-    } catch (error) {
-        console.error("Error updating user:", error);
-        //Alert.alert("Lỗi", "Không thể cập nhật.");
+  try {
+    if (!user_id) {
+      throw new Error("User ID is required.");
     }
+
+    const userDocRef = doc(collection(db, "user"), user_id);
+    await updateDoc(userDocRef, newData);
+    console.log("User updated!");
+
+    //Alert.alert("Thành công", "Đã cập nhật Firestore.");
+  } catch (error) {
+    console.error("Error updating user:", error);
+  }
 });
 
 
-
-// doc(collection(db, "user"), user_id);
-//               try {
-//                 // Cập nhật mật khẩu mới trong Firestore
-//                 await updateDoc(userRef, newData);
-//                 console.log("User updated!");
-//                 Alert.alert(
-//                   "Thành công",
-//                   "đã cập nhật Firestore."
-//                 );
-
-//               } catch (error) {
-//                 console.error("Error updating user:", error);
-//                 Alert.alert("Lỗi", "Không thể cập nhật.");
-//               }
-// export const updateUser = createAsyncThunk(
-//   "data/updateUser",
-//   async ({ userId, newData }, { rejectWithValue }) => {
-//     const userRef = doc(collection(db, "user"), userId);
-//     try {
-//       // Cập nhật dữ liệu trong Firestore
-//       await updateDoc(userRef, newData);
-//       return { userId, newData };
-//     } catch (error) {
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
-
-export const updateUserPassword = createAsyncThunk('data/updateUserPassword', async ({ userId, newPassWord }) => {
+export const updateUserPassword = createAsyncThunk(
+  "data/updateUserPassword",
+  async ({ userId, newPassWord }) => {
     try {
-        const userRef = doc(db, 'user', userId); // Tạo tham chiếu đến tài liệu của người dùng trong Firestore
-        await updateDoc(userRef, {
-            passWord: newPassWord, // Cập nhật trường passWord với mật khẩu mới
-        });
+      const userRef = doc(db, "user", userId); // Tạo tham chiếu đến tài liệu của người dùng trong Firestore
+      await updateDoc(userRef, {
+        passWord: newPassWord, // Cập nhật trường passWord với mật khẩu mới
+      });
 
-        return { userId, newPassWord }; // Trả về userId và mật khẩu mới sau khi cập nhật thành công
+      return { userId, newPassWord }; // Trả về userId và mật khẩu mới sau khi cập nhật thành công
     } catch (err) {
-        return rejectWithValue(err.message);
+      return rejectWithValue(err.message);
     }
-});
+  }
+);
+
+// Tạo async thunk để upload ảnh
+export const uploadImage = createAsyncThunk(
+  "data/uploadImage",
+  async ({ imgUser, setUploadProgress }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(imgUser);
+      const blob = await response.blob();
+      const imgRef = ref(storage, `avatar/${imgUser.split("/").pop()}`);
+      const uploadTask = uploadBytesResumable(imgRef, blob);
+
+      return new Promise((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(Math.round(progress));
+            console.log("Upload is " + progress + "% done");
+          },
+          (error) => {
+            console.error("Upload failed", error);
+            reject(error);
+          },
+          async () => {
+            const imgUrl = await getDownloadURL(imgRef);
+            console.log("File available at", imgUrl);
+            blob.close();
+            resolve(imgUrl);
+          }
+        );
+      });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Hàm lấy danh sách user ID đã được follow
+const getFollowedUserIds = async ({ currentUserId }) => {
+  const followerQuery = query(
+    collection(db, "Follower"),
+    where("follower_user_id", "==", currentUserId)
+  );
+  const followerSnapshot = await getDocs(followerQuery);
+  //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
+
+  return followerSnapshot.docs.map((doc) => doc.data().user_id);
+};
+
+// Hàm lấy bài đăng từ những người dùng đã được follow
+export const getUserFromFollowedUsers = createAsyncThunk(
+  "data/getUserFromFollowedUsers",
+  async ({ field, currentUserId }, { getState }) => {
+    try {
+      // Lấy danh sách user ID đã được follow
+      const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
+      // console.log('followedUserIds',followedUserIds);
+
+      // Nếu không có user nào được follow, trả về mảng rỗng
+      if (followedUserIds.length === 0) {
+        return { usersFollowed: [] };
+      }
+      // console.log('followedUserIds2',followedUserIds); 
+      // Tạo query lấy bài đăng từ những người dùng đã được follow
+      let userQuery = query(
+        collection(db, "user"),
+        where("user_id", "in", followedUserIds)
+      );
+      // console.log('userQuery',userQuery);
+
+
+      const querySnapshot = await getDocs(userQuery);
+      // console.log('querySnapshot1',querySnapshot);
+
+      // Trả về mảng rỗng nếu không có user nào
+      if (querySnapshot.empty) {
+        console.log('empty');
+        return { usersFollowed: [] };
+      }
+      const usersFollowed = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      // console.log('usersFollowed',usersFollowed);
+
+      return {
+        usersFollowed: usersFollowed,
+      };
+    } catch (error) {
+      console.error("Error fetching user from followed users: ", error);
+      throw error;
+    }
+  }
+);
 
 // Tạo slice cho user
 export const UserSlices = createSlice({
-    name: "user",
-    initialState,
-    reducers: {},
-    extraReducers: (builder) => {
-        builder
-
-            // Xử lý khi lấy dữ liệu thành công
-            .addCase(getUser.fulfilled, (state, action) => {
-                state.user = action.payload; // Cập nhật danh sách
-                // console.log("action.payload", action.payload);
-                // console.log("state.user", state.user);
-                state.statusUser = 'succeeded'; // Đánh dấu thành công
-            })
-            .addCase(getUser.pending, (state) => {
-                state.statusUser = 'loading'; // Đánh dấu trạng thái đang tải
-            })
-            .addCase(getUser.rejected, (state, action) => {
-                state.errorUser = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
-                state.statusUser = 'failed'; // Đánh dấu thất bại
-            })
-
-            // getUserByField
-            // .addCase(getUserByField.fulfilled, (state, action) => {
-            //     state.userByField = action.payload.userById;
-            //     // console.log("userByField", state.userByField);
-            // })
-            .addCase(getUserByField.fulfilled, (state, action) => {
-                const { user_id, userById } = action.payload;
-                state[user_id] = userById;
-            })
-            .addCase(getUserByField.pending, (state) => {
-            })
-            .addCase(getUserByField.rejected, (state, action) => {
-                state.errorUser = action.error.message;
-            })
-
-            // updateUser
-            .addCase(updateUser.fulfilled, (state, action) => {
-                state.user = action.payload;
-                state.statusUser = 'succeeded';
-            })
-            .addCase(updateUser.pending, (state) => {
-                state.statusUser = 'loading';
-            })
-            .addCase(updateUser.rejected, (state, action) => {
-                state.errorUser = action.error.message;
-                state.statusUser = 'failed';
-            })
-
-            // updateUserState
-            .addCase(updateUserState.fulfilled, (state, action) => {
-                state.user = action.payload;
-                state.statusUser = 'succeeded';
-            })
-            .addCase(updateUserState.pending, (state) => {
-                state.statusUser = 'loading';
-            })
-            .addCase(updateUserState.rejected, (state, action) => {
-                state.errorUser = action.error.message;
-                state.statusUser = 'failed';
-            })
+  name: "user",
+  initialState,
+  reducers: {
+    setUser: (state, action) => {
+      state.user = action.payload;
+      state.errorUser = null; // Reset lỗi khi có dữ liệu người dùng mới
     },
+  },
+  extraReducers: (builder) => {
+    builder
+
+      // Xử lý khi lấy dữ liệu thành công
+      //   .addCase(getUser.fulfilled, (state, action) => {
+      //     state.user = action.payload; // Cập nhật danh sách
+      //     // console.log("action.payload", action.payload);
+      //     // console.log("state.user", state.user);
+      //     state.statusUser = "succeeded"; // Đánh dấu thành công
+      //   })
+      //   .addCase(getUser.pending, (state) => {
+      //     state.statusUser = "loading"; // Đánh dấu trạng thái đang tải
+      //   })
+      //   .addCase(getUser.rejected, (state, action) => {
+      //     state.errorUser = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
+      //     state.statusUser = "failed"; // Đánh dấu thất bại
+      //   })
+
+      // getUserByField
+      // .addCase(getUserByField.fulfilled, (state, action) => {
+      //     state.userByField = action.payload.userById;
+      //     // console.log("userByField", state.userByField);
+      // })
+      .addCase(getUserByField.fulfilled, (state, action) => {
+        const { user_id, userById } = action.payload;
+        state[user_id] = userById;
+      })
+      .addCase(getUserByField.pending, (state) => { })
+      .addCase(getUserByField.rejected, (state, action) => {
+        state.errorUser = action.error.message;
+      })
+
+      // // updateUser
+      // .addCase(updateUser.fulfilled, (state, action) => {
+      //     state.user = action.payload;
+      //     state.statusUser = 'succeeded';
+      // })
+      // .addCase(updateUser.pending, (state) => {
+      //     state.statusUser = 'loading';
+      // })
+      // .addCase(updateUser.rejected, (state, action) => {
+      //     state.errorUser = action.error.message;
+      //     state.statusUser = 'failed';
+      // })
+
+      // updateUserState
+      .addCase(updateUserState.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.statusUser = "succeeded";
+      })
+      .addCase(updateUserState.pending, (state) => {
+        state.statusUser = "loading";
+      })
+      .addCase(updateUserState.rejected, (state, action) => {
+        state.errorUser = action.error.message;
+        state.statusUser = "failed";
+      })
+      .addCase(uploadImage.fulfilled, (state, action) => {
+        // Update state or user with the new image URL if needed
+      })
+      .addCase(uploadImage.rejected, (state, action) => {
+        state.errorUser = action.payload;
+      })
+      //getUserFromFollowedUsers
+      .addCase(getUserFromFollowedUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserFromFollowedUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.usersFollowed = action.payload.usersFollowed;
+        state.status = "succeeded";
+      })
+      .addCase(getUserFromFollowedUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+  },
 });
 
-// export const { sethashtag } = UserSlice.actions
+export const { setUser, setError } = UserSlices.actions;
 
 export default UserSlices.reducer;

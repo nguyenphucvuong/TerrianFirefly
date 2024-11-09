@@ -1,21 +1,26 @@
-import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text } from 'react-native'
-import React, { useRef, useState, useEffect } from 'react'
+import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text, Alert, LogBox, Clipboard } from 'react-native'
+import React, { useRef, useState, useEffect, useMemo } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSelector, useDispatch } from "react-redux";
+import Entypo from 'react-native-vector-icons/Entypo';
+import Feather from 'react-native-vector-icons/Feather';
+import {
+    BottomSheetModal,
+    BottomSheetView,
+    BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
 //style
 import { StyleGlobal } from '../styles/StyleGlobal'
 //components
-import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx } from '../component';
-//screen
-import ArticleScreen from './ArticleScreen';
-import FavouriteScreen from './FavouriteScreen';
-import GroupScreen from './GroupScreen';
+import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx, ButtonBackComponent } from '../component';
+import TabRecipe from '../component/TabRecipe';
 //constains
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
 //redux
-import { getUser } from '../redux/slices/UserSlices';
+import { listenToUserRealtime, getUserFromFollowedUsers } from '../redux/slices/UserSlices';
+import { getPostUsers } from '../../src/redux/slices/PostSlice';
 const Tab = createMaterialTopTabNavigator();
 
 const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.09;
@@ -23,9 +28,35 @@ const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 
 
 const PersonScreen = () => {
-    const navigation = useNavigation();
     //firebase
-    const user = useSelector((state) => state.user.user);
+    const users = useSelector((state) => state.user.user);
+    const followUp = useSelector((state) => state.user.usersFollowed);
+    const post = useSelector((state) => state.post.postByUser);
+    const dispatch = useDispatch();
+    //route
+    const route = useRoute();
+    const user = route.params?.user ?? users;
+    //console.log('user',user);
+
+    const navigation = useNavigation();
+
+    //Copy
+    const [showToast, setShowToast] = useState(false);
+    const copyToClipboard = (id) => {
+        Clipboard.setString(id);
+        // Hiển thị thông báo
+        setShowToast(true);
+
+        // Tự động ẩn thông báo sau 2 giây
+        setTimeout(() => {
+            setShowToast(false);
+        }, 2000);
+        setShowToast(true);
+    };
+    // Ẩn cảnh báo liên quan đến Clipboard
+    LogBox.ignoreLogs([
+        'Clipboard has been extracted from react-native core',
+    ]);
     //Animated
     const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -43,155 +74,153 @@ const PersonScreen = () => {
             extrapolate: 'clamp',
         }),
     };
-    const [selectedTab, setSelectedTab] = useState('articles');
-    // Hàm để render nội dung tương ứng với tab
-    const renderContent = () => {
-        switch (selectedTab) {
-            case 'articles':
-                return (
-                    <View>
-                        <ArticleScreen />
-                    </View>
-                );
-            case 'favorites':
-                return (
-                    <View style={styles.tabContent}>
-                        <Text style={styles.item}>Yêu thích 1: React Navigation</Text>
-                    </View>
-                );
-            case 'topics':
-                return (
-                    <View style={styles.tabContent}>
-                        <GroupScreen />
-                    </View>
-                );
-            default:
-                return null;
-        }
-    };
+    //BottomSheet
+    const snapPoints = useMemo(() => ['30%'], []);
+    const bottomSheetModalRef = useRef(null);
+    const handleManagement = () => {
+        bottomSheetModalRef.current?.present();
+    }
+    const onClose = () => {
+
+    }
+    //cập nhật lại dữ liệu 
+    useEffect(() => {
+        //Bài viết
+        dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
+        //user theo dõi
+        dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
+        const unsubscribe = dispatch(listenToUserRealtime(user.email));
+        return () => unsubscribe();
+    }, [dispatch, user.email]);
     //console.log('user', user);
+    //console.log('showToast', showToast);
+    ///console.log('followUp', followUp.length,);
+
 
     return (
-        <View style={{ flex: 1 }}>
-            <View style={styles.upperHeaderPlacehholder} />
-            <View style={styles.header}>
-                <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
-                    <View style={styles.upperrHeader}>
-                        <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
-                            <AvatarEx
-                                size={appInfo.heightWindows * 0.035}
-                                round={90}
-                                url={user.imgUser}
-                            />
-                            <Text style={styles.avatarText}>{user.username}</Text>
-                        </Animated.View>
-                    </View>
-                    <View style={styles.setting}>
-                        <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
-                    </View>
-                    <View style={styles.lowerHeader} />
-                </ImageBackground>
-            </View>
-
-            <ScrollView
-                nestedScrollEnabled={true}
-                scrollEventThrottle={16}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.scrollViewContainer} // Sử dụng contentContainerStyle
-                onScroll={e => {
-                    const offsetY = e.nativeEvent.contentOffset.y;
-                    animatedValue.setValue(offsetY);
-                }}
-            >
-                <TouchableOpacity
-                    style={styles.paddingForHeader}
-                    onPress={() => navigation.navigate('BackgroundScreen')}
-                />
-                <View style={styles.scrollViewContent}>
-                    <View style={{ flexDirection: 'row' }}>
-                        {/* Avatar */}
-                        <Animated.View style={[styles.avatar, avatarAnimation]}>
-                            <AvatarEx
-                                url={user.imgUser}
-                                size={appInfo.widthWindows * 0.22}
-                                round={20}
-                                frame={user.frame_user}
-                                name={user.username}
-                            />
-                            <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username}</Text>
-
-                        </Animated.View>
-                        {/* Chỉnh sửa */}
-                        <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
-                            <IconComponent
-                                name={'edit'}
-                                size={appInfo.heightWindows * 0.025}
-                                color={'#190AEF'}
-                                text={'Chỉnh sửa'}
-                                textColor={'#190AEF'}
-                                style={styles.buttonEdit}
-                                onPress={() => navigation.navigate('InfomationScreen')}
-                            />
-                        </View>
-                    </View>
-
-                    {
-                        user.length === 0 || !user.user_id ? (
-                            <View style={styles.iconRow}>
-                                <SkeletonComponent
-                                    Data={""}
-                                    style={{ width: '100%', height: appInfo.heightWindows * 0.1 }}
-                                />
-                                <SkeletonComponent
-                                    Data={""}
-                                    style={{ width: '100%', height: appInfo.heightWindows * 0.1 }}
-                                />
-                            </View>
-                        ) : (
-                            <View style={styles.iconRow}>
-                                <IconComponent name={'credit-card'}
-                                    size={appInfo.heightWindows * 0.025}
-                                    color={'#33363F'}
-                                    text={'ID: ' + user.user_id} />
-                                <IconComponent name={'user'}
-                                    size={appInfo.heightWindows * 0.025}
-                                    color={'#33363F'}
-                                    text={'Người ' + user.nickname}
-                                    onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} />
-                            </View>
-                        )
-                    }
-
-                    <View style={styles.statisticsContainer}>
-                        <StatisticsComponent quantity={0} name={'Bài Viết'} />
-                        <StatisticsComponent quantity={0} name={'Theo Dõi'} onPress={() => navigation.navigate('TrackingScreen')} />
-                        <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
-                        <StatisticsComponent quantity={0} name={'Lượt Thích'} />
-                    </View>
-
-                    {/* Tab Navigator */}
-                    <View style={{ flex: 1 }}>
-                        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                            <View style={styles.tabBar}>
-                                <TouchableOpacity onPress={() => setSelectedTab('articles')} style={styles.tab}>
-                                    <Text style={[styles.tabText, selectedTab === 'articles' && styles.activeTabText]}>Bài viết</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setSelectedTab('favorites')} style={styles.tab}>
-                                    <Text style={[styles.tabText, selectedTab === 'favorites' && styles.activeTabText]}>Yêu thích</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setSelectedTab('topics')} style={styles.tab}>
-                                    <Text style={[styles.tabText, selectedTab === 'topics' && styles.activeTabText]}>Chủ Đề</Text>
-                                </TouchableOpacity>
-                            </View>
-
-                            <View style={styles.contentContainer}>
-                                {renderContent()}
-                            </View>
-                        </ScrollView>
+        <BottomSheetModalProvider style={{ flex: 1, backgroundColor: 'white' }}>
+            {user === null ? (
+                <View>
+                    <SkeletonComponent Data={""} style={{ width: '100%', height: appInfo.heightWindows * 0.15 }} />
+                    <View style={{ margin: '5%' }}>
+                        <SkeletonComponent isAvatar Data={""} style={{ width: 80, height: 80 }} />
+                        <SkeletonComponent Data={""} style={{ width: '60%', height: appInfo.heightWindows * 0.02 }} />
+                        <SkeletonComponent Data={""} style={{ width: '70%', height: appInfo.heightWindows * 0.02 }} />
+                        <SkeletonComponent Data={""} style={{ width: '80%', height: appInfo.heightWindows * 0.02 }} />
                     </View>
                 </View>
-            </ScrollView >
-        </View >
+            ) : (
+                <View >
+                    <View style={styles.upperHeaderPlacehholder} />
+                    <View style={styles.header}>
+                        <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
+                            <View style={styles.upperrHeader}>
+                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, user !== users && { marginLeft: '7%' }]}>
+                                    <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={user.imgUser} />
+                                    <Text style={styles.avatarText}>{user.username}</Text>
+                                </Animated.View>
+                            </View>
+                            {
+                                users !== user ?
+                                    <View style={styles.back}>
+                                        <ButtonBackComponent color={'white'} />
+                                    </View>
+                                    : <View style={styles.setting}>
+                                        <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
+                                    </View>
+                            }
+
+
+
+                            <View style={styles.lowerHeader} />
+                        </ImageBackground>
+                    </View>
+                    {showToast && (
+                        <View style={styles.toastContainer}>
+                            <Text style={styles.toastText}>Đã sao chép thành công!</Text>
+                        </View>
+                    )}
+                    <ScrollView
+                        nestedScrollEnabled={true}
+                        scrollEventThrottle={16}
+                        showsVerticalScrollIndicator={false}
+                        onScroll={e => {
+                            const offsetY = e.nativeEvent.contentOffset.y;
+                            animatedValue.setValue(offsetY);
+                        }}
+                    >
+                        <TouchableOpacity
+                            style={styles.paddingForHeader}
+                            onPress={() => navigation.navigate('BackgroundScreen')}
+                        />
+                        <View style={styles.scrollViewContent}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Animated.View style={[styles.avatar, avatarAnimation]}>
+                                    <AvatarEx url={user.imgUser} size={appInfo.widthWindows * 0.22} round={20} frame={user.frame_user} name={user.username} />
+                                    <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username}</Text>
+                                </Animated.View>
+                                <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
+                                    <IconComponent
+                                        name={'edit'}
+                                        size={appInfo.heightWindows * 0.025}
+                                        color={'#190AEF'}
+                                        text={'Chỉnh sửa'}
+                                        textColor={'#190AEF'}
+                                        style={styles.buttonEdit}
+                                        onPress={() => navigation.navigate('InfomationScreen')}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.iconRow}>
+                                <IconComponent name={'credit-card'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'ID: ' + user.user_id} onPress={() => copyToClipboard(user.user_id)} />
+                                <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} />
+                            </View>
+
+                            <View style={styles.statisticsContainer}>
+                                <StatisticsComponent quantity={post.length} name={'Bài Viết'} />
+                                <StatisticsComponent quantity={followUp.length} name={'Theo Dõi'} onPress={() => navigation.navigate('FollowUp', { followUp })} />
+                                <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
+                                <StatisticsComponent quantity={0} name={'Lượt Thích'} />
+                            </View>
+                            {/*  Tab Navigation */}
+                            <TabRecipe post={post} user={user} />
+                        </View>
+                    </ScrollView>
+                    {/* <BottomSheetModal
+                        ref={bottomSheetModalRef}
+                        index={0}
+                        snapPoints={snapPoints}>
+                        <BottomSheetView style={styles.contentContainer}>
+                            <View style={styles.headerBottom}>
+                                <IconComponent name={'x'} size={appInfo.heightWindows * 0.028} color={'#000000'} style={styles.closeButton} />
+                                <Text style={styles.headerText}>Quản Lý</Text>
+                            </View>
+                            <View style={styles.actionsContainer}>
+                                <View style={styles.actionItem}>
+                                    <IconComponent
+                                        name={'x'}
+                                        size={appInfo.heightWindows * 0.028}
+                                        color={'#000000'}
+                                        style={styles.closeButton}
+                                    />
+                                    <Text style={styles.actionText}>Chặn Người Dùng</Text>
+                                </View>
+                                <View style={styles.actionItem}>
+                                    <IconComponent
+                                        name={'x'}
+                                        size={appInfo.heightWindows * 0.028}
+                                        color={'#000000'}
+                                        style={styles.closeButton}
+                                    />
+                                    <Text style={styles.actionText}>Tố Cáo Người Dùng</Text>
+                                </View>
+                            </View>
+                        </BottomSheetView>
+                    </BottomSheetModal> */}
+                </View>
+            )}
+        </BottomSheetModalProvider>
     );
 };
 
@@ -252,6 +281,12 @@ const styles = StyleSheet.create({
         top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
         zIndex: 1,
     },
+    back: {
+        position: 'absolute', // Đặt nút settings ở vị trí tuyệt đối
+        left: '1%', // Căn phải cách một khoảng
+        top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
+        zIndex: 1,
+    },
     iconRow: {
         marginLeft: appInfo.widthWindows * 0.03,
     },
@@ -305,8 +340,8 @@ const styles = StyleSheet.create({
         color: '#007BFF',
     },
     contentContainer: {
+        flex: 1,
         marginTop: appInfo.heightWindows * 0.02,
-        flexGrow: 1,
     },
     tabContent: {
         padding: 10,
@@ -314,6 +349,44 @@ const styles = StyleSheet.create({
     item: {
         fontSize: 18,
         marginBottom: 8,
+    },
+    toastContainer: {
+        position: 'absolute',
+        justifyContent: 'center',
+        alignSelf: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        padding: 10,
+        borderRadius: 8,
+        top: '50%', // Căn giữa theo chiều dọc
+        zIndex: 1, // Đảm bảo thông báo hiển thị trên các phần khác
+    },
+    toastText: {
+        color: '#fff',
+    },
+    headerBottom: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+    },
+    closeButton: {
+        position: 'absolute',
+        left: '3%',
+    },
+    headerText: {
+        fontSize: 20,
+    },
+    actionsContainer: {
+        marginTop: 20,
+    },
+    actionItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    actionText: {
+        marginLeft: 10,
+        fontSize: 16,
+        color: '#000000',
     },
 
 });

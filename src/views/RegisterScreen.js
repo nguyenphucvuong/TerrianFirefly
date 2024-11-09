@@ -109,7 +109,7 @@ function RegisterScreen() {
         username: userName,
         numberPhone: "",
         email: email,
-        roleid: 0,
+        roleid: 1,
         imgUser:
           "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/avatar%2Favatar.jpg?alt=media&token=42cfc0ed-75cc-4feb-9a0f-19f6203643c5",
         gender: "",
@@ -225,7 +225,7 @@ function RegisterScreen() {
           <View style={styles.viewInput}>
             <Text style={{ marginBottom: "3%" }}>Tên Người Dùng</Text>
             <View style={styles.input}>
-              <Icon name="user" size={25} color="#858585" />
+              <Icon name="user" size={appInfo.heightWindows * 0.028} color="#858585" />
               <TextInput
                 style={styles.textInput}
                 placeholder="Nhập tên người dùng"
@@ -241,7 +241,7 @@ function RegisterScreen() {
           <View style={styles.viewInput}>
             <Text style={{ marginBottom: "3%" }}>Email</Text>
             <View style={styles.input}>
-              <Icon name="envelope" size={25} color="#858585" />
+              <Icon name="envelope" size={appInfo.heightWindows * 0.028} color="#858585" />
               <TextInput
                 style={styles.textInput}
                 placeholder="Nhập email"
@@ -258,7 +258,7 @@ function RegisterScreen() {
           <View style={[styles.viewInput]}>
             <Text style={{ marginBottom: "3%" }}>Password</Text>
             <View style={styles.input}>
-              <Icon name="lock" size={25} color="#858585" />
+              <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
               <TextInput
                 secureTextEntry={checkPass}
                 style={styles.textInput}
@@ -271,14 +271,14 @@ function RegisterScreen() {
                 {checkPass ? (
                   <Icon
                     name="eye-slash"
-                    size={20}
+                    size={appInfo.heightWindows * 0.028}
                     color="#858585"
                     style={{ marginLeft: appInfo.widthWindows * 0.19 }}
                   />
                 ) : (
                   <Icon
                     name="eye"
-                    size={20}
+                    size={appInfo.heightWindows * 0.028}
                     color="#858585"
                     style={{ marginLeft: appInfo.widthWindows * 0.19 }}
                   />
@@ -289,7 +289,7 @@ function RegisterScreen() {
           <View style={[styles.viewInput, { marginBottom: "20%" }]}>
             <Text style={{ marginBottom: "3%" }}>Xác Nhận Mật Khẩu</Text>
             <View style={styles.input}>
-              <Icon name="lock" size={25} color="#858585" />
+              <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
               <TextInput
                 secureTextEntry={checkPass}
                 style={styles.textInput}
@@ -302,14 +302,14 @@ function RegisterScreen() {
                 {checkPass ? (
                   <Icon
                     name="eye-slash"
-                    size={20}
+                    size={appInfo.heightWindows * 0.028}
                     color="#858585"
                     style={{ marginLeft: appInfo.widthWindows * 0.19 }}
                   />
                 ) : (
                   <Icon
                     name="eye"
-                    size={20}
+                    size={appInfo.heightWindows * 0.028}
                     color="#858585"
                     style={{ marginLeft: appInfo.widthWindows * 0.19 }}
                   />

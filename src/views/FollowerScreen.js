@@ -1,5 +1,6 @@
 import { FlatList, View, TouchableOpacity, StyleSheet, Text} from "react-native";
 import React from "react";
+
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal'
 //constains
@@ -11,7 +12,6 @@ const DATA = [
     { id: 2 },
 ];
 const FollowerScreen = () => {
-
     return (
         <View style={StyleGlobal.container}>
             <FlatList

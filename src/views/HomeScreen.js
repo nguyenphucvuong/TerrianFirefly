@@ -28,9 +28,6 @@ const HomeScreen = () => {
   const [hasMorePosts, setHasMorePosts] = useState(true);
 
 
-
-
-
   useEffect(() => {
     if (user) {
       const fetchData = async () => {

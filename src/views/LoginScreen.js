@@ -18,7 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { db, auth } from "../firebase/FirebaseConfig";
 //redux
-import { getUser } from "../redux/slices/UserSlices";
+import { getUser, listenToUserRealtime } from "../redux/slices/UserSlices";
 import { getAchievement } from "../redux/slices/AchievementSlice";
 import { getNickname } from "../redux/slices/NicknameSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,7 +30,6 @@ import {
 } from "firebase/auth";
 import { makeRedirectUri } from "expo-auth-session";
 import * as AuthSession from "expo-auth-session";
-
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 
@@ -163,7 +162,7 @@ function LoginScreen() {
           // Signed up
           const userL = userCredential.user;
           if (userL.emailVerified) {
-            await dispatch(getUser(email));
+            await dispatch(listenToUserRealtime(email));
             navigation.navigate("IndexTab");
             setisLoading(false);
           }
@@ -197,7 +196,7 @@ function LoginScreen() {
         <View style={styles.viewInput}>
           <Text style={{ marginBottom: "3%" }}>Email</Text>
           <View style={styles.input}>
-            <Icon name="envelope" size={25} color="#858585" />
+            <Icon name="envelope" size={appInfo.heightWindows * 0.028} color="#858585" />
             <TextInput
               style={styles.textInput}
               placeholder="Nhập email"
@@ -207,14 +206,14 @@ function LoginScreen() {
               autoCapitalize="none"
             />
           </View>
-          {errorTextEmail ? (
+          {/* {errorTextEmail ? (
             <Text style={{ color: "red" }}>{errorTextName}</Text>
-          ) : null}
+          ) : null} */}
         </View>
         <View style={[styles.viewInput, { marginBottom: "20%" }]}>
           <Text style={{ marginBottom: "3%" }}>Password</Text>
           <View style={styles.input}>
-            <Icon name="lock" size={25} color="#858585" />
+            <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
             <TextInput
               secureTextEntry={checkPass}
               style={styles.textInput}
@@ -227,14 +226,14 @@ function LoginScreen() {
               {checkPass ? (
                 <Icon
                   name="eye-slash"
-                  size={20}
+                  size={appInfo.heightWindows * 0.028}
                   color="#858585"
                   style={{ marginLeft: appInfo.widthWindows * 0.19 }}
                 />
               ) : (
                 <Icon
                   name="eye"
-                  size={20}
+                  size={appInfo.heightWindows * 0.028}
                   color="#858585"
                   style={{ marginLeft: appInfo.widthWindows * 0.19 }}
                 />

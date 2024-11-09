@@ -13,11 +13,7 @@ const initialState = {
 export const getAchievement = createAsyncThunk('data/getAchievement', async () => {
     try {
         const querySnapshot = await getDocs(collection(db, "Achievements"));
-        querySnapshot.forEach((doc) => {
-            console.log(`Achievements: ${doc.id} => `, doc.data());
-        });
-
-        const achievementData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Lấy dữ liệu và ID của từng tài liệu
+        const achievementData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         return achievementData; // Trả về danh sách bài đăng
     } catch (error) {

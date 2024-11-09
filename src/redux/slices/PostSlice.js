@@ -25,6 +25,8 @@ const initialState = {
   status: "idle",
   error: null,
   postByField: [],
+  postByUser: [],
+  postFavourite: [],
 };
 
 // Tạo async thunk để thêm dữ liệu lên Firestore
@@ -126,9 +128,21 @@ const getFollowedUserIds = async ({ currentUserId }) => {
     where("follower_user_id", "==", currentUserId)
   );
   const followerSnapshot = await getDocs(followerQuery);
-  // console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
+  //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
 
   return followerSnapshot.docs.map((doc) => doc.data().user_id);
+};
+
+// Hàm lấy danh sách user ID đã được yêu thích
+const getFavouriteUserIds = async ({ currentUserId }) => {
+  const favouriteQuery = query(
+    collection(db, "Favorite"),
+    where("post_id", "==", currentUserId)
+  );
+  const favouriteSnapshot = await getDocs(favouriteQuery);
+  //console.log("favouriteSnapshot", favouriteSnapshot.docs.map((doc) => doc.data().user_id));
+  
+  return favouriteSnapshot.docs.map((doc) => doc.data().user_id);
 };
 
 // Hàm chính để lấy bài viết mới
@@ -266,8 +280,108 @@ export const getPostsFromUnfollowedUsers = createAsyncThunk(
     }
   }
 );
+// hàm lấy bài đăng của người dùng
+export const getPostUsers = createAsyncThunk(
+  "data/getPostUsers",
+  async ({ field, currentUserId }, { getState }) => {
+    //console.log('currentUserId', currentUserId);
+
+    try {
 
 
+      let postsQuery = query(
+        collection(db, "Posts"),
+        orderBy(field, "desc"),
+        where('user_id', '==', currentUserId)
+      );
+
+
+      const querySnapshot = await getDocs(postsQuery);
+
+      if (querySnapshot.empty) {
+        return { postData: [] };
+      }
+
+      await updatePostViewCount(querySnapshot.docs);
+
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return {
+        postData: postData,
+      };
+    } catch (error) {
+      console.error("Error fetching posts from unfollowed users: ", error);
+      throw error;
+    }
+  }
+);
+
+//hàm lấy bài người dùng đã yêu thích
+export const getPostsFromFavouriteUsers = createAsyncThunk(
+  "data/getPostsFromFavouriteUsers",
+  async ({ field, currentUserId }, { getState }) => {
+
+    try {
+      // Lấy danh sách user ID đã được follow
+      const favouriteUserIds = await getFavouriteUserIds({ currentUserId: currentUserId });
+      //console.log('favouriteUserIds', favouriteUserIds);
+
+      // Nếu không có user nào được follow, trả về mảng rỗng
+      if (favouriteUserIds.length === 0) {
+        return { postData: [], lastVisiblePost: null };
+      }
+
+      // Kiểm tra lastVisiblePostFollower để lấy bài đăng từ trang trước đó
+      const lastVisiblePostId = getState().post.lastVisiblePostFollower;
+      //console.log("currentUserId", getState().post.lastVisiblePostFollower);
+      let lastVisibleDoc = null;
+
+      if (lastVisiblePostId) {
+        const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
+        lastVisibleDoc = await getDoc(lastVisibleDocRef);
+      }
+
+      // Tạo query lấy bài đăng từ những người dùng đã được follow
+      let postsQuery = query(
+        collection(db, "Posts"),
+        orderBy(field, "desc"),
+        where("user_id", "in", favouriteUserIds)
+      );
+
+      if (lastVisibleDoc) {
+        postsQuery = query(postsQuery, startAfter(lastVisibleDoc));
+      }
+
+      const querySnapshot = await getDocs(postsQuery);
+
+      // Trả về mảng rỗng nếu không có bài đăng nào
+      if (querySnapshot.empty) {
+        return { postData: [], lastVisiblePost: null };
+      }
+
+      // Cập nhật lượt xem
+      await updatePostViewCount(querySnapshot.docs);
+
+      // Lấy ID của bài đăng cuối cùng để hỗ trợ paginating
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return {
+        postData: postData,
+        lastVisiblePost: lastVisible ? lastVisible.id : null,
+      };
+    } catch (error) {
+      console.error("Error fetching posts from followed users: ", error);
+      throw error;
+    }
+  }
+);
 
 // Hàm lấy bài đăng từ những người dùng đã được follow
 export const getPostsFromFollowedUsers = createAsyncThunk(
@@ -286,7 +400,7 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
 
       // Kiểm tra lastVisiblePostFollower để lấy bài đăng từ trang trước đó
       const lastVisiblePostId = getState().post.lastVisiblePostFollower;
-      console.log("currentUserId", getState().post.lastVisiblePostFollower);
+      //console.log("currentUserId", getState().post.lastVisiblePostFollower);
       let lastVisibleDoc = null;
 
       if (lastVisiblePostId) {
@@ -348,7 +462,7 @@ export const updatePostsByField = createAsyncThunk(
         [field]: value,
       });
 
-      console.log(`Field '${field}' updated successfully with value: ${value}`);
+      ///console.log(`Field '${field}' updated successfully with value: ${value}`);
 
     } catch (error) {
       console.error("Error updating post: ", error);
@@ -444,6 +558,36 @@ export const PostSlice = createSlice({
         state.status = "succeeded";
       })
       .addCase(getPostsFromFollowedUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      //getPostsFromFavouriteUsers
+      .addCase(getPostsFromFavouriteUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPostsFromFavouriteUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.postFavourite.push(...action.payload.postData);
+        state.lastVisiblePostFollower = action.payload.lastVisiblePost;
+        state.status = "succeeded";
+      })
+      .addCase(getPostsFromFavouriteUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+
+      //getPostUsers
+      .addCase(getPostUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPostUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.postByUser = action.payload.postData;
+        state.status = "succeeded";
+      })
+      .addCase(getPostUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       });

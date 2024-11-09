@@ -8,7 +8,7 @@ const IconComponent = ({ name, size, color, onPress, text, textColor, style}) =>
         <TouchableOpacity style={[{ flexDirection: 'row', alignItems: 'center'}, style]} 
         onPress={onPress}> 
             <Feather name={name} size={size} color={color}  />
-            <Text style={[StyleGlobal.text,{marginLeft: 7, color: textColor}]}>{text}</Text>
+            <Text style={[StyleGlobal.text,{marginLeft: 5, color: textColor}]}>{text}</Text>
         </TouchableOpacity>
     )
 }

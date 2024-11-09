@@ -16,8 +16,9 @@ import {
   getUser,
   updateUser,
   getUserByField,
+  listenToUserRealtime
 } from "../redux/slices/UserSlices";
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, } from "firebase/auth";
 //styles
 import { StyleGlobal } from "../styles/StyleGlobal";
 //constains
@@ -39,9 +40,13 @@ import {
   updateDoc,
 } from "firebase/firestore";
 const SetUpAccountScreen = () => {
-  //firebase
+  const dispatch = useDispatch();
+  const authUser = auth.currentUser;
   const user = useSelector((state) => state.user.user);
-
+  useEffect(() => {
+    const unsubscribe = dispatch(listenToUserRealtime(user.email));
+    return () => unsubscribe();
+}, [dispatch, user.email]);
   //khai bao
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.numberPhone);
@@ -55,12 +60,8 @@ const SetUpAccountScreen = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const dispatch = useDispatch();
-  const authUser = auth.currentUser;
-  useEffect(() => {
-    //đọc dữ liệu
-    dispatch(getUser(user.email));
-  }, []);
+  
+   //firebase
   const handleLinkPhone = () => {
     setIsModalVisible(true);
   };
@@ -75,9 +76,9 @@ const SetUpAccountScreen = () => {
       const newData = {
         numberPhone: inputPhone,
       };
+      console.log("user.user_id", user.user_id);
+      
       await dispatch(updateUser({ user_id: user.user_id, newData }));
-      await dispatch(getUser(user.email));
-      setPhone(inputPhone);
       setPhoneError("");
       setIsModalVisible(false);
     } else {
@@ -190,9 +191,9 @@ const SetUpAccountScreen = () => {
         />
         <View style={{ marginLeft: 10 }}>
           <Text style={styles.label}>Số điện thoại</Text>
-          <Text style={styles.value}>{phone ? phone : "chưa liên kết"}</Text>
+          <Text style={styles.value}>{user.numberPhone ? user.numberPhone : "chưa liên kết"}</Text>
         </View>
-        {phone ? (
+        {user.numberPhone ? (
           <TouchableOpacity
             style={[styles.button, styles.disabledButton]}
             disabled={true}
