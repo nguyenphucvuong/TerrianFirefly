@@ -18,18 +18,20 @@ import ListEventComponent from "../component/event/ListEventComponent";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserPassword } from "../redux/slices/UserSlices";
 import { getEvent } from "../redux/slices/EventSlice";
+import DetailEventComponent from "../component/event/DetailEventComponent";
 
-const DetailEventScreen = () => {
+const DetailEventScreen = ({route }) => {
   const dispatch = useDispatch();
-  const { event } = useSelector((state) => state.event); // post
+  const { event } = useSelector((state) => state.event);
+  const { eventId } = route.params;
+
+  const eventDetail = event.find((e) => e.event_id === eventId);
 
 
   return (
-    <TouchableWithoutFeedback style={{ flex: 1 }}>
       <View style={styles.container}>
-       <Text style={{margin:200}} >chi tiết sự kiện</Text>  
+       <DetailEventComponent event={eventDetail}></DetailEventComponent>
       </View>
-    </TouchableWithoutFeedback>
   );
 };
 export default DetailEventScreen;

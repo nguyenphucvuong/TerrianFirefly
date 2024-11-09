@@ -29,6 +29,7 @@ import { ButtonBackComponent, IconComponent } from "../component";
 import NotiTabScreen from "../views/NotiTabScreen";
 import DetailEventScreen from "../views/DetailEventScreen";
 import NewEventScreen from "../views/NewEventScreen";
+import NotificationScreen from "../views/NotificationScreen";
 const Stack = createStackNavigator();
 
 const IconBack = (title) => ({
@@ -170,17 +171,23 @@ const StackNavigator = () => {
       <Stack.Screen
         name="EventScreen"
         component={EventScreen}
-        options={() => IconBack("Sự kiện")}
+        options={() => IconBack("Sự Kiện")}
       />
       <Stack.Screen
         name="NewEventScreen"
         component={NewEventScreen}
-        options={() => IconBack("Sự kiện mới")}
+        options={() => IconBack("Sự Kiện Mới")}
       />
       <Stack.Screen
         name="DetailEventScreen"
         component={DetailEventScreen}
-        options={() => IconBack("Chi tiết sự kiện")}
+        options={() => IconBack("Chi Tiết Sự Kiện")}
+      />
+      
+      <Stack.Screen
+        name="NotificationScreen"
+        component={NotificationScreen}
+        options={() => IconBack("Thông Báo")}
       />
     </Stack.Navigator>
   );

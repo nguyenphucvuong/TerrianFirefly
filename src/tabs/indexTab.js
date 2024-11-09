@@ -64,7 +64,7 @@ const IndexTab = () => {
         })}
       />
       <Tab.Screen
-        name="Thông Tin"
+        name="Sự Kiện"
         component={EventTab}
         options={({ route }) => ({
           tabBarIcon: ({ focused }) => (
@@ -78,6 +78,7 @@ const IndexTab = () => {
             />
           ),
           headerShown: true,
+          headerTitleAlign: "center",
         })}
       />
       <Tab.Screen
@@ -95,7 +96,7 @@ const IndexTab = () => {
         }}
       />
       <Tab.Screen
-        name="Thông tin"
+        name="Thông Tin"
         component={NotiTab}
         options={{
           tabBarIcon: ({ focused }) => (
@@ -110,6 +111,7 @@ const IndexTab = () => {
           ),
           headerShown: true,
           gestureEnabled: false,
+          headerTitleAlign: "center",
         }}
       />
       <Tab.Screen

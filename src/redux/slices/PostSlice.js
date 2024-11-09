@@ -224,14 +224,14 @@ export const PostSlice = createSlice({
       // Xử lý khi thêm dữ liệu thành công
       .addCase(createPost.fulfilled, (state, action) => {
         state.post.push(action.payload); // Thêm dữ liệu mới vào state
-        state.status = 'succeeded'; // Đánh dấu thành công
+        state.status = 'succeeded'; 
       })
       .addCase(createPost.pending, (state) => {
-        state.status = 'loading'; // Đánh dấu trạng thái đang tải
+        state.status = 'loading'; 
       })
       .addCase(createPost.rejected, (state, action) => {
         state.error = action.error.message; // Lưu lỗi nếu quá trình thêm thất bại
-        state.status = 'failed'; // Đánh dấu thất bại
+        state.status = 'failed'; 
       })
 
       // Xử lý khi lấy dữ liệu thành công

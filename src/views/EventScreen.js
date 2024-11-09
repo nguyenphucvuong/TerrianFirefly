@@ -21,10 +21,9 @@ import { getEvent, getEventByField } from "../redux/slices/EventSlice";
 const EventScreen = () => {
   const dispatch = useDispatch();
   const { event, eventByField } = useSelector((state) => state.event); // post
-  console.log();
 
   const handleRefresh = () => {
-    dispatch(getEvent());
+    // dispatch(getEvent());
   };
   const test = () => {
     console.log("event created_at: ", eventByField);
@@ -35,6 +34,7 @@ const EventScreen = () => {
         <ListEventComponent
           events={event}
           onRefresh={handleRefresh}
+          isNew={false}
         ></ListEventComponent>
       </View>
     </TouchableWithoutFeedback>

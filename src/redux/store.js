@@ -8,6 +8,7 @@ import AchievementSlice from './slices/AchievementSlice';
 import NicknameSlice from './slices/NicknameSlice';
 import UserSlices from './slices/UserSlices';
 import  EventSlice  from './slices/EventSlice';
+import  NotiSlice  from './slices/NotiSlice';
 
 export const store = configureStore({
         reducer: {
@@ -19,6 +20,7 @@ export const store = configureStore({
                 nickname: NicknameSlice,
                 user: UserSlices,
                 event: EventSlice,
+                noti: NotiSlice,
         },
 })
 

@@ -11,11 +11,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { format } from "date-fns";
 
-const ListEventComponent = ({ events, onRefresh }) => {
+const ListEventComponent = ({ isNew, events, onRefresh }) => {
   const navigation = useNavigation();
 
-  const handlePressOnEvent = () => {
-    navigation.navigate("DetailEventScreen");
+  const handlePressOnEvent = (eventId) => {
+    navigation.navigate("DetailEventScreen", { eventId });
   };
   const limitText = (text, charLimit) => {
     if (text.length > charLimit) {
@@ -23,21 +23,48 @@ const ListEventComponent = ({ events, onRefresh }) => {
     }
     return text;
   };
+
+  let eventSortToCreateAt = events;
+  if (!isNew) {
+    eventSortToCreateAt = [...events].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+  }
+  else {
+    eventSortToCreateAt = [...events]
+      .filter((e) => {
+        // Lấy thời gian tạo sự kiện và thời gian hiện tại
+        const eventDate = new Date(e.created_at); // Lấy thời gian sự kiện
+        const now = new Date(); // Lấy thời gian hiện tại
+  
+        // So sánh ngày, tháng, năm giữa thời gian hiện tại và thời gian tạo sự kiện
+        return (
+          eventDate.getFullYear() === now.getFullYear() &&
+          eventDate.getMonth() === now.getMonth() &&
+          eventDate.getDate() === now.getDate()
+        );
+      })
+      .sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at) // Sắp xếp từ mới nhất
+      );
+  }
+  
+
   return (
     <ScrollView
-      style={styles.container}
+      style={isNew ? styles.containerNew : styles.container}
       refreshControl={
         <RefreshControl refreshing={false} onRefresh={onRefresh} /> // Gọi hàm onRefresh khi vuốt xuống
       }
     >
-      {events.map((event) => (
+      {eventSortToCreateAt.map((event) => (
         <TouchableOpacity
-          onPress={handlePressOnEvent}
+          onPress={() => handlePressOnEvent(event.event_id)}
           activeOpacity={1}
           key={event.event_id}
           style={styles.eventItem}
         >
-          <Image source={{ uri: event.url_game }} style={styles.eventImage} />
+          <Image source={{ uri: event.img_event }} style={styles.eventImage} />
           <View style={styles.eventDetails}>
             <Text style={styles.eventTitle}>{event.title}</Text>
             <Text
@@ -66,6 +93,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f6f5fb",
+    marginBottom: "12%",
+  },
+  containerNew: {
+    flex: 1,
+    backgroundColor: "#f6f5fb",
+
   },
   linkText: {
     color: "#007BFF",
@@ -96,6 +129,8 @@ const styles = StyleSheet.create({
   viewRow: {
     marginTop: 15,
     flexDirection: "row",
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   eventDate: {
     color: "#888",
@@ -103,7 +138,7 @@ const styles = StyleSheet.create({
   eventLink: {
     color: "#7487ee",
     fontWeight: "bold",
-    marginLeft: "51%",
+     textAlign: 'right',
     fontSize: 14,
   },
 });

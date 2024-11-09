@@ -15,7 +15,7 @@ function NotiTabScreen() {
   const navigation = useNavigation();
 
   const handleNoti = () => {
-    console.log("noti");
+    navigation.navigate('NotificationScreen')
   };
   
   const handlEvt = () => {
