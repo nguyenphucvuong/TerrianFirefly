@@ -165,7 +165,7 @@ const PostViewComponent = ({ post, user }) => {
                             >
                                 <SkeletonComponent Data={userPost.userId}>
                                     <Text style={StyleGlobal.textName}>{userPost.username}</Text>
-                                    <Text style={StyleGlobal.textInfo}>{handleTime({ post: post })}</Text>
+                                    <Text style={StyleGlobal.textInfo}>{handleTime({ timestamp: post.created_at })}</Text>
                                 </SkeletonComponent>
                             </View>
 

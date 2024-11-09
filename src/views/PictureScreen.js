@@ -58,7 +58,6 @@ const PictureScreen = ({ }) => {
     const { Data: post, Select, user } = route.params;
     const userPost = route.params.userPost;
 
-    console.log("asldaslkdjaksjdlkajsd", post, Select, user, userPost);
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
     // const DataLength = Object.keys(Data.imgPost).length;
     const inset = useSafeAreaInsets();
@@ -291,12 +290,26 @@ const PictureScreen = ({ }) => {
                 top: inset.top, // Chưa tìm được cách nâng hiển thị index của ImageViewer lên, nên tạm thời hạ thanh navigate bar xuống
                 padding: 10,
             }}>
+                {/* <LinearGradient
+                    start={{ x: 0, y: 1 }} end={{ x: 0, y: 0.5 }}
+                    colors={["transparent", "black"]}
+
+                    style={{
+                        flex: 1,
+                        height: 300,
+                        position: 'absolute',
+                        right: 0,
+                        bottom: -50,
+                        left: 0,
+                        // backgroundColor: "black",
+                    }}
+                /> */}
                 <Feather name='x' color={'white'} size={24}
                     onPress={() => navigation.goBack()} />
 
                 <View style={{ width: "85%", alignItems: 'center' }}>
                     {/* Image Index Versoin 1 */}
-                    {/* <Text style={{ color: "white" }}>{index}/{DataLength}</Text> */}
+                    {/* <Text style={{ color: "white" }}>{index}/{post.imgPost.length}</Text> */}
                 </View>
                 {/* <Feather name='more-vertical' color={'white'} size={24} /> */}
 
@@ -306,6 +319,7 @@ const PictureScreen = ({ }) => {
                 }}>
                     <MoreOptionPostComponent isWhiteDot post_id={post.post_id} user_id={user.user_id} post_user_id={userPost.user_id} />
                 </View>
+
             </View>}
 
             {/* Image Viewer Versoin 1 */}
@@ -367,7 +381,7 @@ const PictureScreen = ({ }) => {
                         // backgroundColor: "red",
                     }} >
                         <View style={{ width: "100%", height: "auto", marginLeft: "5%" }} >
-                            <Text style={{ color: "white" }}>{post.body}</Text>
+                            <Text style={{ color: "white" }}>{post.title}</Text>
                         </View>
                     </View>
                     <View style={{
@@ -563,8 +577,6 @@ const PictureScreen = ({ }) => {
                 }} >
                     <AnimatedQuickCmtComponent isNomal post={post} userPost={userPost} user={user} />
                 </View>
-
-
             </View>}
             {/* Emoji Box */}
             <ModalPop

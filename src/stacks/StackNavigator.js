@@ -34,22 +34,22 @@ import NewEventScreen from "../views/NewEventScreen";
 const Stack = createStackNavigator();
 
 const IconBack = (title) => ({
-  headerShown: true,
-  title: title,
-  headerTitleAlign: "center", // Đưa tiêu đề vào giữa
-  headerLeft: () => <ButtonBackComponent color="#000000" />,
+    headerShown: true,
+    title: title,
+    headerTitleAlign: "center", // Đưa tiêu đề vào giữa
+    headerLeft: () => <ButtonBackComponent color="#000000" />,
 });
 
 const IconHeaderRight = (text, onPress, name) => ({
-  headerRight: () => (
-    <IconComponent
-      text={text}
-      name={name}
-      color={"#000000"}
-      onPress={onPress}
-      size={26}
-    />
-  ),
+    headerRight: () => (
+        <IconComponent
+            text={text}
+            name={name}
+            color={"#000000"}
+            onPress={onPress}
+            size={26}
+        />
+    ),
 });
 
 const StackNavigator = () => {
