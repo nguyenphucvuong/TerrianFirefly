@@ -91,11 +91,11 @@ const DetailPostScreen = () => {
     const handleBtnEmoji = async (emojiType) => {
         const existingEmoji = emoji.find(e => e.user_id === user.user_id && e.post_id === post.post_id);
         if (existingEmoji) {
-            console.log("existingEmoji", existingEmoji);
-            console.log("existingEmoji[`count_like`]", existingEmoji[`count_like`]);
-            console.log("existingEmoji[`count_heart`]", existingEmoji[`count_heart`]);
-            console.log("existingEmoji[`count_laugh`]", existingEmoji[`count_laugh`]);
-            console.log("existingEmoji[`count_sad`]", existingEmoji[`count_sad`]);
+           // console.log("existingEmoji", existingEmoji);
+            //console.log("existingEmoji[`count_like`]", existingEmoji[`count_like`]);
+            //console.log("existingEmoji[`count_heart`]", existingEmoji[`count_heart`]);
+            //console.log("existingEmoji[`count_laugh`]", existingEmoji[`count_laugh`]);
+            //console.log("existingEmoji[`count_sad`]", existingEmoji[`count_sad`]);
         }
 
         if (existingEmoji) {

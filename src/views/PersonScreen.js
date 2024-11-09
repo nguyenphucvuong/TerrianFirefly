@@ -1,22 +1,26 @@
 import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text, Alert, LogBox, Clipboard } from 'react-native'
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useMemo } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSelector, useDispatch } from "react-redux";
+import Entypo from 'react-native-vector-icons/Entypo';
+import Feather from 'react-native-vector-icons/Feather';
+import {
+    BottomSheetModal,
+    BottomSheetView,
+    BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
 //style
 import { StyleGlobal } from '../styles/StyleGlobal'
 //components
-import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx } from '../component';
+import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx, ButtonBackComponent } from '../component';
 import TabRecipe from '../component/TabRecipe';
-//screen
-// import ArticleScreen from './ArticleScreen';
-// import FavouriteScreen from './FavouriteScreen';
-// import GroupScreen from './GroupScreen';
 //constains
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
 //redux
-import { getUser, getUserByField, listenToUserRealtime } from '../redux/slices/UserSlices';
+import { listenToUserRealtime, getUserFromFollowedUsers } from '../redux/slices/UserSlices';
+import { getPostUsers } from '../../src/redux/slices/PostSlice';
 const Tab = createMaterialTopTabNavigator();
 
 const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.09;
@@ -26,12 +30,14 @@ const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 const PersonScreen = () => {
     //firebase
     const users = useSelector((state) => state.user.user);
+    const followUp = useSelector((state) => state.user.usersFollowed);
+    const post = useSelector((state) => state.post.postByUser);
     const dispatch = useDispatch();
     //route
     const route = useRoute();
     const user = route.params?.user ?? users;
-    console.log('users',users);
-    
+    //console.log('user',user);
+
     const navigation = useNavigation();
 
     //Copy
@@ -68,18 +74,32 @@ const PersonScreen = () => {
             extrapolate: 'clamp',
         }),
     };
+    //BottomSheet
+    const snapPoints = useMemo(() => ['30%'], []);
+    const bottomSheetModalRef = useRef(null);
+    const handleManagement = () => {
+        bottomSheetModalRef.current?.present();
+    }
+    const onClose = () => {
+
+    }
     //cập nhật lại dữ liệu 
     useEffect(() => {
+        //Bài viết
+        dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
+        //user theo dõi
+        dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
         const unsubscribe = dispatch(listenToUserRealtime(user.email));
-
         return () => unsubscribe();
     }, [dispatch, user.email]);
     //console.log('user', user);
     //console.log('showToast', showToast);
+    ///console.log('followUp', followUp.length,);
+
 
     return (
-        <View style={{ flex: 1 }}>
-            {!user ? (
+        <BottomSheetModalProvider style={{ flex: 1, backgroundColor: 'white' }}>
+            {user === null ? (
                 <View>
                     <SkeletonComponent Data={""} style={{ width: '100%', height: appInfo.heightWindows * 0.15 }} />
                     <View style={{ margin: '5%' }}>
@@ -90,19 +110,28 @@ const PersonScreen = () => {
                     </View>
                 </View>
             ) : (
-                <View style={{ flexGrow: 1 }}>
+                <View >
                     <View style={styles.upperHeaderPlacehholder} />
                     <View style={styles.header}>
                         <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
                             <View style={styles.upperrHeader}>
-                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
+                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, user !== users && { marginLeft: '7%' }]}>
                                     <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={user.imgUser} />
                                     <Text style={styles.avatarText}>{user.username}</Text>
                                 </Animated.View>
                             </View>
-                            <View style={styles.setting}>
-                                <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
-                            </View>
+                            {
+                                users !== user ?
+                                    <View style={styles.back}>
+                                        <ButtonBackComponent color={'white'} />
+                                    </View>
+                                    : <View style={styles.setting}>
+                                        <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
+                                    </View>
+                            }
+
+
+
                             <View style={styles.lowerHeader} />
                         </ImageBackground>
                     </View>
@@ -112,7 +141,6 @@ const PersonScreen = () => {
                         </View>
                     )}
                     <ScrollView
-                        style={{ flex: 1 }}
                         nestedScrollEnabled={true}
                         scrollEventThrottle={16}
                         showsVerticalScrollIndicator={false}
@@ -150,18 +178,49 @@ const PersonScreen = () => {
                             </View>
 
                             <View style={styles.statisticsContainer}>
-                                <StatisticsComponent quantity={0} name={'Bài Viết'} />
-                                <StatisticsComponent quantity={0} name={'Theo Dõi'} onPress={() => navigation.navigate('TrackingScreen')} />
+                                <StatisticsComponent quantity={post.length} name={'Bài Viết'} />
+                                <StatisticsComponent quantity={followUp.length} name={'Theo Dõi'} onPress={() => navigation.navigate('FollowUp', { followUp })} />
                                 <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
                                 <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                             </View>
                             {/*  Tab Navigation */}
-                            <TabRecipe />
+                            <TabRecipe post={post} user={user} />
                         </View>
                     </ScrollView>
+                    {/* <BottomSheetModal
+                        ref={bottomSheetModalRef}
+                        index={0}
+                        snapPoints={snapPoints}>
+                        <BottomSheetView style={styles.contentContainer}>
+                            <View style={styles.headerBottom}>
+                                <IconComponent name={'x'} size={appInfo.heightWindows * 0.028} color={'#000000'} style={styles.closeButton} />
+                                <Text style={styles.headerText}>Quản Lý</Text>
+                            </View>
+                            <View style={styles.actionsContainer}>
+                                <View style={styles.actionItem}>
+                                    <IconComponent
+                                        name={'x'}
+                                        size={appInfo.heightWindows * 0.028}
+                                        color={'#000000'}
+                                        style={styles.closeButton}
+                                    />
+                                    <Text style={styles.actionText}>Chặn Người Dùng</Text>
+                                </View>
+                                <View style={styles.actionItem}>
+                                    <IconComponent
+                                        name={'x'}
+                                        size={appInfo.heightWindows * 0.028}
+                                        color={'#000000'}
+                                        style={styles.closeButton}
+                                    />
+                                    <Text style={styles.actionText}>Tố Cáo Người Dùng</Text>
+                                </View>
+                            </View>
+                        </BottomSheetView>
+                    </BottomSheetModal> */}
                 </View>
             )}
-        </View>
+        </BottomSheetModalProvider>
     );
 };
 
@@ -222,6 +281,12 @@ const styles = StyleSheet.create({
         top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
         zIndex: 1,
     },
+    back: {
+        position: 'absolute', // Đặt nút settings ở vị trí tuyệt đối
+        left: '1%', // Căn phải cách một khoảng
+        top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
+        zIndex: 1,
+    },
     iconRow: {
         marginLeft: appInfo.widthWindows * 0.03,
     },
@@ -275,8 +340,8 @@ const styles = StyleSheet.create({
         color: '#007BFF',
     },
     contentContainer: {
+        flex: 1,
         marginTop: appInfo.heightWindows * 0.02,
-        flexGrow: 1,
     },
     tabContent: {
         padding: 10,
@@ -297,6 +362,31 @@ const styles = StyleSheet.create({
     },
     toastText: {
         color: '#fff',
+    },
+    headerBottom: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+    },
+    closeButton: {
+        position: 'absolute',
+        left: '3%',
+    },
+    headerText: {
+        fontSize: 20,
+    },
+    actionsContainer: {
+        marginTop: 20,
+    },
+    actionItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    actionText: {
+        marginLeft: 10,
+        fontSize: 16,
+        color: '#000000',
     },
 
 });

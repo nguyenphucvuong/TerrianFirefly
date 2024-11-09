@@ -52,7 +52,7 @@ export const deleteFavorite = createAsyncThunk('data/deleteFavorite', async ({ p
         console.error('Error deleting document: ', error);
         throw error;
     }
-});
+}); 
 
 export const getFavorites = createAsyncThunk('data/getFavorite', async ({ post_id }) => {
     if (post_id === undefined) {

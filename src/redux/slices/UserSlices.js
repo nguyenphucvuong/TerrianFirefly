@@ -1,24 +1,16 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { db, auth, storage } from "../../firebase/FirebaseConfig";
-import {
-  collection,
-  addDoc,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-  updateDoc,
-  onSnapshot,
-} from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; // Firebase Storage
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { db, auth, storage } from '../../firebase/FirebaseConfig';
+import { collection, addDoc, doc, getDoc, getDocs, query, where, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Firebase Storage
 
 // Trạng thái ban đầu
 const initialState = {
   user: null,
   userByField: {},
-  statusUser: "idle",
+  statusUser: 'idle',
   errorUser: null,
+  usersFollowed: [],
+
 };
 
 // Thiết lập listener thời gian thực cho dữ liệu người dùng
@@ -132,20 +124,19 @@ export const getUserByField = createAsyncThunk(
 // Tạo async thunk để cập nhật dữ liệu Firestore
 export const updateUser = createAsyncThunk('data/upDateUser', async ({ user_id, newData }) => {
 
-    try {
-        if (!user_id) {
-            throw new Error("User ID is required.");
-        }
-        
-        const userDocRef = doc(collection(db, "user"), user_id);
-        await updateDoc(userDocRef, newData);
-        console.log("User updated!");
-        
-        //Alert.alert("Thành công", "Đã cập nhật Firestore.");
-    } catch (error) {
-        console.error("Error updating user:", error);
-        //Alert.alert("Lỗi", "Không thể cập nhật.");
+  try {
+    if (!user_id) {
+      throw new Error("User ID is required.");
     }
+
+    const userDocRef = doc(collection(db, "user"), user_id);
+    await updateDoc(userDocRef, newData);
+    console.log("User updated!");
+
+    //Alert.alert("Thành công", "Đã cập nhật Firestore.");
+  } catch (error) {
+    console.error("Error updating user:", error);
+  }
 });
 
 
@@ -203,6 +194,64 @@ export const uploadImage = createAsyncThunk(
   }
 );
 
+// Hàm lấy danh sách user ID đã được follow
+const getFollowedUserIds = async ({ currentUserId }) => {
+  const followerQuery = query(
+    collection(db, "Follower"),
+    where("follower_user_id", "==", currentUserId)
+  );
+  const followerSnapshot = await getDocs(followerQuery);
+  //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
+
+  return followerSnapshot.docs.map((doc) => doc.data().user_id);
+};
+
+// Hàm lấy bài đăng từ những người dùng đã được follow
+export const getUserFromFollowedUsers = createAsyncThunk(
+  "data/getUserFromFollowedUsers",
+  async ({ field, currentUserId }, { getState }) => {
+    try {
+      // Lấy danh sách user ID đã được follow
+      const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
+      // console.log('followedUserIds',followedUserIds);
+
+      // Nếu không có user nào được follow, trả về mảng rỗng
+      if (followedUserIds.length === 0) {
+        return { usersFollowed: [] };
+      }
+      // console.log('followedUserIds2',followedUserIds); 
+      // Tạo query lấy bài đăng từ những người dùng đã được follow
+      let userQuery = query(
+        collection(db, "user"),
+        where("user_id", "in", followedUserIds)
+      );
+      // console.log('userQuery',userQuery);
+
+
+      const querySnapshot = await getDocs(userQuery);
+      // console.log('querySnapshot1',querySnapshot);
+
+      // Trả về mảng rỗng nếu không có user nào
+      if (querySnapshot.empty) {
+        console.log('empty');
+        return { usersFollowed: [] };
+      }
+      const usersFollowed = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      // console.log('usersFollowed',usersFollowed);
+
+      return {
+        usersFollowed: usersFollowed,
+      };
+    } catch (error) {
+      console.error("Error fetching user from followed users: ", error);
+      throw error;
+    }
+  }
+);
+
 // Tạo slice cho user
 export const UserSlices = createSlice({
   name: "user",
@@ -212,27 +261,24 @@ export const UserSlices = createSlice({
       state.user = action.payload;
       state.errorUser = null; // Reset lỗi khi có dữ liệu người dùng mới
     },
-    setError: (state, action) => {
-      state.errorUser = action.payload;
-    },
   },
   extraReducers: (builder) => {
     builder
 
       // Xử lý khi lấy dữ liệu thành công
-    //   .addCase(getUser.fulfilled, (state, action) => {
-    //     state.user = action.payload; // Cập nhật danh sách
-    //     // console.log("action.payload", action.payload);
-    //     // console.log("state.user", state.user);
-    //     state.statusUser = "succeeded"; // Đánh dấu thành công
-    //   })
-    //   .addCase(getUser.pending, (state) => {
-    //     state.statusUser = "loading"; // Đánh dấu trạng thái đang tải
-    //   })
-    //   .addCase(getUser.rejected, (state, action) => {
-    //     state.errorUser = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
-    //     state.statusUser = "failed"; // Đánh dấu thất bại
-    //   })
+      //   .addCase(getUser.fulfilled, (state, action) => {
+      //     state.user = action.payload; // Cập nhật danh sách
+      //     // console.log("action.payload", action.payload);
+      //     // console.log("state.user", state.user);
+      //     state.statusUser = "succeeded"; // Đánh dấu thành công
+      //   })
+      //   .addCase(getUser.pending, (state) => {
+      //     state.statusUser = "loading"; // Đánh dấu trạng thái đang tải
+      //   })
+      //   .addCase(getUser.rejected, (state, action) => {
+      //     state.errorUser = action.error.message; // Lưu lỗi nếu quá trình lấy thất bại
+      //     state.statusUser = "failed"; // Đánh dấu thất bại
+      //   })
 
       // getUserByField
       // .addCase(getUserByField.fulfilled, (state, action) => {
@@ -243,7 +289,7 @@ export const UserSlices = createSlice({
         const { user_id, userById } = action.payload;
         state[user_id] = userById;
       })
-      .addCase(getUserByField.pending, (state) => {})
+      .addCase(getUserByField.pending, (state) => { })
       .addCase(getUserByField.rejected, (state, action) => {
         state.errorUser = action.error.message;
       })
@@ -278,8 +324,21 @@ export const UserSlices = createSlice({
       })
       .addCase(uploadImage.rejected, (state, action) => {
         state.errorUser = action.payload;
-      });
-    // updateUserState
+      })
+      //getUserFromFollowedUsers
+      .addCase(getUserFromFollowedUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserFromFollowedUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.usersFollowed = action.payload.usersFollowed;
+        state.status = "succeeded";
+      })
+      .addCase(getUserFromFollowedUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
   },
 });
 

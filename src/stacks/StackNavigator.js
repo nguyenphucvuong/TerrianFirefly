@@ -20,7 +20,9 @@ import {
     FollowerScreen,
     ResetPasswordScreen,
     HashtagManagerScreen,
-    TrackingScreen,
+    FollowUp,
+    PictureScreen,
+    DetailPostScreen,
     EventManagementScreen,
     AddEditEventScreen,
 
@@ -101,8 +103,10 @@ const StackNavigator = () => {
                 options={() => IconBack("Thiết Lập Tài Khoản")} />
             <Stack.Screen name='FollowerScreen' component={FollowerScreen}
                 options={() => IconBack("Người Theo Dõi")} />
-            <Stack.Screen name='TrackingScreen' component={TrackingScreen}
+            <Stack.Screen name='FollowUp' component={FollowUp}
                 options={() => IconBack("Theo Dõi")} />
+            <Stack.Screen name='picture' component={PictureScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='DetailPost' component={DetailPostScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     )
 }
