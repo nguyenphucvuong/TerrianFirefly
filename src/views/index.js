@@ -26,13 +26,13 @@ import ResetPasswordScreen from './ResetPasswordScreen'
 import HashtagManagerScreen from './HashtagManagerScreen';
 
 import FollowerScreen from './FollowerScreen';
-import TrackingScreen from './TrackingScreen';
+import FollowUp from './FollowUp';
 export { HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen,
      InfomationScreen, AchievementsScreen, NickNameScreen, DetailPostScreen, UserManagementScreen,
       SettingScreen, AccountDetailsScreen, ArticleScreen, FavouriteScreen, GroupScreen, NotificationManagement,
       ManagePostsScreen, SetUpAccountScreen, WellcomScreen, LoginScreen, 
       RegisterScreen, ForgotPassword, VerificationCodeScreen, CreatePostScreen, FollowerScreen,
-      TrackingScreen, ResetPasswordScreen, HashtagManagerScreen,
+      FollowUp, ResetPasswordScreen, HashtagManagerScreen,
      }; 
 
 

@@ -1,34 +1,21 @@
-import { RefreshControl, ScrollView, Text, View, FlatList, ActivityIndicator, Image } from "react-native";
-import React, { useCallback, useContext, useState, useEffect } from "react";
-import { StyleGlobal } from "../styles/StyleGlobal";
+import { View, FlatList, ActivityIndicator, Text } from "react-native";
+import React, { useState, useEffect } from "react";
 import { data } from "../constains/data";
 import { useSelector, useDispatch } from "react-redux";
-import { getPostsByField, getPostsRefresh, getPostsFromUnfollowedUsers, getPostUsers } from '../../src/redux/slices/PostSlice';
-import { startListeningFollowers } from "../redux/slices/FollowerSlice";
-import { startListeningFavorites } from "../redux/slices/FavoriteSlice";
-import { startListeningEmoji } from "../redux/slices/EmojiSlice";
+import { getPostUsers } from '../../src/redux/slices/PostSlice';
 import { SkeletonComponent } from "../component";
 //components
 import PostViewComponent from "../component/PostViewComponent";
-const ArticleScreen = () => {
+const ArticleScreen = ({post, user}) => {
     const emoji = data.emoji;
-    const post = useSelector((state) => state.post.postByUser);
-    const user = useSelector((state) => state.user.user);
-    const dispatch = useDispatch();
 
-    const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [hasMorePosts, setHasMorePosts] = useState(true);
 
-
-    useEffect(() => {
-        dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
-    },[user]);
     // console.log('user1',user);
-    // console.log('post1',post);
+    //console.log('post1', post);
     return (
         <>
-            {post == [] || user === null ? (
+            {post.length === 0 || user === null ? (
                 <View style={{ height: 100, width: "100%", paddingHorizontal: "5%", }}>
                     <SkeletonComponent isAvatar Data={""} />
                     <SkeletonComponent style={{ width: "60%", height: 20 }} Data={""} />
@@ -46,7 +33,7 @@ const ArticleScreen = () => {
                         )
                     }}
                     contentContainerStyle={{ flexGrow: 1 }}
-                    
+
                     ListFooterComponent={() => (
                         loading ? //  a==b ? b : a
                             <View style={{

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { db, auth, storage } from '../../firebase/FirebaseConfig';
-import { collection, addDoc, doc, getDoc, getDocs, query, where, updateDoc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, getDocs, query, where, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Firebase Storage
 
 // Trạng thái ban đầu
@@ -9,6 +9,8 @@ const initialState = {
     userByField: {},
     statusUser: 'idle',
     errorUser: null,
+    usersFollowed: [],
+
 };
 
 // Thiết lập listener thời gian thực cho dữ liệu người dùng
@@ -128,10 +130,9 @@ export const updateUser = createAsyncThunk('data/updateUser', async ({ user_id, 
         await updateDoc(userDocRef, newData);
         console.log("User updated!");
 
-        return { user_id, newData };
     } catch (error) {
         console.error("Error updating user:", error);
-        return rejectWithValue('error.message',error.message);
+        return rejectWithValue('error.message', error.message);
     }
 });
 
@@ -185,6 +186,64 @@ export const uploadImage = createAsyncThunk('data/uploadImage', async ({ imgUser
     }
 });
 
+// Hàm lấy danh sách user ID đã được follow
+const getFollowedUserIds = async ({ currentUserId }) => {
+    const followerQuery = query(
+        collection(db, "Follower"),
+        where("follower_user_id", "==", currentUserId)
+    );
+    const followerSnapshot = await getDocs(followerQuery);
+    //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
+
+    return followerSnapshot.docs.map((doc) => doc.data().user_id);
+};
+
+// Hàm lấy bài đăng từ những người dùng đã được follow
+export const getUserFromFollowedUsers = createAsyncThunk(
+    "data/getUserFromFollowedUsers",
+    async ({ field, currentUserId }, { getState }) => { 
+        try {
+            // Lấy danh sách user ID đã được follow
+            const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId }); 
+            // console.log('followedUserIds',followedUserIds);
+            
+            // Nếu không có user nào được follow, trả về mảng rỗng
+            if (followedUserIds.length === 0) {
+                return { usersFollowed: [] };
+            }
+            // console.log('followedUserIds2',followedUserIds); 
+            // Tạo query lấy bài đăng từ những người dùng đã được follow
+            let userQuery = query(
+                collection(db, "user"),
+                where("user_id", "in", followedUserIds)
+            );
+            // console.log('userQuery',userQuery);
+            
+
+            const querySnapshot = await getDocs(userQuery);
+            // console.log('querySnapshot1',querySnapshot);
+            
+            // Trả về mảng rỗng nếu không có user nào
+            if (querySnapshot.empty) {
+                console.log('empty');
+                return { usersFollowed: [] };
+            }
+            const usersFollowed = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            // console.log('usersFollowed',usersFollowed);
+            
+            return {
+                usersFollowed: usersFollowed,
+            };
+        } catch (error) {
+            console.error("Error fetching user from followed users: ", error);
+            throw error;
+        }
+    }
+);
+
 // Tạo slice cho user
 export const UserSlices = createSlice({
     name: "user",
@@ -231,19 +290,6 @@ export const UserSlices = createSlice({
                 state.errorUser = action.error.message;
             })
 
-            // // updateUser
-            // .addCase(updateUser.fulfilled, (state, action) => {
-            //     state.user = action.payload;
-            //     state.statusUser = 'succeeded';
-            // })
-            // .addCase(updateUser.pending, (state) => {
-            //     state.statusUser = 'loading';
-            // })
-            // .addCase(updateUser.rejected, (state, action) => {
-            //     state.errorUser = action.error.message;
-            //     state.statusUser = 'failed';
-            // })
-
             // updateUserState
             .addCase(updateUserState.fulfilled, (state, action) => {
                 state.user = action.payload;
@@ -261,8 +307,21 @@ export const UserSlices = createSlice({
             })
             .addCase(uploadImage.rejected, (state, action) => {
                 state.errorUser = action.payload;
-            });
-        // updateUserState
+            })
+            //getUserFromFollowedUsers
+            .addCase(getUserFromFollowedUsers.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getUserFromFollowedUsers.fulfilled, (state, action) => {
+                state.loading = false;
+                state.usersFollowed = action.payload.usersFollowed;
+                state.status = "succeeded";
+            })
+            .addCase(getUserFromFollowedUsers.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            })
 
 
 
