@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, Dimensions, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Dimensions, StyleSheet, ScrollView, Button } from 'react-native';
 import ArticleScreen from '../views/ArticleScreen';
 import FavouriteScreen from '../views/FavouriteScreen';
 import GroupScreen from '../views/GroupScreen';
@@ -20,14 +20,9 @@ const TabRecipe = ({ post, user }) => {
       return newHeights;
     });
   };
-  const screens = [
-    <ArticleScreen post={post} user={user} key="0" />,
-    <FavouriteScreen key="1" />,
-    <GroupScreen key="2" />,
-  ];
+
   const animateTabTransition = (newIndex) => {
     setActiveTabIndex(newIndex);
-    setSelectedTab(newIndex === 0 ? 'articles' : newIndex === 1 ? 'favorites' : 'topics');
     Animated.timing(animatedValue, {
       toValue: newIndex,
       duration: 300,
@@ -42,31 +37,37 @@ const TabRecipe = ({ post, user }) => {
       outputRange: [0, 1, 0],
       extrapolate: 'clamp',
     });
-
+  const screens = [
+    <ArticleScreen post={post} user={user} key="0" />,
+    <FavouriteScreen key="1" />,
+    <GroupScreen key="2" />,
+  ];
   return (
-    <>
+    <View style={{ flex: 1 }}>
       {/* Tab Navigation Buttons */}
       <View style={styles.tabBar}>
-        <TouchableOpacity onPress={() => animateTabTransition(0)} style={styles.tab}>
+        <TouchableOpacity onPress={() => [animateTabTransition(0), setSelectedTab('articles')]} style={styles.tab}>
           <Text style={[styles.tabText, selectedTab === 'articles' && styles.activeTabText]}>Bài viết</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => animateTabTransition(1)} style={styles.tab}>
+        <TouchableOpacity onPress={() => [animateTabTransition(1), setSelectedTab('favorites')]} style={styles.tab}>
           <Text style={[styles.tabText, selectedTab === 'favorites' && styles.activeTabText]}>Yêu thích</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => animateTabTransition(2)} style={styles.tab}>
+        <TouchableOpacity onPress={() => [animateTabTransition(2), setSelectedTab('topics')]} style={styles.tab}>
           <Text style={[styles.tabText, selectedTab === 'topics' && styles.activeTabText]}>Chủ Đề</Text>
         </TouchableOpacity>
       </View>
 
       {/* Animated Tab Content */}
-      <View style={{ flex: 1, height: tabHeights[activeTabIndex] }}>
+      <View style={{ flex: 1 }}>
         {screens.map((screen, index) => (
           <Animated.View
             key={index}
             style={{
               width,
               opacity: tabOpacity(index),
+              position: index === activeTabIndex ? 'relative' : 'absolute',
               height: tabHeights[index] || 'auto',
+              paddingBottom: appInfo.heightWindows * 0.08,
             }}
           >
             <ScrollView
@@ -81,10 +82,9 @@ const TabRecipe = ({ post, user }) => {
           </Animated.View>
         ))}
       </View>
-    </>
+    </View>
   );
 };
-
 const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
@@ -107,5 +107,4 @@ const styles = StyleSheet.create({
     color: '#007BFF',
   },
 });
-
 export default TabRecipe;

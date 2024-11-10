@@ -19,7 +19,7 @@ import TabRecipe from '../component/TabRecipe';
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
 //redux
-import { listenToUserRealtime, getUserFromFollowedUsers } from '../redux/slices/UserSlices';
+import { listenToUserRealtime, getUserFromFollowedUsers, getUserFromFollowingUsers } from '../redux/slices/UserSlices';
 import { getPostUsers } from '../../src/redux/slices/PostSlice';
 const Tab = createMaterialTopTabNavigator();
 
@@ -31,6 +31,7 @@ const PersonScreen = () => {
     //firebase
     const users = useSelector((state) => state.user.user);
     const followUp = useSelector((state) => state.user.usersFollowed);
+    const followingUsers = useSelector((state) => state.user.followingUsers);
     const post = useSelector((state) => state.post.postByUser);
     const dispatch = useDispatch();
     //route
@@ -87,8 +88,10 @@ const PersonScreen = () => {
     useEffect(() => {
         //Bài viết
         dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
-        //user theo dõi
+        //theo dõi
         dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
+        // người theo dõi
+        dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: user?.user_id }));
         const unsubscribe = dispatch(listenToUserRealtime(user.email));
         return () => unsubscribe();
     }, [dispatch, user.email]);
@@ -98,8 +101,8 @@ const PersonScreen = () => {
 
 
     return (
-        <BottomSheetModalProvider style={{ flex: 1, backgroundColor: 'white' }}>
-            {user === null ? (
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
+            {user.length === 0 ? (
                 <View>
                     <SkeletonComponent Data={""} style={{ width: '100%', height: appInfo.heightWindows * 0.15 }} />
                     <View style={{ margin: '5%' }}>
@@ -180,7 +183,7 @@ const PersonScreen = () => {
                             <View style={styles.statisticsContainer}>
                                 <StatisticsComponent quantity={post.length} name={'Bài Viết'} />
                                 <StatisticsComponent quantity={followUp.length} name={'Theo Dõi'} onPress={() => navigation.navigate('FollowUp', { followUp })} />
-                                <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
+                                <StatisticsComponent quantity={followingUsers.length} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen',{followingUsers})} />
                                 <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                             </View>
                             {/*  Tab Navigation */}
@@ -220,7 +223,7 @@ const PersonScreen = () => {
                     </BottomSheetModal> */}
                 </View>
             )}
-        </BottomSheetModalProvider>
+        </View>
     );
 };
 
