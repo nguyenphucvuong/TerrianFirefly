@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
     },
     iconStyle: {
         marginLeft: 'auto',
+        zIndex: 1,
     },
     separator: {
         width: '100%',  // Or you can use a fixed width, like 50 or 100
