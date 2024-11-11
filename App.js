@@ -51,8 +51,13 @@ const MainApp = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    const unsubscribeHashtag = getHashtag(dispatch);
+    return () => unsubscribeHashtag();
+  }, [dispatch]);
+
+  useEffect(() => {
     dispatch(getPostsFirstTime());
-    dispatch(getHashtag());
+    // getHashtag(dispatch);
 
     registerForPushNotificationsAsync().then(
       (token) => token && setExpoPushToken(token)

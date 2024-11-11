@@ -1,6 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  collection, addDoc, getDoc, getDocs, setDoc, doc,
+  collection,
+  addDoc,
+  getDoc,
+  getDocs,
+  setDoc,
+  doc,
+  query,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../../firebase/FirebaseConfig"; // Firebase config
 import { storage } from "../../firebase/FirebaseConfig"; // Firebase config
@@ -58,61 +65,38 @@ export const createHashtag = createAsyncThunk(
   }
 );
 
-// Tạo async thunk để lấy tất cả dữ liệu từ Firestore
-export const getHashtag = createAsyncThunk("data/getHashtag", async () => {
+export const getHashtag = (dispatch) => {
   try {
-    const querySnapshot = await getDocs(collection(db, "Hashtag"));
-    querySnapshot.forEach((doc) => {
-      //console.log(`hashtag: ${doc.id} => `, doc.data());
+    const q = query(collection(db, "Hashtag"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const hashtagData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      // console.log("eventdata", hashtagData);
+      dispatch(sethashtag(hashtagData));
     });
-    //console.log('querysnap', querySnapshot);
-    const hashTagData = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })); // Lấy dữ liệu và ID của từng tài liệu
-    return hashTagData;
-  } catch (errorHashtag) {
-    console.errorHashtag("ErrorHashtag fetching hashtag: ", errorHashtag);
-    throw errorHashtag;
+
+    return unsubscribe;
+  } catch (error) {
+    console.error("Error setting up real-time event listener: ", error);
   }
-});
+};
 
 // Tạo slice cho hashtag
 export const HashtagSlice = createSlice({
   name: "hashtag",
   initialState,
-  reducers: {},
+  reducers: {
+    sethashtag: (state, action) => {
+      state.hashtag = action.payload;
+    },
+  },
   extraReducers: (builder) => {
-    builder
-
-      // Xử lý khi thêm dữ liệu thành công
-      .addCase(createHashtag.fulfilled, (state, action) => {
-        state.hashtag.push(...action.payload); // Sử dụng spread operator để thêm nhiều hashtag vào state
-        state.statusHashtag = "succeeded"; // Đánh dấu thành công
-      })
-      .addCase(createHashtag.pending, (state) => {
-        state.statusHashtag = "loading"; // Đánh dấu trạng thái đang tải
-      })
-      .addCase(createHashtag.rejected, (state, action) => {
-        state.error = action.error.message; // Lưu lỗi nếu quá trình thêm thất bại
-        state.statusHashtag = "failed"; // Đánh dấu thất bại
-      })
-
-      // Xử lý khi lấy dữ liệu thành công
-      .addCase(getHashtag.fulfilled, (state, action) => {
-        state.hashtag = action.payload; // Cập nhật danh sách
-        state.statusHashtag = "succeeded"; // Đánh dấu thành công
-      })
-      .addCase(getHashtag.pending, (state) => {
-        state.statusHashtag = "loading"; // Đánh dấu trạng thái đang tải
-      })
-      .addCase(getHashtag.rejected, (state, action) => {
-        state.errorHashtag = action.errorHashtag.message; // lưu lỗi
-        state.statusHashtag = "failed"; // Đánh dấu không thành công
-      });
+    builder;
   },
 });
 
-// export const { sethashtag } = hashtagSlice.actions
+export const { sethashtag } = HashtagSlice.actions;
 
 export default HashtagSlice.reducer;

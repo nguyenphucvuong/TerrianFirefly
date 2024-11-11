@@ -37,7 +37,7 @@ import {
   getPostsByField,
 } from "../redux/slices/PostSlice";
 import LoadingCompoent from "../component/LoadingComponent";
-import { getHashtag, createHashtag } from "../redux/slices/HashtagSlice";
+// import { getHashtag, createHashtag } from "../redux/slices/HashtagSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { log } from "@tensorflow/tfjs";
 const { height } = Dimensions.get("window");
@@ -142,22 +142,19 @@ const CreatePostScreen = () => {
 
     // Nếu có hashtag mới, thêm vào Firestore
     if (newHashtag.length !== 0) {
-      await dispatch(createHashtag(newHashtag))
-        .then(() => {
-          dispatch(getHashtag());
-        })
-        .catch((error) => {
-          console.error("Lỗi thêm hashtag:", error);
-        });
+      await dispatch(createHashtag(newHashtag)).unwrap()
+        // .then(() => {
+        //   dispatch(getHashtag());
+        // })
     }
 
     // Gọi lại danh sách hashtag sau khi thêm mới
-    await dispatch(getHashtag()).unwrap();
-    console.log("Cập nhật danh sách hashtag thành công");
+    // await dispatch(getHashtag()).unwrap();
+    // console.log("Cập nhật danh sách hashtag thành công");
 
     // Thêm bài viết mới vào Firestore
     await dispatch(createPost(newDataPost)).unwrap();
-    console.log("Thêm bài viết thành công");
+    // console.log("Thêm bài viết thành công");
     resetData();
     setIsLoading(false);  // Kết thúc loading
   };
