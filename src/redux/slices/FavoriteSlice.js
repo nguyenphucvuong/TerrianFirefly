@@ -6,7 +6,6 @@ import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 const initialState = {
     favoriteList: [],
     currentFavorite: [],
-    currentFavoritePost: [],
     status: 'idle',
     error: null,
 };
@@ -79,12 +78,12 @@ export const getFavorites = createAsyncThunk('data/getFavorite', async ({ post_i
 });
 
 export const startListeningFavorites = ({ user_id }) => (dispatch) => {
-    if (!user_id) return;
+    // if (!user_id) return;
 
     const favoriteQuery =
         query(
             collection(db, "Favorite"),
-            where('user_id', "==", user_id),
+            // where('user_id', "==", user_id),
         );
     const unFavorite = onSnapshot(favoriteQuery, (querySnapshot) => {
         const favorites = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -103,30 +102,7 @@ export const startListeningFavorites = ({ user_id }) => (dispatch) => {
     return unFavorite;
 };
 
-export const startListeningFavoritesPost = ({ post_id }) => (dispatch) => {
-    if (!post_id) return;
 
-    const favoriteQuery =
-        query(
-            collection(db, "Favorite"),
-            where('post_id', "==", post_id),
-        );
-    const unFavorite = onSnapshot(favoriteQuery, (querySnapshot) => {
-        const favorites = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // console.log("favorites", favorites);
-        if (favorites.length > 0) {
-            // Dispatch only the first document if available
-            dispatch(setCurrentFavoritePost(favorites));
-        } else {
-            // console.log("No document found");
-            dispatch(setCurrentFavoritePost([])); // Empty array if no document is found
-        }
-    }, (error) => {
-        console.error('Error fetching Favorite: ', error);
-    });
-
-    return unFavorite;
-};
 export const FavoriteSlice = createSlice({
     name: 'favorite',
     initialState,
@@ -135,15 +111,12 @@ export const FavoriteSlice = createSlice({
             state.currentFavorite = action.payload;
             state.status = 'succeeded';
         },
-        setCurrentFavoritePost: (state, action) => {
-            state.currentFavoritePost = action.payload;
-            state.status = 'succeeded';
-        },
+
     },
     extraReducers: (builder) => {
         builder
             .addCase(createFavorite.fulfilled, (state, action) => {
-                state.currentFavorite.push(action.payload);
+                // state.currentFavorite.push(action.payload);
                 state.status = 'succeeded';
             })
             .addCase(createFavorite.pending, (state) => {
@@ -167,7 +140,7 @@ export const FavoriteSlice = createSlice({
             })
 
             .addCase(deleteFavorite.fulfilled, (state, action) => {
-                state.currentFavorite = state.currentFavorite.filter(favorite => favorite.user_id !== action.payload.user_id && favorite.post_id !== action.payload.post_id);
+                // state.currentFavorite = state.currentFavorite.filter(favorite => favorite.user_id !== action.payload.user_id && favorite.post_id !== action.payload.post_id);
                 state.status = 'succeeded';
             })
             .addCase(deleteFavorite.pending, (state) => {

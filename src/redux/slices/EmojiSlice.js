@@ -130,7 +130,7 @@ export const updateEmojiByField = createAsyncThunk(
 
 export const startListeningEmoji = ({ user_id }) => (dispatch) => {
     // console.log("!post_id || !user_id", !post_id || !user_id)
-    if (!user_id) return;
+    // if (!user_id) return;
 
     const emojiQuery = query(
         collection(db, "Emoji"),
@@ -176,7 +176,7 @@ export const EmojiSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(createEmoji.fulfilled, (state, action) => {
-                state.emojiList.push(action.payload);
+                // state.emojiList.push(action.payload);
                 state.status = 'succeeded';
             })
             .addCase(createEmoji.pending, (state) => {
@@ -200,7 +200,7 @@ export const EmojiSlice = createSlice({
             })
 
             .addCase(deleteEmoji.fulfilled, (state, action) => {
-                state.emojiList = state.emojiList.filter(e => e.post_id !== action.payload.post_id && e.user_id !== action.payload.user_id);
+                // state.emojiList = state.emojiList.filter(e => e.post_id !== action.payload.post_id && e.user_id !== action.payload.user_id);
                 state.status = 'succeeded';
             })
             .addCase(deleteEmoji.pending, (state) => {

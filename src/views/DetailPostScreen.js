@@ -13,7 +13,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
-import { handleTime, formatDate, calculateEmojiCounts, formatNumber } from "../utils";
+import { handleTime, formatDate, formatNumber } from "../utils";
 
 
 import MoreOptionPostComponent from '../component/moreOptionBox/MoreOptionPostComponent';
@@ -27,6 +27,7 @@ import YoutubePlayerComponent from '../component/YoutubePlayerComponent';
 import { useDispatch, useSelector } from 'react-redux';
 import { createFollow } from '../redux/slices/FollowerSlice';
 import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
+import { calculateEmojiCounts } from '../utils';
 
 
 
@@ -45,13 +46,14 @@ const DetailPostScreen = () => {
 
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
-    const likeCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).likeCount });
-    const heartCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).heartCount });
-    const laughCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).laughCount });
-    const sadCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).sadCount });
+    const countEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id })
+    const likeCount = countEmoji.likeCount;
+    const heartCount = countEmoji.heartCount;
+    const laughCount = countEmoji.laughCount;
+    const sadCount = countEmoji.sadCount;
 
     useEffect(() => {
-        console.log("emoji Run");
+        // console.log("emoji Run");
         const getEmoji = async () => {
             let foundEmojiType = "default";
             for (let i = 0; i < emoji.length; i++) {
@@ -120,6 +122,8 @@ const DetailPostScreen = () => {
                 // await dispatch(startListeningEmoji({ user_id: user.user_id }));
                 setIconEmoji(emojiType);
             }
+            // await dispatch(startListeningEmoji({ user_id: user.user_id }));
+
         } else {
             console.log("createEmoji");
             // Nếu người dùng chưa tương tác -> CREATE

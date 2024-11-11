@@ -27,7 +27,7 @@ import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { createFollow } from "../redux/slices/FollowerSlice";
 import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
-import { createFavorite, deleteFavorite, startListeningFavoritesPost } from "../redux/slices/FavoriteSlice";
+import { createFavorite, deleteFavorite } from "../redux/slices/FavoriteSlice";
 
 import { handleTime, formatDate, calculateEmojiCounts, formatNumber, calculateFavoriteCounts } from "../utils";
 import { ModalPop } from "../modals";
@@ -60,7 +60,6 @@ const PictureScreen = ({ }) => {
 
     // favorite
     const favorite = useSelector(state => state.favorite.currentFavorite);
-    const favoritesPost = useSelector(state => state.favorite.currentFavoritePost);
     // const [isFavorite, setIsFavorite] = useState(false);
     const isFavorite = favorite.some(f => f.post_id === post.post_id);
 
@@ -77,12 +76,13 @@ const PictureScreen = ({ }) => {
 
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
-    const likeCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).likeCount });
-    const heartCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).heartCount });
-    const laughCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).laughCount });
-    const sadCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).sadCount });
-    const totalCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).totalCount });
-    const favoriteCount = formatNumber({ num: calculateFavoriteCounts({ favoriteList: favoritesPost, postId: post.post_id }).totalCount });
+    const countEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id });
+    const likeCount = countEmoji.likeCount;
+    const heartCount = countEmoji.heartCount;
+    const laughCount = countEmoji.laughCount;
+    const sadCount = countEmoji.sadCount;
+    const totalCount = countEmoji.totalCount;
+    const favoriteCount = calculateFavoriteCounts({ favoriteList: favorite, post_id: post.post_id }).totalCount;
 
     // console.log(Select);
 
@@ -166,6 +166,7 @@ const PictureScreen = ({ }) => {
                 // await dispatch(startListeningEmoji({ user_id: user.user_id }));
                 setIconEmoji(emojiType);
             }
+            // await dispatch(startListeningEmoji({ user_id: user.user_id }));
         } else {
             console.log("createEmoji");
             // Nếu người dùng chưa tương tác -> CREATE
@@ -185,9 +186,7 @@ const PictureScreen = ({ }) => {
 
         handleHidePop();
     };
-    useEffect(() => {
-        dispatch(startListeningFavoritesPost({ post_id: post.post_id }));
-    }, []);
+
 
 
     const handleFollowButton = useCallback(() => {
@@ -412,12 +411,13 @@ const PictureScreen = ({ }) => {
                                 alignItems: "center",
                             }}>
                             {iconEmoji === "default" ?
-                                <AndtDegisn name='like1' color={"white"} size={30} />
+                                <AndtDegisn name='like1' color={"white"} size={30} style={{ marginTop: 8 }} />
                                 :
                                 <Image
                                     style={{
                                         width: 30,
                                         height: 30,
+                                        marginTop: 8,
                                     }}
                                     source={getIconImg(iconEmoji)}
                                     contentFit="cover"
@@ -427,7 +427,7 @@ const PictureScreen = ({ }) => {
                         </TouchableOpacity>
 
                         {/* Comment Button */}
-                        <TouchableOpacity style={{ alignItems: "center" }}>
+                        <TouchableOpacity style={{ alignItems: "center", marginTop: 8, }}>
                             <MaterialCommunityIcons name='comment-processing' color={"white"} size={30} />
                             <Text style={{ color: "white" }}>9999</Text>
                         </TouchableOpacity>
@@ -436,14 +436,14 @@ const PictureScreen = ({ }) => {
                         {!isFavorite ?
                             <TouchableOpacity
                                 onPress={handleFavorite}
-                                style={{ alignItems: "center" }}>
+                                style={{ alignItems: "center", marginTop: 8, }}>
                                 <AndtDegisn name='star' color={"white"} size={30} />
                                 <Text style={{ color: "white" }}>{favoriteCount}</Text>
                             </TouchableOpacity>
                             :
                             <TouchableOpacity
                                 onPress={handleFavorite}
-                                style={{ alignItems: "center" }}>
+                                style={{ alignItems: "center", marginTop: 8, }}>
                                 <Image
                                     style={{
                                         width: 30,

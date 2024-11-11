@@ -1,4 +1,4 @@
-export const calculateEmojiCounts = ({ emojiList, postId }) => {
+export const calculateEmojiCounts = ({ emojiList, post_id }) => {
     // console.log("emojiList", emojiList);
     let likeCount = 0;
     let heartCount = 0;
@@ -13,8 +13,8 @@ export const calculateEmojiCounts = ({ emojiList, postId }) => {
         };
     }
     emojiList.forEach(emoji => {
-        if (emoji.post_id === postId) {
-            console.log("vo day");
+        if (emoji.post_id === post_id) {
+            // console.log("vo day");
             likeCount += emoji.count_like;
             heartCount += emoji.count_heart;
             laughCount += emoji.count_laugh;
@@ -31,7 +31,7 @@ export const calculateEmojiCounts = ({ emojiList, postId }) => {
     };
 };
 
-export const calculateFavoriteCounts = ({ favoriteList, postId }) => {
+export const calculateFavoriteCounts = ({ favoriteList, post_id }) => {
     let totalCount = 0;
 
     if (!favoriteList) {
@@ -40,7 +40,9 @@ export const calculateFavoriteCounts = ({ favoriteList, postId }) => {
         };
     }
     favoriteList.forEach(favorite => {
-        if (favorite.post_id === postId) {
+        console.log("favorite", favorite);
+        console.log("post_id", post_id);
+        if (favorite.post_id === post_id) {
             totalCount += 1;
         }
     });
