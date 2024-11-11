@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserByField } from "../redux/slices/UserSlices";
-import { createFollow, getFollower, startListeningFollowers } from "../redux/slices/FollowerSlice";
+import { createFollow } from "../redux/slices/FollowerSlice";
 
 
 import { appInfo } from "../constains/appInfo";
@@ -91,6 +91,10 @@ const PostViewComponent = ({ post, user }) => {
         // navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, isFollow: isFollow, post_user_id: userId });
         navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, post_user_id: userId });
     }
+    const handleNagigatePersonScreen = () => {
+        navigation.navigate("PersonScreen", { user: userPost });
+        console.log("toi day")
+    }
 
 
     const IsYTView = () => {
@@ -143,31 +147,27 @@ const PostViewComponent = ({ post, user }) => {
                             height={appInfo.widthWindows / 5.7}
                             style={{ alignItems: "center" }}
                         >
-                            <AvatarEx size={40} round={30} url={userPost.imgUser} frame={userPost.frame_user} />
-                            {/* <Image
-                            source={require('../../assets/frame/frame_background.png')}
-                            style={{
-                                height: 60,
-                                width: 60,
-                                position: 'absolute', // Chồng lên Avatar
-                                borderRadius: 80,
-                            }}
-                        >
-                        </Image> */}
-
-                            <View
+                            <TouchableOpacity onPress={handleNagigatePersonScreen}
+                                activeOpacity={1}
                                 style={{
-                                    height: "80%",
-                                    width: "55%",
-                                    justifyContent: "center",
-                                    paddingLeft: "3%",
-                                }}
-                            >
-                                <SkeletonComponent Data={userPost.userId}>
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                }}>
+
+                                <AvatarEx size={40} round={30} url={userPost.imgUser} frame={userPost.frame_user} />
+                                <View
+                                    style={{
+                                        height: "100%",
+                                        width: "55%",
+                                        justifyContent: "center",
+                                        paddingLeft: "4%",
+                                        // backgroundColor: "red",
+                                    }}
+                                >
                                     <Text style={StyleGlobal.textName}>{userPost.username}</Text>
                                     <Text style={StyleGlobal.textInfo}>{handleTime({ timestamp: post.created_at })}</Text>
-                                </SkeletonComponent>
-                            </View>
+                                </View>
+                            </TouchableOpacity>
 
                             {userPostCheck() ?
                                 <TouchableOpacity

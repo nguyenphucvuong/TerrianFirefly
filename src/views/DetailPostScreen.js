@@ -25,9 +25,39 @@ import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtC
 import ImagesPaperComponent from '../component/ImagesPaperComponent';
 import YoutubePlayerComponent from '../component/YoutubePlayerComponent';
 import { useDispatch, useSelector } from 'react-redux';
-import { createFollow, startListeningFollowers } from '../redux/slices/FollowerSlice';
+import { createFollow } from '../redux/slices/FollowerSlice';
 import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
 
+const calculateEmojiCounts = ({ emojiList, postId }) => {
+    let likeCount = 0;
+    let heartCount = 0;
+    let laughCount = 0;
+    let sadCount = 0;
+    if (!emojiList) {
+        return {
+            likeCount,
+            heartCount,
+            laughCount,
+            sadCount,
+        };
+    }
+    emojiList.forEach(emoji => {
+        if (emoji.post_id === postId) {
+            likeCount += emoji.count_like;
+            heartCount += emoji.count_heart;
+            laughCount += emoji.count_laugh;
+            sadCount += emoji.count_sad;
+        }
+    });
+    const totalCount = likeCount + heartCount + laughCount + sadCount;
+    return {
+        likeCount,
+        heartCount,
+        laughCount,
+        sadCount,
+        totalCount,
+    };
+};
 
 const DetailPostScreen = () => {
     const inset = useSafeAreaInsets();
@@ -37,7 +67,6 @@ const DetailPostScreen = () => {
     const { post, user, userPost, post_user_id } = route;
     // console.log("user.user_id", user.user_id)
     // console.log("post_user_id", post_user_id)
-    console.log("handleTime({ timestamp: post.created_at })", handleTime({ timestamp: post.created_at }));
 
     const follower = useSelector(state => state.follower.follower);
     const dispatch = useDispatch();
@@ -45,6 +74,10 @@ const DetailPostScreen = () => {
 
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
+    const likeCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).likeCount;
+    const heartCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).heartCount;
+    const laughCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).laughCount;
+    const sadCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).sadCount;
 
     useEffect(() => {
         const getEmoji = async () => {
@@ -90,13 +123,7 @@ const DetailPostScreen = () => {
 
     const handleBtnEmoji = async (emojiType) => {
         const existingEmoji = emoji.find(e => e.user_id === user.user_id && e.post_id === post.post_id);
-        if (existingEmoji) {
-           // console.log("existingEmoji", existingEmoji);
-            //console.log("existingEmoji[`count_like`]", existingEmoji[`count_like`]);
-            //console.log("existingEmoji[`count_heart`]", existingEmoji[`count_heart`]);
-            //console.log("existingEmoji[`count_laugh`]", existingEmoji[`count_laugh`]);
-            //console.log("existingEmoji[`count_sad`]", existingEmoji[`count_sad`]);
-        }
+
 
         if (existingEmoji) {
 
@@ -150,7 +177,7 @@ const DetailPostScreen = () => {
     const animation = useRef(new Animated.Value(0)).current;
     const opacityNavigaion = {
         opacity: animation.interpolate({
-            inputRange: [componentPosition + 70, componentPosition + 250],
+            inputRange: [componentPosition + 50, componentPosition + 100],
             outputRange: [0, 1],
             extrapolate: 'clamp',
         })
@@ -170,6 +197,10 @@ const DetailPostScreen = () => {
 
 
     };
+    const handleNagigatePersonScreen = () => {
+        navigation.navigate("PersonScreen", { user: userPost });
+        console.log("toi day")
+    }
 
     const [copiedText, setCopiedText] = useState('');
     const copyToClipboard = async (content) => {
@@ -236,14 +267,14 @@ const DetailPostScreen = () => {
                             width: "100%",
                             height: "100%",
                         }, opacityNavigaion]}>
-                        <TouchableOpacity onPress={handleAd}
+                        <TouchableOpacity onPress={handleNagigatePersonScreen}
                             style={{
                                 flexDirection: "row",
                                 alignItems: "center",
                                 width: "65%",
                             }}>
-                            <AvatarEx size={30} round={10} url={user.imgUser} frame={user.frame_user} />
-                            <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{user.username}</Text>
+                            <AvatarEx size={30} round={10} url={userPost.imgUser} frame={userPost.frame_user} />
+                            <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{userPost.username}</Text>
                         </TouchableOpacity>
 
                         {userPostCheck() ?
@@ -333,32 +364,41 @@ const DetailPostScreen = () => {
                             alignItems: "center",
                             flexDirection: "row",
                         }}>
-                        <AvatarEx size={50} round={10} url={userPost.imgUser} frame={userPost.frame_user}
+                        <TouchableOpacity onPress={handleNagigatePersonScreen}
+                            activeOpacity={1}
                             style={{
-                                marginHorizontal: "3%",
-                            }} />
-                        <View style={{
-                            flexDirection: "column",
-                            width: "50%",
-                            height: "100%",
-                            justifyContent: "center",
-                            // backgroundColor: "yellow",
-                        }}>
-                            <Text style={{
-                                fontSize: 15,
-                                fontWeight: "bold",
-                            }}>{userPost.username}</Text>
-                            <Text style={{
-                                fontSize: 12,
-                                color: "#BFBFBF",
-                            }}>{handleTime({ timestamp: post.created_at })}</Text>
-                        </View>
+                                flexDirection: "row",
+                                alignItems: "center",
+                                width: "50%",
+                                height: "100%",
+                            }}>
+
+
+                            <AvatarEx size={50} round={10} url={userPost.imgUser} frame={userPost.frame_user}
+                                style={{
+                                    marginHorizontal: "3%",
+                                }} />
+                            <View style={{
+                                justifyContent: "center",
+                                // backgroundColor: "yellow",
+                            }}>
+                                <Text style={{
+                                    fontSize: 15,
+                                    fontWeight: "bold",
+                                }}>{userPost.username}</Text>
+                                <Text style={{
+                                    fontSize: 12,
+                                    color: "#BFBFBF",
+                                }}>{handleTime({ timestamp: post.created_at })}</Text>
+                            </View>
+                        </TouchableOpacity>
                         {userPostCheck() ?
                             isFlag ? <></>
                                 :
                                 <View style={{
                                     flex: 1,
                                     paddingHorizontal: "2%",
+                                    alignItems: "center",
                                     // backgroundColor: "red",
                                 }}>
                                     <ButtonsComponent isButton onPress={handleFollowButton}
@@ -368,7 +408,7 @@ const DetailPostScreen = () => {
                                             borderWidth: 2,
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            width: "100%",
+                                            width: "70%",
                                             height: "30%",
                                         }}
                                     >
@@ -474,7 +514,7 @@ const DetailPostScreen = () => {
                             marginLeft: 4,
                             color: iconEmoji === "like" ? appcolor.primary : "rgba(0,0,0,0.4)",
                             fontSize: 12
-                        }}>20k</Text>
+                        }}>{likeCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("heart")}
@@ -502,7 +542,7 @@ const DetailPostScreen = () => {
                             marginLeft: 4,
                             color: iconEmoji === "heart" ? appcolor.primary : "rgba(0,0,0,0.4)",
                             fontSize: 12
-                        }}>20k</Text>
+                        }}>{heartCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("laugh")}
@@ -530,7 +570,7 @@ const DetailPostScreen = () => {
                             marginLeft: 4,
                             color: iconEmoji === "laugh" ? appcolor.primary : "rgba(0,0,0,0.4)",
                             fontSize: 12
-                        }}>20k</Text>
+                        }}>{laughCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("sad")}
@@ -558,7 +598,7 @@ const DetailPostScreen = () => {
                             marginLeft: 4,
                             color: iconEmoji === "sad" ? appcolor.primary : "rgba(0,0,0,0.4)",
                             fontSize: 12
-                        }}>20k</Text>
+                        }}>{sadCount}</Text>
                     </TouchableOpacity>
 
                 </View>

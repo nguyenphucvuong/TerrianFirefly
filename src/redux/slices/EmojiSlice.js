@@ -12,7 +12,7 @@ const initialState = {
 
 export const createEmoji = createAsyncThunk('data/createEmoji', async (
     { emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad }) => {
-    console.log("emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad", emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad)
+    // console.log("emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad", emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad)
     try {
         const docRef = await addDoc(collection(db, 'Emoji'), {
             emoji_id: emoji_id,
@@ -52,7 +52,7 @@ export const createEmoji = createAsyncThunk('data/createEmoji', async (
 });
 
 export const deleteEmoji = createAsyncThunk('data/deleteEmoji', async ({ post_id, user_id }, { getState, dispatch }) => {
-    console.log("post_id, user_id", post_id, user_id)
+    // console.log("post_id, user_id", post_id, user_id)
     try {
         const emojiQuery = query(
             collection(db, 'Emoji'),
@@ -93,7 +93,7 @@ export const getEmoji = createAsyncThunk('data/getEmoji', async ({ post_id, user
 export const updateEmojiByField = createAsyncThunk(
     "data/updateEmojiByField",
     async ({ post_id, user_id, count_like, count_heart, count_laugh, count_sad }, { getState, dispatch }) => {
-        console.log("post_id, user_id, count_like, count_heart, count_laugh, count_sad", post_id, user_id, count_like, count_heart, count_laugh, count_sad)
+        // console.log("post_id, user_id, count_like, count_heart, count_laugh, count_sad", post_id, user_id, count_like, count_heart, count_laugh, count_sad)
         try {
             const emojiQuery = query(
                 collection(db, "Emoji"),
@@ -131,7 +131,7 @@ export const countEmojis = async ({ post_id }) => {
 
         const emojiSnapshot = await getDocs(emojiQuery);
         let emojiCount = emojiSnapshot.size; // Kích thước của snapshot là số lượng tài liệu
-        console.log("emojiCount", emojiCount)
+        // console.log("emojiCount", emojiCount)
         if (emojiSnapshot.empty) {
             return 0;
         }
@@ -153,7 +153,7 @@ export const startListeningEmoji = ({ user_id }) => (dispatch) => {
 
     const emojiQuery = query(
         collection(db, "Emoji"),
-        where('user_id', "==", user_id),
+        // where('user_id', "==", user_id),
     );
     const unEmoji = onSnapshot(emojiQuery, (querySnapshot) => {
         const emojis = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -177,7 +177,7 @@ export const EmojiSlice = createSlice({
     reducers: {
         setEmoji: (state, action) => {
             state.emojiList = action.payload;
-            console.log("emojiList setemojiLists", action.payload)
+            // console.log("emojiList setemojiLists", action.payload)
             state.status = 'succeeded';
         },
         setCurrentEmoji: (state, action) => {

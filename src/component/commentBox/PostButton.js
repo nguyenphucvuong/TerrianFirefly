@@ -28,6 +28,39 @@ const formatNumber = (num) => {
         return num.toString(); // số bình thường
     }
 };
+
+const calculateEmojiCounts = ({ emojiList, postId }) => {
+    let likeCount = 0;
+    let heartCount = 0;
+    let laughCount = 0;
+    let sadCount = 0;
+    if (!emojiList) {
+        return {
+            likeCount,
+            heartCount,
+            laughCount,
+            sadCount,
+        };
+    }
+    emojiList.forEach(emoji => {
+        if (emoji.post_id === postId) {
+            likeCount += emoji.count_like;
+            heartCount += emoji.count_heart;
+            laughCount += emoji.count_laugh;
+            sadCount += emoji.count_sad;
+        }
+    });
+    const totalCount = likeCount + heartCount + laughCount + sadCount;
+    return {
+        likeCount,
+        heartCount,
+        laughCount,
+        sadCount,
+        totalCount,
+    };
+};
+
+
 const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handleNagigateDetailPost }) => {
     const dispatch = useDispatch();
 
@@ -43,7 +76,7 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
 
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
-    const dataPostEmoji = formatNumber(152321); // chưa xong
+    const dataPostEmoji = formatNumber(calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).totalCount); // chưa xong
     // useEffect(() => {
     //     dispatch(startListeningEmoji({ user_id: user.user_id }));
     // }, [])
