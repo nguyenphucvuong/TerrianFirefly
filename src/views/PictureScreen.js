@@ -27,8 +27,9 @@ import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { createFollow } from "../redux/slices/FollowerSlice";
 import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
-import { createFavorite, deleteFavorite } from "../redux/slices/FavoriteSlice";
+import { createFavorite, deleteFavorite, startListeningFavoritesPost } from "../redux/slices/FavoriteSlice";
 
+import { handleTime, formatDate, calculateEmojiCounts, formatNumber, calculateFavoriteCounts } from "../utils";
 import { ModalPop } from "../modals";
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
@@ -40,18 +41,7 @@ import { app } from "../firebase/FirebaseConfig";
 // import { AvatarEx } from '../component'
 // import RowComponent from '../RowComponent';
 
-const formatNumber = (num) => {
-    // console.log(num)
-    if (num >= 1e9) {
-        return (num / 1e9).toFixed(1) + 'B'; // tỷ
-    } else if (num >= 1e6) {
-        return (num / 1e6).toFixed(1) + 'M'; // triệu
-    } else if (num >= 1e3) {
-        return (num / 1e3).toFixed(1) + 'K'; // nghìn
-    } else {
-        return num.toString(); // số bình thường
-    }
-};
+
 const PictureScreen = ({ }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
@@ -70,11 +60,12 @@ const PictureScreen = ({ }) => {
 
     // favorite
     const favorite = useSelector(state => state.favorite.currentFavorite);
+    const favoritesPost = useSelector(state => state.favorite.currentFavoritePost);
     // const [isFavorite, setIsFavorite] = useState(false);
     const isFavorite = favorite.some(f => f.post_id === post.post_id);
 
 
-    const dataPostView = formatNumber(post.count_view);
+    const dataPostView = formatNumber({ num: post.count_view });
     const dataPostCmt = null; // chưa có dữ liệu tạm thời để trống
 
     const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
@@ -86,7 +77,12 @@ const PictureScreen = ({ }) => {
 
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
-    const dataPostEmoji = formatNumber(1231321); // chưa xong
+    const likeCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).likeCount });
+    const heartCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).heartCount });
+    const laughCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).laughCount });
+    const sadCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).sadCount });
+    const totalCount = formatNumber({ num: calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).totalCount });
+    const favoriteCount = formatNumber({ num: calculateFavoriteCounts({ favoriteList: favoritesPost, postId: post.post_id }).totalCount });
 
     // console.log(Select);
 
@@ -189,6 +185,9 @@ const PictureScreen = ({ }) => {
 
         handleHidePop();
     };
+    useEffect(() => {
+        dispatch(startListeningFavoritesPost({ post_id: post.post_id }));
+    }, []);
 
 
     const handleFollowButton = useCallback(() => {
@@ -424,13 +423,13 @@ const PictureScreen = ({ }) => {
                                     contentFit="cover"
                                 />
                             }
-                            <Text style={{ color: "white" }}>20</Text>
+                            <Text style={{ color: "white" }}>{totalCount}</Text>
                         </TouchableOpacity>
 
                         {/* Comment Button */}
                         <TouchableOpacity style={{ alignItems: "center" }}>
                             <MaterialCommunityIcons name='comment-processing' color={"white"} size={30} />
-                            <Text style={{ color: "white" }}>20</Text>
+                            <Text style={{ color: "white" }}>9999</Text>
                         </TouchableOpacity>
 
                         {/* Favorite Button */}
@@ -439,7 +438,7 @@ const PictureScreen = ({ }) => {
                                 onPress={handleFavorite}
                                 style={{ alignItems: "center" }}>
                                 <AndtDegisn name='star' color={"white"} size={30} />
-                                <Text style={{ color: "white" }}>20</Text>
+                                <Text style={{ color: "white" }}>{favoriteCount}</Text>
                             </TouchableOpacity>
                             :
                             <TouchableOpacity
@@ -453,7 +452,7 @@ const PictureScreen = ({ }) => {
                                     source={require("../../assets/appIcons/favorite.png")}
                                     contentFit="cover"
                                 />
-                                <Text style={{ color: "white" }}>20</Text>
+                                <Text style={{ color: "white" }}>{favoriteCount}</Text>
                             </TouchableOpacity>
                         }
                     </View>
@@ -489,7 +488,7 @@ const PictureScreen = ({ }) => {
                             source={getIconImg("like")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>{likeCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("heart")}
@@ -513,7 +512,7 @@ const PictureScreen = ({ }) => {
                             source={getIconImg("heart")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>{heartCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("laugh")}
@@ -537,7 +536,7 @@ const PictureScreen = ({ }) => {
                             source={getIconImg("laugh")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>{laughCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("sad")}
@@ -561,7 +560,7 @@ const PictureScreen = ({ }) => {
                             source={getIconImg("sad")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>{sadCount}</Text>
                     </TouchableOpacity>
 
 

@@ -6,6 +6,7 @@ import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 const initialState = {
     favoriteList: [],
     currentFavorite: [],
+    currentFavoritePost: [],
     status: 'idle',
     error: null,
 };
@@ -52,7 +53,7 @@ export const deleteFavorite = createAsyncThunk('data/deleteFavorite', async ({ p
         console.error('Error deleting document: ', error);
         throw error;
     }
-}); 
+});
 
 export const getFavorites = createAsyncThunk('data/getFavorite', async ({ post_id }) => {
     if (post_id === undefined) {
@@ -101,12 +102,41 @@ export const startListeningFavorites = ({ user_id }) => (dispatch) => {
 
     return unFavorite;
 };
+
+export const startListeningFavoritesPost = ({ post_id }) => (dispatch) => {
+    if (!post_id) return;
+
+    const favoriteQuery =
+        query(
+            collection(db, "Favorite"),
+            where('post_id', "==", post_id),
+        );
+    const unFavorite = onSnapshot(favoriteQuery, (querySnapshot) => {
+        const favorites = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // console.log("favorites", favorites);
+        if (favorites.length > 0) {
+            // Dispatch only the first document if available
+            dispatch(setCurrentFavoritePost(favorites));
+        } else {
+            // console.log("No document found");
+            dispatch(setCurrentFavoritePost([])); // Empty array if no document is found
+        }
+    }, (error) => {
+        console.error('Error fetching Favorite: ', error);
+    });
+
+    return unFavorite;
+};
 export const FavoriteSlice = createSlice({
     name: 'favorite',
     initialState,
     reducers: {
         setCurrentFavorite: (state, action) => {
             state.currentFavorite = action.payload;
+            state.status = 'succeeded';
+        },
+        setCurrentFavoritePost: (state, action) => {
+            state.currentFavoritePost = action.payload;
             state.status = 'succeeded';
         },
     },
@@ -150,6 +180,6 @@ export const FavoriteSlice = createSlice({
     },
 });
 
-export const { setCurrentFavorite } = FavoriteSlice.actions
+export const { setCurrentFavorite, setCurrentFavoritePost } = FavoriteSlice.actions
 
 export default FavoriteSlice.reducer;

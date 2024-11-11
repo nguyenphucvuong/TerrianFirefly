@@ -3,7 +3,7 @@ import { Text, View, Animated, StyleSheet, TouchableOpacity } from 'react-native
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Image } from 'expo-image'
 import { useDispatch, useSelector } from 'react-redux'
-import { createEmoji, deleteEmoji, updateEmojiByField, startListeningEmoji, countEmojis } from '../../redux/slices/EmojiSlice'
+import { createEmoji, deleteEmoji, updateEmojiByField, startListeningEmoji } from '../../redux/slices/EmojiSlice'
 
 
 import RowComponent from '../RowComponent'
@@ -155,7 +155,7 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
                     count_laugh: emojiType === "laugh" ? 1 : 0,
                     count_sad: emojiType === "sad" ? 1 : 0,
                 }));
-                await dispatch(startListeningEmoji({ user_id: user.user_id }));
+                // await dispatch(startListeningEmoji({ user_id: user.user_id }));
                 setIconEmoji(emojiType);
             }
         } else {
