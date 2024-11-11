@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image } from "expo-image";
-import {React, useEffect, useState} from "react";
+import { React, useEffect, useState } from "react";
 import { EventTab, NewPostTab, NotiTab, PersonTab } from "./";
 import { IndexRouter } from "../routers/indexRouter";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
@@ -28,8 +28,8 @@ const IndexTab = () => {
     // Hủy đăng ký lắng nghe khi thành phần bị hủy
     return () => unsubscribe();
   }, []);
-  
-  
+
+
   return (
     <Tab.Navigator
       initialRouteName="Home"

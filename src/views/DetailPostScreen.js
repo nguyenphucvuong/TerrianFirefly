@@ -13,7 +13,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
-import { handleTime } from "../utils/converDate";
+import { handleTime, formatDate } from "../utils/converDate";
 
 
 import MoreOptionPostComponent from '../component/moreOptionBox/MoreOptionPostComponent';
@@ -25,9 +25,39 @@ import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtC
 import ImagesPaperComponent from '../component/ImagesPaperComponent';
 import YoutubePlayerComponent from '../component/YoutubePlayerComponent';
 import { useDispatch, useSelector } from 'react-redux';
-import { createFollow, startListeningFollowers } from '../redux/slices/FollowerSlice';
+import { createFollow } from '../redux/slices/FollowerSlice';
 import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
 
+const calculateEmojiCounts = ({ emojiList, postId }) => {
+    let likeCount = 0;
+    let heartCount = 0;
+    let laughCount = 0;
+    let sadCount = 0;
+    if (!emojiList) {
+        return {
+            likeCount,
+            heartCount,
+            laughCount,
+            sadCount,
+        };
+    }
+    emojiList.forEach(emoji => {
+        if (emoji.post_id === postId) {
+            likeCount += emoji.count_like;
+            heartCount += emoji.count_heart;
+            laughCount += emoji.count_laugh;
+            sadCount += emoji.count_sad;
+        }
+    });
+    const totalCount = likeCount + heartCount + laughCount + sadCount;
+    return {
+        likeCount,
+        heartCount,
+        laughCount,
+        sadCount,
+        totalCount,
+    };
+};
 
 const DetailPostScreen = () => {
     const inset = useSafeAreaInsets();
@@ -38,13 +68,16 @@ const DetailPostScreen = () => {
     // console.log("user.user_id", user.user_id)
     // console.log("post_user_id", post_user_id)
 
-
     const follower = useSelector(state => state.follower.follower);
     const dispatch = useDispatch();
     const isFlag = follower.some(f => f.user_id === post.user_id);
 
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
+    const likeCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).likeCount;
+    const heartCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).heartCount;
+    const laughCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).laughCount;
+    const sadCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).sadCount;
 
     useEffect(() => {
         const getEmoji = async () => {
@@ -90,13 +123,7 @@ const DetailPostScreen = () => {
 
     const handleBtnEmoji = async (emojiType) => {
         const existingEmoji = emoji.find(e => e.user_id === user.user_id && e.post_id === post.post_id);
-        if (existingEmoji) {
-           // console.log("existingEmoji", existingEmoji);
-            //console.log("existingEmoji[`count_like`]", existingEmoji[`count_like`]);
-            //console.log("existingEmoji[`count_heart`]", existingEmoji[`count_heart`]);
-            //console.log("existingEmoji[`count_laugh`]", existingEmoji[`count_laugh`]);
-            //console.log("existingEmoji[`count_sad`]", existingEmoji[`count_sad`]);
-        }
+
 
         if (existingEmoji) {
 
@@ -150,7 +177,7 @@ const DetailPostScreen = () => {
     const animation = useRef(new Animated.Value(0)).current;
     const opacityNavigaion = {
         opacity: animation.interpolate({
-            inputRange: [componentPosition + 70, componentPosition + 250],
+            inputRange: [componentPosition + 50, componentPosition + 100],
             outputRange: [0, 1],
             extrapolate: 'clamp',
         })
@@ -170,6 +197,10 @@ const DetailPostScreen = () => {
 
 
     };
+    const handleNagigatePersonScreen = () => {
+        navigation.navigate("PersonScreen", { user: userPost });
+        console.log("toi day")
+    }
 
     const [copiedText, setCopiedText] = useState('');
     const copyToClipboard = async (content) => {
@@ -236,14 +267,14 @@ const DetailPostScreen = () => {
                             width: "100%",
                             height: "100%",
                         }, opacityNavigaion]}>
-                        <TouchableOpacity onPress={handleAd}
+                        <TouchableOpacity onPress={handleNagigatePersonScreen}
                             style={{
                                 flexDirection: "row",
                                 alignItems: "center",
                                 width: "65%",
                             }}>
-                            <AvatarEx size={30} round={10} url={user.imgUser} frame={user.frame_user} />
-                            <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{user.username}</Text>
+                            <AvatarEx size={30} round={10} url={userPost.imgUser} frame={userPost.frame_user} />
+                            <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{userPost.username}</Text>
                         </TouchableOpacity>
 
                         {userPostCheck() ?
@@ -316,7 +347,7 @@ const DetailPostScreen = () => {
 
                     <RowComponent style={{ height: 30, width: "100%", marginVertical: "3%" }}>
                         <AntDesign name='clockcircle' color={'#BFBFBF'} size={15} />
-                        <Text style={{ color: "#BFBFBF", fontSize: 12, marginRight: "15%", marginLeft: "2%" }}>{post.created_at}</Text>
+                        <Text style={{ color: "#BFBFBF", fontSize: 12, marginRight: "15%", marginLeft: "2%" }}>{formatDate({ timestamp: post.created_at })}</Text>
                         <AntDesign name='eye' color={'#BFBFBF'} size={20} style={{ bottom: ".5%" }} />
                         <Text style={{ color: "#BFBFBF", fontSize: 12, marginLeft: "2%" }}>{post.count_view}</Text>
                     </RowComponent>
@@ -333,32 +364,41 @@ const DetailPostScreen = () => {
                             alignItems: "center",
                             flexDirection: "row",
                         }}>
-                        <AvatarEx size={50} round={10} url={userPost.imgUser} frame={userPost.frame_user}
+                        <TouchableOpacity onPress={handleNagigatePersonScreen}
+                            activeOpacity={1}
                             style={{
-                                marginHorizontal: "3%",
-                            }} />
-                        <View style={{
-                            flexDirection: "column",
-                            width: "50%",
-                            height: "100%",
-                            justifyContent: "center",
-                            // backgroundColor: "yellow",
-                        }}>
-                            <Text style={{
-                                fontSize: 15,
-                                fontWeight: "bold",
-                            }}>{userPost.username}</Text>
-                            <Text style={{
-                                fontSize: 12,
-                                color: "#BFBFBF",
-                            }}>{handleTime({ post: post })}</Text>
-                        </View>
+                                flexDirection: "row",
+                                alignItems: "center",
+                                width: "50%",
+                                height: "100%",
+                            }}>
+
+
+                            <AvatarEx size={50} round={10} url={userPost.imgUser} frame={userPost.frame_user}
+                                style={{
+                                    marginHorizontal: "3%",
+                                }} />
+                            <View style={{
+                                justifyContent: "center",
+                                // backgroundColor: "yellow",
+                            }}>
+                                <Text style={{
+                                    fontSize: 15,
+                                    fontWeight: "bold",
+                                }}>{userPost.username}</Text>
+                                <Text style={{
+                                    fontSize: 12,
+                                    color: "#BFBFBF",
+                                }}>{handleTime({ timestamp: post.created_at })}</Text>
+                            </View>
+                        </TouchableOpacity>
                         {userPostCheck() ?
                             isFlag ? <></>
                                 :
                                 <View style={{
                                     flex: 1,
                                     paddingHorizontal: "2%",
+                                    alignItems: "center",
                                     // backgroundColor: "red",
                                 }}>
                                     <ButtonsComponent isButton onPress={handleFollowButton}
@@ -368,7 +408,7 @@ const DetailPostScreen = () => {
                                             borderWidth: 2,
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            width: "100%",
+                                            width: "70%",
                                             height: "30%",
                                         }}
                                     >
@@ -381,16 +421,20 @@ const DetailPostScreen = () => {
                     </View>
 
                     {/* Content Post */}
-                    <View style={{
-                        marginTop: "3%",
-                        // backgroundColor: "rgba(0, 0, 0, 0.05)",
-                    }}>
-                        <Text style={{
-                            fontSize: 15,
-                        }}
-                            onLongPress={() => fetchCopiedText(post.body)}
-                        >{post.body}</Text>
-                    </View>
+                    {post.isYtb ? <></>
+                        :
+                        <View style={{
+                            marginTop: "3%",
+                            // backgroundColor: "rgba(0, 0, 0, 0.05)",
+                        }}>
+                            <Text style={{
+                                fontSize: 15,
+                            }}
+                                onLongPress={() => fetchCopiedText(post.body)}
+                            >{post.body}</Text>
+                        </View>
+                    }
+
 
                     {/* Image Post */}
                     {/* <PagerView style={{
@@ -434,6 +478,7 @@ const DetailPostScreen = () => {
 
                 {/* Hashtag */}
                 {post.hashtag.length === 0 ? <></> :
+
                     <ButtonsComponent isHashtag onPress={handleAd} hashtag={post?.hashtag} isDetail />
                 }
                 {/* Emoji Count Button */}
@@ -453,7 +498,7 @@ const DetailPostScreen = () => {
                             borderRadius: 10,
                             justifyContent: "center",
                             alignItems: "center",
-                            backgroundColor: iconEmoji === "like" ? appcolor.primary : 'rgba(0,0,0,0.05)',
+                            backgroundColor: iconEmoji === "like" ? appcolor.secondary : 'rgba(0,0,0,0.05)',
                             flexDirection: "row",
                             marginRight: 4,
                         }}>
@@ -465,7 +510,11 @@ const DetailPostScreen = () => {
                             source={getIconImg("like")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "rgba(0,0,0,0.4)", fontSize: 12 }}>20k</Text>
+                        <Text style={{
+                            marginLeft: 4,
+                            color: iconEmoji === "like" ? appcolor.primary : "rgba(0,0,0,0.4)",
+                            fontSize: 12
+                        }}>{likeCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("heart")}
@@ -477,7 +526,7 @@ const DetailPostScreen = () => {
                             borderRadius: 10,
                             justifyContent: "center",
                             alignItems: "center",
-                            backgroundColor: iconEmoji === "heart" ? appcolor.primary : 'rgba(0,0,0,0.05)',
+                            backgroundColor: iconEmoji === "heart" ? appcolor.secondary : 'rgba(0,0,0,0.05)',
                             flexDirection: "row",
                             marginRight: 4,
                         }}>
@@ -489,7 +538,11 @@ const DetailPostScreen = () => {
                             source={getIconImg("heart")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "rgba(0,0,0,0.4)", fontSize: 12 }}>20k</Text>
+                        <Text style={{
+                            marginLeft: 4,
+                            color: iconEmoji === "heart" ? appcolor.primary : "rgba(0,0,0,0.4)",
+                            fontSize: 12
+                        }}>{heartCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("laugh")}
@@ -501,7 +554,7 @@ const DetailPostScreen = () => {
                             borderRadius: 10,
                             justifyContent: "center",
                             alignItems: "center",
-                            backgroundColor: iconEmoji === "laugh" ? appcolor.primary : 'rgba(0,0,0,0.05)',
+                            backgroundColor: iconEmoji === "laugh" ? appcolor.secondary : 'rgba(0,0,0,0.05)',
                             flexDirection: "row",
                             marginRight: 4,
                         }}>
@@ -513,7 +566,11 @@ const DetailPostScreen = () => {
                             source={getIconImg("laugh")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "rgba(0,0,0,0.4)", fontSize: 12 }}>20k</Text>
+                        <Text style={{
+                            marginLeft: 4,
+                            color: iconEmoji === "laugh" ? appcolor.primary : "rgba(0,0,0,0.4)",
+                            fontSize: 12
+                        }}>{laughCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("sad")}
@@ -525,7 +582,7 @@ const DetailPostScreen = () => {
                             borderRadius: 10,
                             justifyContent: "center",
                             alignItems: "center",
-                            backgroundColor: iconEmoji === "sad" ? appcolor.primary : 'rgba(0,0,0,0.05)',
+                            backgroundColor: iconEmoji === "sad" ? appcolor.secondary : 'rgba(0,0,0,0.05)',
                             flexDirection: "row",
                             marginRight: 4,
                         }}>
@@ -537,7 +594,11 @@ const DetailPostScreen = () => {
                             source={getIconImg("sad")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "rgba(0,0,0,0.4)", fontSize: 12 }}>20k</Text>
+                        <Text style={{
+                            marginLeft: 4,
+                            color: iconEmoji === "sad" ? appcolor.primary : "rgba(0,0,0,0.4)",
+                            fontSize: 12
+                        }}>{sadCount}</Text>
                     </TouchableOpacity>
 
                 </View>
@@ -552,94 +613,363 @@ const DetailPostScreen = () => {
 
 
 
-
-
-                {/* Comment */}
-                <View
-
-                    activeOpacity={1}
-                    style={{
-                        height: "auto",
-                        width: "100%",
-                        // backgroundColor: "pink",
-                    }} >
-                    {/* Avatar */}
-                    <RowComponent
-                        height={appInfo.widthWindows / 5.7}
-                        style={{ alignItems: "center" }}
-                    >
-                        <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                {/* Comment Component Test */}
+                <>
+                    <View>
+                        {/* Comment */}
                         <View
+
+                            activeOpacity={1}
                             style={{
-                                height: "80%",
-                                width: "80%",
-                                justifyContent: "center",
-                                paddingLeft: "3%",
-                            }}
-                        >
-                            <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
-                            <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ post: post })}</Text>
+                                height: "auto",
+                                width: "100%",
+                                // backgroundColor: "pink",
+                            }} >
+                            {/* Avatar */}
+                            <RowComponent
+                                height={appInfo.widthWindows / 5.7}
+                                style={{ alignItems: "center" }}
+                            >
+                                <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                                <View
+                                    style={{
+                                        height: "80%",
+                                        width: "80%",
+                                        justifyContent: "center",
+                                        paddingLeft: "3%",
+                                    }}
+                                >
+                                    <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
+                                    <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: post.created_at })}</Text>
+                                </View>
+                                <View
+                                    style={{
+                                        width: "10%",
+                                        height: "100%",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <MoreOptionPostComponent size={20} post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
+                                </View>
+                            </RowComponent>
+                            {/* Content Comment */}
+                            <View style={{
+                                width: "100%",
+                                height: "auto",
+                            }}>
+                                <Text
+                                    style={{ fontSize: 15 }}
+                                // onLongPress={(text) => fetchCopiedText(text.)}
+                                >askdhahsgdjahsgdjhaaa</Text>
+                            </View>
                         </View>
-                        <View
+                        {/* Comment Buttons */}
+                        <RowComponent
+                            height={30}
                             style={{
-                                width: "10%",
-                                height: "100%",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <MoreOptionPostComponent size={20} post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
-                        </View>
-                    </RowComponent>
-                    {/* Content Comment */}
-                    <View style={{
-                        width: "100%",
-                        height: "auto",
-                    }}>
-                        <Text
-                            style={{ fontSize: 15 }}
-                        // onLongPress={(text) => fetchCopiedText(text.)}
-                        >askdhahsgdjahsgdjhaaa</Text>
+                                // backgroundColor: "red",
+                                justifyContent: "flex-end",
+                            }}>
+                            <ButtonsComponent onPress={handleAd}
+                                onLongPress={handleAd}
+                                isButton
+                                style={{ flexDirection: "row", alignItems: 'center', }}>
+                                <Image
+                                    style={{
+                                        width: 20,
+                                        height: 20,
+                                    }}
+                                    source={require('../../assets/appIcons/comment-out-post.png')}
+                                    contentFit="cover"
+                                />
+                                <Text style={{ fontSize: 13 }}>Phản hồi</Text>
+
+                            </ButtonsComponent>
+
+                            <ButtonsComponent onPress={handleAd}
+                                onLongPress={handleAd}
+                                isButton
+                                style={{ marginLeft: "10%", flexDirection: "row", alignItems: 'center', }}>
+                                <Image
+                                    style={{
+                                        width: 20,
+                                        height: 20,
+                                    }}
+                                    source={require('../../assets/appIcons/like-out-post.png')}
+                                    contentFit="cover"
+                                />
+                                <Text style={{ fontSize: 13 }}>Nhấn thích</Text>
+
+                            </ButtonsComponent>
+                        </RowComponent>
                     </View>
-                </View>
-                {/* Comment Buttons */}
-                <RowComponent
-                    height={30}
-                    style={{
-                        // backgroundColor: "red",
-                        justifyContent: "flex-end",
-                    }}>
-                    <ButtonsComponent onPress={handleAd}
-                        onLongPress={handleAd}
-                        isButton
-                        style={{ flexDirection: "row", alignItems: 'center', }}>
-                        <Image
+                    <View>
+                        {/* Comment */}
+                        <View
+
+                            activeOpacity={1}
                             style={{
-                                width: 20,
-                                height: 20,
-                            }}
-                            source={require('../../assets/appIcons/comment-out-post.png')}
-                            contentFit="cover"
-                        />
-                        <Text style={{ fontSize: 13 }}>Phản hồi</Text>
-
-                    </ButtonsComponent>
-
-                    <ButtonsComponent onPress={handleAd}
-                        onLongPress={handleAd}
-                        isButton
-                        style={{ marginLeft: "10%", flexDirection: "row", alignItems: 'center', }}>
-                        <Image
+                                height: "auto",
+                                width: "100%",
+                                // backgroundColor: "pink",
+                            }} >
+                            {/* Avatar */}
+                            <RowComponent
+                                height={appInfo.widthWindows / 5.7}
+                                style={{ alignItems: "center" }}
+                            >
+                                <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                                <View
+                                    style={{
+                                        height: "80%",
+                                        width: "80%",
+                                        justifyContent: "center",
+                                        paddingLeft: "3%",
+                                    }}
+                                >
+                                    <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
+                                    <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: post.created_at })}</Text>
+                                </View>
+                                <View
+                                    style={{
+                                        width: "10%",
+                                        height: "100%",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <MoreOptionPostComponent size={20} post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
+                                </View>
+                            </RowComponent>
+                            {/* Content Comment */}
+                            <View style={{
+                                width: "100%",
+                                height: "auto",
+                            }}>
+                                <Text
+                                    style={{ fontSize: 15 }}
+                                // onLongPress={(text) => fetchCopiedText(text.)}
+                                >askdhahsgdjahsgdjhaaa</Text>
+                            </View>
+                        </View>
+                        {/* Comment Buttons */}
+                        <RowComponent
+                            height={30}
                             style={{
-                                width: 20,
-                                height: 20,
-                            }}
-                            source={require('../../assets/appIcons/like-out-post.png')}
-                            contentFit="cover"
-                        />
-                        <Text style={{ fontSize: 13 }}>Nhấn thích</Text>
+                                // backgroundColor: "red",
+                                justifyContent: "flex-end",
+                            }}>
+                            <ButtonsComponent onPress={handleAd}
+                                onLongPress={handleAd}
+                                isButton
+                                style={{ flexDirection: "row", alignItems: 'center', }}>
+                                <Image
+                                    style={{
+                                        width: 20,
+                                        height: 20,
+                                    }}
+                                    source={require('../../assets/appIcons/comment-out-post.png')}
+                                    contentFit="cover"
+                                />
+                                <Text style={{ fontSize: 13 }}>Phản hồi</Text>
 
-                    </ButtonsComponent>
-                </RowComponent>
+                            </ButtonsComponent>
+
+                            <ButtonsComponent onPress={handleAd}
+                                onLongPress={handleAd}
+                                isButton
+                                style={{ marginLeft: "10%", flexDirection: "row", alignItems: 'center', }}>
+                                <Image
+                                    style={{
+                                        width: 20,
+                                        height: 20,
+                                    }}
+                                    source={require('../../assets/appIcons/like-out-post.png')}
+                                    contentFit="cover"
+                                />
+                                <Text style={{ fontSize: 13 }}>Nhấn thích</Text>
+
+                            </ButtonsComponent>
+                        </RowComponent>
+                    </View>
+                    <View>
+                        {/* Comment */}
+                        <View
+
+                            activeOpacity={1}
+                            style={{
+                                height: "auto",
+                                width: "100%",
+                                // backgroundColor: "pink",
+                            }} >
+                            {/* Avatar */}
+                            <RowComponent
+                                height={appInfo.widthWindows / 5.7}
+                                style={{ alignItems: "center" }}
+                            >
+                                <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                                <View
+                                    style={{
+                                        height: "80%",
+                                        width: "80%",
+                                        justifyContent: "center",
+                                        paddingLeft: "3%",
+                                    }}
+                                >
+                                    <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
+                                    <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: post.created_at })}</Text>
+                                </View>
+                                <View
+                                    style={{
+                                        width: "10%",
+                                        height: "100%",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <MoreOptionPostComponent size={20} post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
+                                </View>
+                            </RowComponent>
+                            {/* Content Comment */}
+                            <View style={{
+                                width: "100%",
+                                height: "auto",
+                            }}>
+                                <Text
+                                    style={{ fontSize: 15 }}
+                                // onLongPress={(text) => fetchCopiedText(text.)}
+                                >askdhahsgdjahsgdjhaaa</Text>
+                            </View>
+                        </View>
+                        {/* Comment Buttons */}
+                        <RowComponent
+                            height={30}
+                            style={{
+                                // backgroundColor: "red",
+                                justifyContent: "flex-end",
+                            }}>
+                            <ButtonsComponent onPress={handleAd}
+                                onLongPress={handleAd}
+                                isButton
+                                style={{ flexDirection: "row", alignItems: 'center', }}>
+                                <Image
+                                    style={{
+                                        width: 20,
+                                        height: 20,
+                                    }}
+                                    source={require('../../assets/appIcons/comment-out-post.png')}
+                                    contentFit="cover"
+                                />
+                                <Text style={{ fontSize: 13 }}>Phản hồi</Text>
+
+                            </ButtonsComponent>
+
+                            <ButtonsComponent onPress={handleAd}
+                                onLongPress={handleAd}
+                                isButton
+                                style={{ marginLeft: "10%", flexDirection: "row", alignItems: 'center', }}>
+                                <Image
+                                    style={{
+                                        width: 20,
+                                        height: 20,
+                                    }}
+                                    source={require('../../assets/appIcons/like-out-post.png')}
+                                    contentFit="cover"
+                                />
+                                <Text style={{ fontSize: 13 }}>Nhấn thích</Text>
+
+                            </ButtonsComponent>
+                        </RowComponent>
+                    </View>
+                    <View>
+                        {/* Comment */}
+                        <View
+
+                            activeOpacity={1}
+                            style={{
+                                height: "auto",
+                                width: "100%",
+                                // backgroundColor: "pink",
+                            }} >
+                            {/* Avatar */}
+                            <RowComponent
+                                height={appInfo.widthWindows / 5.7}
+                                style={{ alignItems: "center" }}
+                            >
+                                <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                                <View
+                                    style={{
+                                        height: "80%",
+                                        width: "80%",
+                                        justifyContent: "center",
+                                        paddingLeft: "3%",
+                                    }}
+                                >
+                                    <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
+                                    <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: post.created_at })}</Text>
+                                </View>
+                                <View
+                                    style={{
+                                        width: "10%",
+                                        height: "100%",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <MoreOptionPostComponent size={20} post_id={post.post_id} user_id={user.user_id} isFollow={isFlag} post_user_id={post_user_id} />
+                                </View>
+                            </RowComponent>
+                            {/* Content Comment */}
+                            <View style={{
+                                width: "100%",
+                                height: "auto",
+                            }}>
+                                <Text
+                                    style={{ fontSize: 15 }}
+                                // onLongPress={(text) => fetchCopiedText(text.)}
+                                >askdhahsgdjahsgdjhaaa</Text>
+                            </View>
+                        </View>
+                        {/* Comment Buttons */}
+                        <RowComponent
+                            height={30}
+                            style={{
+                                // backgroundColor: "red",
+                                justifyContent: "flex-end",
+                            }}>
+                            <ButtonsComponent onPress={handleAd}
+                                onLongPress={handleAd}
+                                isButton
+                                style={{ flexDirection: "row", alignItems: 'center', }}>
+                                <Image
+                                    style={{
+                                        width: 20,
+                                        height: 20,
+                                    }}
+                                    source={require('../../assets/appIcons/comment-out-post.png')}
+                                    contentFit="cover"
+                                />
+                                <Text style={{ fontSize: 13 }}>Phản hồi</Text>
+
+                            </ButtonsComponent>
+
+                            <ButtonsComponent onPress={handleAd}
+                                onLongPress={handleAd}
+                                isButton
+                                style={{ marginLeft: "10%", flexDirection: "row", alignItems: 'center', }}>
+                                <Image
+                                    style={{
+                                        width: 20,
+                                        height: 20,
+                                    }}
+                                    source={require('../../assets/appIcons/like-out-post.png')}
+                                    contentFit="cover"
+                                />
+                                <Text style={{ fontSize: 13 }}>Nhấn thích</Text>
+
+                            </ButtonsComponent>
+                        </RowComponent>
+                    </View>
+                </>
+
+
 
 
             </ScrollView >

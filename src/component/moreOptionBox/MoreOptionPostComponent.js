@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteFollow, startListeningFollowers, getFollower } from '../../redux/slices/FollowerSlice';
+import { deleteFollow } from '../../redux/slices/FollowerSlice';
 import { deleteFavorite, createFavorite, startListeningFavorites } from '../../redux/slices/FavoriteSlice';
 import { updatePostsByField } from '../../redux/slices/PostSlice';
 import { updateUserState } from '../../redux/slices/UserSlices';

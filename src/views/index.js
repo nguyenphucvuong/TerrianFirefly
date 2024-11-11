@@ -35,7 +35,7 @@ export {
       SettingScreen, AccountDetailsScreen, ArticleScreen, FavouriteScreen, GroupScreen, NotificationManagement,
       ManagePostsScreen, SetUpAccountScreen, WellcomScreen, LoginScreen,
       RegisterScreen, ForgotPassword, VerificationCodeScreen, CreatePostScreen, FollowerScreen,
-      FollowUp, ResetPasswordScreen, HashtagManagerScreen, EventManagementScreen, AddEditEventScreen
+      FollowUp, ResetPasswordScreen, HashtagManagerScreen, EventManagementScreen, AddEditEventScreen,
 };
 
 
