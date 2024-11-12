@@ -347,6 +347,7 @@ const DetailPostScreen = () => {
                                 alignItems: "center",
                                 width: "50%",
                                 height: "100%",
+                                paddingLeft: 13,
                             }}>
 
 
@@ -355,6 +356,7 @@ const DetailPostScreen = () => {
                                     marginHorizontal: "3%",
                                 }} />
                             <View style={{
+                                marginLeft: 10,
                                 justifyContent: "center",
                                 // backgroundColor: "yellow",
                             }}>
