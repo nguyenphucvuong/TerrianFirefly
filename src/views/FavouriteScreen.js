@@ -1,4 +1,4 @@
-import { View, FlatList, ActivityIndicator, RefreshControl } from "react-native";
+import { View, FlatList, ActivityIndicator, Text } from "react-native";
 import React, { useState, useEffect } from "react";
 import { data } from "../constains/data";
 import { useSelector, useDispatch } from "react-redux";
@@ -6,35 +6,24 @@ import { getPostsFromFavouriteUsers, getPostsRefresh } from '../../src/redux/sli
 import { SkeletonComponent } from "../component";
 //components
 import PostViewComponent from "../component/PostViewComponent";
-const FavouriteScreen = () => {
+const FavouriteScreen = ({ postFavourite, user }) => {
     const emoji = data.emoji;
-    const post = useSelector((state) => state.post.postFavourite);
-    const user = useSelector((state) => state.user.user);
-    const dispatch = useDispatch();
 
     const [loading, setLoading] = useState(false);
-    const [refreshing, setRefreshing] = useState(false);
-    const [hasMorePosts, setHasMorePosts] = useState(true);
 
-    useEffect(() => {
-        dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: user?.user_id }));
-      }, [user?.user_id]);
     // console.log('user?.user_id',user?.user_id);
     // console.log('post1234', post);
     // console.log('user', user);
     return (
         <>
-            {post.length === 0 || user === null ? (
-                <View style={{ height: 100, width: "100%", paddingHorizontal: "5%", }}>
-                    <SkeletonComponent isAvatar Data={""} />
-                    <SkeletonComponent style={{ width: "60%", height: 20 }} Data={""} />
-                    <SkeletonComponent style={{ width: "80%", height: 10 }} Data={""} />
-                    <SkeletonComponent style={{ width: "90%", height: 10 }} Data={""} />
+            {postFavourite.length === 0 ? (
+                <View style={{ alignItems: 'center', marginTop: '50%' }}>
+                    <Text> Chưa có bài yêu thích</Text>
                 </View>
             ) : (
                 <FlatList
                     scrollEnabled={false}
-                    data={post}
+                    data={postFavourite}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => {
                         return (

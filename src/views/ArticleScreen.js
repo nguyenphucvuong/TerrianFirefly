@@ -16,8 +16,8 @@ const ArticleScreen = ({post, user}) => {
     return (
         <>
             {post.length === 0 ? (
-                <View style={{ height: 100, width: "100%", paddingHorizontal: "5%", }}>
-                    <Text>Bạn chưa có bài viết</Text>
+                <View style={{ alignItems: 'center', marginTop: '50%' }}>
+                    <Text> Chưa có bài viết</Text>
                 </View>
             ) : (
                 <FlatList

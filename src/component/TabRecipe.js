@@ -7,7 +7,7 @@ import { appInfo } from '../constains/appInfo';
 
 const { width } = Dimensions.get('window');
 
-const TabRecipe = ({ post, user }) => {
+const TabRecipe = ({ post, postFavourite, user }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [tabHeights, setTabHeights] = useState([0, 0, 0]);
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -39,7 +39,7 @@ const TabRecipe = ({ post, user }) => {
     });
   const screens = [
     <ArticleScreen post={post} user={user} key="0" />,
-    <FavouriteScreen key="1" />,
+    <FavouriteScreen postFavourite={postFavourite} user={user}  key="1" />,
     <GroupScreen key="2" />,
   ];
   return (

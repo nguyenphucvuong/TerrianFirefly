@@ -19,8 +19,8 @@ import TabRecipe from '../component/TabRecipe';
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
 //redux
-import { listenToUserRealtime, getUserFromFollowedUsers, getUserFromFollowingUsers } from '../redux/slices/UserSlices';
-import { getPostUsers } from '../../src/redux/slices/PostSlice';
+import {getUserFromFollowedUsers, getUserFromFollowingUsers } from '../redux/slices/UserSlices';
+import { getPostUsers, getPostsFromFavouriteUsers } from '../../src/redux/slices/PostSlice';
 const Tab = createMaterialTopTabNavigator();
 
 const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.09;
@@ -35,6 +35,7 @@ const PersonScreen = ({ isAvatar }) => {
     const followingUsers = useSelector((state) => state.user.followingUsers);
     const dataUser = useSelector((state) => state.user.user);
     const post = useSelector((state) => state.post.postByUser);
+    const postFavourite = useSelector((state) => state.post.postFavourite);
     const dispatch = useDispatch();
     const isFocused = useIsFocused(); // Kiểm tra khi tab được focus
 
@@ -119,6 +120,8 @@ const PersonScreen = ({ isAvatar }) => {
             // console.log('aaaaaaaaaaaaaaaaa');
             //Bài viết
             dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
+            //Yêu thích
+            dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: user?.user_id }));
             //theo dõi
             dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
             // người theo dõi
@@ -160,9 +163,6 @@ const PersonScreen = ({ isAvatar }) => {
                                         <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
                                     </View>
                             }
-
-
-
                             <View style={styles.lowerHeader} />
                         </ImageBackground>
                     </View>
@@ -227,7 +227,7 @@ const PersonScreen = ({ isAvatar }) => {
                                         <TouchableOpacity
                                             // disabled={isFollow}
                                             activeOpacity={0.6}
-                                            onPress={handleFollowButton}
+                                            onPress={() => handleFollowButton}
                                             style={{
                                                 borderColor: "rgba(121,141,218,1)",
                                                 borderRadius: 100,
@@ -259,7 +259,7 @@ const PersonScreen = ({ isAvatar }) => {
                                 <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                             </View>
                             {/*  Tab Navigation */}
-                            <TabRecipe post={post} user={user} />
+                            <TabRecipe post={post} postFavourite={postFavourite} user={user} />
                         </View>
                     </ScrollView>
                 </View>

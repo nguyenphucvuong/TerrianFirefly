@@ -70,7 +70,7 @@ const FollowerScreen = () => {
                             source={require('../../assets/new_empty_dark.03ebcaa.png')}
                         />
                         <Text style={{ fontSize: 16, color: '#333' }}>
-                            Bạn chưa theo dõi người dùng nào!
+                            Chưa người dùng nào theo dõi!
                         </Text>
                     </View>
 
