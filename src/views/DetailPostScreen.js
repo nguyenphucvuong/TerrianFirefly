@@ -13,7 +13,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
-import { handleTime, formatDate } from "../utils/converDate";
+import { calculateEmojiCounts, formatNumber, handleTime, formatDate } from '../utils';
+
 
 
 import MoreOptionPostComponent from '../component/moreOptionBox/MoreOptionPostComponent';
@@ -28,36 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createFollow } from '../redux/slices/FollowerSlice';
 import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
 
-const calculateEmojiCounts = ({ emojiList, postId }) => {
-    let likeCount = 0;
-    let heartCount = 0;
-    let laughCount = 0;
-    let sadCount = 0;
-    if (!emojiList) {
-        return {
-            likeCount,
-            heartCount,
-            laughCount,
-            sadCount,
-        };
-    }
-    emojiList.forEach(emoji => {
-        if (emoji.post_id === postId) {
-            likeCount += emoji.count_like;
-            heartCount += emoji.count_heart;
-            laughCount += emoji.count_laugh;
-            sadCount += emoji.count_sad;
-        }
-    });
-    const totalCount = likeCount + heartCount + laughCount + sadCount;
-    return {
-        likeCount,
-        heartCount,
-        laughCount,
-        sadCount,
-        totalCount,
-    };
-};
+
 
 const DetailPostScreen = () => {
     const inset = useSafeAreaInsets();
@@ -74,12 +46,14 @@ const DetailPostScreen = () => {
 
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
-    const likeCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).likeCount;
-    const heartCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).heartCount;
-    const laughCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).laughCount;
-    const sadCount = calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).sadCount;
+    const countEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id })
+    const likeCount = formatNumber({ num: countEmoji.likeCount });
+    const heartCount = formatNumber({ num: countEmoji.heartCount });
+    const laughCount = formatNumber({ num: countEmoji.laughCount });
+    const sadCount = formatNumber({ num: countEmoji.sadCount });
 
     useEffect(() => {
+        // console.log("emoji Run");
         const getEmoji = async () => {
             let foundEmojiType = "default";
             for (let i = 0; i < emoji.length; i++) {
@@ -148,6 +122,8 @@ const DetailPostScreen = () => {
                 // await dispatch(startListeningEmoji({ user_id: user.user_id }));
                 setIconEmoji(emojiType);
             }
+            // await dispatch(startListeningEmoji({ user_id: user.user_id }));
+
         } else {
             console.log("createEmoji");
             // Nếu người dùng chưa tương tác -> CREATE
