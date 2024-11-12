@@ -36,7 +36,11 @@ import {
   getPosts,
   getPostsByField,
 } from "../redux/slices/PostSlice";
-import { getHashtag, createHashtag } from "../redux/slices/HashtagSlice";
+import {
+  createHashtag
+} from "../redux/slices/HashtagSlice";
+import LoadingCompoent from "../component/LoadingComponent";
+// import { getHashtag, createHashtag } from "../redux/slices/HashtagSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { log } from "@tensorflow/tfjs";
 const { height } = Dimensions.get("window");
@@ -52,6 +56,7 @@ const CreatePostScreen = () => {
   const navigation = useNavigation();
 
   //khai báo biến
+  const [isLoading, setIsLoading] = useState(false);  // Trạng thái loading
   const [showOptions, setShowOptions] = useState(false); // Trạng thái của modal bảng tùy chọn
   const [textTitle, onChangeTextTitle] = React.useState(""); // tiêu đề
   const [textPost, onChangeTextPost] = React.useState(""); // nội dung
@@ -104,7 +109,6 @@ const CreatePostScreen = () => {
         "Thông báo",
         "Bạn không thể nhập dữ liệu khi Switch đang bật."
       );
-      // console.log("an cai cc");
     }
   };
 
@@ -115,8 +119,10 @@ const CreatePostScreen = () => {
     const match = url.match(youtubeRegex);
     return match ? match[1] : "Erro link";
   };
+
   //xử lý đăng bài viết mới
   const handlePost = async () => {
+    setIsLoading(true);  // Bắt đầu loading
     let body = isEnabled ? link : textPost;
     if (isEnabled) {
       body = extractYouTubeVideoID(body);
@@ -136,32 +142,18 @@ const CreatePostScreen = () => {
       isYtb: isEnabled,
       created_at: Date.now(),
     };
+
     // Nếu có hashtag mới, thêm vào Firestore
     if (newHashtag.length !== 0) {
-      await dispatch(createHashtag(newHashtag))
-        .then(() => {
-          dispatch(getHashtag());
-        })
-        .catch((error) => {
-          console.error("Lỗi thêm hashtag:", error);
-        });
+      await dispatch(createHashtag(newHashtag)).unwrap();
     }
 
-    // Gọi lại danh sách hashtag sau khi thêm mới
-    await dispatch(getHashtag()).unwrap();
-    console.log("Cập nhật danh sách hashtag thành công");
 
     // Thêm bài viết mới vào Firestore
     await dispatch(createPost(newDataPost)).unwrap();
-    console.log("Thêm bài viết thành công");
-
-    Dialog.show({
-      type: ALERT_TYPE.SUCCESS,
-      title: "Thông báo",
-      textBody: "Thêm bài viết thành công",
-      button: "Đóng",
-    });
-    resetData();
+    // console.log("Thêm bài viết thành công");
+    handleGoBack();
+    setIsLoading(false);  // Kết thúc loading
   };
 
   //xử lý quay lại màn hình trước
@@ -173,8 +165,8 @@ const CreatePostScreen = () => {
     navigation.goBack();
   };
 
+  //gán lại
   const resetData = () => {
-    //gán lại
     onChangeTextTitle("");
     onChangeTextPost("");
     onChangetextHashTag("");
@@ -400,14 +392,17 @@ const CreatePostScreen = () => {
         <SafeAreaView>
           <View style={styles.upperHeaderPlacehholder} />
         </SafeAreaView>
+        <LoadingCompoent isVisible={isLoading} />
         {/* View Thanh điều hướng */}
         <View style={styles.navigationView}>
           {/* Nút quay lại */}
           <ButtonsComponent isBack onPress={handleGoBack}>
             <Image
-              source={{
-                uri: "https://cdn-icons-png.flaticon.com/512/3114/3114883.png",
-              }}
+              // source={{
+              //   uri: "https://cdn-icons-png.flaticon.com/512/3114/3114883.png",
+              // }}
+            source={require("../../assets/appIcons/close_icon.png")} //icon #
+
               style={{ width: 25, height: 25, marginTop: "auto" }}
             />
           </ButtonsComponent>
@@ -429,28 +424,30 @@ const CreatePostScreen = () => {
         />
 
         {/* nhập nội dung bài viết */}
-        <TextInput
-          style={styles.input}
-          placeholder="Nội dung bài viết ..."
-          multiline
-          onChangeText={onChangeTextPost}
-          value={textPost}
-          editable={!isEnabled}
-          onFocus={handleFocus} // Gọi hàm khi người dùng nhấn vào TextInput
-          onPressIn={() => {
-            if (isEnabled) {
-              // Hiện thông báo cảnh báo nếu switch đang bật
-              Dialog.show({
-                type: ALERT_TYPE.WARNING,
-                title: "Cảnh báo",
-                textBody: "Bạn không thể nhập dữ liệu khi switch đang bật",
-                button: "Đóng",
-              });
-              // Ẩn bàn phím nếu nó đang mở
-              Keyboard.dismiss();
-            }
-          }}
-        />
+        {!isEnabled && (
+          <TextInput
+            style={styles.input}
+            placeholder="Nội dung bài viết ..."
+            multiline
+            onChangeText={onChangeTextPost}
+            value={textPost}
+            editable={!isEnabled}
+            onFocus={handleFocus} // Gọi hàm khi người dùng nhấn vào TextInput
+            onPressIn={() => {
+              if (isEnabled) {
+                // Hiện thông báo cảnh báo nếu switch đang bật
+                Dialog.show({
+                  type: ALERT_TYPE.WARNING,
+                  title: "Cảnh báo",
+                  textBody: "Bạn không thể nhập dữ liệu khi switch đang bật",
+                  button: "Đóng",
+                });
+                // Ẩn bàn phím nếu nó đang mở
+                Keyboard.dismiss();
+              }
+            }}
+          />
+        )}
 
         {/* Hiển thị số lượng chủ đề đã chọn */}
         <Text style={(styles.titleHashTag, { marginTop: 7, marginBottom: -5 })}>

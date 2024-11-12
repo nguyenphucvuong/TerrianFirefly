@@ -1,110 +1,75 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  RefreshControl,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import { View, Text, Image, ScrollView, StyleSheet } from "react-native";
 import { format } from "date-fns";
+import TextWithLinks from '../../utils/TextWithLink';
+import InteractionBarEventComponent from '../InteractionBarEventComponent '; 
 
-const DetailEventComponent = ({ events, onRefresh }) => {
-  const navigation = useNavigation();
+const DetailEventComponent = ({ event }) => {
+  if (!event) {
+    return <Text>Loading...</Text>;
+  }else{
+    return (
+      <>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>{event.title}</Text>
+        <View>
+          <Text style={styles.userId}>Người đăng: {event.user_id}</Text>
+        </View>
+        <View style={styles.viewDate}>
+          <Text style={styles.date}>
+            {format(new Date(event.start_date), "dd/MM")} -{" "}
+            {format(new Date(event.end_date), "dd/MM")}
+          </Text>
+        </View>
+        <Image source={{ uri: event.img_event }} style={styles.image} />
+        <TextWithLinks style={styles.content} content={event.content} />
+        
+        {/* Thêm thanh tương tác vào đây */}
+      </ScrollView>
+        <InteractionBarEventComponent event={event}/></>
+      
+    );
+  }
 
-  const handlePressOnEvent = () => {
-    navigation.navigate("DetailEventScreen");
-  };
-  const limitText = (text, charLimit) => {
-    if (text.length > charLimit) {
-      return text.slice(0, charLimit) + "...";
-    }
-    return text;
-  };
-  return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={false} onRefresh={onRefresh} /> // Gọi hàm onRefresh khi vuốt xuống
-      }
-    >
-      {events.map((event) => (
-        <TouchableOpacity
-          onPress={handlePressOnEvent}
-          activeOpacity={1}
-          key={event.event_id}
-          style={styles.eventItem}
-        >
-          <Image source={{ uri: event.url_game }} style={styles.eventImage} />
-          <View style={styles.eventDetails}>
-            <Text style={styles.eventTitle}>{event.title}</Text>
-            <Text
-              style={{
-                marginTop: 10,
-              }}
-            >
-              {limitText(event.content, 100)}
-            </Text>
-            <View style={styles.viewRow}>
-              <Text style={styles.eventDate}>
-                {format(new Date(event.created_at), "dd-MM-yyyy")}
-              </Text>
-              <TouchableOpacity onPress={handlePressOnEvent}>
-                <Text style={styles.eventLink}>Nhấn để tiếp tục {"➤"}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
-  );
+  
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#f6f5fb",
+    padding: 16,
   },
-  linkText: {
-    color: "#007BFF",
-  },
-  eventItem: {
-    margin: 10,
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  eventImage: {
-    width: "100%",
-    height: 180,
-  },
-  eventDetails: {
-    padding: 10,
-  },
-  eventTitle: {
-    fontSize: 16,
+  title: {
+    fontSize: 22,
     fontWeight: "bold",
+    marginBottom: 8,
   },
-  eventDescription: {
-    marginVertical: 5,
-    color: "#888",
-  },
-  viewRow: {
-    marginTop: 15,
-    flexDirection: "row",
-  },
-  eventDate: {
-    color: "#888",
-  },
-  eventLink: {
-    color: "#7487ee",
-    fontWeight: "bold",
-    marginLeft: "51%",
+  userId: {
     fontSize: 14,
+    color: "#6a6a6a",
+    marginBottom: 4,
+  },
+  date: {
+    textAlign: "center",
+    textAlignVertical: "center",
+    padding: 5,
+    fontWeight: "bold",
+  },
+  viewDate: {
+    backgroundColor: "#c3e7c1",
+    padding: 4,
+    borderRadius: 12,
+    marginBottom: 16,
+    alignItems: "flex-start",
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  content: {
+    fontSize: 20,
+    lineHeight: 24,
   },
 });
 

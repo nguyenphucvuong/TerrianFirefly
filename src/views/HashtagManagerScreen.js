@@ -44,7 +44,7 @@ const HashtagManagerScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await dispatch(fetchHashtags());
+        // await dispatch(fetchHashtags());
       } catch (error) {
         console.error("Failed to fetch hashtags:", error);
       }
@@ -114,7 +114,7 @@ const HashtagManagerScreen = () => {
         hashtag_avatar: imgAvatar,
       };
       await dispatch(addHashtagToFirestore(newHashtag)); // Thêm hashtag vào Firestore
-      await dispatch(fetchHashtags());
+      // await dispatch(fetchHashtags());
       resetForm();
     } catch (error) {
       console.error("Upload failed:", error);
