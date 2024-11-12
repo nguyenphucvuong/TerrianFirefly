@@ -1,38 +1,72 @@
 import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text, Alert, LogBox, Clipboard } from 'react-native'
-import React, { useRef, useState, useEffect } from 'react'
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigation, useRoute, useIsFocused } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSelector, useDispatch } from "react-redux";
+import { createFollow, deleteFollow } from "../redux/slices/FollowerSlice";
+
+import Entypo from 'react-native-vector-icons/Entypo';
+import Feather from 'react-native-vector-icons/Feather';
+import {
+    BottomSheetModal,
+    BottomSheetView,
+    BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
 //style
 import { StyleGlobal } from '../styles/StyleGlobal'
 //components
-import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx } from '../component';
+import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx, ButtonBackComponent } from '../component';
 import TabRecipe from '../component/TabRecipe';
-//screen
-// import ArticleScreen from './ArticleScreen';
-// import FavouriteScreen from './FavouriteScreen';
-// import GroupScreen from './GroupScreen';
 //constains
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
 //redux
-import { getUser, getUserByField, listenToUserRealtime } from '../redux/slices/UserSlices';
+import { listenToUserRealtime, getUserFromFollowedUsers, getUserFromFollowingUsers } from '../redux/slices/UserSlices';
+import { getPostUsers } from '../../src/redux/slices/PostSlice';
 const Tab = createMaterialTopTabNavigator();
 
 const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.09;
 const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 
 
-const PersonScreen = () => {
+const PersonScreen = ({ isAvatar }) => {
+    const navigation = useNavigation();
     //firebase
-    const users = useSelector((state) => state.user.user);
+    // const users = useSelector((state) => state.user.user);
+    const followUp = useSelector((state) => state.user.usersFollowed);
+    const followingUsers = useSelector((state) => state.user.followingUsers);
+    const dataUser = useSelector((state) => state.user.user);
+    const post = useSelector((state) => state.post.postByUser);
     const dispatch = useDispatch();
+    const isFocused = useIsFocused(); // Kiểm tra khi tab được focus
+
     //route
     const route = useRoute();
-    const user = route.params?.user ?? users;
-    console.log('users',users);
-    
-    const navigation = useNavigation();
+    const userPost = route.params?.userPost ?? {};
+    const isFromAvatar = route.params?.isFromAvatar ?? isAvatar;
+    // console.log('userPost',userPost);
+    //console.log('isFromAvatar', isFromAvatar);
+    const [user, setUser] = useState(isFromAvatar ? userPost : dataUser);
+    //console.log('dataUser', dataUser);
+
+    //console.log('useruser', user);
+    const follower = useSelector(state => state.follower.follower);
+    const isFlag = follower.some(f => f.user_id === userPost.user_id);
+
+    const handleFollowButton = useCallback(() => {
+        const handleFollowUser = async () => {
+            if (isFlag) {
+                await dispatch(deleteFollow({ follower_user_id: dataUser.user_id, user_id: userPost.user_id }));
+                // await dispatch(stopListeningFollowers({ follower_user_id: user.user_id }));
+
+
+            } else {
+                await dispatch(createFollow({ follower_user_id: dataUser.user_id, user_id: userPost.user_id }));
+                // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+            }
+        }
+        handleFollowUser();
+    });
 
     //Copy
     const [showToast, setShowToast] = useState(false);
@@ -68,16 +102,37 @@ const PersonScreen = () => {
             extrapolate: 'clamp',
         }),
     };
-    //cập nhật lại dữ liệu 
-    useEffect(() => {
-        const unsubscribe = dispatch(listenToUserRealtime(user.email));
+    //BottomSheet
+    const snapPoints = useMemo(() => ['30%'], []);
+    const bottomSheetModalRef = useRef(null);
+    const handleManagement = () => {
+        bottomSheetModalRef.current?.present();
+    }
+    const onClose = () => {
 
-        return () => unsubscribe();
-    }, [dispatch, user.email]);
-    //console.log('user', user);
-    //console.log('showToast', showToast);
+    }
+    //cập nhật lại dữ liệu  
+    useEffect(() => {
+        if (isFocused) {
+            if (isFocused && user !== (isFromAvatar ? userPost : dataUser)) {
+                setUser(isFromAvatar ? userPost : dataUser);
+                // dispatch actions here
+            }
+            // console.log('aaaaaaaaaaaaaaaaa');
+            //Bài viết
+            dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
+            //theo dõi
+            dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
+            // người theo dõi
+            dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: user?.user_id }));
+            // const unsubscribe = dispatch(listenToUserRealtime(user.email));
+            // return () => unsubscribe();
+            console.log("user", user);
+            console.log("userPost", userPost);
+        }
+    }, [isFocused, isFromAvatar]);
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
             {user.length === 0 ? (
                 <View>
                     <SkeletonComponent Data={""} style={{ width: '100%', height: appInfo.heightWindows * 0.15 }} />
@@ -89,19 +144,28 @@ const PersonScreen = () => {
                     </View>
                 </View>
             ) : (
-                <View style={{ flexGrow: 1 }}>
+                <View >
                     <View style={styles.upperHeaderPlacehholder} />
                     <View style={styles.header}>
                         <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
                             <View style={styles.upperrHeader}>
-                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation]}>
+                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, user === userPost && { marginLeft: '7%' }]}>
                                     <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={user.imgUser} />
                                     <Text style={styles.avatarText}>{user.username}</Text>
                                 </Animated.View>
                             </View>
-                            <View style={styles.setting}>
-                                <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
-                            </View>
+                            {
+                                userPost === user ?
+                                    <View style={styles.back}>
+                                        <ButtonBackComponent color={'white'} />
+                                    </View>
+                                    : <View style={styles.setting}>
+                                        <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
+                                    </View>
+                            }
+
+
+
                             <View style={styles.lowerHeader} />
                         </ImageBackground>
                     </View>
@@ -111,7 +175,6 @@ const PersonScreen = () => {
                         </View>
                     )}
                     <ScrollView
-                        style={{ flex: 1 }}
                         nestedScrollEnabled={true}
                         scrollEventThrottle={16}
                         showsVerticalScrollIndicator={false}
@@ -125,37 +188,81 @@ const PersonScreen = () => {
                             onPress={() => navigation.navigate('BackgroundScreen')}
                         />
                         <View style={styles.scrollViewContent}>
-                            <View style={{ flexDirection: 'row' }}>
+                            <View style={{
+                                flexDirection: 'row', width: "100%",
+                                // backgroundColor: "yellow",
+                            }}>
                                 <Animated.View style={[styles.avatar, avatarAnimation]}>
                                     <AvatarEx url={user.imgUser} size={appInfo.widthWindows * 0.22} round={20} frame={user.frame_user} name={user.username} />
                                     <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username}</Text>
                                 </Animated.View>
-                                <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
-                                    <IconComponent
-                                        name={'edit'}
-                                        size={appInfo.heightWindows * 0.025}
-                                        color={'#190AEF'}
-                                        text={'Chỉnh sửa'}
-                                        textColor={'#190AEF'}
-                                        style={styles.buttonEdit}
-                                        onPress={() => navigation.navigate('InfomationScreen')}
-                                    />
-                                </View>
+
+
+                                {user !== userPost ?
+                                    <View style={{
+                                        // backgroundColor: 'red',
+                                        flexDirection: 'row',
+                                        justifyContent: 'center',
+                                        width: '100%',
+                                    }}>
+                                        <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
+                                            <IconComponent
+                                                name={'edit'}
+                                                size={appInfo.heightWindows * 0.025}
+                                                color={'#190AEF'}
+                                                text={'Chỉnh sửa'}
+                                                textColor={'#190AEF'}
+                                                style={styles.buttonEdit}
+                                                onPress={() => navigation.navigate('InfomationScreen')}
+                                            />
+                                        </View>
+                                    </View>
+                                    :
+
+                                    <View style={{
+                                        // backgroundColor: 'red',
+                                        flexDirection: 'row',
+                                        justifyContent: 'flex-end',
+                                        width: '100%',
+                                        paddingRight: '6%',
+                                        paddingTop: '3%',
+                                    }}>
+                                        <TouchableOpacity
+                                            // disabled={isFollow}
+                                            activeOpacity={0.6}
+                                            onPress={handleFollowButton}
+                                            style={{
+                                                borderColor: "rgba(121,141,218,1)",
+                                                borderRadius: 100,
+                                                borderWidth: 1,
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                width: "27%",
+                                                height: 40,
+                                                paddingHorizontal: "2%",
+                                                // opacity: isFollow ? 0 : 1,
+                                            }}
+                                        >
+                                            <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>{isFlag ? "Hủy theo dõi" : "Theo dõi"}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
+
                             </View>
 
                             <View style={styles.iconRow}>
                                 <IconComponent name={'credit-card'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'ID: ' + user.user_id} onPress={() => copyToClipboard(user.user_id)} />
-                                <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} />
+                                <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} disabled={userPost === user ? true : false} />
                             </View>
 
                             <View style={styles.statisticsContainer}>
-                                <StatisticsComponent quantity={0} name={'Bài Viết'} />
-                                <StatisticsComponent quantity={0} name={'Theo Dõi'} onPress={() => navigation.navigate('TrackingScreen')} />
-                                <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
+                                <StatisticsComponent quantity={post.length} name={'Bài Viết'} />
+                                <StatisticsComponent quantity={followUp.length} name={'Theo Dõi'} onPress={() => navigation.navigate('FollowUp', { followUp })} />
+                                <StatisticsComponent quantity={followingUsers.length} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen', { followingUsers })} />
                                 <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                             </View>
                             {/*  Tab Navigation */}
-                            <TabRecipe />
+                            <TabRecipe post={post} user={user} />
                         </View>
                     </ScrollView>
                 </View>
@@ -221,6 +328,12 @@ const styles = StyleSheet.create({
         top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
         zIndex: 1,
     },
+    back: {
+        position: 'absolute', // Đặt nút settings ở vị trí tuyệt đối
+        left: '1%', // Căn phải cách một khoảng
+        top: appInfo.heightWindows * 0.05, // Điều chỉnh vị trí theo chiều dọc
+        zIndex: 1,
+    },
     iconRow: {
         marginLeft: appInfo.widthWindows * 0.03,
     },
@@ -274,8 +387,8 @@ const styles = StyleSheet.create({
         color: '#007BFF',
     },
     contentContainer: {
+        flex: 1,
         marginTop: appInfo.heightWindows * 0.02,
-        flexGrow: 1,
     },
     tabContent: {
         padding: 10,
@@ -296,6 +409,31 @@ const styles = StyleSheet.create({
     },
     toastText: {
         color: '#fff',
+    },
+    headerBottom: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+    },
+    closeButton: {
+        position: 'absolute',
+        left: '3%',
+    },
+    headerText: {
+        fontSize: 20,
+    },
+    actionsContainer: {
+        marginTop: 20,
+    },
+    actionItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    actionText: {
+        marginLeft: 10,
+        fontSize: 16,
+        color: '#000000',
     },
 
 });

@@ -29,6 +29,7 @@ import { createFollow } from "../redux/slices/FollowerSlice";
 import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
 import { createFavorite, deleteFavorite } from "../redux/slices/FavoriteSlice";
 
+import { handleTime, formatDate, calculateEmojiCounts, formatNumber, calculateFavoriteCounts } from "../utils";
 import { ModalPop } from "../modals";
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
@@ -40,25 +41,13 @@ import { app } from "../firebase/FirebaseConfig";
 // import { AvatarEx } from '../component'
 // import RowComponent from '../RowComponent';
 
-const formatNumber = (num) => {
-    // console.log(num)
-    if (num >= 1e9) {
-        return (num / 1e9).toFixed(1) + 'B'; // tỷ
-    } else if (num >= 1e6) {
-        return (num / 1e6).toFixed(1) + 'M'; // triệu
-    } else if (num >= 1e3) {
-        return (num / 1e3).toFixed(1) + 'K'; // nghìn
-    } else {
-        return num.toString(); // số bình thường
-    }
-};
+
 const PictureScreen = ({ }) => {
     const [index, setIndex] = useState(0);
     const route = useRoute();
     const { Data: post, Select, user } = route.params;
     const userPost = route.params.userPost;
 
-    console.log("asldaslkdjaksjdlkajsd", post, Select, user, userPost);
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
     // const DataLength = Object.keys(Data.imgPost).length;
     const inset = useSafeAreaInsets();
@@ -75,7 +64,7 @@ const PictureScreen = ({ }) => {
     const isFavorite = favorite.some(f => f.post_id === post.post_id);
 
 
-    const dataPostView = formatNumber(post.count_view);
+    const dataPostView = formatNumber({ num: post.count_view });
     const dataPostCmt = null; // chưa có dữ liệu tạm thời để trống
 
     const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
@@ -87,7 +76,13 @@ const PictureScreen = ({ }) => {
 
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
-    const dataPostEmoji = formatNumber(1231321); // chưa xong
+    const countEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id });
+    const likeCount = formatNumber({ num: countEmoji.likeCount });
+    const heartCount = formatNumber({ num: countEmoji.heartCount });
+    const laughCount = formatNumber({ num: countEmoji.laughCount });
+    const sadCount = formatNumber({ num: countEmoji.sadCount });
+    const totalCount = formatNumber({ num: countEmoji.totalCount });
+    const favoriteCount = formatNumber({ num: calculateFavoriteCounts({ favoriteList: favorite, post_id: post.post_id }).totalCount });
 
     // console.log(Select);
 
@@ -171,6 +166,7 @@ const PictureScreen = ({ }) => {
                 // await dispatch(startListeningEmoji({ user_id: user.user_id }));
                 setIconEmoji(emojiType);
             }
+            // await dispatch(startListeningEmoji({ user_id: user.user_id }));
         } else {
             console.log("createEmoji");
             // Nếu người dùng chưa tương tác -> CREATE
@@ -190,6 +186,7 @@ const PictureScreen = ({ }) => {
 
         handleHidePop();
     };
+
 
 
     const handleFollowButton = useCallback(() => {
@@ -277,6 +274,12 @@ const PictureScreen = ({ }) => {
     }
 
 
+    const handleNagigatePersonScreen = () => {
+        navigation.navigate("PersonScreen", { userPost: userPost, isFromAvatar: true });
+        console.log("toi day")
+    }
+
+
 
     {/* Image Viewer Versoin 1 */ }
     const imageUrls = post.imgPost.map((item) => ({ url: item }));
@@ -291,12 +294,26 @@ const PictureScreen = ({ }) => {
                 top: inset.top, // Chưa tìm được cách nâng hiển thị index của ImageViewer lên, nên tạm thời hạ thanh navigate bar xuống
                 padding: 10,
             }}>
+                {/* <LinearGradient
+                    start={{ x: 0, y: 1 }} end={{ x: 0, y: 0.5 }}
+                    colors={["transparent", "black"]}
+
+                    style={{
+                        flex: 1,
+                        height: 300,
+                        position: 'absolute',
+                        right: 0,
+                        bottom: -50,
+                        left: 0,
+                        // backgroundColor: "black",
+                    }}
+                /> */}
                 <Feather name='x' color={'white'} size={24}
                     onPress={() => navigation.goBack()} />
 
                 <View style={{ width: "85%", alignItems: 'center' }}>
                     {/* Image Index Versoin 1 */}
-                    {/* <Text style={{ color: "white" }}>{index}/{DataLength}</Text> */}
+                    {/* <Text style={{ color: "white" }}>{index}/{post.imgPost.length}</Text> */}
                 </View>
                 {/* <Feather name='more-vertical' color={'white'} size={24} /> */}
 
@@ -306,6 +323,7 @@ const PictureScreen = ({ }) => {
                 }}>
                     <MoreOptionPostComponent isWhiteDot post_id={post.post_id} user_id={user.user_id} post_user_id={userPost.user_id} />
                 </View>
+
             </View>}
 
             {/* Image Viewer Versoin 1 */}
@@ -367,7 +385,7 @@ const PictureScreen = ({ }) => {
                         // backgroundColor: "red",
                     }} >
                         <View style={{ width: "100%", height: "auto", marginLeft: "5%" }} >
-                            <Text style={{ color: "white" }}>{post.body}</Text>
+                            <Text style={{ color: "white" }}>{post.title}</Text>
                         </View>
                     </View>
                     <View style={{
@@ -377,10 +395,13 @@ const PictureScreen = ({ }) => {
                         position: 'absolute',
                         right: 0,
                     }}>
-                        <ButtonsComponent isButton style={{ alignItems: "center", marginBottom: "10%" }}>
+                        <TouchableOpacity
+                            onPress={() => handleNagigatePersonScreen()}
+                            activeOpacity={0.9}
+                            style={{ alignItems: "center", marginBottom: "10%" }}>
                             <AvatarEx size={50} round={30} url={userPost.imgUser} frame={userPost.frame_user} style={{ marginRight: "3%" }} />
 
-                        </ButtonsComponent>
+                        </TouchableOpacity>
 
 
                         { /* Follow Button */}
@@ -399,38 +420,39 @@ const PictureScreen = ({ }) => {
                                 alignItems: "center",
                             }}>
                             {iconEmoji === "default" ?
-                                <AndtDegisn name='like1' color={"white"} size={30} />
+                                <AndtDegisn name='like1' color={"white"} size={30} style={{ marginTop: 8 }} />
                                 :
                                 <Image
                                     style={{
                                         width: 30,
                                         height: 30,
+                                        marginTop: 8,
                                     }}
                                     source={getIconImg(iconEmoji)}
                                     contentFit="cover"
                                 />
                             }
-                            <Text style={{ color: "white" }}>20</Text>
+                            <Text style={{ color: "white" }}>{totalCount}</Text>
                         </TouchableOpacity>
 
                         {/* Comment Button */}
-                        <TouchableOpacity style={{ alignItems: "center" }}>
+                        <TouchableOpacity style={{ alignItems: "center", marginTop: 8, }}>
                             <MaterialCommunityIcons name='comment-processing' color={"white"} size={30} />
-                            <Text style={{ color: "white" }}>20</Text>
+                            <Text style={{ color: "white" }}>9999</Text>
                         </TouchableOpacity>
 
                         {/* Favorite Button */}
                         {!isFavorite ?
                             <TouchableOpacity
                                 onPress={handleFavorite}
-                                style={{ alignItems: "center" }}>
+                                style={{ alignItems: "center", marginTop: 8, }}>
                                 <AndtDegisn name='star' color={"white"} size={30} />
-                                <Text style={{ color: "white" }}>20</Text>
+                                <Text style={{ color: "white" }}>{favoriteCount}</Text>
                             </TouchableOpacity>
                             :
                             <TouchableOpacity
                                 onPress={handleFavorite}
-                                style={{ alignItems: "center" }}>
+                                style={{ alignItems: "center", marginTop: 8, }}>
                                 <Image
                                     style={{
                                         width: 30,
@@ -439,7 +461,7 @@ const PictureScreen = ({ }) => {
                                     source={require("../../assets/appIcons/favorite.png")}
                                     contentFit="cover"
                                 />
-                                <Text style={{ color: "white" }}>20</Text>
+                                <Text style={{ color: "white" }}>{favoriteCount}</Text>
                             </TouchableOpacity>
                         }
                     </View>
@@ -475,7 +497,7 @@ const PictureScreen = ({ }) => {
                             source={getIconImg("like")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>{likeCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("heart")}
@@ -499,7 +521,7 @@ const PictureScreen = ({ }) => {
                             source={getIconImg("heart")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>{heartCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("laugh")}
@@ -523,7 +545,7 @@ const PictureScreen = ({ }) => {
                             source={getIconImg("laugh")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>{laughCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => handleBtnEmoji("sad")}
@@ -547,7 +569,7 @@ const PictureScreen = ({ }) => {
                             source={getIconImg("sad")}
                             contentFit="cover"
                         />
-                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>20k</Text>
+                        <Text style={{ marginLeft: 4, color: "white", fontSize: 12 }}>{sadCount}</Text>
                     </TouchableOpacity>
 
 
@@ -563,8 +585,6 @@ const PictureScreen = ({ }) => {
                 }} >
                     <AnimatedQuickCmtComponent isNomal post={post} userPost={userPost} user={user} />
                 </View>
-
-
             </View>}
             {/* Emoji Box */}
             <ModalPop

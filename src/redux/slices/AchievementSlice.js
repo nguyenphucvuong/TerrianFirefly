@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
@@ -12,7 +12,10 @@ const initialState = {
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getAchievement = createAsyncThunk('data/getAchievement', async () => {
     try {
-        const querySnapshot = await getDocs(collection(db, "Achievements"));
+        const achievementRef = collection(db, "Achievements");
+        const q = query(achievementRef, orderBy('level')); //sắp xếp tăng dần theo leve 
+        const querySnapshot = await getDocs(q);
+        
         const achievementData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         return achievementData; // Trả về danh sách bài đăng

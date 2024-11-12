@@ -6,12 +6,8 @@ import GroupScreen from '../views/GroupScreen';
 import { appInfo } from '../constains/appInfo';
 
 const { width } = Dimensions.get('window');
-const screens = [
-  <ArticleScreen key="0" />,
-  <FavouriteScreen key="1" />,
-  <GroupScreen key="2" />,
-];
-const TabRecipe = () => {
+
+const TabRecipe = ({ post, user }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [tabHeights, setTabHeights] = useState([0, 0, 0]);
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -41,7 +37,11 @@ const TabRecipe = () => {
       outputRange: [0, 1, 0],
       extrapolate: 'clamp',
     });
-
+  const screens = [
+    <ArticleScreen post={post} user={user} key="0" />,
+    <FavouriteScreen key="1" />,
+    <GroupScreen key="2" />,
+  ];
   return (
     <View style={{ flex: 1 }}>
       {/* Tab Navigation Buttons */}
@@ -49,10 +49,10 @@ const TabRecipe = () => {
         <TouchableOpacity onPress={() => [animateTabTransition(0), setSelectedTab('articles')]} style={styles.tab}>
           <Text style={[styles.tabText, selectedTab === 'articles' && styles.activeTabText]}>Bài viết</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => [animateTabTransition(1),setSelectedTab('favorites')]} style={styles.tab}>
+        <TouchableOpacity onPress={() => [animateTabTransition(1), setSelectedTab('favorites')]} style={styles.tab}>
           <Text style={[styles.tabText, selectedTab === 'favorites' && styles.activeTabText]}>Yêu thích</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => [animateTabTransition(2),setSelectedTab('topics')]} style={styles.tab}>
+        <TouchableOpacity onPress={() => [animateTabTransition(2), setSelectedTab('topics')]} style={styles.tab}>
           <Text style={[styles.tabText, selectedTab === 'topics' && styles.activeTabText]}>Chủ Đề</Text>
         </TouchableOpacity>
       </View>
@@ -71,6 +71,8 @@ const TabRecipe = () => {
             }}
           >
             <ScrollView
+              scrollEnabled={false}
+              contentContainerStyle={{ paddingBottom: '38%' }}
               onContentSizeChange={(contentWidth, contentHeight) =>
                 handleContentSizeChange(index, contentWidth, contentHeight)
               }

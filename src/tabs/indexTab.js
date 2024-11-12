@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image } from "expo-image";
-import {React, useEffect, useState} from "react";
+import { React, useEffect, useState } from "react";
 import { EventTab, NewPostTab, NotiTab, PersonTab } from "./";
 import { IndexRouter } from "../routers/indexRouter";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
@@ -9,10 +9,8 @@ import { auth } from '../firebase/FirebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import EventScreen from "../views/EventScreen";
 import { ButtonsComponent } from "../component";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  listenToUserRealtime
-} from "../redux/slices/UserSlices";
+
+import { useNavigation } from '@react-navigation/native';
 const Tab = createBottomTabNavigator();
 const getRouteName = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route);
@@ -23,6 +21,21 @@ const getRouteName = (route) => {
 };
 
 const IndexTab = () => {
+  const navigation = useNavigation();
+  //firebase
+
+  const [user, setUser] = useState("");
+  useEffect(() => {
+  
+    // Kiểm tra trạng thái xác thực của người dùng
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    // Hủy đăng ký lắng nghe khi thành phần bị hủy
+    return () => unsubscribe();
+  }, []);
+
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -57,7 +70,7 @@ const IndexTab = () => {
         })}
       />
       <Tab.Screen
-        name="Thông Tin"
+        name="Sự Kiện"
         component={EventTab}
         options={({ route }) => ({
           tabBarIcon: ({ focused }) => (
@@ -71,6 +84,7 @@ const IndexTab = () => {
             />
           ),
           headerShown: true,
+          headerTitleAlign: "center",
         })}
       />
       <Tab.Screen
@@ -88,7 +102,7 @@ const IndexTab = () => {
         }}
       />
       <Tab.Screen
-        name="Thông tin"
+        name="Thông Tin"
         component={NotiTab}
         options={{
           tabBarIcon: ({ focused }) => (
@@ -103,6 +117,7 @@ const IndexTab = () => {
           ),
           headerShown: true,
           gestureEnabled: false,
+          headerTitleAlign: "center",
         }}
       />
       <Tab.Screen

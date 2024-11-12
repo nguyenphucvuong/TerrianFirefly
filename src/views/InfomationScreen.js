@@ -80,10 +80,10 @@ const InfomationScreen = () => {
     useEffect(() => {
         hanndleDisPlay();
         //dispatch(getUser(user.email));
-        const unsubscribe = dispatch(listenToUserRealtime(user.email));
-        return () => unsubscribe();
-    }, [dispatch, user.email]);
-
+        // const unsubscribe = dispatch(listenToUserRealtime(user.email));
+        // return () => unsubscribe();
+    }, []);
+  
 
     // console.log('user1232',user[0].email);
     const hanndleDisPlay = () => {

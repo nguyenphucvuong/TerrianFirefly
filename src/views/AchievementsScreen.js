@@ -110,7 +110,7 @@ const AchievementsScreen = () => {
                                                     color={'#FFFFFF'}
                                                     style={[
                                                         styles.iconComponent,
-                                                        { bottom: 5, left: 5, backgroundColor: '#BFBFBF' },
+                                                        { bottom: 5, left: 5, backgroundColor: '#BFBFBF', zIndex: 1 },
                                                     ]}
                                                 />
                                             ) : null}

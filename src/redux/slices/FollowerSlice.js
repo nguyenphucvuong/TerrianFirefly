@@ -51,7 +51,7 @@ export const deleteFollow = createAsyncThunk('data/deleteFollow', async ({ follo
             await deleteDoc(docSnapshot.ref);
         }
         // await dispatch(removeFollower({ follower_user_id, user_id }));
-        console.log(`Successfully deleted follow relationship between ${follower_user_id} and ${user_id}`);
+        //console.log(`Successfully deleted follow relationship between ${follower_user_id} and ${user_id}`);
         return { follower_user_id, user_id };
     } catch (error) {
         console.error('Error deleting document: ', error);
@@ -94,20 +94,21 @@ export const startListeningFollowers = ({ follower_user_id }) => (dispatch) => {
         // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
         dispatch(setFollowers(followers));
-        console.log("followers", followers)
+        // console.log("followers", followers)
     }, (error) => {
         console.error('Error fetching follower: ', error);
     });
 
     return unsubscribe; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
 };
+
 export const FollowerSlice = createSlice({
     name: 'follower',
     initialState,
     reducers: {
         setFollowers: (state, action) => {
             state.follower = action.payload;
-            console.log("follower setFollowers", action.payload)
+            //console.log("follower setFollowers", action.payload)
             state.status = 'succeeded';
         },
         setCurrentFollower: (state, action) => {
@@ -126,7 +127,7 @@ export const FollowerSlice = createSlice({
             .addCase(createFollow.fulfilled, (state, action) => {
                 console.log(action.payload);
                 state.follower.push(action.payload);
-                console.log("follower createFollow", state.follower)
+                //console.log("follower createFollow", state.follower)
                 state.status = 'succeeded';
             })
             .addCase(createFollow.pending, (state) => {
@@ -153,7 +154,7 @@ export const FollowerSlice = createSlice({
             //  deleteFollow
             .addCase(deleteFollow.fulfilled, (state, action) => {
                 state.follower = state.follower.filter(item => item.user_id !== action.payload.user_id);
-                console.log("follower deleteFollow", state.follower)
+                //console.log("follower deleteFollow", state.follower)
                 state.status = 'succeeded';
             })
             .addCase(deleteFollow.pending, (state) => {
