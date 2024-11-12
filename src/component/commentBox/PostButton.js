@@ -3,7 +3,7 @@ import { Text, View, Animated, StyleSheet, TouchableOpacity } from 'react-native
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Image } from 'expo-image'
 import { useDispatch, useSelector } from 'react-redux'
-import { createEmoji, deleteEmoji, updateEmojiByField, startListeningEmoji, countEmojis } from '../../redux/slices/EmojiSlice'
+import { createEmoji, deleteEmoji, updateEmojiByField, startListeningEmoji } from '../../redux/slices/EmojiSlice'
 
 
 import RowComponent from '../RowComponent'
@@ -14,51 +14,23 @@ import { ModalPop } from '../../modals'
 import { appInfo } from '../../constains/appInfo'
 import { appcolor } from '../../constains/appcolor'
 import EmojiBoxComponent from './EmojiBoxComponent'
+import { calculateEmojiCounts } from '../../utils'
 
 
 const formatNumber = (num) => {
     // console.log(num)
     if (num >= 1e9) {
-        return (num / 1e9).toFixed(0) + 'B'; // tỷ
+        return (num / 1e9).toFixed(1) + 'B'; // tỷ
     } else if (num >= 1e6) {
-        return (num / 1e6).toFixed(0) + 'M'; // triệu
+        return (num / 1e6).toFixed(1) + 'M'; // triệu
     } else if (num >= 1e3) {
-        return (num / 1e3).toFixed(0) + 'K'; // nghìn
+        return (num / 1e3).toFixed(1) + 'K'; // nghìn
     } else {
         return num.toString(); // số bình thường
     }
 };
 
-const calculateEmojiCounts = ({ emojiList, postId }) => {
-    let likeCount = 0;
-    let heartCount = 0;
-    let laughCount = 0;
-    let sadCount = 0;
-    if (!emojiList) {
-        return {
-            likeCount,
-            heartCount,
-            laughCount,
-            sadCount,
-        };
-    }
-    emojiList.forEach(emoji => {
-        if (emoji.post_id === postId) {
-            likeCount += emoji.count_like;
-            heartCount += emoji.count_heart;
-            laughCount += emoji.count_laugh;
-            sadCount += emoji.count_sad;
-        }
-    });
-    const totalCount = likeCount + heartCount + laughCount + sadCount;
-    return {
-        likeCount,
-        heartCount,
-        laughCount,
-        sadCount,
-        totalCount,
-    };
-};
+
 
 
 const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handleNagigateDetailPost }) => {
@@ -76,7 +48,7 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
 
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
-    const dataPostEmoji = formatNumber(calculateEmojiCounts({ emojiList: emoji, postId: post.post_id }).totalCount); // chưa xong
+    const dataPostEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id }).totalCount; // chưa xong
     // useEffect(() => {
     //     dispatch(startListeningEmoji({ user_id: user.user_id }));
     // }, [])
@@ -155,9 +127,10 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
                     count_laugh: emojiType === "laugh" ? 1 : 0,
                     count_sad: emojiType === "sad" ? 1 : 0,
                 }));
-                await dispatch(startListeningEmoji({ user_id: user.user_id }));
+                // await dispatch(startListeningEmoji({ user_id: user.user_id }));
                 setIconEmoji(emojiType);
             }
+            // await dispatch(startListeningEmoji({ user_id: user.user_id }));
         } else {
             console.log("createEmoji");
             // Nếu người dùng chưa tương tác -> CREATE
