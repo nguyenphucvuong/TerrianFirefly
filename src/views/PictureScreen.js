@@ -274,6 +274,12 @@ const PictureScreen = ({ }) => {
     }
 
 
+    const handleNagigatePersonScreen = () => {
+        navigation.navigate("PersonScreen", { userPost: userPost, isFromAvatar: true });
+        console.log("toi day")
+    }
+
+
 
     {/* Image Viewer Versoin 1 */ }
     const imageUrls = post.imgPost.map((item) => ({ url: item }));
@@ -389,10 +395,13 @@ const PictureScreen = ({ }) => {
                         position: 'absolute',
                         right: 0,
                     }}>
-                        <ButtonsComponent isButton style={{ alignItems: "center", marginBottom: "10%" }}>
+                        <TouchableOpacity
+                            onPress={() => handleNagigatePersonScreen()}
+                            activeOpacity={0.9}
+                            style={{ alignItems: "center", marginBottom: "10%" }}>
                             <AvatarEx size={50} round={30} url={userPost.imgUser} frame={userPost.frame_user} style={{ marginRight: "3%" }} />
 
-                        </ButtonsComponent>
+                        </TouchableOpacity>
 
 
                         { /* Follow Button */}

@@ -3,6 +3,8 @@ import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigation, useRoute, useIsFocused } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSelector, useDispatch } from "react-redux";
+import { createFollow, deleteFollow } from "../redux/slices/FollowerSlice";
+
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import {
@@ -49,19 +51,19 @@ const PersonScreen = ({ isAvatar }) => {
 
     //console.log('useruser', user);
     const follower = useSelector(state => state.follower.follower);
-    const isFlag = follower.some(f => f.user_id === post.user_id);
+    const isFlag = follower.some(f => f.user_id === userPost.user_id);
 
     const handleFollowButton = useCallback(() => {
         const handleFollowUser = async () => {
-            // if (isFollow) {
-            //     await dispatch(deleteFollow({ follower_user_id: user.user_id, user_id: userId }));
-            //     // await dispatch(stopListeningFollowers({ follower_user_id: user.user_id }));
+            if (isFlag) {
+                await dispatch(deleteFollow({ follower_user_id: dataUser.user_id, user_id: userPost.user_id }));
+                // await dispatch(stopListeningFollowers({ follower_user_id: user.user_id }));
 
 
-            // } else {
-            //     await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userId }));
-            //     // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
-            // }
+            } else {
+                await dispatch(createFollow({ follower_user_id: dataUser.user_id, user_id: userPost.user_id }));
+                // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+            }
         }
         handleFollowUser();
     });
@@ -125,7 +127,8 @@ const PersonScreen = ({ isAvatar }) => {
             dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: user?.user_id }));
             // const unsubscribe = dispatch(listenToUserRealtime(user.email));
             // return () => unsubscribe();
-
+            console.log("user", user);
+            console.log("userPost", userPost);
         }
     }, [isFocused, isFromAvatar]);
     return (

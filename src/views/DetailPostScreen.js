@@ -174,7 +174,7 @@ const DetailPostScreen = () => {
 
     };
     const handleNagigatePersonScreen = () => {
-        navigation.navigate("PersonScreen", { user: userPost });
+        navigation.navigate("PersonScreen", { userPost: userPost, isFromAvatar: true });
         console.log("toi day")
     }
 
