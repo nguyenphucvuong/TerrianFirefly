@@ -1,6 +1,6 @@
 import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text, Alert, LogBox, Clipboard } from 'react-native'
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
-import { useNavigation, useRoute, useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { useNavigation, useRoute, useIsFocused } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSelector, useDispatch } from "react-redux";
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -48,6 +48,23 @@ const PersonScreen = ({ isAvatar }) => {
     //console.log('dataUser', dataUser);
 
     //console.log('useruser', user);
+    const follower = useSelector(state => state.follower.follower);
+    const isFlag = follower.some(f => f.user_id === post.user_id);
+
+    const handleFollowButton = useCallback(() => {
+        const handleFollowUser = async () => {
+            // if (isFollow) {
+            //     await dispatch(deleteFollow({ follower_user_id: user.user_id, user_id: userId }));
+            //     // await dispatch(stopListeningFollowers({ follower_user_id: user.user_id }));
+
+
+            // } else {
+            //     await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userId }));
+            //     // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+            // }
+        }
+        handleFollowUser();
+    });
 
     //Copy
     const [showToast, setShowToast] = useState(false);
@@ -168,22 +185,66 @@ const PersonScreen = ({ isAvatar }) => {
                             onPress={() => navigation.navigate('BackgroundScreen')}
                         />
                         <View style={styles.scrollViewContent}>
-                            <View style={{ flexDirection: 'row' }}>
+                            <View style={{
+                                flexDirection: 'row', width: "100%",
+                                // backgroundColor: "yellow",
+                            }}>
                                 <Animated.View style={[styles.avatar, avatarAnimation]}>
                                     <AvatarEx url={user.imgUser} size={appInfo.widthWindows * 0.22} round={20} frame={user.frame_user} name={user.username} />
                                     <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username}</Text>
                                 </Animated.View>
-                                <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
-                                    <IconComponent
-                                        name={'edit'}
-                                        size={appInfo.heightWindows * 0.025}
-                                        color={'#190AEF'}
-                                        text={'Chỉnh sửa'}
-                                        textColor={'#190AEF'}
-                                        style={styles.buttonEdit}
-                                        onPress={() => navigation.navigate('InfomationScreen')}
-                                    />
-                                </View>
+
+
+                                {user !== userPost ?
+                                    <View style={{
+                                        // backgroundColor: 'red',
+                                        flexDirection: 'row',
+                                        justifyContent: 'center',
+                                        width: '100%',
+                                    }}>
+                                        <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
+                                            <IconComponent
+                                                name={'edit'}
+                                                size={appInfo.heightWindows * 0.025}
+                                                color={'#190AEF'}
+                                                text={'Chỉnh sửa'}
+                                                textColor={'#190AEF'}
+                                                style={styles.buttonEdit}
+                                                onPress={() => navigation.navigate('InfomationScreen')}
+                                            />
+                                        </View>
+                                    </View>
+                                    :
+
+                                    <View style={{
+                                        // backgroundColor: 'red',
+                                        flexDirection: 'row',
+                                        justifyContent: 'flex-end',
+                                        width: '100%',
+                                        paddingRight: '6%',
+                                        paddingTop: '3%',
+                                    }}>
+                                        <TouchableOpacity
+                                            // disabled={isFollow}
+                                            activeOpacity={0.6}
+                                            onPress={handleFollowButton}
+                                            style={{
+                                                borderColor: "rgba(121,141,218,1)",
+                                                borderRadius: 100,
+                                                borderWidth: 1,
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                width: "27%",
+                                                height: 40,
+                                                paddingHorizontal: "2%",
+                                                // opacity: isFollow ? 0 : 1,
+                                            }}
+                                        >
+                                            <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>{isFlag ? "Hủy theo dõi" : "Theo dõi"}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
+
                             </View>
 
                             <View style={styles.iconRow}>

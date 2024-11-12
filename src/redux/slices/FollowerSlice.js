@@ -94,7 +94,7 @@ export const startListeningFollowers = ({ follower_user_id }) => (dispatch) => {
         // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
         dispatch(setFollowers(followers));
-        console.log("followers", followers)
+        // console.log("followers", followers)
     }, (error) => {
         console.error('Error fetching follower: ', error);
     });

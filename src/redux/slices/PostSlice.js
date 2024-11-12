@@ -133,8 +133,6 @@ const getFollowedUserIds = async ({ currentUserId }) => {
   return followerSnapshot.docs.map((doc) => doc.data().user_id);
 };
 
-
-
 // Hàm chính để lấy bài viết mới
 export const getPostsRefresh = createAsyncThunk(
   "data/getPostsRefresh",
@@ -182,29 +180,34 @@ export const getPostsRefresh = createAsyncThunk(
 
 export const getPostsByField = createAsyncThunk(
   "data/getPostsByField",
-  async ({ field, value }, { getState, dispatch }) => {
+  async ({ field, value }) => {
+    console.log("field, value", field, value)
     try {
 
-      const postQuery = query(
+      let postsQuery = query(
         collection(db, "Posts"),
-        orderBy(field, "desc"),
-        limit(1),
-        where(field, "==", value)
+        where(field, "==", value),
       );
 
-      const querySnapshot = await getDocs(postQuery);
-      if (querySnapshot.empty) {
-        return { postData: [], lastVisiblePost: null };
-      }
 
+      const querySnapshot = await getDocs(postsQuery);
+
+      if (querySnapshot.empty) {
+        return { postData: [] };
+      }
+      await updatePostViewCount(querySnapshot.docs);
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
       const postData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      return postData;
-
+      console.log("postData[0]", postData[0])
+      console.log("postData[0].imgPost", postData[0].imgPost)
+      return {
+        postData: postData[0],
+      };
     } catch (error) {
-      console.error("Error fetching posts by field: ", error);
+      console.error("Error getPostsByField: ", error);
       throw error;
     }
   }
@@ -479,7 +482,7 @@ export const PostSlice = createSlice({
       // getPostsByField
       .addCase(getPostsByField.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentPost = action.payload.postData;
+        state.currentPost = action.payload;
         // console.log("getPostsByField", state.currentPost);
         state.status = "succeeded"; // Đánh dấu thành công
       })

@@ -52,7 +52,7 @@ export const deleteFavorite = createAsyncThunk('data/deleteFavorite', async ({ p
         console.error('Error deleting document: ', error);
         throw error;
     }
-}); 
+});
 
 export const getFavorites = createAsyncThunk('data/getFavorite', async ({ post_id }) => {
     if (post_id === undefined) {
@@ -78,12 +78,12 @@ export const getFavorites = createAsyncThunk('data/getFavorite', async ({ post_i
 });
 
 export const startListeningFavorites = ({ user_id }) => (dispatch) => {
-    if (!user_id) return;
+    // if (!user_id) return;
 
     const favoriteQuery =
         query(
             collection(db, "Favorite"),
-            where('user_id', "==", user_id),
+            // where('user_id', "==", user_id),
         );
     const unFavorite = onSnapshot(favoriteQuery, (querySnapshot) => {
         const favorites = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -101,6 +101,8 @@ export const startListeningFavorites = ({ user_id }) => (dispatch) => {
 
     return unFavorite;
 };
+
+
 export const FavoriteSlice = createSlice({
     name: 'favorite',
     initialState,
@@ -109,11 +111,12 @@ export const FavoriteSlice = createSlice({
             state.currentFavorite = action.payload;
             state.status = 'succeeded';
         },
+
     },
     extraReducers: (builder) => {
         builder
             .addCase(createFavorite.fulfilled, (state, action) => {
-                state.currentFavorite.push(action.payload);
+                // state.currentFavorite.push(action.payload);
                 state.status = 'succeeded';
             })
             .addCase(createFavorite.pending, (state) => {
@@ -137,7 +140,7 @@ export const FavoriteSlice = createSlice({
             })
 
             .addCase(deleteFavorite.fulfilled, (state, action) => {
-                state.currentFavorite = state.currentFavorite.filter(favorite => favorite.user_id !== action.payload.user_id && favorite.post_id !== action.payload.post_id);
+                // state.currentFavorite = state.currentFavorite.filter(favorite => favorite.user_id !== action.payload.user_id && favorite.post_id !== action.payload.post_id);
                 state.status = 'succeeded';
             })
             .addCase(deleteFavorite.pending, (state) => {
@@ -150,6 +153,6 @@ export const FavoriteSlice = createSlice({
     },
 });
 
-export const { setCurrentFavorite } = FavoriteSlice.actions
+export const { setCurrentFavorite, setCurrentFavoritePost } = FavoriteSlice.actions
 
 export default FavoriteSlice.reducer;
