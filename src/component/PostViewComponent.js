@@ -143,8 +143,9 @@ const PostViewComponent = ({ post, user }) => {
                             height={appInfo.widthWindows / 5.7}
                             style={{ alignItems: "center" }}
                         >
-                            <AvatarEx size={40} round={30} url={userPost.imgUser} frame={userPost.frame_user} />
-                            {/* <Image
+                            <TouchableOpacity onPress={() => navigation.navigate('PersonScreen',{userPost: userPost, isFromAvatar: true})}>
+                                <AvatarEx size={40} round={30} url={userPost.imgUser} frame={userPost.frame_user} />
+                                {/* <Image
                             source={require('../../assets/frame/frame_background.png')}
                             style={{
                                 height: 60,
@@ -154,6 +155,7 @@ const PostViewComponent = ({ post, user }) => {
                             }}
                         >
                         </Image> */}
+                            </TouchableOpacity>
 
                             <View
                                 style={{

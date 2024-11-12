@@ -25,6 +25,7 @@ import {
     DetailPostScreen,
     EventManagementScreen,
     AddEditEventScreen,
+    PersonScreen,
 
 } from '../views';
 
@@ -107,6 +108,7 @@ const StackNavigator = () => {
                 options={() => IconBack("Theo Dõi")} />
             <Stack.Screen name='picture' component={PictureScreen} options={{ headerShown: false }} />
             <Stack.Screen name='DetailPost' component={DetailPostScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='PersonScreen' component={PersonScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     )
 }

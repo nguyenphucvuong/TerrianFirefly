@@ -1,6 +1,6 @@
 import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text, Alert, LogBox, Clipboard } from 'react-native'
-import React, { useRef, useState, useEffect, useMemo } from 'react'
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigation, useRoute, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSelector, useDispatch } from "react-redux";
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -27,19 +27,27 @@ const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.09;
 const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 
 
-const PersonScreen = () => {
+const PersonScreen = ({ isAvatar }) => {
+    const navigation = useNavigation();
     //firebase
-    const users = useSelector((state) => state.user.user);
+    // const users = useSelector((state) => state.user.user);
     const followUp = useSelector((state) => state.user.usersFollowed);
     const followingUsers = useSelector((state) => state.user.followingUsers);
+    const dataUser = useSelector((state) => state.user.user);
     const post = useSelector((state) => state.post.postByUser);
     const dispatch = useDispatch();
+    const isFocused = useIsFocused(); // Kiểm tra khi tab được focus
+
     //route
     const route = useRoute();
-    const user = route.params?.user ?? users;
-    //console.log('user',user);
+    const userPost = route.params?.userPost ?? {};
+    const isFromAvatar = route.params?.isFromAvatar ?? isAvatar;
+    // console.log('userPost',userPost);
+    //console.log('isFromAvatar', isFromAvatar);
+    const [user, setUser] = useState(isFromAvatar ? userPost : dataUser);
+    //console.log('dataUser', dataUser);
 
-    const navigation = useNavigation();
+    //console.log('useruser', user);
 
     //Copy
     const [showToast, setShowToast] = useState(false);
@@ -84,22 +92,25 @@ const PersonScreen = () => {
     const onClose = () => {
 
     }
-    //cập nhật lại dữ liệu 
+    //cập nhật lại dữ liệu  
     useEffect(() => {
-        //Bài viết
-        dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
-        //theo dõi
-        dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
-        // người theo dõi
-        dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: user?.user_id }));
-        const unsubscribe = dispatch(listenToUserRealtime(user.email));
-        return () => unsubscribe();
-    }, [dispatch, user.email]);
-    //console.log('user', user);
-    //console.log('showToast', showToast);
-    ///console.log('followUp', followUp.length,);
+        if (isFocused) {
+            if (isFocused && user !== (isFromAvatar ? userPost : dataUser)) {
+                setUser(isFromAvatar ? userPost : dataUser);
+                // dispatch actions here
+            }
+            // console.log('aaaaaaaaaaaaaaaaa');
+            //Bài viết
+            dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
+            //theo dõi
+            dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
+            // người theo dõi
+            dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: user?.user_id }));
+            // const unsubscribe = dispatch(listenToUserRealtime(user.email));
+            // return () => unsubscribe();
 
-
+        }
+    }, [isFocused, isFromAvatar]);
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
             {user.length === 0 ? (
@@ -118,13 +129,13 @@ const PersonScreen = () => {
                     <View style={styles.header}>
                         <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
                             <View style={styles.upperrHeader}>
-                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, user !== users && { marginLeft: '7%' }]}>
+                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, user === userPost && { marginLeft: '7%' }]}>
                                     <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={user.imgUser} />
                                     <Text style={styles.avatarText}>{user.username}</Text>
                                 </Animated.View>
                             </View>
                             {
-                                users !== user ?
+                                userPost === user ?
                                     <View style={styles.back}>
                                         <ButtonBackComponent color={'white'} />
                                     </View>
@@ -177,50 +188,19 @@ const PersonScreen = () => {
 
                             <View style={styles.iconRow}>
                                 <IconComponent name={'credit-card'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'ID: ' + user.user_id} onPress={() => copyToClipboard(user.user_id)} />
-                                <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} />
+                                <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} disabled={userPost === user ? true : false} />
                             </View>
 
                             <View style={styles.statisticsContainer}>
                                 <StatisticsComponent quantity={post.length} name={'Bài Viết'} />
                                 <StatisticsComponent quantity={followUp.length} name={'Theo Dõi'} onPress={() => navigation.navigate('FollowUp', { followUp })} />
-                                <StatisticsComponent quantity={followingUsers.length} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen',{followingUsers})} />
+                                <StatisticsComponent quantity={followingUsers.length} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen', { followingUsers })} />
                                 <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                             </View>
                             {/*  Tab Navigation */}
                             <TabRecipe post={post} user={user} />
                         </View>
                     </ScrollView>
-                    {/* <BottomSheetModal
-                        ref={bottomSheetModalRef}
-                        index={0}
-                        snapPoints={snapPoints}>
-                        <BottomSheetView style={styles.contentContainer}>
-                            <View style={styles.headerBottom}>
-                                <IconComponent name={'x'} size={appInfo.heightWindows * 0.028} color={'#000000'} style={styles.closeButton} />
-                                <Text style={styles.headerText}>Quản Lý</Text>
-                            </View>
-                            <View style={styles.actionsContainer}>
-                                <View style={styles.actionItem}>
-                                    <IconComponent
-                                        name={'x'}
-                                        size={appInfo.heightWindows * 0.028}
-                                        color={'#000000'}
-                                        style={styles.closeButton}
-                                    />
-                                    <Text style={styles.actionText}>Chặn Người Dùng</Text>
-                                </View>
-                                <View style={styles.actionItem}>
-                                    <IconComponent
-                                        name={'x'}
-                                        size={appInfo.heightWindows * 0.028}
-                                        color={'#000000'}
-                                        style={styles.closeButton}
-                                    />
-                                    <Text style={styles.actionText}>Tố Cáo Người Dùng</Text>
-                                </View>
-                            </View>
-                        </BottomSheetView>
-                    </BottomSheetModal> */}
                 </View>
             )}
         </View>

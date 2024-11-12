@@ -275,7 +275,7 @@ export const getUserFromFollowingUsers = createAsyncThunk(
     try {
       // Lấy danh sách user ID đã được follow
       const followedUserIds = await getFollowingUsersIds({ currentUserId: currentUserId });
-      console.log('followedUserIds',followedUserIds);
+      //console.log('followedUserIds',followedUserIds);
 
       // Nếu không có user nào được follow, trả về mảng rỗng
       if (followedUserIds.length === 0) {
