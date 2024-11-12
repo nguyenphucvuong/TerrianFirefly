@@ -59,7 +59,7 @@ export const getNoti = (dispatch, targetUser_id) => {
       id: doc.id,
       ...doc.data(),
     }));
-    // console.log("logSlice",notiList)
+    // console.log("l",notiList)
     dispatch(setNotifications(notiList));
   });
 

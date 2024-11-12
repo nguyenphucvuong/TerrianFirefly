@@ -61,6 +61,7 @@ const NotificationScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* {console.log(noti)} */}
       {noti.length != 0 ? (
         <ListNotiComponent targetUser_id={user.user_id} />
       ) : (
