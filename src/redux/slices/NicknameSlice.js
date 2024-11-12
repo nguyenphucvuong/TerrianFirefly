@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
@@ -12,11 +12,10 @@ const initialState = {
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getNickname = createAsyncThunk('data/getNickname', async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "Nickname"));
-    querySnapshot.forEach((doc) => {
-      //console.log(`Nickname: ${doc.id} => `, doc.data());
-    });
-    //const querySnapshot = await getDocs(collection(db, "Posts")); // Thay "Posts" bằng tên bộ sưu tập của bạn
+    const nicknameRef = collection(db, "Nickname");
+    const q = query(nicknameRef, orderBy('level')); // sắp xếp tăng dần theo level
+
+    const querySnapshot = await getDocs(q);
     const nicknameData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Lấy dữ liệu và ID của từng tài liệu
 
     //console.log("Danh sách post: ",postData[0].imgPost);

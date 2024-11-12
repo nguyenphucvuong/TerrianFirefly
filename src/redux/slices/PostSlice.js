@@ -133,18 +133,6 @@ const getFollowedUserIds = async ({ currentUserId }) => {
   return followerSnapshot.docs.map((doc) => doc.data().user_id);
 };
 
-// Hàm lấy danh sách user ID đã được yêu thích
-const getFavouriteUserIds = async ({ currentUserId }) => {
-  const favouriteQuery = query(
-    collection(db, "Favorite"),
-    where("post_id", "==", currentUserId)
-  );
-  const favouriteSnapshot = await getDocs(favouriteQuery);
-  //console.log("favouriteSnapshot", favouriteSnapshot.docs.map((doc) => doc.data().user_id));
-
-  return favouriteSnapshot.docs.map((doc) => doc.data().user_id);
-};
-
 // Hàm chính để lấy bài viết mới
 export const getPostsRefresh = createAsyncThunk(
   "data/getPostsRefresh",
@@ -319,10 +307,30 @@ export const getPostUsers = createAsyncThunk(
   }
 );
 
+// Hàm lấy danh sách user ID đã được yêu thích
+const getFavouriteUserIds = async ({ currentUserId }) => {
+  try {
+    const favouriteQuery = query(
+      collection(db, "Favorite"),
+      where("user_id", "==", currentUserId)  // Lấy bài viết yêu thích của currentUserId
+    );
+
+    const favouriteSnapshot = await getDocs(favouriteQuery);
+    // Lấy danh sách post_id từ các bài viết mà người dùng yêu thích
+    //console.log('favouriteSnapshot', favouriteSnapshot.docs.map((doc) => doc.data().post_id));
+    
+    return favouriteSnapshot.docs.map((doc) => doc.data().post_id);  // Trả về post_id của bài viết yêu thích
+  } catch (error) {
+    console.error("Error fetching favourite post IDs: ", error);
+    throw error;
+  }
+};
+
 //hàm lấy bài người dùng đã yêu thích
 export const getPostsFromFavouriteUsers = createAsyncThunk(
   "data/getPostsFromFavouriteUsers",
   async ({ field, currentUserId }, { getState }) => {
+    // console.log('currentUserId',currentUserId);
 
     try {
       // Lấy danh sách user ID đã được follow
@@ -331,42 +339,23 @@ export const getPostsFromFavouriteUsers = createAsyncThunk(
 
       // Nếu không có user nào được follow, trả về mảng rỗng
       if (favouriteUserIds.length === 0) {
-        return { postData: [], lastVisiblePost: null };
+        return { postData: [] };
       }
 
-      // Kiểm tra lastVisiblePostFollower để lấy bài đăng từ trang trước đó
-      const lastVisiblePostId = getState().post.lastVisiblePostFollower;
-      //console.log("currentUserId", getState().post.lastVisiblePostFollower);
-      let lastVisibleDoc = null;
-
-      if (lastVisiblePostId) {
-        const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
-        lastVisibleDoc = await getDoc(lastVisibleDocRef);
-      }
-
-      // Tạo query lấy bài đăng từ những người dùng đã được follow
+      // Tạo query lấy bài đăng từ những người dùng đã được yêu thích
       let postsQuery = query(
         collection(db, "Posts"),
         orderBy(field, "desc"),
-        where("user_id", "in", favouriteUserIds)
+        where("post_id", "in", favouriteUserIds)
       );
-
-      if (lastVisibleDoc) {
-        postsQuery = query(postsQuery, startAfter(lastVisibleDoc));
-      }
 
       const querySnapshot = await getDocs(postsQuery);
 
       // Trả về mảng rỗng nếu không có bài đăng nào
       if (querySnapshot.empty) {
-        return { postData: [], lastVisiblePost: null };
+        return { postData: [] };
       }
 
-      // Cập nhật lượt xem
-      await updatePostViewCount(querySnapshot.docs);
-
-      // Lấy ID của bài đăng cuối cùng để hỗ trợ paginating
-      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
       const postData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -374,10 +363,9 @@ export const getPostsFromFavouriteUsers = createAsyncThunk(
 
       return {
         postData: postData,
-        lastVisiblePost: lastVisible ? lastVisible.id : null,
       };
     } catch (error) {
-      console.error("Error fetching posts from followed users: ", error);
+      console.error("Error fetching posts from favourite users: ", error);
       throw error;
     }
   }
@@ -568,7 +556,7 @@ export const PostSlice = createSlice({
       })
       .addCase(getPostsFromFavouriteUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.postFavourite.push(...action.payload.postData);
+        state.postFavourite = action.payload.postData;
         state.lastVisiblePostFollower = action.payload.lastVisiblePost;
         state.status = "succeeded";
       })
