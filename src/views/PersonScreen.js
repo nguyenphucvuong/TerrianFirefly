@@ -76,10 +76,9 @@ const PersonScreen = () => {
     }, [dispatch, user.email]);
     //console.log('user', user);
     //console.log('showToast', showToast);
-
     return (
         <View style={{ flex: 1 }}>
-            {!user ? (
+            {user.length === 0 ? (
                 <View>
                     <SkeletonComponent Data={""} style={{ width: '100%', height: appInfo.heightWindows * 0.15 }} />
                     <View style={{ margin: '5%' }}>

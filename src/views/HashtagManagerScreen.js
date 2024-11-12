@@ -68,36 +68,35 @@ const HashtagManagerScreen = () => {
       );
       return;
     }
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setAvatarImage(result.assets[0].uri);
+      if (!result.canceled) {
+        setAvatarImage(result.assets[0].uri);
+      }
+    } catch {
+      console.error("Error picking image: ", error);
     }
   };
 
   const handleAddHashtag = async () => {
-    const hashtag_id = hashtags.filter((e) => {
-      return e.hashtag_id == hashtagName;
-      
-    });
     if (!hashtagName) {
       Alert.alert("Lỗi", "Vui lòng nhập tên hashtag.");
       return;
     }
-    
-    
-    if (hashtag_id[0].hashtag_id === hashtagName) {
+    // Kiểm tra nếu hashtag đã tồn tại
+    const hashtagExists = hashtags.some((e) => e.hashtag_id === hashtagName);
+
+    if (hashtagExists) {
       setModalVisible(false);
-      Alert.alert("Lỗi", "Hashtag Đã tồn tại.");
+      Alert.alert("Lỗi", "Hashtag đã tồn tại.");
       return;
     }
-
     setisLoading(true);
     try {
       setModalVisible(true);
@@ -124,7 +123,6 @@ const HashtagManagerScreen = () => {
       setisLoading(false);
     }
   };
-
   const handleDeleteHashtag = async (hashtag_id) => {
     try {
       await dispatch(deleteHashtagFromFirestore(hashtag_id)); // Xóa hashtag từ Firestore
@@ -158,9 +156,7 @@ const HashtagManagerScreen = () => {
         </TouchableOpacity>
 
         <View style={[styles.sampleHashtagContainer, { backgroundColor }]}>
-          <Text style={[styles.sampleHashtagText,]}>
-            #{hashtagName}
-          </Text>
+          <Text style={[styles.sampleHashtagText]}>#{hashtagName}</Text>
         </View>
       </View>
 

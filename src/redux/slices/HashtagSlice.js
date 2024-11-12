@@ -70,10 +70,8 @@ export const addHashtagToFirestore = createAsyncThunk(
   async (hashtagData, { rejectWithValue }) => {
     try {
       const { hashtag_id, hashtag_avatar, ...otherData } = hashtagData;
-
       // Kiểm tra nếu hashtag_avatar không có giá trị, đặt giá trị mặc định là "default"
       const finalAvatar = hashtag_avatar || "default";
-
       // Chuẩn bị dữ liệu để lưu, bao gồm cả hashtag_id và hashtag_avatar mặc định (nếu cần)
       const hashtagToSave = {
         hashtag_id, // Đảm bảo có trường hashtag_id trong Firestore

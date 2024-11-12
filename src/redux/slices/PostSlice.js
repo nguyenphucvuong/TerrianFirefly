@@ -329,7 +329,6 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
   }
 );
 
-
 export const updatePostsByField = createAsyncThunk(
   "data/updatePostsByField",
   async ({ post_id, field, value }, { getState, dispatch }) => {

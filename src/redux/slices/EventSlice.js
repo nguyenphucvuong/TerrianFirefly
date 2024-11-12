@@ -116,10 +116,12 @@ export const createEvent = createAsyncThunk(
       await updateDoc(docRef, {
         event_id: docRef.id,
         count_like: 0, // Giá trị mặc định cho số like
+        count_dislike: 0,
         count_view: 0,
+        user_like: [],
+        user_dislike: [],
         created_at: new Date().getTime(),
       });
-
       if (docSnap.exists()) {
         // Trả về dữ liệu của tài liệu vừa thêm
         return { id: docSnap.id, ...docSnap.data() };
@@ -206,7 +208,6 @@ export const addEvent = createAsyncThunk(
 // Async thunk để lấy dữ liệu sự kiện theo thời gian thực từ Firestore
 export const fetchEvents = () => (dispatch) => {
   const q = query(collection(db, "Event"));
-
   // Thiết lập listener (onSnapshot) cho Firestore
   const unsubscribe = onSnapshot(
     q,
