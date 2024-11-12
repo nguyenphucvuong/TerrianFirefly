@@ -18,6 +18,7 @@ const ListEventComponent = ({ isNew, events, onRefresh }) => {
     // console.log("idcuaevent",eventId)
     navigation.navigate("DetailEventScreen", { eventId });
   };
+  
   const limitText = (text, charLimit) => {
     if (text.length > charLimit) {
       return text.slice(0, charLimit) + "...";
@@ -30,14 +31,13 @@ const ListEventComponent = ({ isNew, events, onRefresh }) => {
     eventSortToCreateAt = [...events].sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
-  }
-  else {
+  } else {
     eventSortToCreateAt = [...events]
       .filter((e) => {
         // Lấy thời gian tạo sự kiện và thời gian hiện tại
         const eventDate = new Date(e.created_at); // Lấy thời gian sự kiện
         const now = new Date(); // Lấy thời gian hiện tại
-  
+
         // So sánh ngày, tháng, năm giữa thời gian hiện tại và thời gian tạo sự kiện
         return (
           eventDate.getFullYear() === now.getFullYear() &&
@@ -49,7 +49,6 @@ const ListEventComponent = ({ isNew, events, onRefresh }) => {
         (a, b) => new Date(b.created_at) - new Date(a.created_at) // Sắp xếp từ mới nhất
       );
   }
-  
 
   return (
     <ScrollView
@@ -99,7 +98,6 @@ const styles = StyleSheet.create({
   containerNew: {
     flex: 1,
     backgroundColor: "#f6f5fb",
-
   },
   linkText: {
     color: "#007BFF",
@@ -130,8 +128,8 @@ const styles = StyleSheet.create({
   viewRow: {
     marginTop: 15,
     flexDirection: "row",
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   eventDate: {
     color: "#888",
@@ -139,7 +137,7 @@ const styles = StyleSheet.create({
   eventLink: {
     color: "#7487ee",
     fontWeight: "bold",
-     textAlign: 'right',
+    textAlign: "right",
     fontSize: 14,
   },
 });
