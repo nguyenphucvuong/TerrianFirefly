@@ -14,7 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 const Tab = createBottomTabNavigator();
 const getRouteName = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route);
-  if (routeName == "picture" || routeName == "DetailPost") {
+  if (routeName == "picture" || routeName == "DetailPost" || routeName == "PersonScreen") {
     return "none";
   }
   return "flex";
@@ -26,7 +26,7 @@ const IndexTab = () => {
 
   const [user, setUser] = useState("");
   useEffect(() => {
-  
+
     // Kiểm tra trạng thái xác thực của người dùng
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
