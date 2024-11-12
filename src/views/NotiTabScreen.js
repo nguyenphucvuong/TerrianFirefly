@@ -11,11 +11,11 @@ import {
 import ButtonsComponent from "../component/ButtonsComponent";
 import { appInfo } from "../constains/appInfo";
 import { useNavigation } from "@react-navigation/native";
-function NotiTabScreen() {
+const NotiTabScreen=()=> {
   const navigation = useNavigation();
 
   const handleNoti = () => {
-    console.log("noti");
+    navigation.navigate('NotificationScreen')
   };
   
   const handlEvt = () => {

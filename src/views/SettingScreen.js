@@ -1,8 +1,7 @@
 import { View, SafeAreaView, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useMemo, useRef } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
-
-import { db, auth } from "../firebase/FirebaseConfig";
+import { auth } from '../firebase/FirebaseConfig';
 import { signOut } from "firebase/auth";
 import { useSelector } from "react-redux";
 

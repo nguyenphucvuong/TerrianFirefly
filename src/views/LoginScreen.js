@@ -162,7 +162,6 @@ function LoginScreen() {
           // Signed up
           const userL = userCredential.user;
           if (userL.emailVerified) {
-            await dispatch(listenToUserRealtime(email));
             navigation.navigate("IndexTab");
             setisLoading(false);
           }

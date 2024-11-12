@@ -13,8 +13,8 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { db } from "../../firebase/FirebaseConfig"; // Firebase config
-
+import { db, storage } from "../../firebase/FirebaseConfig"; // Firebase config
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase Storage
 // Trạng thái ban đầu
 const initialState = {
   post: [],
@@ -30,6 +30,7 @@ const initialState = {
 };
 
 // Tạo async thunk để thêm dữ liệu lên Firestore
+
 export const createPost = createAsyncThunk(
   "data/createPost",
   async (newData) => {
@@ -74,40 +75,45 @@ export const createPost = createAsyncThunk(
   }
 );
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
-export const getPostsFirstTime = createAsyncThunk('data/getPostsFirstTime', async () => {
-  try {
-    let postsQuery = query(
-      collection(db, "Posts"),
-      orderBy("created_at", "desc"),
-      limit(3)
-    );
+export const getPostsFirstTime = createAsyncThunk(
+  "data/getPostsFirstTime",
+  async () => {
+    try {
+      let postsQuery = query(
+        collection(db, "Posts"),
+        orderBy("created_at", "desc"),
+        limit(3)
+      );
 
-    const querySnapshot = await getDocs(postsQuery);
+      const querySnapshot = await getDocs(postsQuery);
 
-    if (querySnapshot.empty) {
-      return { posts: [], lastVisiblePost: null };
+      if (querySnapshot.empty) {
+        return { posts: [], lastVisiblePost: null };
+      }
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    }
-    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-    const postData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Thêm lượt xem mỗi khi duyệt qua bài viết
-    querySnapshot.docs.forEach(async doc => {
-      const currentCountView = doc.data().count_view || 0;
-      await updateDoc(doc.ref, {
-        count_view: currentCountView + 1
+      // Thêm lượt xem mỗi khi duyệt qua bài viết
+      querySnapshot.docs.forEach(async (doc) => {
+        const currentCountView = doc.data().count_view || 0;
+        await updateDoc(doc.ref, {
+          count_view: currentCountView + 1,
+        });
       });
-    });
 
-    return {
-      postData: postData,
-      lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
-    }; // Return only the document ID for `lastVisiblePost`
-  } catch (error) {
-    console.error('Error fetching posts: ', error);
-    throw error;
+      return {
+        postData: postData,
+        lastVisiblePost: lastVisible ? lastVisible.id : null, // Serialize the last visible post
+      }; // Return only the document ID for `lastVisiblePost`
+    } catch (error) {
+      console.error("Error fetching posts: ", error);
+      throw error;
+    }
   }
-});
+);
 
 // Hàm để cập nhật số lượt xem cho bài viết
 const updatePostViewCount = async (docs) => {
@@ -138,10 +144,12 @@ export const getPostsRefresh = createAsyncThunk(
   "data/getPostsRefresh",
   async ({ currentUserId, isFollow }) => {
     try {
-      const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
+      const followedUserIds = await getFollowedUserIds({
+        currentUserId: currentUserId,
+      });
 
       if (followedUserIds.length === 0 && isFollow) {
-        return { postData: [], lastVisiblePost: null, isFollow: isFollow, };
+        return { postData: [], lastVisiblePost: null, isFollow: isFollow };
       }
 
       let postsQuery = query(
@@ -152,7 +160,10 @@ export const getPostsRefresh = createAsyncThunk(
       if (followedUserIds.length > 0) {
         postsQuery = isFollow
           ? query(postsQuery, where("user_id", "in", followedUserIds))
-          : query(postsQuery, where("user_id", "not-in", followedUserIds.slice(0, 10)));
+          : query(
+              postsQuery,
+              where("user_id", "not-in", followedUserIds.slice(0, 10))
+            );
       }
 
       const querySnapshot = await getDocs(postsQuery);
@@ -181,14 +192,12 @@ export const getPostsRefresh = createAsyncThunk(
 export const getPostsByField = createAsyncThunk(
   "data/getPostsByField",
   async ({ field, value }) => {
-    console.log("field, value", field, value)
+    console.log("field, value", field, value);
     try {
-
       let postsQuery = query(
         collection(db, "Posts"),
-        where(field, "==", value),
+        where(field, "==", value)
       );
-
 
       const querySnapshot = await getDocs(postsQuery);
 
@@ -201,8 +210,8 @@ export const getPostsByField = createAsyncThunk(
         id: doc.id,
         ...doc.data(),
       }));
-      console.log("postData[0]", postData[0])
-      console.log("postData[0].imgPost", postData[0].imgPost)
+      console.log("postData[0]", postData[0]);
+      console.log("postData[0].imgPost", postData[0].imgPost);
       return {
         postData: postData[0],
       };
@@ -217,7 +226,9 @@ export const getPostsFromUnfollowedUsers = createAsyncThunk(
   "data/getPostsFromUnfollowedUsers",
   async ({ field, quantity, currentUserId }, { getState }) => {
     try {
-      const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
+      const followedUserIds = await getFollowedUserIds({
+        currentUserId: currentUserId,
+      });
 
       const lastVisiblePostId = getState().post.lastVisiblePost;
       let lastVisibleDoc = null;
@@ -275,14 +286,11 @@ export const getPostUsers = createAsyncThunk(
     //console.log('currentUserId', currentUserId);
 
     try {
-
-
       let postsQuery = query(
         collection(db, "Posts"),
         orderBy(field, "desc"),
-        where('user_id', '==', currentUserId)
+        where("user_id", "==", currentUserId)
       );
-
 
       const querySnapshot = await getDocs(postsQuery);
 
@@ -334,7 +342,9 @@ export const getPostsFromFavouriteUsers = createAsyncThunk(
 
     try {
       // Lấy danh sách user ID đã được follow
-      const favouriteUserIds = await getFavouriteUserIds({ currentUserId: currentUserId });
+      const favouriteUserIds = await getFavouriteUserIds({
+        currentUserId: currentUserId,
+      });
       //console.log('favouriteUserIds', favouriteUserIds);
 
       // Nếu không có user nào được follow, trả về mảng rỗng
@@ -376,10 +386,10 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
   "data/getPostsFromFollowedUsers",
   async ({ field, quantity, currentUserId }, { getState }) => {
     try {
-
-
       // Lấy danh sách user ID đã được follow
-      const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
+      const followedUserIds = await getFollowedUserIds({
+        currentUserId: currentUserId,
+      });
 
       // Nếu không có user nào được follow, trả về mảng rỗng
       if (followedUserIds.length === 0) {
@@ -436,7 +446,6 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
   }
 );
 
-
 export const updatePostsByField = createAsyncThunk(
   "data/updatePostsByField",
   async ({ post_id, field, value }, { getState, dispatch }) => {
@@ -451,7 +460,6 @@ export const updatePostsByField = createAsyncThunk(
       });
 
       ///console.log(`Field '${field}' updated successfully with value: ${value}`);
-
     } catch (error) {
       console.error("Error updating post: ", error);
       throw error;
@@ -459,7 +467,7 @@ export const updatePostsByField = createAsyncThunk(
   }
 );
 
-// Tạo slice cho Post 
+// Tạo slice cho Post
 export const PostSlice = createSlice({
   name: "post",
   initialState,
@@ -582,6 +590,6 @@ export const PostSlice = createSlice({
   },
 });
 
-export const { } = PostSlice.actions;
+export const {} = PostSlice.actions;
 
 export default PostSlice.reducer;

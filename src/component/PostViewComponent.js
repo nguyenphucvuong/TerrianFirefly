@@ -96,7 +96,6 @@ const PostViewComponent = ({ post, user }) => {
         console.log("toi day")
     }
 
-
     const IsYTView = () => {
         return post?.isYtb ? (
             < RowComponent

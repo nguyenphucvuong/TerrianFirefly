@@ -11,6 +11,8 @@ import FollowerSlice from './slices/FollowerSlice';
 import FavoriteSlice from './slices/FavoriteSlice';
 import EmojiSlice from './slices/EmojiSlice';
 import EventSlice from './slices/EventSlice';
+import  NotiSlice  from './slices/NotiSlice';
+
 
 export const store = configureStore({
         reducer: {
@@ -25,6 +27,7 @@ export const store = configureStore({
                 favorite: FavoriteSlice,
                 emoji: EmojiSlice,
                 event: EventSlice,
+                noti: NotiSlice,
         },
 })
 

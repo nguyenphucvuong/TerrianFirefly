@@ -22,73 +22,60 @@ const initialState = {
   statusEvent: "idle",
   errorEvent: null,
   eventByField: [],
-  detaiEvent: null,
 };
 
-// Tạo async thunk để lấy tất cả dữ liệu từ Firestore
-export const getEvent = createAsyncThunk("data/getEvent", async () => {
+// // Thiết lập listener realtime để lấy tất cả dữ liệu từ Firestore
+export const fetchEvents = () => (dispatch) => {
   try {
-    const querySnapshot = await getDocs(collection(db, "Event"));
-    const eventData = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const q = query(collection(db, "Event"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const eventData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      // console.log("eventdata", eventData);
+      dispatch(setEvent(eventData));
+    });
 
-    return eventData;
+    return unsubscribe;
   } catch (error) {
-    console.error("Error fetching event: ", error);
-    throw error;
+    console.error("Error setting up real-time event listener: ", error);
   }
-});
+};
 
-export const getEventByField = createAsyncThunk(
-  "data/getEventByField",
-  async ({ fieldWhere, value }) => {
+//tạo 1 hàm update trạng thái checked
+export const updateEventByField = createAsyncThunk(
+  "data/updateEventByField",
+  async ({ eventID, field, value }) => {
     try {
-      if (!fieldWhere || !value) {
-        throw new Error("fieldWhere and value are required");
-      }
-      // Chuyển value từ timestamp về Date
-      const date = new Date(value);
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0); // 00:00:00
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999); // 23:59:59
+      // Tạo tham chiếu đến tài liệu trong Firestore
+      const notiRef = doc(db, "Event", eventID);
 
-      // Lấy thời gian dưới dạng mili giây
-      const start = startOfDay.getTime();
-      const end = endOfDay.getTime();
-
-      // Tạo một truy vấn Firestore với where
-      const e = query(
-        collection(db, "Event"),
-        where(fieldWhere, ">=", start),
-        where(fieldWhere, "<=", end)
-      );
-
-      // Lấy tài liệu dựa trên truy vấn (query)
-      const querySnapshot = await getDocs(e);
-
-      if (querySnapshot.empty) {
-        console.log("No matching documents.");
-        return [];
-      }
-
-      // Map qua các tài liệu để lấy dữ liệu cần thiết
-      const event = querySnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-        };
+      // Cập nhật trường cụ thể bằng cách sử dụng [field] để cập nhật trường động
+      await updateDoc(notiRef, {
+        [field]: value,
       });
-      return event;
+
+      return { eventID, field, value }; // Return necessary data for updating the state
     } catch (error) {
-      console.error("Error fetching events: ", error);
+      console.error("Error updating notification: ", error);
       throw error;
     }
   }
 );
+
+// const EventSlice = createSlice({
+//   name: "event",
+//   initialState,
+//   reducers: {
+//     setEvent: (state, action) => {
+//       state.event = action.payload;
+//     },
+//   },
+//   extraReducers: (builder) => {
+//     builder;
+//   },
+// });
 
 // Tạo async thunk để thêm dữ liệu lên Firestore
 export const createEvent = createAsyncThunk(
@@ -98,28 +85,18 @@ export const createEvent = createAsyncThunk(
       // Thêm dữ liệu mới vào Firestore
       const docRef = await addDoc(collection(db, "Event"), newData);
 
-      // const response = await fetch(newData.img_event);
-      // const blob = await response.blob(); // Chuyển đổi URL thành blob
-
-      // const imgRef = ref(
-      //   storage,
-      //   `EventImage/${newData.img_event.split("/").pop()}`
-      // ); // Đặt tên cho ảnh
-      // await uploadBytes(imgRef, blob); // Tải lên ảnh
-
-      // // Lấy URL tải về
-      // const imgUrl = await getDownloadURL(imgRef);
-
       // // Lấy tài liệu vừa thêm từ Firestore
       const docSnap = await getDoc(docRef);
 
       await updateDoc(docRef, {
         event_id: docRef.id,
         count_like: 0, // Giá trị mặc định cho số like
+        count_dislike: 0,
         count_view: 0,
+        user_like: [],
+        user_dislike: [],
         created_at: new Date().getTime(),
       });
-
       if (docSnap.exists()) {
         // Trả về dữ liệu của tài liệu vừa thêm
         return { id: docSnap.id, ...docSnap.data() };
@@ -204,36 +181,36 @@ export const addEvent = createAsyncThunk(
   }
 );
 // Async thunk để lấy dữ liệu sự kiện theo thời gian thực từ Firestore
-export const fetchEvents = () => (dispatch) => {
-  const q = query(collection(db, "Event"));
+// export const fetchEvents = () => (dispatch) => {
+//   const q = query(collection(db, "Event"));
 
-  // Thiết lập listener (onSnapshot) cho Firestore
-  const unsubscribe = onSnapshot(
-    q,
-    (querySnapshot) => {
-      if (!querySnapshot.empty) {
-        const eventData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        dispatch(updateEvents(eventData)); // Gửi dữ liệu vào Redux state
-      }
-    },
-    (error) => {
-      console.error("Error in realtime listener:", error);
-      dispatch(setError(error.message)); // Gửi lỗi vào Redux state
-    }
-  );
+//   // Thiết lập listener (onSnapshot) cho Firestore
+//   const unsubscribe = onSnapshot(
+//     q,
+//     (querySnapshot) => {
+//       if (!querySnapshot.empty) {
+//         const eventData = querySnapshot.docs.map((doc) => ({
+//           id: doc.id,
+//           ...doc.data(),
+//         }));
+//         dispatch(updateEvents(eventData)); // Gửi dữ liệu vào Redux state
+//       }
+//     },
+//     (error) => {
+//       console.error("Error in Event:", error);
+//       dispatch(setError(error.message)); // Gửi lỗi vào Redux state
+//     }
+//   );
 
-  // Trả về một đối tượng có thể tuần tự hóa (hoặc không trả gì nếu không cần thiết)
-  return unsubscribe;
-};
+//   // Trả về một đối tượng có thể tuần tự hóa (hoặc không trả gì nếu không cần thiết)
+//   return unsubscribe;
+// };
 
 // Async thunk để cập nhật sự kiện đã có trên Firestore
 // Tạo async thunk để cập nhật người dùng
 export const updateEvent = createAsyncThunk(
   "data/updateEvent",
-  async ({updatedEvent, event_id}, { rejectWithValue }) => {
+  async ({ updatedEvent, event_id }, { rejectWithValue }) => {
     console.log(event_id);
     try {
       const eventDocRef = doc(collection(db, "Event"), event_id);
@@ -247,6 +224,7 @@ export const updateEvent = createAsyncThunk(
     }
   }
 );
+
 // Thunk để xóa Event từ Firestore
 export const deleteEventFromFirestore = createAsyncThunk(
   "event/deleteEventFromFirestore",
@@ -265,27 +243,17 @@ export const deleteEventFromFirestore = createAsyncThunk(
 
 export const EventSlice = createSlice({
   name: "event",
-  initialState: {
-    events: [],
-    statusEvent: "idle", // Trạng thái của sự kiện
-    errorEvent: null,
-  },
+  initialState: {},
   reducers: {
-    updateEvents: (state, action) => {
+    setEvent: (state, action) => {
       state.events = action.payload;
       state.errorEvent = null; // Reset lỗi khi có dữ liệu mới
     },
-    setError: (state, action) => {
-      state.errorEvent = action.payload;
-    },
   },
   extraReducers: (builder) => {
-    builder
-      
-      
+    builder;
   },
 });
 
-export const { updateEvents, setError } = EventSlice.actions;
-
+export const { setEvent, setError } = EventSlice.actions;
 export default EventSlice.reducer;

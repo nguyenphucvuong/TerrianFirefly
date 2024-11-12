@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-import { EventScreen } from '../views'
+import  EventScreen  from '../views/EventScreen'
 
 const EventTab = () => {
     return (

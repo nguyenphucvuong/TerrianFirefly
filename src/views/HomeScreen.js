@@ -13,20 +13,29 @@ import { SkeletonComponent } from "../component";
 import PostViewComponent from "../component/PostViewComponent";
 import { ImageCheckContext } from "../context/ImageProvider";
 import { getUserByField } from "../redux/slices/UserSlices";
+import { getNoti } from "../redux/slices/NotiSlice";
+
 const HomeScreen = () => {
 
   const post = useSelector((state) => state.post.post);
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
+  const noti = useSelector((state) => state.noti.noti);
 
-
-
-
+  // console.log(user_id)
+  
 
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasMorePosts, setHasMorePosts] = useState(true);
 
+  useEffect(() => {
+    if (user) {
+    const unsubscribe = getNoti(dispatch, user.user_id);
+    // console.log("notiHome:",noti)
+    return () => unsubscribe();
+  }
+  }, [dispatch,user]);
 
   useEffect(() => {
     if (user) {
@@ -39,8 +48,6 @@ const HomeScreen = () => {
       fetchData();
     }
   }, [user]);
-
-
 
   return (
     <>
@@ -113,11 +120,10 @@ const HomeScreen = () => {
             }
           }}
           onEndReachedThreshold={0.1}
-        />)}
+        />
+      )}
     </>
   );
 };
 
 export default HomeScreen;
-
-
