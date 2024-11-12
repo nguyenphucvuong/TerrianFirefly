@@ -34,19 +34,22 @@ function ForgotPassword() {
       setisLoading(false)
       return;
     }
+    setisLoading(true)
     try {
-      setisLoading(true)
       setMessage('Đã gửi mã xác nhận đến email của bạn.');
       // Gửi mã xác nhận qua EmailJS
       const code = Math.floor(100000 + Math.random() * 900000); // Tạo mã 6 chữ số ngẫu nhiên
       console.log("gui ma", code);
       await sendVerificationCode(email, code); // Gửi mã xác nhận qua EmailJS
       navigation.navigate('VerificationCodeScreen', { email, code }); // Chuyển đến màn xác nhận
-      setisLoading(false)
+      
     } catch (error) {
       setisLoading(false)
       console.error('Lỗi gửi mã xác nhận:', error);
       setMessage('Có lỗi xảy ra. Vui lòng kiểm tra lại email.');
+    }
+    finally {
+      setisLoading(false); // Đặt trạng thái loading về false ở đây
     }
   };
 
@@ -84,7 +87,7 @@ function ForgotPassword() {
         <View style={styles.viewInput}>
           <Text style={{ marginBottom: "3%" }}>Email</Text>
           <View style={styles.input}>
-            <Icon name="envelope" size={25} color="#858585" />
+            <Icon name="envelope" size={appInfo.heightWindows * 0.028} color="#858585" />
             <TextInput
               style={styles.textInput}
               placeholder="Nhập email"
@@ -94,9 +97,10 @@ function ForgotPassword() {
               type="email"
             />
           </View>
+          {message ? <Text >{message}</Text> : null}
         </View>
-        {message ? <Text>{message}</Text> : null}
         <ButtonFunctionComponent
+          isLoading={isLoading}
           name={"Xác Nhận"}
           backgroundColor={"#0286FF"}
           colorText={"#fff"}
@@ -118,6 +122,10 @@ const styles = StyleSheet.create({
     fontSize: 28,
     marginLeft: "3%",
     marginBottom: "19%",
+  },
+  texErr: {
+    alignContent: "center",
+
   },
   textNameApp: {
     marginTop: appInfo.heightWindows * 0.05,

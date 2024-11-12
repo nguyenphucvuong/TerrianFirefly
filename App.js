@@ -17,13 +17,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { getPostsFirstTime } from "./src/redux/slices/PostSlice";
 import { ImageProvider } from "./src/context/ImageProvider";
 import { getHashtag } from "./src/redux/slices/HashtagSlice";
-import { fetchEvent } from "./src/redux/slices/EventSlice";
+import { fetchEvents } from "./src/redux/slices/EventSlice";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Title } from "react-native-paper";
 import { NotiProvider } from "./src/context/NotiProvider";
 import { useNotification } from "./src/context/NotiProvider";
+import { LogBox } from "react-native";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -46,7 +47,8 @@ const MainApp = () => {
   const noti = useSelector((state) => state.noti.noti);
 
   useEffect(() => {
-    const unsubscribeEvent = fetchEvent()(dispatch);
+    const unsubscribeEvent = fetchEvents()(dispatch);
+    // console.log(object)
     return () => unsubscribeEvent();
   }, [dispatch]);
 
@@ -57,7 +59,6 @@ const MainApp = () => {
 
   useEffect(() => {
     dispatch(getPostsFirstTime());
-    // getHashtag(dispatch);
 
     registerForPushNotificationsAsync().then(
       (token) => token && setExpoPushToken(token)
@@ -84,22 +85,6 @@ const MainApp = () => {
         Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
-
-  // useEffect(() => {
-  //   const unsubscribe = getNoti(dispatch, targetUser_id);
-  //   return () => unsubscribe();
-  // }, [dispatch, targetUser_id]);
-
-  // useEffect(() => {
-  //   // Kiểm tra và gửi thông báo khi có thông báo mới
-  //   if (noti.length > 0) {
-  //     const newNoti = noti[0]; // lấy thông báo đầu tiên
-  //     schedulePushNotification({
-  //       title: newNoti.title,
-  //       body: newNoti.body,
-  //     });
-  //   }
-  // }, [noti, schedulePushNotification]);
 
   return (
     <>
@@ -157,7 +142,7 @@ async function registerForPushNotificationsAsync() {
       token = `${e}`;
     }
   } else {
-    alert("Thông báo không hoạt động trên thiết bị ảo");
+    alert("Không hoạt động trên thiết bị ảo");
   }
 
   return token;

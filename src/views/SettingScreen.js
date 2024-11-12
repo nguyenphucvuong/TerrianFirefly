@@ -1,7 +1,11 @@
 import { View, SafeAreaView, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useMemo, useRef } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
+
+import { db, auth } from "../firebase/FirebaseConfig";
+import { signOut } from "firebase/auth";
 import { useSelector } from "react-redux";
+
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal'
 //constains
@@ -9,11 +13,21 @@ import { appInfo } from '../constains/appInfo'
 //components
 import { IconComponent, ButtonFunctionComponent } from '../component'
 const SettingScreen = () => { 
+    const authUser = auth.currentUser;
     const navigation = useNavigation(); // Sử dụng hook navigation
     //FireBase
     const user = useSelector((state) => state.user.user);
     // console.log('user.roleid',user[0].roleid);
-    
+    //thoát đăng nhập
+    const handleLogout = async () => {
+        try {
+          await signOut(auth);
+          // Có thể điều hướng người dùng trở lại màn hình đăng nhập
+          navigation.navigate("LoginScreen");
+        } catch (error) {
+          Alert.alert("Lỗi", "Đã xảy ra lỗi khi thoát đăng nhập. Vui lòng thử lại.");
+        }
+      };
     return (
         <View style={StyleGlobal.container}>
             {/* Gạch ngang User */}
@@ -32,7 +46,7 @@ const SettingScreen = () => {
                 <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
             </TouchableOpacity>
             {
-                user.roleid === 0 ? (
+                user.roleid != 0 ? (
                     <View>
                         {/* Gạch ngang Admin */}
                         <View style={{ marginTop: appInfo.heightWindows * 0.02, fontSize: 16 }}>
@@ -50,19 +64,29 @@ const SettingScreen = () => {
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
                         {/* Sự Kiện */}
-                        <TouchableOpacity style={styles.buttonRow}>
+                        <TouchableOpacity style={styles.buttonRow}
+                        onPress={() => navigation.navigate('EventManagementScreen')}
+                        >
                             <Text style={styles.buttonText}>Quản Lý Sự Kiện</Text>
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
                         {/* Hashtag */}
-                        <TouchableOpacity style={styles.buttonRow}>
+                        <TouchableOpacity style={styles.buttonRow}
+                        onPress={() => navigation.navigate('HashtagManagerScreen')}
+                        >
                             <Text style={styles.buttonText}>Quản Lý Hashtag</Text>
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
                     </View>
                 ) : null
             }
-            <ButtonFunctionComponent name={'Thoát Đăng Nhập'} backgroundColor={'red'} colorText={'#FFFFFF'} style={styles.button2} />
+            <ButtonFunctionComponent 
+            name={'Thoát Đăng Nhập'} 
+            backgroundColor={'red'} 
+            colorText={'#FFFFFF'} 
+            style={styles.button2} 
+            onPress={handleLogout}
+            />
         </View>
     )
 }

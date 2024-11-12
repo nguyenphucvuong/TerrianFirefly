@@ -66,6 +66,13 @@ const InteractionBarComponent = ({ event }) => {
             value: event.user_dislike.filter((u) => u !== user.user_id),
           })
         );
+        dispatch(
+          updateEventByField({
+            eventID: event.event_id,
+            field: "count_dislike",
+            value: event.count_dislike - 1,
+          })
+        );
       }
     }
   };
@@ -81,6 +88,13 @@ const InteractionBarComponent = ({ event }) => {
           value: event.user_dislike.filter((u) => u !== user.user_id),
         })
       );
+      dispatch(
+        updateEventByField({
+          eventID: event.event_id,
+          field: "count_dislike",
+          value: event.count_dislike - 1,
+        })
+      );
     } else {
       // Thêm dislike
       setIsDisliked(true);
@@ -89,6 +103,13 @@ const InteractionBarComponent = ({ event }) => {
           eventID: event.event_id,
           field: "user_dislike",
           value: [...event.user_dislike, user.user_id],
+        })
+      );
+      dispatch(
+        updateEventByField({
+          eventID: event.event_id,
+          field: "count_dislike",
+          value: event.count_dislike + 1,
         })
       );
 

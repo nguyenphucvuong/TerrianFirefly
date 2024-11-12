@@ -25,9 +25,23 @@ import { StyleGlobal } from "../styles/StyleGlobal";
 import { appInfo } from "../constains/appInfo";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { getUser, updateUser } from "../redux/slices/UserSlices";
-import { updatePassword, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  updatePassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 
 const ResetPasswordScreen = ({ navigation, route }) => {
+  const customAlert = (title, content, text, style) => {
+    Alert.alert(title, content, [
+      {
+        text: text,
+        onPress: () => console.log("ok"),
+        style: style,
+      },
+    ]);
+  };
+
   const { email } = route.params; // Nhận email từ params
   const [newPassword, setNewPassword] = useState("");
   const [checkPass, setCheckPass] = useState(true);
@@ -37,15 +51,19 @@ const ResetPasswordScreen = ({ navigation, route }) => {
   const { user, loading, error } = useSelector((state) => state.user); //user
 
   useEffect(() => {
-    dispatch(getUser(email));
-    //setUser_id(user[0].user_id);
+    const fetchUser = async () => {
+      await dispatch(getUser(email));
+    };
+
+    fetchUser();
   }, []);
 
-  if (user.length > 0) {
-    console.log("id", user.user_id);
-  } else {
-    dispatch(getUser(email));
-  }
+  // const userId = user && user.length > 0 ? user.user_id : null; // Lấy user_id nếu user hợp lệ
+  // if (userId != null) {
+  //   console.log("id", user.user_id);
+  // } else {
+  //   dispatch(getUser(email));
+  // }
 
   const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
@@ -56,41 +74,45 @@ const ResetPasswordScreen = ({ navigation, route }) => {
       Alert.alert("Lỗi", "Mật khẩu không khớp. Vui lòng thử lại.");
       return;
     }
+    setisLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, user.passWord); // Thay 'temporaryPassword' bằng mật khẩu tạm thời bạn thiết lập
+      // Đăng nhập với mật khẩu tạm thời
+      await signInWithEmailAndPassword(auth, email, user.passWord);
 
       // Cập nhật mật khẩu mới trong Firebase Auth
       const authUser = auth.currentUser;
       if (authUser) {
         await updatePassword(authUser, newPassword);
-        console.log("Đã cập nhật mật khẩu trong Firebase Auth.");
+        if (!authUser.emailVerified) {
+          // Nếu chưa xác thực, gửi mã xác thực
+          await sendEmailVerification(authUser);
+          Alert.alert(
+              "Chưa xác thực",
+              "Vui lòng kiểm tra email để xác thực tài khoản."
+          );
       }
-      const newData = {
-        passWord: newPassword,
-      };
-      // Lấy reference đến tài liệu của người dùng
-      const userRef = doc(collection(db, "user"), user.user_id);
-      try {
+        // Lấy reference đến tài liệu của người dùng
+        const userRef = doc(collection(db, "user"), user.user_id);
+        const newData = {
+          passWord: newPassword,
+        };
+
         // Cập nhật mật khẩu mới trong Firestore
         await updateDoc(userRef, newData);
         console.log("User updated!");
-        setisLoading(true);
+
         // Thông báo thành công
         Alert.alert(
           "Thành công",
           "Mật khẩu đã được cập nhật trong Firebase Auth và Firestore."
         );
-        
-      } catch (error) {
-        console.error("Error updating user:", error);
-        Alert.alert("Lỗi", "Không thể cập nhật mật khẩu. Vui lòng thử lại.");
+        navigation.navigate("LoginScreen"); // Điều hướng đến màn hình đăng nhập sau khi cập nhật thành công
       }
-      navigation.navigate("LoginScreen"); // Điều hướng đến màn hình đăng nhập sau khi cập nhật thành công
-      setisLoading(false);
     } catch (error) {
       console.error("Lỗi cập nhật mật khẩu:", error);
-      setisLoading(false);
       Alert.alert("Lỗi", "Đã xảy ra lỗi. Vui lòng thử lại.");
+    } finally {
+      setisLoading(false); // Đặt trạng thái loading về false ở đây
     }
   };
 
@@ -109,7 +131,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
       <View style={[styles.viewInput, { marginBottom: "15%" }]}>
         <Text style={{ marginBottom: "3%" }}>Password</Text>
         <View style={styles.input}>
-          <Icon name="lock" size={25} color="#858585" />
+          <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
           <TextInput
             secureTextEntry={checkPass}
             style={styles.textInput}
@@ -122,14 +144,14 @@ const ResetPasswordScreen = ({ navigation, route }) => {
             {checkPass ? (
               <Icon
                 name="eye-slash"
-                size={20}
+                size={appInfo.heightWindows * 0.028}
                 color="#858585"
                 style={{ marginLeft: appInfo.widthWindows * 0.19 }}
               />
             ) : (
               <Icon
                 name="eye"
-                size={20}
+                size={appInfo.heightWindows * 0.028}
                 color="#858585"
                 style={{ marginLeft: appInfo.widthWindows * 0.19 }}
               />
@@ -138,9 +160,9 @@ const ResetPasswordScreen = ({ navigation, route }) => {
         </View>
       </View>
       <View style={[styles.viewInput, { marginBottom: "23%" }]}>
-        <Text style={{ marginBottom: "3%" }}>Password</Text>
+        <Text style={{ marginBottom: "3%" }}>Xác Nhận Mật Khẩu</Text>
         <View style={styles.input}>
-          <Icon name="lock" size={25} color="#858585" />
+          <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
           <TextInput
             secureTextEntry={checkPass}
             style={styles.textInput}
@@ -153,14 +175,14 @@ const ResetPasswordScreen = ({ navigation, route }) => {
             {checkPass ? (
               <Icon
                 name="eye-slash"
-                size={20}
+                size={appInfo.heightWindows * 0.028}
                 color="#858585"
                 style={{ marginLeft: appInfo.widthWindows * 0.19 }}
               />
             ) : (
               <Icon
                 name="eye"
-                size={20}
+                size={appInfo.heightWindows * 0.028}
                 color="#858585"
                 style={{ marginLeft: appInfo.widthWindows * 0.19 }}
               />

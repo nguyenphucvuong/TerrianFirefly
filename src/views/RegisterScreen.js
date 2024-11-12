@@ -16,7 +16,7 @@ import { db, auth } from "../firebase/FirebaseConfig";
 import { collection, addDoc, updateDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { appInfo } from "../constains/appInfo";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import * as AuthSession from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
@@ -44,6 +44,7 @@ function RegisterScreen() {
   const [errorTextName, setErrorTextName] = useState("");
   const [errorTextEmail, setErrorTextEmail] = useState("");
   const [errorTextPass, setErrorTextPass] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [checkPass, setCheckPass] = useState(true);
   const [isLoading, setisLoading] = useState(false);
   const [isLoadingGg, setisLoadingGg] = useState(false);
@@ -108,14 +109,16 @@ function RegisterScreen() {
         username: userName,
         numberPhone: "",
         email: email,
-        roleid: 0,
-        imgUser: "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/avatar%2Favatar.jpg?alt=media&token=42cfc0ed-75cc-4feb-9a0f-19f6203643c5",
+        roleid: 1,
+        imgUser:
+          "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/avatar%2Favatar.jpg?alt=media&token=42cfc0ed-75cc-4feb-9a0f-19f6203643c5",
         gender: "",
         passWord: password,
         status_user_id: 0,
         nickname: "Người Dùng Mới",
         total_interact_id: 0,
-        backgroundUser: "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/background%2Fbackground4.jpg?alt=media&token=31c49a20-9146-46cc-8df6-496093d45194",
+        backgroundUser:
+          "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/background%2Fbackground4.jpg?alt=media&token=31c49a20-9146-46cc-8df6-496093d45194",
         frame_user: "",
       });
       await updateDoc(docRef, {
@@ -155,60 +158,62 @@ function RegisterScreen() {
     if (!email || !password || !name) {
       customAlert(
         "Thông báo",
-        "vui lòng nhập đầy đủ thông tin",
+        "Vui lòng nhập đầy đủ thông tin",
         "OK",
         "cancel"
       );
-    } else if (!validateUsername(name)) {
-      setErrorTextName(
-        "Tên người dùng phải có ít nhất 2 ký tự và không được chứa ký tự đặc biệt"
-      );
-    } else if (!validateEmail(email)) {
-      setErrorTextEmail("Email không hợp lệ");
-    } else if (!validatePassword(password)) {
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorTextPass("Lỗi Mật khẩu không khớp. Vui lòng thử lại.");
+      return;
+    }
+
+    if (
+      !validateUsername(name) ||
+      !validateEmail(email) ||
+      !validatePassword(password)
+    ) {
+      setErrorTextName(validateUsername(name) ? "" : "Tên không hợp lệ");
+      setErrorTextEmail(validateEmail(email) ? "" : "Email không hợp lệ");
       setErrorTextPass(
-        "Mật khẩu phải có ít nhất 6 ký tự và bao gồm cả chữ và số"
+        validatePassword(password) ? "" : "Mật khẩu không hợp lệ"
       );
-    } else {
-      //kiểm tra thành công
-      setErrorTextEmail("");
-      setErrorTextName("");
-      setErrorTextPass("");
-      await createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          // Signed up
-          customAlert("Thông báo", "Đăng ký thành công.", "OK", "cancel");
-          addUser(name, email, password);
-          navigation.navigate("LoginScreen");
-          const user = userCredential.user;
-          //console.log("log user", user);
-          // ...
-        })
-        .catch((error) => {
-          if (
-            error.message ==
-            "Firebase: Password should be at least 6 characters (auth/weak-password)."
-          ) {
-            customAlert(
-              "Thông báo",
-              "Mật khẩu phải chứa ít nhất 6 ký tự",
-              "OK",
-              "cancel"
-            );
-          } else if (
-            error.message == "Firebase: Error (auth/email-already-in-use)."
-          ) {
-            setErrorTextEmail("Email đã tồn tại.", "OK", "cancel");
-          } else {
-            customAlert(
-              "Thông báo",
-              "Đăng ký không thành công.",
-              "OK",
-              "cancel"
-            );
-          }
-          console.log("er", error.message);
-        });
+      return;
+    }
+    setisLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      await addUser(name, email, password);
+      // Send verification email
+      await sendEmailVerification(user);
+      customAlert("Thông báo", "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.", "OK", "cancel");
+      navigation.navigate("LoginScreen");
+    } catch (error) {
+      setisLoading(false);
+      handleError(error);
+    }
+    finally {
+      setisLoading(false); // Đặt trạng thái loading về false ở đây
+    }
+  };
+  // Hàm xử lý lỗi từ Firebase
+  const handleError = (error) => {
+    switch (error.code) {
+      case "auth/weak-password":
+        setErrorTextPass("Mật khẩu phải có ít nhất 6 ký tự");
+        break;
+      case "auth/email-already-in-use":
+        setErrorTextEmail("Email đã tồn tại.");
+        break;
+      default:
+        customAlert("Thông báo", "Đăng ký không thành công", "OK", "cancel");
     }
   };
   return (
@@ -216,12 +221,11 @@ function RegisterScreen() {
       <View style={[StyleGlobal.container, { flex: 1 }]}>
         <KeyboardAwareScrollView>
           <Text style={styles.textNameApp}>Terrian Firefly</Text>
-
           <Text style={styles.textRegister}>Đăng Ký</Text>
           <View style={styles.viewInput}>
             <Text style={{ marginBottom: "3%" }}>Tên Người Dùng</Text>
             <View style={styles.input}>
-              <Icon name="user" size={25} color="#858585" />
+              <Icon name="user" size={appInfo.heightWindows * 0.028} color="#858585" />
               <TextInput
                 style={styles.textInput}
                 placeholder="Nhập tên người dùng"
@@ -237,7 +241,7 @@ function RegisterScreen() {
           <View style={styles.viewInput}>
             <Text style={{ marginBottom: "3%" }}>Email</Text>
             <View style={styles.input}>
-              <Icon name="envelope" size={25} color="#858585" />
+              <Icon name="envelope" size={appInfo.heightWindows * 0.028} color="#858585" />
               <TextInput
                 style={styles.textInput}
                 placeholder="Nhập email"
@@ -251,10 +255,10 @@ function RegisterScreen() {
               <Text style={{ color: "red" }}>{errorTextEmail}</Text>
             ) : null}
           </View>
-          <View style={[styles.viewInput, { marginBottom: "18%" }]}>
+          <View style={[styles.viewInput]}>
             <Text style={{ marginBottom: "3%" }}>Password</Text>
             <View style={styles.input}>
-              <Icon name="lock" size={25} color="#858585" />
+              <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
               <TextInput
                 secureTextEntry={checkPass}
                 style={styles.textInput}
@@ -267,14 +271,45 @@ function RegisterScreen() {
                 {checkPass ? (
                   <Icon
                     name="eye-slash"
-                    size={20}
+                    size={appInfo.heightWindows * 0.028}
                     color="#858585"
                     style={{ marginLeft: appInfo.widthWindows * 0.19 }}
                   />
                 ) : (
                   <Icon
                     name="eye"
-                    size={20}
+                    size={appInfo.heightWindows * 0.028}
+                    color="#858585"
+                    style={{ marginLeft: appInfo.widthWindows * 0.19 }}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={[styles.viewInput, { marginBottom: "20%" }]}>
+            <Text style={{ marginBottom: "3%" }}>Xác Nhận Mật Khẩu</Text>
+            <View style={styles.input}>
+              <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
+              <TextInput
+                secureTextEntry={checkPass}
+                style={styles.textInput}
+                placeholder="Xác nhận mật khẩu"
+                autoCapitalize="none"
+                onChangeText={setConfirmPassword}
+                value={confirmPassword}
+              />
+              <TouchableOpacity onPress={() => setCheckPass(!checkPass)}>
+                {checkPass ? (
+                  <Icon
+                    name="eye-slash"
+                    size={appInfo.heightWindows * 0.028}
+                    color="#858585"
+                    style={{ marginLeft: appInfo.widthWindows * 0.19 }}
+                  />
+                ) : (
+                  <Icon
+                    name="eye"
+                    size={appInfo.heightWindows * 0.028}
                     color="#858585"
                     style={{ marginLeft: appInfo.widthWindows * 0.19 }}
                   />
@@ -286,6 +321,7 @@ function RegisterScreen() {
             ) : null}
           </View>
           <ButtonFunctionComponent
+            isLoading={isLoading}
             name={"Đăng Ký"}
             backgroundColor={"#0286FF"}
             colorText={"#fff"}
@@ -333,20 +369,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 28,
     marginLeft: "3%",
-    marginBottom: appInfo.heightWindows * 0.04,
+    marginBottom: appInfo.heightWindows * 0.01,
   },
   textNameApp: {
-    marginTop: appInfo.heightWindows * 0.05,
+    marginTop: appInfo.heightWindows * 0.015,
     alignSelf: "center",
     fontWeight: "bold",
     fontSize: 28,
     padding: "4%",
-    marginBottom: appInfo.heightWindows * 0.008,
+    marginBottom: appInfo.heightWindows * 0.002,
   },
   viewInput: {
     margin: "2%",
     height: appInfo.heightWindows * 0.06,
-    marginBottom: appInfo.heightWindows * 0.08,
+    marginBottom: appInfo.heightWindows * 0.05,
   },
   input: {
     width: appInfo.widthWindows * 0.88,
@@ -364,7 +400,7 @@ const styles = StyleSheet.create({
   link: {
     width: "100%",
     alignItems: "center",
-    marginTop: appInfo.heightWindows * 0.1,
+    marginTop: appInfo.heightWindows * 0.08,
   },
   buttonHover: {
     backgroundColor: "#0276E3",

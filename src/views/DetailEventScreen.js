@@ -22,10 +22,11 @@ import DetailEventComponent from "../component/event/DetailEventComponent";
 
 const DetailEventScreen = ({route }) => {
   const dispatch = useDispatch();
-  const { event } = useSelector((state) => state.event);
+  const events = useSelector((state) => state.event.events);
+
   const { eventId } = route.params;
 
-  const eventDetail = event.find((e) => e.event_id === eventId);
+  const eventDetail = events.find((e) => e.event_id === eventId);
 
 
   return (

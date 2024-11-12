@@ -19,7 +19,8 @@ import { useDispatch, useSelector } from "react-redux";
 
 const NewEventScreen = () => {
   const dispatch = useDispatch();
-  const { event } = useSelector((state) => state.event); // post
+  const event = useSelector((state) => state.event.events);
+
   console.log();
 
   const handleRefresh = () => {

@@ -15,6 +15,7 @@ const ListEventComponent = ({ isNew, events, onRefresh }) => {
   const navigation = useNavigation();
 
   const handlePressOnEvent = (eventId) => {
+    // console.log("idcuaevent",eventId)
     navigation.navigate("DetailEventScreen", { eventId });
   };
   const limitText = (text, charLimit) => {

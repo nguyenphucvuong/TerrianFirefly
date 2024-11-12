@@ -3,7 +3,7 @@ import SkeletonComponent from "./SkeletonComponent";
 import ButtonsComponent from "./ButtonsComponent";
 import ImagesPostComponent from "./ImagesPostComponent";
 // import AnimatedQuickCmtComponent from "./AnimatedQuickCmtComponent";
-import IconsOptionComponent from "./commentBox/IconsOptionComponent";
+import EmojiBoxComponent from "./commentBox/EmojiBoxComponent";
 // import CmtBoxComponent from "./commentBox/CmtBoxComponent";
 import ButtonBackComponent from "./ButtonBackComponent";
 import ButtonFunctionComponent from "./ButtonFunctionComponent";
@@ -17,7 +17,7 @@ export {
     SkeletonComponent,
     ButtonsComponent,
     ImagesPostComponent,
-    IconsOptionComponent,
+    EmojiBoxComponent as IconsOptionComponent,
     // CmtBoxComponent,
     ButtonBackComponent,
     ButtonFunctionComponent,
@@ -25,4 +25,5 @@ export {
     SelectImageComponent,
     StatisticsComponent,
     InputComponents,
+
 };

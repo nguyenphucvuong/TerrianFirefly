@@ -14,7 +14,7 @@ export const getNickname = createAsyncThunk('data/getNickname', async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "Nickname"));
     querySnapshot.forEach((doc) => {
-      console.log(`Nickname: ${doc.id} => `, doc.data());
+      //console.log(`Nickname: ${doc.id} => `, doc.data());
     });
     //const querySnapshot = await getDocs(collection(db, "Posts")); // Thay "Posts" bằng tên bộ sưu tập của bạn
     const nicknameData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Lấy dữ liệu và ID của từng tài liệu

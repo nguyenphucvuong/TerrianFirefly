@@ -11,7 +11,6 @@ import {
   AccountDetailsScreen,
   NotificationManagement,
   ManagePostsScreen,
-  ArticleDetailsScreen,
   SetUpAccountScreen,
   WellcomScreen,
   LoginScreen,
@@ -20,9 +19,15 @@ import {
   VerificationCodeScreen,
   FollowerScreen,
   ResetPasswordScreen,
-  AccountSettingsScreen,
+  HashtagManagerScreen,
+  FollowUp,
+  PictureScreen,
+  DetailPostScreen,
+  EventManagementScreen,
+  AddEditEventScreen,
 } from "../views";
-import IndexTab from '../tabs/indexTab';
+
+import IndexTab from "../tabs/indexTab";
 import EventScreen from "../views/EventScreen";
 //components
 import { ButtonBackComponent, IconComponent } from "../component";
@@ -52,7 +57,7 @@ const IconHeaderRight = (text, onPress, name) => ({
 });
 
 const StackNavigator = () => {
-  const [isLogin, setIsLogin] = useState(false);
+  //const [isLogin, setIsLogin] = useState(false);
   return (
     <Stack.Navigator initialRouteName="WellcomScreen">
       <Stack.Screen
@@ -78,11 +83,6 @@ const StackNavigator = () => {
       <Stack.Screen
         name="VerificationCodeScreen"
         component={VerificationCodeScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="AccountSettingsScreen"
-        component={AccountSettingsScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -139,6 +139,29 @@ const StackNavigator = () => {
         })}
       />
       <Stack.Screen
+        name="EventManagementScreen"
+        component={EventManagementScreen}
+        options={({ navigation }) => ({
+          // Kết hợp các cấu hình từ cả hai hàm
+          ...IconBack("Quản Lý Sự Kiện"),
+          ...IconHeaderRight(
+            "",
+            () => navigation.navigate("AddEditEventScreen"),
+            "plus-circle"
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="AddEditEventScreen"
+        component={AddEditEventScreen}
+        options={() => IconBack("Chi Tiết Sự Kiện")}
+      />
+      <Stack.Screen
+        name="HashtagManagerScreen"
+        component={HashtagManagerScreen}
+        options={() => IconBack("Quản Lý Hashtag")}
+      />
+      <Stack.Screen
         name="NotificationManagement"
         component={NotificationManagement}
         options={() => IconBack("Quản Lý Thông Báo")}
@@ -147,11 +170,6 @@ const StackNavigator = () => {
         name="ManagePostsScreen"
         component={ManagePostsScreen}
         options={() => IconBack("Quản Lý Bài Viết")}
-      />
-      <Stack.Screen
-        name="ArticleDetailsScreen"
-        component={ArticleDetailsScreen}
-        options={() => IconBack("Chi Tiết Bài Viết")}
       />
       <Stack.Screen
         name="SetUpAccountScreen"
@@ -163,6 +181,22 @@ const StackNavigator = () => {
         component={FollowerScreen}
         options={() => IconBack("Người Theo Dõi")}
       />
+      <Stack.Screen
+        name="FollowUp"
+        component={FollowUp}
+        options={() => IconBack("Theo Dõi")}
+      />
+      <Stack.Screen
+        name="picture"
+        component={PictureScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="DetailPost"
+        component={DetailPostScreen}
+        options={{ headerShown: false }}
+      />
+
       <Stack.Screen
         name="NotiTabScreen"
         component={NotiTabScreen}
@@ -183,7 +217,7 @@ const StackNavigator = () => {
         component={DetailEventScreen}
         options={() => IconBack("Chi Tiết Sự Kiện")}
       />
-      
+
       <Stack.Screen
         name="NotificationScreen"
         component={NotificationScreen}

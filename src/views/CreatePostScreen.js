@@ -36,6 +36,9 @@ import {
   getPosts,
   getPostsByField,
 } from "../redux/slices/PostSlice";
+import {
+  createHashtag
+} from "../redux/slices/HashtagSlice";
 import LoadingCompoent from "../component/LoadingComponent";
 // import { getHashtag, createHashtag } from "../redux/slices/HashtagSlice";
 import { Ionicons } from "@expo/vector-icons";
@@ -142,20 +145,14 @@ const CreatePostScreen = () => {
 
     // Nếu có hashtag mới, thêm vào Firestore
     if (newHashtag.length !== 0) {
-      await dispatch(createHashtag(newHashtag)).unwrap()
-        // .then(() => {
-        //   dispatch(getHashtag());
-        // })
+      await dispatch(createHashtag(newHashtag)).unwrap();
     }
 
-    // Gọi lại danh sách hashtag sau khi thêm mới
-    // await dispatch(getHashtag()).unwrap();
-    // console.log("Cập nhật danh sách hashtag thành công");
 
     // Thêm bài viết mới vào Firestore
     await dispatch(createPost(newDataPost)).unwrap();
     // console.log("Thêm bài viết thành công");
-    resetData();
+    handleGoBack();
     setIsLoading(false);  // Kết thúc loading
   };
 
@@ -401,9 +398,11 @@ const CreatePostScreen = () => {
           {/* Nút quay lại */}
           <ButtonsComponent isBack onPress={handleGoBack}>
             <Image
-              source={{
-                uri: "https://cdn-icons-png.flaticon.com/512/3114/3114883.png",
-              }}
+              // source={{
+              //   uri: "https://cdn-icons-png.flaticon.com/512/3114/3114883.png",
+              // }}
+            source={require("../../assets/appIcons/close_icon.png")} //icon #
+
               style={{ width: 25, height: 25, marginTop: "auto" }}
             />
           </ButtonsComponent>
