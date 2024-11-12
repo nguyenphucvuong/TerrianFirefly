@@ -29,7 +29,7 @@ export default function EventManagementScreen() {
 
   // Gọi hàm getEvent để lấy dữ liệu khi màn hình được render lần đầu
   // useEffect(() => {
-  //   const unsubscribe = dispatch(fetchEvents()); 
+  //   const unsubscribe = fetchEvents(getEvent()); 
   //   return () => unsubscribe(); // Cleanup
   // }, [dispatch]);
 
@@ -37,11 +37,11 @@ export default function EventManagementScreen() {
   const formatNumber = (num) => {
     // console.log(num)
     if (num >= 1e9) {
-        return (num / 1e9).toFixed(0) + 'B'; // tỷ
+        return (num / 1e9) + 'B'; // tỷ
     } else if (num >= 1e6) {
-        return (num / 1e6).toFixed(0) + 'M'; // triệu
+        return (num / 1e6) + 'M'; // triệu
     } else if (num >= 1e3) {
-        return (num / 1e3).toFixed(0) + 'K'; // nghìn
+        return (num / 1e3) + 'K'; // nghìn
     } else {
         return num; // số bình thường
     }

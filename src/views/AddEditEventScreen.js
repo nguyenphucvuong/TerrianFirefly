@@ -133,7 +133,6 @@ export default function AddEditEventScreen({ route, navigation }) {
       alert("Quyền truy cập ảnh bị từ chối!");
       return;
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
