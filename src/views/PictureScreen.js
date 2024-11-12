@@ -77,12 +77,12 @@ const PictureScreen = ({ }) => {
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
     const countEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id });
-    const likeCount = countEmoji.likeCount;
-    const heartCount = countEmoji.heartCount;
-    const laughCount = countEmoji.laughCount;
-    const sadCount = countEmoji.sadCount;
-    const totalCount = countEmoji.totalCount;
-    const favoriteCount = calculateFavoriteCounts({ favoriteList: favorite, post_id: post.post_id }).totalCount;
+    const likeCount = formatNumber({ num: countEmoji.likeCount });
+    const heartCount = formatNumber({ num: countEmoji.heartCount });
+    const laughCount = formatNumber({ num: countEmoji.laughCount });
+    const sadCount = formatNumber({ num: countEmoji.sadCount });
+    const totalCount = formatNumber({ num: countEmoji.totalCount });
+    const favoriteCount = formatNumber({ num: calculateFavoriteCounts({ favoriteList: favorite, post_id: post.post_id }).totalCount });
 
     // console.log(Select);
 

@@ -13,7 +13,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
-import { handleTime, formatDate, formatNumber } from "../utils";
+import { calculateEmojiCounts, formatNumber, handleTime, formatDate } from '../utils';
+
 
 
 import MoreOptionPostComponent from '../component/moreOptionBox/MoreOptionPostComponent';
@@ -27,7 +28,6 @@ import YoutubePlayerComponent from '../component/YoutubePlayerComponent';
 import { useDispatch, useSelector } from 'react-redux';
 import { createFollow } from '../redux/slices/FollowerSlice';
 import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
-import { calculateEmojiCounts } from '../utils';
 
 
 
@@ -47,10 +47,10 @@ const DetailPostScreen = () => {
     const [iconEmoji, setIconEmoji] = useState("default");
     const emoji = useSelector(state => state.emoji.emojiList);
     const countEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id })
-    const likeCount = countEmoji.likeCount;
-    const heartCount = countEmoji.heartCount;
-    const laughCount = countEmoji.laughCount;
-    const sadCount = countEmoji.sadCount;
+    const likeCount = formatNumber({ num: countEmoji.likeCount });
+    const heartCount = formatNumber({ num: countEmoji.heartCount });
+    const laughCount = formatNumber({ num: countEmoji.laughCount });
+    const sadCount = formatNumber({ num: countEmoji.sadCount });
 
     useEffect(() => {
         // console.log("emoji Run");

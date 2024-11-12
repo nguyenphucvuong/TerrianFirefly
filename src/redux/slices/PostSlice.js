@@ -141,7 +141,7 @@ const getFavouriteUserIds = async ({ currentUserId }) => {
   );
   const favouriteSnapshot = await getDocs(favouriteQuery);
   //console.log("favouriteSnapshot", favouriteSnapshot.docs.map((doc) => doc.data().user_id));
-  
+
   return favouriteSnapshot.docs.map((doc) => doc.data().user_id);
 };
 
