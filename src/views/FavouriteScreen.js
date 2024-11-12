@@ -8,7 +8,7 @@ import { SkeletonComponent } from "../component";
 import PostViewComponent from "../component/PostViewComponent";
 const FavouriteScreen = () => {
     const emoji = data.emoji;
-    const post = useSelector((state) => state.post.postByUser);
+    const post = useSelector((state) => state.post.postFavourite);
     const user = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
 
@@ -16,14 +16,15 @@ const FavouriteScreen = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [hasMorePosts, setHasMorePosts] = useState(true);
 
-    // useEffect( async () => {
-    //     await dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: user?.user_id }));
-    // }, [user]);
+    useEffect(() => {
+        dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: user?.user_id }));
+      }, [user?.user_id]);
     // console.log('user?.user_id',user?.user_id);
-
+    // console.log('post1234', post);
+    // console.log('user', user);
     return (
         <>
-            {post == [] || user === null ? (
+            {post.length === 0 || user === null ? (
                 <View style={{ height: 100, width: "100%", paddingHorizontal: "5%", }}>
                     <SkeletonComponent isAvatar Data={""} />
                     <SkeletonComponent style={{ width: "60%", height: 20 }} Data={""} />
@@ -37,25 +38,11 @@ const FavouriteScreen = () => {
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => {
                         return (
-                            <PostViewComponent post={item} images={item.images} emoji={emoji} user={user} />
+                            <PostViewComponent post={item} images={item.images} user={user} />
                         )
                     }}
                     contentContainerStyle={{ flexGrow: 1 }}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={() => {
-                            setRefreshing(true);
-                            setTimeout(async () => {
-                                const dataRefresh = await dispatch(getPostsRefresh({ isFollow: true, currentUserId: user?.user_id }));
-                                // await startListeningFollowers({ follower_user_id: user?.user_id });
-                                // await startListeningFavorites({ user_id: user?.user_id });
-                                // setLastVisiblePost(dataRefresh.payload.lastVisiblePost);
-                                console.log("getPostsRefresh")
-                                // Sau khi hoàn thành refresh, có thể cập nhật lại dữ liệu từ API hoặc giữ nguyên
-                                setRefreshing(false);
-                                setHasMorePosts(true);
-                            }, 2000);
-                        }} />
-                    }
+
                     ListFooterComponent={() => (
                         loading ? //  a==b ? b : a
                             <View style={{
@@ -70,31 +57,12 @@ const FavouriteScreen = () => {
                                 flexDirection: 'column'
                             }} >
                                 <ActivityIndicator size="large" color='#0000ff' />
+
                             </View> : null
                     )}
-
-                    onEndReached={async () => {
-                        if (loading || !hasMorePosts || !user) return; // Check if loading or no more posts to load
-                        setLoading(true);
-
-                        try {
-                            console.log('currentUserId: user?.user_id',user?.user_id);
-                            
-                            const dataLoadMore = await dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: user?.user_id }));
-                            // await startListeningFollowers({ follower_user_id: user?.user_id });
-                            // await startListeningFavorites({ user_id: user?.user_id });
-                            if (dataLoadMore.payload.postData.length === 0) {
-                                setHasMorePosts(false);
-                            }
-                        } catch (error) {
-                            console.error("Error loading more posts:", error);
-                        } finally {
-                            setLoading(false);
-                        }
-                    }}
-                    onEndReachedThreshold={0.1}
                 />)}
         </>
     );
+
 }
-export default FavouriteScreen;
+export default React.memo(FavouriteScreen);

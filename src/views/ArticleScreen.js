@@ -15,12 +15,9 @@ const ArticleScreen = ({post, user}) => {
     //console.log('post1', post);
     return (
         <>
-            {post.length === 0 || user === null ? (
+            {post.length === 0 ? (
                 <View style={{ height: 100, width: "100%", paddingHorizontal: "5%", }}>
-                    <SkeletonComponent isAvatar Data={""} />
-                    <SkeletonComponent style={{ width: "60%", height: 20 }} Data={""} />
-                    <SkeletonComponent style={{ width: "80%", height: 10 }} Data={""} />
-                    <SkeletonComponent style={{ width: "90%", height: 10 }} Data={""} />
+                    <Text>Bạn chưa có bài viết</Text>
                 </View>
             ) : (
                 <FlatList

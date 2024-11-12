@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
@@ -12,15 +12,13 @@ const initialState = {
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getBackground = createAsyncThunk('data/getBackground', async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "Background"));
-    querySnapshot.forEach((doc) => {
-      // console.log(`Background: ${doc.id} => `, doc.data());
-    });
-    //const querySnapshot = await getDocs(collection(db, "Posts")); // Thay "Posts" bằng tên bộ sưu tập của bạn
-    const backgroundData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Lấy dữ liệu và ID của từng tài liệu
+    const backgroundRef = collection(db, "Background");
+    const q = query(backgroundRef, orderBy('level')); // sắp xếp tăng dần theo level
 
-    //console.log("Danh sách post: ",postData[0].imgPost);
-    return backgroundData; // Trả về danh sách bài đăng
+    const querySnapshot = await getDocs(q);
+    const backgroundData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    return backgroundData;
   } catch (error) {
     console.error('Error fetching posts: ', error);
     throw error;

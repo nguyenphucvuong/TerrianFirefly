@@ -1,6 +1,6 @@
 import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text, Alert, LogBox, Clipboard } from 'react-native'
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useIsFocused } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSelector, useDispatch } from "react-redux";
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -19,7 +19,7 @@ import TabRecipe from '../component/TabRecipe';
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
 //redux
-import { listenToUserRealtime, getUserFromFollowedUsers } from '../redux/slices/UserSlices';
+import { listenToUserRealtime, getUserFromFollowedUsers, getUserFromFollowingUsers } from '../redux/slices/UserSlices';
 import { getPostUsers } from '../../src/redux/slices/PostSlice';
 const Tab = createMaterialTopTabNavigator();
 
@@ -27,17 +27,27 @@ const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.09;
 const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 
 
-const PersonScreen = () => {
+const PersonScreen = ({ isAvatar }) => {
+    const navigation = useNavigation();
     //firebase
-    const users = useSelector((state) => state.user.user);
+    // const users = useSelector((state) => state.user.user);
     const followUp = useSelector((state) => state.user.usersFollowed);
+    const followingUsers = useSelector((state) => state.user.followingUsers);
+    const dataUser = useSelector((state) => state.user.user);
     const post = useSelector((state) => state.post.postByUser);
     const dispatch = useDispatch();
+    const isFocused = useIsFocused(); // Kiểm tra khi tab được focus
+
     //route
     const route = useRoute();
-    const user = route.params?.user ?? users;
-    //console.log('user',user);
+    const userPost = route.params?.userPost ?? {};
+    const isFromAvatar = route.params?.isFromAvatar ?? isAvatar;
+    // console.log('userPost',userPost);
+    //console.log('isFromAvatar', isFromAvatar);
+    const [user, setUser] = useState(isFromAvatar ? userPost : dataUser);
+    //console.log('dataUser', dataUser);
 
+    //console.log('useruser', user);
     const follower = useSelector(state => state.follower.follower);
     const isFlag = follower.some(f => f.user_id === post.user_id);
 
@@ -55,8 +65,6 @@ const PersonScreen = () => {
         }
         handleFollowUser();
     });
-
-    const navigation = useNavigation();
 
     //Copy
     const [showToast, setShowToast] = useState(false);
@@ -101,23 +109,28 @@ const PersonScreen = () => {
     const onClose = () => {
 
     }
-    //cập nhật lại dữ liệu 
+    //cập nhật lại dữ liệu  
     useEffect(() => {
-        //Bài viết
-        dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
-        //user theo dõi
-        dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
-        const unsubscribe = dispatch(listenToUserRealtime(user.email));
-        return () => unsubscribe();
-    }, [dispatch, user.email]);
-    //console.log('user', user);
-    //console.log('showToast', showToast);
-    ///console.log('followUp', followUp.length,);
+        if (isFocused) {
+            if (isFocused && user !== (isFromAvatar ? userPost : dataUser)) {
+                setUser(isFromAvatar ? userPost : dataUser);
+                // dispatch actions here
+            }
+            // console.log('aaaaaaaaaaaaaaaaa');
+            //Bài viết
+            dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
+            //theo dõi
+            dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
+            // người theo dõi
+            dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: user?.user_id }));
+            // const unsubscribe = dispatch(listenToUserRealtime(user.email));
+            // return () => unsubscribe();
 
-
+        }
+    }, [isFocused, isFromAvatar]);
     return (
-        <BottomSheetModalProvider style={{ flex: 1, backgroundColor: 'white' }}>
-            {user === null ? (
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
+            {user.length === 0 ? (
                 <View>
                     <SkeletonComponent Data={""} style={{ width: '100%', height: appInfo.heightWindows * 0.15 }} />
                     <View style={{ margin: '5%' }}>
@@ -133,13 +146,13 @@ const PersonScreen = () => {
                     <View style={styles.header}>
                         <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
                             <View style={styles.upperrHeader}>
-                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, user !== users && { marginLeft: '7%' }]}>
+                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, user === userPost && { marginLeft: '7%' }]}>
                                     <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={user.imgUser} />
                                     <Text style={styles.avatarText}>{user.username}</Text>
                                 </Animated.View>
                             </View>
                             {
-                                users !== user ?
+                                userPost === user ?
                                     <View style={styles.back}>
                                         <ButtonBackComponent color={'white'} />
                                     </View>
@@ -182,7 +195,7 @@ const PersonScreen = () => {
                                 </Animated.View>
 
 
-                                {user === users ?
+                                {user !== userPost ?
                                     <View style={{
                                         // backgroundColor: 'red',
                                         flexDirection: 'row',
@@ -236,53 +249,22 @@ const PersonScreen = () => {
 
                             <View style={styles.iconRow}>
                                 <IconComponent name={'credit-card'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'ID: ' + user.user_id} onPress={() => copyToClipboard(user.user_id)} />
-                                <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} />
+                                <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} disabled={userPost === user ? true : false} />
                             </View>
 
                             <View style={styles.statisticsContainer}>
                                 <StatisticsComponent quantity={post.length} name={'Bài Viết'} />
                                 <StatisticsComponent quantity={followUp.length} name={'Theo Dõi'} onPress={() => navigation.navigate('FollowUp', { followUp })} />
-                                <StatisticsComponent quantity={0} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
+                                <StatisticsComponent quantity={followingUsers.length} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen', { followingUsers })} />
                                 <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                             </View>
                             {/*  Tab Navigation */}
                             <TabRecipe post={post} user={user} />
                         </View>
                     </ScrollView>
-                    {/* <BottomSheetModal
-                        ref={bottomSheetModalRef}
-                        index={0}
-                        snapPoints={snapPoints}>
-                        <BottomSheetView style={styles.contentContainer}>
-                            <View style={styles.headerBottom}>
-                                <IconComponent name={'x'} size={appInfo.heightWindows * 0.028} color={'#000000'} style={styles.closeButton} />
-                                <Text style={styles.headerText}>Quản Lý</Text>
-                            </View>
-                            <View style={styles.actionsContainer}>
-                                <View style={styles.actionItem}>
-                                    <IconComponent
-                                        name={'x'}
-                                        size={appInfo.heightWindows * 0.028}
-                                        color={'#000000'}
-                                        style={styles.closeButton}
-                                    />
-                                    <Text style={styles.actionText}>Chặn Người Dùng</Text>
-                                </View>
-                                <View style={styles.actionItem}>
-                                    <IconComponent
-                                        name={'x'}
-                                        size={appInfo.heightWindows * 0.028}
-                                        color={'#000000'}
-                                        style={styles.closeButton}
-                                    />
-                                    <Text style={styles.actionText}>Tố Cáo Người Dùng</Text>
-                                </View>
-                            </View>
-                        </BottomSheetView>
-                    </BottomSheetModal> */}
                 </View>
             )}
-        </BottomSheetModalProvider>
+        </View>
     );
 };
 

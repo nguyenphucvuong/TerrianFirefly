@@ -92,7 +92,7 @@ const PostViewComponent = ({ post, user }) => {
         navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, post_user_id: userId });
     }
     const handleNagigatePersonScreen = () => {
-        navigation.navigate("PersonScreen", { user: userPost });
+        navigation.navigate("PersonScreen", { userPost: userPost, isFromAvatar: true });
         console.log("toi day")
     }
 

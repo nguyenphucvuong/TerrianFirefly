@@ -8,7 +8,7 @@ import { StyleGlobal } from '../styles/StyleGlobal'
 import { appInfo } from '../constains/appInfo'
 //components
 import { AvatarEx, ButtonFunctionComponent } from '../component';
-const TrackingScreen = () => {
+const FollowUp = () => {
     const [isClick, setIsClick] = useState({}); // Lưu trạng thái cho từng item bằng id
     //route
     const route = useRoute();
@@ -45,10 +45,10 @@ const TrackingScreen = () => {
                                             <Text style={StyleGlobal.text}>{item.username}</Text>
                                         </View>
                                         <ButtonFunctionComponent
-                                            name2={isFollowing ? 'Đã Theo Dõi' : 'Theo Dõi Lại'}
-                                            backgroundColor={isFollowing ? '#D9D9D9' : '#FFFFFF'}
-                                            colorText={isFollowing ? '#000' : '#0286FF'}
-                                            style={isFollowing ? styles.button : styles.button2}
+                                            name2={isFollowing ? 'Theo Dõi' : 'Đã Theo Dõi'}
+                                            backgroundColor={isFollowing ? '#FFFFFF' : '#D9D9D9'}
+                                            colorText={isFollowing ? '#0286FF' : '#000'}
+                                            style={isFollowing ? styles.button2 : styles.button}
                                             onPress={() => handleFollow(item)}
                                         />
 
@@ -97,4 +97,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default TrackingScreen;
+export default FollowUp;
