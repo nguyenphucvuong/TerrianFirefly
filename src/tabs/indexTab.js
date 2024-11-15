@@ -26,7 +26,7 @@ const IndexTab = () => {
 
   const [user, setUser] = useState("");
   useEffect(() => {
-  
+
     // Kiểm tra trạng thái xác thực của người dùng
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);

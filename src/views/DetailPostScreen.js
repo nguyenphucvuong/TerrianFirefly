@@ -356,6 +356,7 @@ const DetailPostScreen = () => {
                                     marginHorizontal: "3%",
                                 }} />
                             <View style={{
+                                marginLeft: 10,
                                 justifyContent: "center",
                                 // backgroundColor: "yellow",
                             }}>
