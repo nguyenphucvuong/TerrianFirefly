@@ -314,6 +314,34 @@ export const getUserFromFollowingUsers = createAsyncThunk(
   }
 );
 
+export const startListeningUserByID = ({ user_id }) => (dispatch) => {
+  if (!user_id) return;
+
+  const followerQuery = query(
+    collection(db, "user"),
+    where("user_id", "==", user_id)
+  );
+  const unsubscribe = onSnapshot(followerQuery, (querySnapshot) => {
+    // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
+    const userById = {
+      id: querySnapshot.docs[0].id,
+      ...querySnapshot.docs[0].data(),
+    };
+    // console.log("userById00", userById)
+    dispatch(setUserById(userById));
+    // console.log("followers", followers)
+  }, (error) => {
+    console.error('Error fetching follower: ', error);
+  });
+
+  return unsubscribe; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
+};
+
+
+
+
+
 // Tạo slice cho user
 export const UserSlices = createSlice({
   name: "user",
@@ -322,6 +350,12 @@ export const UserSlices = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       state.errorUser = null; // Reset lỗi khi có dữ liệu người dùng mới
+    },
+    setUserById: (state, action) => {
+      // const { user_id, userById } = action.payload;
+      console.log("userByIddddds ", action.payload);
+      console.log("user_id, ", action.payload.user_id);
+      state[action.payload.user_id] = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -383,6 +417,6 @@ export const UserSlices = createSlice({
   },
 });
 
-export const { setUser, setError } = UserSlices.actions;
+export const { setUser, setError, setUserById } = UserSlices.actions;
 
 export default UserSlices.reducer;

@@ -23,7 +23,7 @@ const HomeScreen = () => {
   const noti = useSelector((state) => state.noti.noti);
 
   // console.log(user_id)
-  
+
 
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,18 +31,18 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (user) {
-    const unsubscribe = getNoti(dispatch, user.user_id);
-    // console.log("notiHome:",noti)
-    return () => unsubscribe();
-  }
-  }, [dispatch,user]);
+      const unsubscribe = getNoti(dispatch, user.user_id);
+      // console.log("notiHome:",noti)
+      return () => unsubscribe();
+    }
+  }, [dispatch, user]);
 
   useEffect(() => {
     if (user) {
       const fetchData = async () => {
         await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
         await dispatch(startListeningFavorites({ user_id: user.user_id }));
-        await dispatch(startListeningEmoji({ user_id: user.user_id }));
+        // await dispatch(startListeningEmoji({ user_id: user.user_id }));
         // dispatch(getPostsByField({ field: "created_at", quantity: 3, isFollow: false, currentUserId: user?.user_id }));
       }
       fetchData();

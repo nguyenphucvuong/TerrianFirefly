@@ -25,5 +25,4 @@ export {
     SelectImageComponent,
     StatisticsComponent,
     InputComponents,
-
 };

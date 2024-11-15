@@ -56,7 +56,7 @@ const PictureScreen = ({ }) => {
     const dispatch = useDispatch();
     // follow
     const follower = useSelector((state) => state.follower.follower);
-    const isFollow = follower.some(f => f.user_id === post.user_id);
+    const isFollow = follower.some(f => f.user_id === post.user_id && f.follower_user_id === user.user_id);
 
     // favorite
     const favorite = useSelector(state => state.favorite.currentFavorite);
@@ -75,7 +75,7 @@ const PictureScreen = ({ }) => {
 
 
     const [iconEmoji, setIconEmoji] = useState("default");
-    const emoji = useSelector(state => state.emoji.emojiList);
+    const emoji = useSelector(state => state.emoji[post.post_id]);
     const countEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id });
     const likeCount = formatNumber({ num: countEmoji.likeCount });
     const heartCount = formatNumber({ num: countEmoji.heartCount });

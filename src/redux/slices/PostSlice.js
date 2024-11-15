@@ -37,30 +37,31 @@ export const createPost = createAsyncThunk(
     try {
       // Thêm dữ liệu mới vào Firestore
       const docRef = await addDoc(collection(db, "Posts"), newData);
-
       const imgUrls = [];
 
-      // Tải lên từng ảnh trong imgPost
-      for (const img of newData.imgPost) {
+      // Tải lên tất cả ảnh
+      const uploadPromises = newData.imgPost.map(async (img) => {
         const response = await fetch(img);
         const blob = await response.blob(); // Chuyển đổi URL thành dạng nhị phân
-        console.log("so nhi phan", blob);
         const imgRef = ref(storage, `images/${img.split("/").pop()}`); // Đặt tên cho ảnh
-        await uploadBytes(imgRef, blob); // Tải lên ảnh
 
-        // Lấy URL tải về
+        // Tải lên ảnh và lấy URL tải về
+        await uploadBytes(imgRef, blob);
         const imgUrl = await getDownloadURL(imgRef);
-        imgUrls.push(imgUrl); // Lưu URL vào mảng
-      }
+        imgUrls.push(imgUrl);
+      });
 
-      console.log(imgUrls);
-      // Lấy tài liệu vừa thêm từ Firestore
-      const docSnap = await getDoc(docRef);
+      // Chờ tất cả ảnh được tải lên
+      await Promise.all(uploadPromises);
 
+      // Cập nhật tài liệu với ID và URL ảnh
       await updateDoc(docRef, {
         post_id: docRef.id,
-        imgPost: imgUrls, // Lưu ID vào tài liệu
+        imgPost: imgUrls,
       });
+
+      // Lấy tài liệu vừa thêm từ Firestore
+      const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         // Trả về dữ liệu của tài liệu vừa thêm
@@ -69,7 +70,7 @@ export const createPost = createAsyncThunk(
         throw new Error("No such document!");
       }
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Error adding document:", error.message);
       throw error;
     }
   }
@@ -161,9 +162,9 @@ export const getPostsRefresh = createAsyncThunk(
         postsQuery = isFollow
           ? query(postsQuery, where("user_id", "in", followedUserIds))
           : query(
-              postsQuery,
-              where("user_id", "not-in", followedUserIds.slice(0, 10))
-            );
+            postsQuery,
+            where("user_id", "not-in", followedUserIds.slice(0, 10))
+          );
       }
 
       const querySnapshot = await getDocs(postsQuery);
@@ -326,7 +327,7 @@ const getFavouriteUserIds = async ({ currentUserId }) => {
     const favouriteSnapshot = await getDocs(favouriteQuery);
     // Lấy danh sách post_id từ các bài viết mà người dùng yêu thích
     //console.log('favouriteSnapshot', favouriteSnapshot.docs.map((doc) => doc.data().post_id));
-    
+
     return favouriteSnapshot.docs.map((doc) => doc.data().post_id);  // Trả về post_id của bài viết yêu thích
   } catch (error) {
     console.error("Error fetching favourite post IDs: ", error);
@@ -590,6 +591,6 @@ export const PostSlice = createSlice({
   },
 });
 
-export const {} = PostSlice.actions;
+export const { } = PostSlice.actions;
 
 export default PostSlice.reducer;

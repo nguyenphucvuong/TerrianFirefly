@@ -3,8 +3,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserByField } from "../redux/slices/UserSlices";
+import { getUserByField, startListeningUserByID } from "../redux/slices/UserSlices";
+import { startListeningEmoji } from "../redux/slices/EmojiSlice";
 import { createFollow } from "../redux/slices/FollowerSlice";
+import { startListeningCommentByPostId } from "../redux/slices/CommentSlice";
 
 
 import { appInfo } from "../constains/appInfo";
@@ -41,7 +43,14 @@ const PostViewComponent = ({ post, user }) => {
     const userPost = useSelector((state) => state.user[userId]);
     // const [isFollow, setIsFollow] = useState(false);
     const follower = useSelector((state) => state.follower.follower);
-    const isFollow = follower.some(f => f.user_id === post.user_id);
+    const isFollow = follower.some(f => f.user_id === post.user_id && f.follower_user_id === user.user_id);
+    const comments = useSelector(state => state.comment[post.post_id])
+
+    useEffect(() => {
+        dispatch(startListeningEmoji({ post_id: post.post_id }));
+        dispatch(startListeningCommentByPostId({ post_id: post.post_id }));
+    }, []);
+
 
 
     // useEffect(() => {
@@ -56,7 +65,8 @@ const PostViewComponent = ({ post, user }) => {
 
     useEffect(() => {
         if (!userPost) {
-            dispatch(getUserByField({ user_id: userId }));
+            // dispatch(getUserByField({ user_id: userId }));
+            dispatch(startListeningUserByID({ user_id: userId }));
         }
     }, [userId]);
 
@@ -89,7 +99,7 @@ const PostViewComponent = ({ post, user }) => {
 
     const handleNagigateDetailPost = () => {
         // navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, isFollow: isFollow, post_user_id: userId });
-        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, post_user_id: userId });
+        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, post_user_id: userId, comments: comments });
     }
     const handleNagigatePersonScreen = () => {
         navigation.navigate("PersonScreen", { userPost: userPost, isFromAvatar: true });
@@ -158,7 +168,6 @@ const PostViewComponent = ({ post, user }) => {
                                     style={{
                                         height: "100%",
                                         width: "55%",
-                                        justifyContent: "center",
                                         paddingLeft: "4%",
                                         // backgroundColor: "red",
                                     }}

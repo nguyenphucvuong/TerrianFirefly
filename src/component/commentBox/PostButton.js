@@ -47,7 +47,7 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
 
 
     const [iconEmoji, setIconEmoji] = useState("default");
-    const emoji = useSelector(state => state.emoji.emojiList);
+    const emoji = useSelector(state => state.emoji[post.post_id]);
     const dataPostEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id }).totalCount; // chưa xong
     // useEffect(() => {
     //     dispatch(startListeningEmoji({ user_id: user.user_id }));

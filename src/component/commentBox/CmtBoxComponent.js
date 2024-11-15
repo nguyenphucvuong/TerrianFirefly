@@ -1,10 +1,12 @@
 /* eslint-disable no-undef */
-import { Animated, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useContext, } from 'react'
+import { Animated, StyleSheet, Text, TextInput, TouchableOpacity, View, ToastAndroid, Platform } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
 import { Image } from 'expo-image';
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from 'expo-image-picker';
+import { useSelector, useDispatch } from 'react-redux';
 
+import { createComment, getComment } from '../../redux/slices/CommentSlice';
 
 import { ImageCheckContext } from '../../context/ImageProvider';
 import RowComponent from '../RowComponent';
@@ -15,13 +17,99 @@ import {
 import { appInfo } from '../../constains/appInfo';
 // import ButtonsComponent from '../ButtonsComponent';
 // import IconsOptionComponent from './IconsOptionComponent';
+const convertToPercentage = (value) => (value * 100).toFixed(2) + "%";
 
-const CmtBoxComponent = ({ translateY, handleHidePop, setContent, btnDangComment }) => {
-    const image = useContext(ImageCheckContext).image
-    const setImage = useContext(ImageCheckContext).setImage
-    const predictions = useContext(ImageCheckContext).predictions
-    const selectImage = useContext(ImageCheckContext).selectImage
-    const modelReady = useContext(ImageCheckContext).modelReady
+const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id }) => {
+
+    const { image, setImage, selectImage, modelReady, predictions, setPredictions } = useContext(ImageCheckContext);
+    const [content, setContent] = useState("");
+
+
+    const dispatch = useDispatch();
+
+
+    const dataCmt = {
+        comment_id: "",
+        post_id: post.post_id,
+        user_id: user_id,
+        content: content,
+        count_like: 0,
+        count_comment: 0,
+        created_at: Date.now(),
+        imgPost: image,
+    }
+
+
+    const btnDangComment = () => {
+        // console.log("dang comment");
+        if (content || image) {
+            handleHidePop();
+
+            if (image) {
+                // Show a loading indicator if needed
+                if (Platform.OS === 'android') {
+                    ToastAndroid.show('Đang xử lý...', ToastAndroid.SHORT);
+                } else {
+                    alert('Đang xử lý...');
+                }
+
+                // Wait for predictions to be ready
+                const waitForPredictions = new Promise((resolve) => {
+                    const checkPredictions = setInterval(() => {
+                        if (predictions && predictions.length > 0) {
+                            clearInterval(checkPredictions);
+                            resolve();
+                        }
+                    }, 100); // Check every 100ms
+                });
+
+                waitForPredictions;
+
+                // Perform actions after predictions are ready
+                console.log("Neutral", predictions[0].probability);
+                console.log("Drawing", predictions[1].probability);
+                console.log("Hentai", predictions[2].probability);
+                console.log("Porn", predictions[3].probability);
+                console.log("Sexy", predictions[4].probability);
+                console.log("Neutral", convertToPercentage(predictions[0].probability));
+                console.log("Drawing", convertToPercentage(predictions[1].probability));
+                console.log("Hentai", convertToPercentage(predictions[2].probability));
+                console.log("Porn", convertToPercentage(predictions[3].probability));
+                console.log("Sexy", convertToPercentage(predictions[4].probability));
+
+                if (predictions[3].probability > 0.05 || predictions[2].probability > 0.05 || predictions[4].probability > 0.05) {
+                    if (Platform.OS === 'android') {
+                        ToastAndroid.show('Hình ảnh không phù hợp!', ToastAndroid.SHORT);
+                    } else {
+                        alert('Hình ảnh không phù hợp');
+                    }
+                    setImage(null);
+                    setPredictions(null);
+                    return;
+                }
+            }
+
+            setImage(null);
+            setPredictions(null);
+
+            // Dispatch the comment action only after predictions are ready
+            dispatch(createComment(dataCmt));
+
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Đang đăng bình luận!', ToastAndroid.SHORT);
+            } else {
+                alert('Đang đăng bình luận');
+            }
+        } else {
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Bình luận hoặc hình không được để trống!', ToastAndroid.SHORT);
+            } else {
+                alert('Bình luận không được để trống');
+            }
+            handleHidePop();
+        }
+    };
+
     return (
         <Animated.View style={[styles.animatedContainer, { transform: [{ translateY }] }]}>
             <RowComponent width={"100%"} height={"auto"} style={{
@@ -83,7 +171,9 @@ const CmtBoxComponent = ({ translateY, handleHidePop, setContent, btnDangComment
                                 zIndex: 1,
                                 top: 0,
                                 right: 0,
-                            }} >
+                            }}
+                            onPress={() => { console.log("Clearing image"); setImage(null); setPredictions(null); }}
+                        >
                             <Image source={require('../../../assets/appIcons/close_icon.png')}
                                 style={{
                                     width: 25,
@@ -138,8 +228,7 @@ const CmtBoxComponent = ({ translateY, handleHidePop, setContent, btnDangComment
                         height: "100%",
                     }}
                 >
-                    <ButtonsComponent
-                        isButton
+                    <TouchableOpacity
                         onPress={btnDangComment}
                         style={{
                             borderRadius: 30,
@@ -156,7 +245,7 @@ const CmtBoxComponent = ({ translateY, handleHidePop, setContent, btnDangComment
                                 color: "white",
                                 fontSize: 12,
                             }} >Đăng</Text>
-                    </ButtonsComponent>
+                    </TouchableOpacity>
                 </LinearGradient>
 
             </View>

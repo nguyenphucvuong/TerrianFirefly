@@ -106,7 +106,7 @@ export const ImageProvider = ({ children }) => {
   };
 
   return (
-    <ImageCheckContext.Provider value={{ image, setImage, predictions, selectImage, modelReady, lastVisiblePost, setLastVisiblePost }}>
+    <ImageCheckContext.Provider value={{ image, setImage, predictions, setPredictions, selectImage, modelReady, lastVisiblePost, setLastVisiblePost }}>
       {children}
     </ImageCheckContext.Provider>
   );

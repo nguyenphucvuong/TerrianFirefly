@@ -22,7 +22,7 @@ import MoreOptionItemComponent from './MoreOptionItemComponent';
 
 
 // const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_id }) => {
-const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhiteDot, size }) => {
+const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhiteDot, size, isComment }) => {
     const [isVisible, setIsVisible] = useState(false);
     const translateY = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
     // const translateY = useRef(new Animated.Value(0)).current; // Start offscreen
@@ -56,8 +56,12 @@ const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhit
     })
 
     const handleReport = useCallback(() => {
-        dispatch(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
-        dispatch(updateUserState({ user_id: post_user_id, field: "status_user_id", value: 1 }));
+        if (isComment) {
+            dispatch(updateUserState({ user_id: user_id, field: "status_user_id", value: 1 }));
+        } else {
+            dispatch(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
+            dispatch(updateUserState({ user_id: post_user_id, field: "status_user_id", value: 1 }));
+        }
         handleHideInput();
     })
 
@@ -146,26 +150,28 @@ const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhit
                             }}>
 
                             {/* Hủy theo dõi */}
-                            {userFollowCheck() ?
-                                <MoreOptionItemComponent
-                                    isRow
-                                    url={require('../../../assets/appIcons/sad-unfollow.png')}
-                                    text={"Hủy theo dõi"}
-                                    onPress={handleDeleteFollow} /> : <></>}
+                            {isComment ? <></> :
+                                userFollowCheck() ?
+                                    <MoreOptionItemComponent
+                                        isRow
+                                        url={require('../../../assets/appIcons/sad-unfollow.png')}
+                                        text={"Hủy theo dõi"}
+                                        onPress={handleDeleteFollow} /> : <></>}
                             {/* Yêu thích */}
                             {/* {userFavoriteCheck() ? */}
-                            {!isFavorite ?
-                                <MoreOptionItemComponent
-                                    isRow
-                                    url={require('../../../assets/appIcons/favorite.png')}
-                                    text={"Yêu thích"}
-                                    onPress={handleFavorite} />
-                                :
-                                <MoreOptionItemComponent
-                                    isRow
-                                    url={require('../../../assets/appIcons/unfavorite.png')}
-                                    text={"Hủy yêu thích"}
-                                    onPress={handleFavorite} />
+                            {isComment ? null :
+                                !isFavorite ?
+                                    <MoreOptionItemComponent
+                                        isRow
+                                        url={require('../../../assets/appIcons/favorite.png')}
+                                        text={"Yêu thích"}
+                                        onPress={handleFavorite} />
+                                    :
+                                    <MoreOptionItemComponent
+                                        isRow
+                                        url={require('../../../assets/appIcons/unfavorite.png')}
+                                        text={"Hủy yêu thích"}
+                                        onPress={handleFavorite} />
                             }
                             {/* : <></>} */}
                             {/* Báo cáo */}

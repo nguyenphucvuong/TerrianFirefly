@@ -362,6 +362,7 @@ const CreatePostScreen = () => {
 
     if (!result.canceled) {
       const selectedImages = result.assets.map((asset) => asset.uri); // Lấy URI của các ảnh được chọn
+      console.log("selectedImages", selectedImages);
       const newImages = selectedImages.filter((uri) => !images.includes(uri));
 
       if (newImages.length > 0) {
@@ -401,7 +402,7 @@ const CreatePostScreen = () => {
               // source={{
               //   uri: "https://cdn-icons-png.flaticon.com/512/3114/3114883.png",
               // }}
-            source={require("../../assets/appIcons/close_icon.png")} //icon #
+              source={require("../../assets/appIcons/close_icon.png")} //icon #
 
               style={{ width: 25, height: 25, marginTop: "auto" }}
             />
