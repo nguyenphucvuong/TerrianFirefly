@@ -39,11 +39,11 @@ const TabRecipe = ({ post, postFavourite, user }) => {
     });
   const screens = [
     <ArticleScreen post={post} user={user} key="0" />,
-    <FavouriteScreen postFavourite={postFavourite} user={user}  key="1" />,
+    <FavouriteScreen postFavourite={postFavourite} user={user} key="1" />,
     <GroupScreen key="2" />,
   ];
   return (
-    <View style={{ flex: 1 }}>
+    <View  >
       {/* Tab Navigation Buttons */}
       <View style={styles.tabBar}>
         <TouchableOpacity onPress={() => [animateTabTransition(0), setSelectedTab('articles')]} style={styles.tab}>
@@ -58,7 +58,7 @@ const TabRecipe = ({ post, postFavourite, user }) => {
       </View>
 
       {/* Animated Tab Content */}
-      <View style={{ flex: 1 }}>
+      <View >
         {screens.map((screen, index) => (
           <Animated.View
             key={index}

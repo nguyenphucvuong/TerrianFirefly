@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserByField } from "../redux/slices/UserSlices";
+import { getUserByField, startListeningUserByID } from "../redux/slices/UserSlices";
 import { createFollow } from "../redux/slices/FollowerSlice";
 
 
@@ -56,7 +56,8 @@ const PostViewComponent = ({ post, user }) => {
 
     useEffect(() => {
         if (!userPost) {
-            dispatch(getUserByField({ user_id: userId }));
+            // dispatch(getUserByField({ user_id: userId }));
+            dispatch(startListeningUserByID({ user_id: userId }));
         }
     }, [userId]);
 

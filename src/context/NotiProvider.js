@@ -18,21 +18,23 @@ export const NotiProvider = ({ children }) => {
     });
   };
 
-  // useEffect giám sát noti và gửi thông báo nếu có thông báo chưa đọc
-  useEffect(() => {
-    // Kiểm tra nếu user và user.user_id không null hoặc undefined
-    if (user && user.user_id) {
-      // Lọc thông báo của người dùng hiện tại (targetUser_id = user.user_id)
-      const uncheckedNotis = noti.filter((n) => !n.checked && n.targetUser_id === user.user_id);
+ // useEffect giám sát noti và gửi thông báo nếu có thông báo chưa đọc
+ useEffect(() => {
+  // Kiểm tra nếu user và user.user_id không null hoặc undefined
+  if (user && user.user_id) {
+    // Lọc thông báo của người dùng hiện tại (targetUser_id = user.user_id)
+    const uncheckedNotis = noti.filter(
+      (n) => !n.checked && n.targetUser_id === user.user_id && n.noti_id != "temp"
+    ); // Chỉ chọn thông báo đã có noti_id
 
-      Promise.all(
-        uncheckedNotis.map(async (notiItem) => {
-          await schedulePushNotification({ title: "TerrianFireFly", body: notiItem.content });
-          dispatch(updateNotiByField({ notiID: notiItem.noti_id, field: "checked", value: true }));
-        })
-      );
-    }
-  }, [noti, dispatch, user]); // Thêm 'user' vào dependencies
+    Promise.all(
+      uncheckedNotis.map(async (notiItem) => {
+        await schedulePushNotification({ title: "TerrianFireFly", body: notiItem.content });
+        dispatch(updateNotiByField({ notiID: notiItem.noti_id, field: "checked", value: true }));
+      })
+    );
+  }
+}, [noti, dispatch, user]);
 
   return (
     <NotifiContext.Provider value={{ schedulePushNotification }}>

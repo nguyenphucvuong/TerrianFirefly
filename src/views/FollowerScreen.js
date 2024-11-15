@@ -1,6 +1,7 @@
 import { FlatList, View, TouchableOpacity, StyleSheet, Text, Image } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useSelector, useDispatch } from "react-redux";
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal'
 //constains
@@ -12,9 +13,7 @@ import { getUserFromFollowingUsers } from "../redux/slices/UserSlices";
 
 const FollowerScreen = () => {
     const [isClick, setIsClick] = useState({}); // Lưu trạng thái cho từng item bằng id
-    //route
-    const route = useRoute();
-    const followingUsers = route.params?.followingUsers ?? [];
+    const followingUsers = useSelector((state) => state.follower.following);
     //su ly follower
     const handleFollower = (item) => {
         // Thay đổi trạng thái dựa trên id của item

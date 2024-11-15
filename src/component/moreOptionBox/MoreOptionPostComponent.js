@@ -32,7 +32,7 @@ const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhit
 
     const favorite = useSelector(state => state.favorite.currentFavorite);
     // const [isFavorite, setIsFavorite] = useState(false);
-    const isFavorite = favorite.some(f => f.post_id === post_id);
+    const isFavorite = favorite.some(f => f.post_id === post_id && f.user_id === user_id);
     const dispatch = useDispatch();
 
 

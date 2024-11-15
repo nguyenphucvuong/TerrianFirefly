@@ -6,7 +6,7 @@ import { getPostUsers } from '../../src/redux/slices/PostSlice';
 import { SkeletonComponent } from "../component";
 //components
 import PostViewComponent from "../component/PostViewComponent";
-const ArticleScreen = ({post, user}) => {
+const ArticleScreen = ({ post, user }) => {
     const emoji = data.emoji;
 
     const [loading, setLoading] = useState(false);

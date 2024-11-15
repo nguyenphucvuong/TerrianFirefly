@@ -16,10 +16,11 @@ import { AvatarEx, ButtonFunctionComponent, InputComponents, IconComponent } fro
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 //redux
-import { getUser, updateUser, uploadImage, listenToUserRealtime } from '../redux/slices/UserSlices';
+import { updateUser, uploadImage } from '../redux/slices/UserSlices';
 const InfomationScreen = () => {
     const navigation = useNavigation(); // Sử dụng hook navigation
     const [userName, setUserName] = useState('');
+    const [phone, setPhone] = useState('');
     const [gender, setGender] = useState('');
     const [avatarImage, setAvatarImage] = useState('');
     //uploadImage
@@ -54,16 +55,17 @@ const InfomationScreen = () => {
         setModalVisible(true);
         try {
             let imgUser = user.imgUser; // Gán ảnh hiện tại của người dùng vào imgUse
-            if (avatarImage !== user.imgUser) {                
+            if (avatarImage !== user.imgUser) {
                 imgUser = await dispatch(uploadImage({
                     imgUser: avatarImage,
-                    setUploadProgress 
+                    setUploadProgress
                 })).unwrap();
-                console.log('imgUser', imgUser);
+                //console.log('imgUser', imgUser);
             }
             //update newData
             const newData = {
                 username: userName,
+                numberPhone: phone,
                 gender: gender,
                 imgUser: imgUser,
             }
@@ -79,18 +81,30 @@ const InfomationScreen = () => {
     //cập nhật lại dữ liệu 
     useEffect(() => {
         hanndleDisPlay();
+        console.log('aaaaaaaa');
+        
         //dispatch(getUser(user.email));
         // const unsubscribe = dispatch(listenToUserRealtime(user.email));
         // return () => unsubscribe();
-    }, []);
-  
+    }, [user]);
+
 
     // console.log('user1232',user[0].email);
     const hanndleDisPlay = () => {
         setUserName(user.username);
+        setPhone(user.numberPhone)
         setGender(user.gender);
         setAvatarImage(user.imgUser);
     }
+    // const handleSetPhone = (text) => {
+    //     setPhone(text);
+    //     setIsEditing(true);
+    // }
+    // const handleBlur = () => {
+    //     setIsEditing(false); // Đánh dấu kết thúc chỉnh sửa khi người dùng dừng nhập
+    //     // Gửi dữ liệu mới lên Firebase (nếu muốn)
+    // };
+
     //Gender
     const hanldeGender = (gender) => {
         switch (gender) {
@@ -140,8 +154,15 @@ const InfomationScreen = () => {
                     </View>
                     <View style={{ marginTop: '3%' }}>
                         <Text style={StyleGlobal.textTitleContent}>Tên</Text>
-                        <InputComponents iconName={'user'} value={userName} onChangeText={(text) => setUserName(text)} />
-                    </View>
+                        <InputComponents iconName={'user'} value={userName} onChangeText={(text) => setUserName(text)} maxLength={30} />
+                    </View>  
+                    {user.numberPhone &&
+                        <View style={{ marginTop: '3%' }}>
+                            <Text style={StyleGlobal.textTitleContent}>SĐT</Text>
+                            <InputComponents iconName={'phone'} value={phone} onChangeText={(text) => setPhone(text)} keyboardType={'numeric'} maxLength={10} />
+                        </View>
+                    }
+
                     <View style={{ marginTop: '3%' }}>
                         <Text style={StyleGlobal.textTitleContent}>Giới Tính</Text>
                         <TouchableOpacity style={styles.buttonRow} onPress={() => handldeOpenPress()}>

@@ -21,8 +21,9 @@ import TabRecipe from '../component/TabRecipe';
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
 //redux
-import {getUserFromFollowedUsers, getUserFromFollowingUsers } from '../redux/slices/UserSlices';
+import { listenToUserRealtime, listenToUserRealtime2, listenToUserRealtimeFollowed, listenToUserRealtimeFollowing } from '../redux/slices/UserSlices';
 import { getPostUsers, getPostsFromFavouriteUsers } from '../../src/redux/slices/PostSlice';
+import { getUserFromFollowedUsers, getUserFromFollowingUsers, listenToFollowerRealtime, listenToFollowingRealtime } from '../redux/slices/FollowerSlice';
 const Tab = createMaterialTopTabNavigator();
 
 const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.09;
@@ -32,10 +33,10 @@ const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 const PersonScreen = ({ isAvatar }) => {
     const navigation = useNavigation();
     //firebase
-    // const users = useSelector((state) => state.user.user);
-    const followUp = useSelector((state) => state.user.usersFollowed);
-    const followingUsers = useSelector((state) => state.user.followingUsers);
+    const followUp = useSelector((state) => state.follower.follower);
+    const followingUsers = useSelector((state) => state.follower.following);
     const dataUser = useSelector((state) => state.user.user);
+    const iUser = useSelector((state) => state.user.iUser) || {};
     const post = useSelector((state) => state.post.postByUser);
     const postFavourite = useSelector((state) => state.post.postFavourite);
     const dispatch = useDispatch();
@@ -45,24 +46,26 @@ const PersonScreen = ({ isAvatar }) => {
     const route = useRoute();
     const userPost = route.params?.userPost ?? {};
     const isFromAvatar = route.params?.isFromAvatar ?? isAvatar;
-    // console.log('userPost',userPost);
-    //console.log('isFromAvatar', isFromAvatar);
-    const [user, setUser] = useState(isFromAvatar ? userPost : dataUser);
-    //console.log('dataUser', dataUser);
 
-    //console.log('useruser', user);
+    //log
+    // console.log('dataUser', dataUser);
+    //console.log('iUser', iUser);
+    //console.log('followUp', followUp);
+    //console.log('followingUsers',followingUsers);
+
+
     const follower = useSelector(state => state.follower.follower);
     const isFlag = follower.some(f => f.user_id === userPost.user_id);
 
     const handleFollowButton = useCallback(() => {
         const handleFollowUser = async () => {
             if (isFlag) {
-                await dispatch(deleteFollow({ follower_user_id: dataUser.user_id, user_id: userPost.user_id }));
+                await dispatch(deleteFollow({ follower_user_id: dataUser.user_id, user_id: iUser.user_id }));
                 // await dispatch(stopListeningFollowers({ follower_user_id: user.user_id }));
 
 
             } else {
-                await dispatch(createFollow({ follower_user_id: dataUser.user_id, user_id: userPost.user_id }));
+                await dispatch(createFollow({ follower_user_id: dataUser.user_id, user_id: iUser.user_id }));
                 // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
             }
         }
@@ -112,33 +115,44 @@ const PersonScreen = ({ isAvatar }) => {
     const onClose = () => {
 
     }
-    //cập nhật lại dữ liệu  
     useEffect(() => {
         if (isFocused) {
-            if (isFocused && user !== (isFromAvatar ? userPost : dataUser)) {
-                setUser(isFromAvatar ? userPost : dataUser);
-                // dispatch actions here
-            }
-            // console.log('aaaaaaaaaaaaaaaaa');
-            //Bài viết
-            dispatch(getPostUsers({ field: "created_at", currentUserId: user?.user_id }));
-            //Yêu thích
-            dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: user?.user_id }));
-            //theo dõi
-            dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user?.user_id }));
-            // người theo dõi
-            dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: user?.user_id }));
-            // const unsubscribe = dispatch(listenToUserRealtime(user.email));
-            // return () => unsubscribe();
-            console.log("user", user);
-            console.log("userPost", userPost);
+            const fetchData = async () => {
+                try {
+                    // Kiểm tra nếu đang từ avatar, lấy thông tin người dùng
+                    if (isFromAvatar) {
+                        //console.log('Fetching user data in real-time');
+                        await dispatch(listenToUserRealtime2(userPost.email));  // Nếu cần async
+                    }
+                    //lắng nghe realtime về followers
+                    await dispatch(listenToFollowerRealtime({ follower_user_id: isFromAvatar ? userPost.user_id : dataUser.user_id }));
+                    //lắng nghe realtime về following
+                    await dispatch(listenToFollowingRealtime({ follower_user_id: isFromAvatar ? userPost.user_id : dataUser.user_id }));
+                    // Bài viết 
+                    await dispatch(getPostUsers({ field: "created_at", currentUserId: isFromAvatar ? userPost.user_id : dataUser.user_id }));
+                    // Yêu thích
+                    await dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: isFromAvatar ? userPost.user_id : dataUser.user_id }));
+                    // Theo dõi
+                    await dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: isFromAvatar ? userPost.user_id : dataUser.user_id }));
+                    // Người theo dõi
+                    await dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: isFromAvatar ? userPost.user_id : dataUser.user_id }));
+
+
+                } catch (error) {
+                    console.error("Error during data fetching: ", error);
+                }
+            };
+
+            fetchData();
         }
-    }, [isFocused, isFromAvatar]);
+    }, [isFocused, isFromAvatar, userPost.user_id, dataUser.user_id, dispatch]);
+
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
-            {user.length === 0 ? (
+            {/* {isFromAvatar ? userPost.length === 0 : dataUser.length === 0 ? (
                 <View>
-                    <SkeletonComponent Data={""} style={{ width: '100%', height: appInfo.heightWindows * 0.15 }} />
+                    <SkeletonComponent Data={""} style={{ width: '
+                    100%', height: appInfo.heightWindows * 0.15 }} />
                     <View style={{ margin: '5%' }}>
                         <SkeletonComponent isAvatar Data={""} style={{ width: 80, height: 80 }} />
                         <SkeletonComponent Data={""} style={{ width: '60%', height: appInfo.heightWindows * 0.02 }} />
@@ -146,127 +160,142 @@ const PersonScreen = ({ isAvatar }) => {
                         <SkeletonComponent Data={""} style={{ width: '80%', height: appInfo.heightWindows * 0.02 }} />
                     </View>
                 </View>
-            ) : (
-                <View >
-                    <View style={styles.upperHeaderPlacehholder} />
-                    <View style={styles.header}>
-                        <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
-                            <View style={styles.upperrHeader}>
-                                <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, user === userPost && { marginLeft: '7%' }]}>
-                                    <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={user.imgUser} />
-                                    <Text style={styles.avatarText}>{user.username}</Text>
-                                </Animated.View>
-                            </View>
-                            {
-                                userPost === user ?
-                                    <View style={styles.back}>
-                                        <ButtonBackComponent color={'white'} />
-                                    </View>
-                                    : <View style={styles.setting}>
-                                        <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
-                                    </View>
-                            }
-                            <View style={styles.lowerHeader} />
-                        </ImageBackground>
-                    </View>
-                    {showToast && (
-                        <View style={styles.toastContainer}>
-                            <Text style={styles.toastText}>Đã sao chép thành công!</Text>
+            ) : ( */}
+            <View >
+                <View style={styles.upperHeaderPlacehholder} />
+                <View style={styles.header}>
+                    <ImageBackground source={{ uri: isFromAvatar ? iUser.backgroundUser : dataUser.backgroundUser }} style={styles.imageBackground}>
+                        <View style={styles.upperrHeader}>
+                            <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, isFromAvatar && { marginLeft: '7%' }]}>
+                                <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={isFromAvatar ? iUser.imgUser : dataUser.imgUser} />
+                                <Text style={styles.avatarText}>{isFromAvatar ? iUser.username : dataUser.username}</Text>
+                            </Animated.View>
                         </View>
-                    )}
-                    <ScrollView
-                        nestedScrollEnabled={true}
-                        scrollEventThrottle={16}
-                        showsVerticalScrollIndicator={false}
-                        onScroll={e => {
-                            const offsetY = e.nativeEvent.contentOffset.y;
-                            animatedValue.setValue(offsetY);
-                        }}
-                    >
-                        <TouchableOpacity
-                            style={styles.paddingForHeader}
-                            onPress={() => navigation.navigate('BackgroundScreen')}
-                        />
-                        <View style={styles.scrollViewContent}>
-                            <View style={{
-                                flexDirection: 'row', width: "100%",
-                                // backgroundColor: "yellow",
-                            }}>
-                                <Animated.View style={[styles.avatar, avatarAnimation]}>
-                                    <AvatarEx url={user.imgUser} size={appInfo.widthWindows * 0.22} round={20} frame={user.frame_user} name={user.username} />
-                                    <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username}</Text>
-                                </Animated.View>
-
-
-                                {user !== userPost ?
-                                    <View style={{
-                                        // backgroundColor: 'red',
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        width: '100%',
-                                    }}>
-                                        <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
-                                            <IconComponent
-                                                name={'edit'}
-                                                size={appInfo.heightWindows * 0.025}
-                                                color={'#190AEF'}
-                                                text={'Chỉnh sửa'}
-                                                textColor={'#190AEF'}
-                                                style={styles.buttonEdit}
-                                                onPress={() => navigation.navigate('InfomationScreen')}
-                                            />
-                                        </View>
-                                    </View>
-                                    :
-
-                                    <View style={{
-                                        // backgroundColor: 'red',
-                                        flexDirection: 'row',
-                                        justifyContent: 'flex-end',
-                                        width: '100%',
-                                        paddingRight: '6%',
-                                        paddingTop: '3%',
-                                    }}>
-                                        <TouchableOpacity
-                                            // disabled={isFollow}
-                                            activeOpacity={0.6}
-                                            onPress={() => handleFollowButton}
-                                            style={{
-                                                borderColor: "rgba(121,141,218,1)",
-                                                borderRadius: 100,
-                                                borderWidth: 1,
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                                width: "27%",
-                                                height: 40,
-                                                paddingHorizontal: "2%",
-                                                // opacity: isFollow ? 0 : 1,
-                                            }}
-                                        >
-                                            <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>{isFlag ? "Hủy theo dõi" : "Theo dõi"}</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                }
-
-                            </View>
-
-                            <View style={styles.iconRow}>
-                                <IconComponent name={'credit-card'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={'ID: ' + user.user_id} onPress={() => copyToClipboard(user.user_id)} />
-                                <IconComponent name={'user'} size={appInfo.heightWindows * 0.025} color={'#33363F'} text={user.nickname} onPress={() => navigation.navigate('NickNameScreen', { nicknameUser: user.nickname })} disabled={userPost === user ? true : false} />
-                            </View>
-
-                            <View style={styles.statisticsContainer}>
-                                <StatisticsComponent quantity={post.length} name={'Bài Viết'} />
-                                <StatisticsComponent quantity={followUp.length} name={'Theo Dõi'} onPress={() => navigation.navigate('FollowUp', { followUp })} />
-                                <StatisticsComponent quantity={followingUsers.length} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen', { followingUsers })} />
-                                <StatisticsComponent quantity={0} name={'Lượt Thích'} />
-                            </View>
-                            {/*  Tab Navigation */}
-                            <TabRecipe post={post} postFavourite={postFavourite} user={user} />
-                        </View>
-                    </ScrollView>
+                        {
+                            isFromAvatar ?
+                                <View style={styles.back}>
+                                    <ButtonBackComponent color={'white'} />
+                                </View>
+                                : <View style={styles.setting}>
+                                    <IconComponent name={'settings'} size={appInfo.heightWindows * 0.03} color={'white'} onPress={() => navigation.navigate('SettingScreen')} />
+                                </View>
+                        }
+                        <View style={styles.lowerHeader} />
+                    </ImageBackground>
                 </View>
-            )}
+                {showToast && (
+                    <View style={styles.toastContainer}>
+                        <Text style={styles.toastText}>Đã sao chép thành công!</Text>
+                    </View>
+                )}
+                <ScrollView
+                    nestedScrollEnabled={true}
+                    scrollEventThrottle={16}
+                    showsVerticalScrollIndicator={false}
+                    onScroll={e => {
+                        const offsetY = e.nativeEvent.contentOffset.y;
+                        animatedValue.setValue(offsetY);
+                    }}
+                >
+                    <TouchableOpacity
+                        style={styles.paddingForHeader}
+                        onPress={() => navigation.navigate('BackgroundScreen')}
+                    />
+                    <View style={styles.scrollViewContent}>
+                        <View style={{
+                            flexDirection: 'row', width: "100%",
+                            // backgroundColor: "yellow",
+                        }}>
+                            <Animated.View style={[styles.avatar, avatarAnimation]}>
+                                <AvatarEx
+                                    url={isFromAvatar ? iUser.imgUser : dataUser.imgUser}
+                                    size={appInfo.widthWindows * 0.22}
+                                    round={20}
+                                    frame={isFromAvatar ? iUser.frame_user : dataUser.frame_user}
+                                    name={isFromAvatar ? iUser.username : dataUser.username} />
+                                <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{isFromAvatar ? iUser.username : dataUser.username}</Text>
+                            </Animated.View>
+
+
+                            {!isFromAvatar ?
+                                <View style={{
+                                    // backgroundColor: 'red',
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                    width: '100%',
+                                }}>
+                                    <View style={{ marginLeft: 'auto', margin: appInfo.widthWindows * 0.02 }}>
+                                        <IconComponent
+                                            name={'edit'}
+                                            size={appInfo.heightWindows * 0.025}
+                                            color={'#190AEF'}
+                                            text={'Chỉnh sửa'}
+                                            textColor={'#190AEF'}
+                                            style={styles.buttonEdit}
+                                            onPress={() => navigation.navigate('InfomationScreen')}
+                                        />
+                                    </View>
+                                </View>
+                                :
+                                <View style={{
+                                    // backgroundColor: 'red',
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-end',
+                                    width: '100%',
+                                    paddingRight: '6%',
+                                    paddingTop: '3%',
+                                }}>
+                                    <TouchableOpacity
+                                        // disabled={isFollow}
+                                        activeOpacity={0.6}
+                                        onPress={() => handleFollowButton}
+                                        style={{
+                                            borderColor: "rgba(121,141,218,1)",
+                                            borderRadius: 100,
+                                            borderWidth: 1,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            width: "27%",
+                                            height: 40,
+                                            paddingHorizontal: "2%",
+                                            // opacity: isFollow ? 0 : 1,
+                                        }}
+                                    >
+                                        <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>{isFlag ? "Hủy theo dõi" : "Theo dõi"}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            }
+
+                        </View>
+
+                        <View style={styles.iconRow}>
+                            <IconComponent
+                                name={'credit-card'}
+                                size={appInfo.heightWindows * 0.025}
+                                color={'#33363F'}
+                                text={'ID: ' + (isFromAvatar ? iUser.user_id : dataUser.user_id)}
+                                onPress={() => copyToClipboard(isFromAvatar ? iUser.user_id : dataUser.user_id)} />
+                            <IconComponent
+                                name={'user'}
+                                size={appInfo.heightWindows * 0.025}
+                                color={'#33363F'}
+                                text={isFromAvatar ? iUser.nickname : dataUser.nickname}
+                                onPress={() => navigation.navigate('NickNameScreen')}
+                                disabled={isFromAvatar} />
+                        </View>
+
+                        <View style={styles.statisticsContainer}>
+                            <StatisticsComponent quantity={post.length} name={'Bài Viết'} />
+                            <StatisticsComponent quantity={followUp.length} name={'Theo Dõi'} onPress={() => navigation.navigate('FollowUp')} />
+                            <StatisticsComponent quantity={followingUsers.length} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
+                            <StatisticsComponent quantity={0} name={'Lượt Thích'} />
+                        </View>
+                        {/*  Tab Navigation */}
+                        <TabRecipe post={post} postFavourite={postFavourite} user={isFromAvatar ? iUser : dataUser} />
+                    </View>
+                </ScrollView>
+            </View>
+            {/* )} */}
         </View>
     );
 };

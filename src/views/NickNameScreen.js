@@ -32,11 +32,11 @@ const NickNameScreen = () => {
         }
     }
     //cập nhật lại dữ liệu 
-    useEffect(() => {
-        dispatch(getNickname());
-        const unsubscribe = dispatch(listenToUserRealtime(user.email));
-        return () => unsubscribe();
-    }, [dispatch, user.email]);
+    // useEffect(() => {
+    //     dispatch(getNickname());
+    //     const unsubscribe = dispatch(listenToUserRealtime(user.email));
+    //     return () => unsubscribe();
+    // }, [dispatch, user.email]);
     //console.log('nickname', nickname);
     return (
         <View style={StyleGlobal.container}>

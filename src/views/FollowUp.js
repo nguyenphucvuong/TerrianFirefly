@@ -8,11 +8,14 @@ import { StyleGlobal } from '../styles/StyleGlobal'
 import { appInfo } from '../constains/appInfo'
 //components
 import { AvatarEx, ButtonFunctionComponent } from '../component';
+//redux
+import {listenToFollowerRealtime } from '../redux/slices/FollowerSlice';
 const FollowUp = () => {
     const [isClick, setIsClick] = useState({}); // Lưu trạng thái cho từng item bằng id
     //route
     const route = useRoute();
-    const followUp = route.params?.followUp ?? [];
+    // const followUp = route.params?.followUp ?? [];
+    const followUp = useSelector((state) => state.follower.follower);
     //su ly follow
     const handleFollow = (item) => {
         // Thay đổi trạng thái dựa trên id của item
@@ -21,6 +24,7 @@ const FollowUp = () => {
             [item.id]: prev[item.id] === 'Followed' ? 'FollowBack' : 'Followed'
         }));
     };
+
     //console.log('user1234', user);
     //console.log('followUp', followUp);
     return (
