@@ -24,6 +24,8 @@ import { appcolor } from '../constains/appcolor';
 import { listenToUserRealtime, listenToUserRealtime2, listenToUserRealtimeFollowed, listenToUserRealtimeFollowing } from '../redux/slices/UserSlices';
 import { getPostUsers, getPostsFromFavouriteUsers } from '../../src/redux/slices/PostSlice';
 import { getUserFromFollowedUsers, getUserFromFollowingUsers, listenToFollowerRealtime, listenToFollowingRealtime } from '../redux/slices/FollowerSlice';
+import { getUserAchievement, listenToUserAchievementRealtime } from '../redux/slices/AchievementSlice';
+
 const Tab = createMaterialTopTabNavigator();
 
 const UPPER_HEADER_HEIGHT = appInfo.heightWindows * 0.09;
@@ -39,19 +41,21 @@ const PersonScreen = ({ isAvatar }) => {
     const iUser = useSelector((state) => state.user.iUser) || {};
     const post = useSelector((state) => state.post.postByUser);
     const postFavourite = useSelector((state) => state.post.postFavourite);
+    const userAchievement = useSelector((state) => state.achievement.userAchievement) || {};
     const dispatch = useDispatch();
     const isFocused = useIsFocused(); // Kiểm tra khi tab được focus
-
+ 
     //route
     const route = useRoute();
     const userPost = route.params?.userPost ?? {};
     const isFromAvatar = route.params?.isFromAvatar ?? isAvatar;
 
     //log
-    // console.log('dataUser', dataUser);
+    //console.log('dataUser', dataUser);
     //console.log('iUser', iUser);
     //console.log('followUp', followUp);
     //console.log('followingUsers',followingUsers);
+    //console.log('userAchievement', userAchievement);
 
 
     const follower = useSelector(state => state.follower.follower);
@@ -123,7 +127,10 @@ const PersonScreen = ({ isAvatar }) => {
                     if (isFromAvatar) {
                         //console.log('Fetching user data in real-time');
                         await dispatch(listenToUserRealtime2(userPost.email));  // Nếu cần async
-                    }
+                    } 
+                    //Danh Hiệu
+                    await dispatch(listenToUserAchievementRealtime({ achie_id: isFromAvatar ? userPost.achie_id : dataUser.achie_id }));
+                    await dispatch(getUserAchievement({ achie_id: isFromAvatar ? userPost.achie_id : dataUser.achie_id }));
                     //lắng nghe realtime về followers
                     await dispatch(listenToFollowerRealtime({ follower_user_id: isFromAvatar ? userPost.user_id : dataUser.user_id }));
                     //lắng nghe realtime về following
@@ -137,7 +144,6 @@ const PersonScreen = ({ isAvatar }) => {
                     // Người theo dõi
                     await dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: isFromAvatar ? userPost.user_id : dataUser.user_id }));
 
-
                 } catch (error) {
                     console.error("Error during data fetching: ", error);
                 }
@@ -145,7 +151,7 @@ const PersonScreen = ({ isAvatar }) => {
 
             fetchData();
         }
-    }, [isFocused, isFromAvatar, userPost.user_id, dataUser.user_id, dispatch]);
+    }, [isFocused, isFromAvatar, userPost.user_id, dataUser.user_id, userPost.achie_id, dataUser.achie_id, dispatch]);
 
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
@@ -211,7 +217,7 @@ const PersonScreen = ({ isAvatar }) => {
                                     url={isFromAvatar ? iUser.imgUser : dataUser.imgUser}
                                     size={appInfo.widthWindows * 0.22}
                                     round={20}
-                                    frame={isFromAvatar ? iUser.frame_user : dataUser.frame_user}
+                                    frame={userAchievement.nameAchie}
                                     name={isFromAvatar ? iUser.username : dataUser.username} />
                                 <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{isFromAvatar ? iUser.username : dataUser.username}</Text>
                             </Animated.View>
@@ -279,8 +285,8 @@ const PersonScreen = ({ isAvatar }) => {
                                 name={'user'}
                                 size={appInfo.heightWindows * 0.025}
                                 color={'#33363F'}
-                                text={isFromAvatar ? iUser.nickname : dataUser.nickname}
-                                onPress={() => navigation.navigate('NickNameScreen')}
+                                text={userAchievement.nickname}
+                                onPress={() => navigation.navigate('AchievementsScreen')}
                                 disabled={isFromAvatar} />
                         </View>
 

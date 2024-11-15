@@ -13,8 +13,8 @@ import { StyleGlobal } from '../styles/StyleGlobal';
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
 //redux
-import { getAchievement } from '../redux/slices/AchievementSlice';
-import { getUser, updateUser, listenToUserRealtime} from '../redux/slices/UserSlices';
+import { getAchievement} from '../redux/slices/AchievementSlice';
+import { getUser, updateUser, listenToUserRealtime } from '../redux/slices/UserSlices';
 const AchievementsScreen = () => {
     //Firebase
     const achievement = useSelector((state) => state.achievement.achievement);
@@ -23,25 +23,15 @@ const AchievementsScreen = () => {
     // const user = "";
     const dispatch = useDispatch();
     //
-    const [selectedId, setSelectedId] = useState(user.frame_user);
-    const [frame, setFrame] = useState(user.frame_user);
-    const [level, setLevel] = useState('');
-    // bottomSheetModal
-    const snapPoints = useMemo(() => ['15%'], []);
-    const bottomSheetModalRef = useRef(null);
-    const handldeOpenPress = (item) => {
-        bottomSheetModalRef.current?.present();
-        setSelectedId(item.nameAchie);
-        setFrame(item.nameAchie);
-        setLevel(item.level);
-
-    };
-    const hanldeFrame = () => {
+    const [isNickname, setNickname] = useState(user.nickname);
+    //Xử lý chọn nickname
+    const hanldeSelectAchievement = (item) => {
         try {
+            setNickname(item.nickname);
             const newData = {
-                frame_user: frame,
+                achie_id: item.achie_id,
             }
-            //console.log('newData', newData);
+            console.log('newData', newData);
             dispatch(updateUser({ user_id: user.user_id, newData: newData }));
             Alert.alert("Thông Báo", "Cập Nhật Thành Công");
         } catch (error) {
@@ -51,22 +41,16 @@ const AchievementsScreen = () => {
     //cập nhật lại dữ liệu 
     useEffect(() => {
         dispatch(getAchievement());
-        const unsubscribe = dispatch(listenToUserRealtime(user.email));
-        return () => unsubscribe();
-    }, [dispatch, user.email]);
-    //console.log('achievement', achievement);
+    
+    },[]);
+    console.log('achievement', achievement);
     // console.log('selectedId', selectedId);
     return (
-        <View style={{ flex: 1 }}>
+        <View style={StyleGlobal.container}>
             {
                 !user || !achievement ?
                     (
                         <View>
-                            <SkeletonComponent
-                                isAvatar
-                                Data={""}
-                                style={{ width: 80, height: 80, margin: '10%', alignSelf: 'center' }}
-                            />
                             <SkeletonComponent
                                 Data={""}
                                 style={{ width: '100%', height: appInfo.heightWindows * 0.05 }}
@@ -81,74 +65,27 @@ const AchievementsScreen = () => {
                             />
                         </View>
                     ) : (
-                        <BottomSheetModalProvider>
-                            <View style={{ backgroundColor: '#7982FB', height: appInfo.heightWindows * 0.2, justifyContent: 'center', borderRadius: 20 }}>
-                                <View style={{ top: appInfo.heightWindows * 0.03, zIndex: 1 }}>
-                                    <ButtonBackComponent color={'white'} />
-                                </View>
-                                <AvatarEx
-                                    url={user.imgUser}
-                                    size={appInfo.widthWindows * 0.22}
-                                    round={20}
-                                    frame={frame}
-                                />
-                            </View>
-                            <FlatList
-                                style={{ margin: '2%', marginTop: '5%' }}
-                                numColumns={3}
-                                data={achievement}
-                                renderItem={({ item }) => {
-                                    const isSelected = selectedId === item.nameAchie;
-                                    const isLocked = item.level > user.total_interact_id; //kiểm tra level > hơn total_interact_id sẽ không click
-                                    return (
-                                        <TouchableOpacity style={[styles.touchableContainer, { backgroundColor: isSelected ? '#90CAF9' : '#EEEEEE' }]}
-                                            onPress={() => !isLocked && handldeOpenPress(item)} >
-                                            {isLocked ? (
-                                                <IconComponent
-                                                    name={'lock'}
-                                                    size={appInfo.heightWindows * 0.02}
-                                                    color={'#FFFFFF'}
-                                                    style={[
-                                                        styles.iconComponent,
-                                                        { bottom: 5, left: 5, backgroundColor: '#BFBFBF', zIndex: 1 },
-                                                    ]}
-                                                />
-                                            ) : null}
-
-                                            <Image
-                                                style={{ width: '100%', height: appInfo.heightWindows * 0.13 }}
-                                                source={{ url: item.nameAchie }}
-                                            />
-                                            {user.frame_user == item.nameAchie
-                                                ? <IconComponent
-                                                    name={'check'}
-                                                    size={appInfo.heightWindows * 0.02}
-                                                    color={'#FFFFFF'}
-                                                    style={[styles.iconComponent, { bottom: 4, right: 5, backgroundColor: '#0286FF' }]}
-                                                />
-                                                : null}
-                                        </TouchableOpacity>
-                                    )
-                                }}
-                                keyExtractor={(item) => item.achie_id.toString()}
-                            />
-                            <BottomSheetModal
-                                ref={bottomSheetModalRef}
-                                index={0}
-                                snapPoints={snapPoints}>
-                                <BottomSheetView style={styles.contentContainer}>
-                                    <Text style={StyleGlobal.textName}> Cấp độ: {level}🎉</Text>
-
-                                    <ButtonFunctionComponent
-                                        name={'Dùng'}
-                                        backgroundColor={'#8B84E9'}
-                                        colorText={'#FFFFFF'}
-                                        onPress={() => hanldeFrame()}
-                                        style={styles.button} />
-                                </BottomSheetView>
-                            </BottomSheetModal>
-
-                        </BottomSheetModalProvider>
+                        <FlatList
+                            data={achievement}
+                            renderItem={({ item }) => {
+                                const isLocked = item.level > user.total_interact_id; //kiểm tra level > hơn total_interact_id sẽ không click
+                                return (
+                                    <TouchableOpacity style={[styles.buttonRow, { borderColor: isNickname === item.nickname ? '#90CAF9' : 'gray' }]}
+                                        onPress={() => !isLocked && hanldeSelectAchievement(item)}>
+                                        <Text style={styles.buttonText}>{item.nickname}</Text>
+                                        {isNickname === item.nickname ?
+                                            <IconComponent name={'check'} size={appInfo.heightWindows * 0.025} color={'#90CAF9'} style={styles.iconStyle} />
+                                            : null
+                                        }
+                                        {isLocked ?
+                                            <IconComponent name={'lock'} size={appInfo.heightWindows * 0.025} color={'#BFBFBF'} style={styles.iconStyle} />
+                                            : null
+                                        }
+                                    </TouchableOpacity>
+                                )
+                            }}
+                            keyExtractor={(item) => item.achie_id.toString()}
+                        />
                     )
             }
         </View>
@@ -176,6 +113,36 @@ const styles = StyleSheet.create({
         width: appInfo.heightWindows * 0.02,
         backgroundColor: '#0286FF',
         borderRadius: 20,
+    },
+    buttonText: {
+        color: '#000000',
+        fontSize: 16,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: 'gray',
+        borderWidth: 1,
+        borderRadius: 10,
+        padding: 10,
+        marginTop: appInfo.heightWindows * 0.01,
+        marginBottom: appInfo.heightWindows * 0.015,
+
+    },
+    iconStyle: {
+        marginLeft: 'auto',
+        zIndex: 1,
+    },
+    separator: {
+        width: '100%',  // Or you can use a fixed width, like 50 or 100
+        height: 1,
+        backgroundColor: '#B6B3B3',
+        marginVertical: 5,
+    },
+    button2: {
+        width: '100%',
+        height: appInfo.heightWindows * 0.055,
+        marginTop: 'auto',
     },
 });
 export default AchievementsScreen;

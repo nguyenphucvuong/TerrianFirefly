@@ -13,7 +13,7 @@ import { getNickname } from '../redux/slices/NicknameSlice';
 import { getUserByField, updateUser, listenToUserRealtime } from '../redux/slices/UserSlices';
 const NickNameScreen = () => {
     //FireBase
-    const nickname = useSelector((state) => state.nickname.nickname);
+    const nickname = useSelector((state) => state.achievement.achievement);
     const user = useSelector((state) => state.user.user);
     const [isNickname, setNickname] = useState(user.nickname);
     const dispatch = useDispatch();
@@ -37,7 +37,7 @@ const NickNameScreen = () => {
     //     const unsubscribe = dispatch(listenToUserRealtime(user.email));
     //     return () => unsubscribe();
     // }, [dispatch, user.email]);
-    //console.log('nickname', nickname);
+    console.log('nickname', nickname);
     return (
         <View style={StyleGlobal.container}>
             {

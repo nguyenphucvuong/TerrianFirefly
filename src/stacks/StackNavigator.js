@@ -109,7 +109,7 @@ const StackNavigator = () => {
       <Stack.Screen
         name="AchievementsScreen"
         component={AchievementsScreen}
-        options={{ headerShown: false }}
+        options={() => IconBack("Danh Hiệu")}
       />
       <Stack.Screen
         name="NickNameScreen"
