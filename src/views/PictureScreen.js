@@ -28,6 +28,7 @@ import * as MediaLibrary from 'expo-media-library';
 import { createFollow } from "../redux/slices/FollowerSlice";
 import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
 import { createFavorite, deleteFavorite } from "../redux/slices/FavoriteSlice";
+import { countCommentsAndSubComments } from "../redux/slices/CommentSlice";
 
 import { handleTime, formatDate, calculateEmojiCounts, formatNumber, calculateFavoriteCounts } from "../utils";
 import { ModalPop } from "../modals";
@@ -37,16 +38,13 @@ import AnimatedQuickCmtComponent from '../component/commentBox/AnimatedQuickCmtC
 import { AvatarEx, ButtonsComponent } from '../component'
 import EmojiBoxComponent from "../component/commentBox/EmojiBoxComponent";
 import MoreOptionPostComponent from "../component/moreOptionBox/MoreOptionPostComponent";
-import { app } from "../firebase/FirebaseConfig";
-// import { AvatarEx } from '../component'
-// import RowComponent from '../RowComponent';
 
 
 const PictureScreen = ({ }) => {
-    const [index, setIndex] = useState(0);
     const route = useRoute();
     const { Data: post, Select, user } = route.params;
     const userPost = route.params.userPost;
+    const [index, setIndex] = useState(Select + 1);
 
     const [isVisible, setIsVisible] = useState(true); // Hiển thị hoặc ẩn thanh navigate bar và các component khác
     // const DataLength = Object.keys(Data.imgPost).length;
@@ -65,7 +63,6 @@ const PictureScreen = ({ }) => {
 
 
     const dataPostView = formatNumber({ num: post.count_view });
-    const dataPostCmt = null; // chưa có dữ liệu tạm thời để trống
 
     const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
 
@@ -84,7 +81,15 @@ const PictureScreen = ({ }) => {
     const totalCount = formatNumber({ num: countEmoji.totalCount });
     const favoriteCount = formatNumber({ num: calculateFavoriteCounts({ favoriteList: favorite, post_id: post.post_id }).totalCount });
 
-    // console.log(Select);
+    const [dataPostCmt, setDataPostCmt] = useState(0); // Sử dụng state để lưu kết quả   
+
+    useEffect(() => {
+        const fetchCommentCount = async () => {
+            const countCmt = await countCommentsAndSubComments({ post_id: post.post_id });
+            setDataPostCmt(formatNumber({ num: countCmt })); // Cập nhật state với kết quả
+        };
+        fetchCommentCount();
+    }, []);
 
     const handleIndex = num => {
         setIndex(num.nativeEvent.position + 1);
@@ -279,6 +284,11 @@ const PictureScreen = ({ }) => {
         console.log("toi day")
     }
 
+    const handleNagigateDetailPost = () => {
+        // navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, isFollow: isFollow, post_user_id: userId });
+        navigation.navigate("DetailPost", { post: post, user: user, userPost: userPost, post_user_id: userPost.user_id, });
+    }
+
 
 
     {/* Image Viewer Versoin 1 */ }
@@ -294,26 +304,26 @@ const PictureScreen = ({ }) => {
                 top: inset.top, // Chưa tìm được cách nâng hiển thị index của ImageViewer lên, nên tạm thời hạ thanh navigate bar xuống
                 padding: 10,
             }}>
-                {/* <LinearGradient
-                    start={{ x: 0, y: 1 }} end={{ x: 0, y: 0.5 }}
+                <LinearGradient
+                    start={{ x: 0, y: 1 }} end={{ x: 0, y: 0.2 }}
                     colors={["transparent", "black"]}
 
                     style={{
                         flex: 1,
-                        height: 300,
+                        height: 200,
                         position: 'absolute',
                         right: 0,
-                        bottom: -50,
                         left: 0,
+                        top: -50,
                         // backgroundColor: "black",
                     }}
-                /> */}
+                />
                 <Feather name='x' color={'white'} size={24}
                     onPress={() => navigation.goBack()} />
 
                 <View style={{ width: "85%", alignItems: 'center' }}>
                     {/* Image Index Versoin 1 */}
-                    {/* <Text style={{ color: "white" }}>{index}/{post.imgPost.length}</Text> */}
+                    <Text style={{ color: "white", fontSize: 15 }}>{index}/{post.imgPost.length}</Text>
                 </View>
                 {/* <Feather name='more-vertical' color={'white'} size={24} /> */}
 
@@ -346,18 +356,19 @@ const PictureScreen = ({ }) => {
             <ImageViewer
                 imageUrls={imageUrls}
                 index={Select}
-                onChange={(idx) => setIndex(idx)}
+                onChange={(idx) => setIndex(idx + 1)}
                 enableSwipeDown={true}
                 onSwipeDown={() => navigation.goBack()}
                 onClick={() => handleTouchOnImage()}
                 onLongPress={() => setIsVisible(false)}
                 menuContext={{ saveToLocal: 'Lưu hình', cancel: 'Hủy' }}
                 onSave={(url) => handleSaveImage(url)}
+                renderIndicator={() => <></>}
             />
 
             {isVisible && <View style={{ flex: 1, position: 'absolute', zIndex: 999, bottom: 0, right: 0, left: 0, height: 350 }}>
                 <LinearGradient
-                    start={{ x: 0, y: 0.2 }} end={{ x: 0, y: 1 }}
+                    start={{ x: 0, y: 0 }} end={{ x: 0, y: 0.85 }}
                     colors={["transparent", "black"]}
 
                     style={{
@@ -436,9 +447,9 @@ const PictureScreen = ({ }) => {
                         </TouchableOpacity>
 
                         {/* Comment Button */}
-                        <TouchableOpacity style={{ alignItems: "center", marginTop: 8, }}>
+                        <TouchableOpacity onPress={handleNagigateDetailPost} style={{ alignItems: "center", marginTop: 8, }}>
                             <MaterialCommunityIcons name='comment-processing' color={"white"} size={30} />
-                            <Text style={{ color: "white" }}>9999</Text>
+                            <Text style={{ color: "white" }}>{dataPostCmt}</Text>
                         </TouchableOpacity>
 
                         {/* Favorite Button */}

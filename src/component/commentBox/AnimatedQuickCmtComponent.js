@@ -25,7 +25,7 @@ import { ImageCheckContext } from '../../context/ImageProvider';
 
 
 
-const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, handleNagigateDetailPost, isSubCmt, user }) => {
+const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, handleNagigateDetailPost, isSubCmt, user, comment_id }) => {
     // const [expanded, setExpanded] = useState(false);
     // const [isNomal] = [info.isNomal];
     var expanded = false;
@@ -90,9 +90,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
         // setIsShowEmojiBox(false);
     }
 
-    const handleLikePressed = () => {
-        handleShowPop();
-    }
+
 
 
     const handleHidePop = () => {
@@ -107,7 +105,9 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
         //     useNativeDriver: true,
         // }).start(setFalse());
     };
-
+    const handleLikePressed = () => {
+        handleShowPop();
+    }
     const user_id = user?.user_id;
     // console.log("user_id", post.post_id, user_id, content);
 
@@ -217,7 +217,8 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
                     transparent={true}
                     onRequestClose={handleHidePop}
                 >
-                    <CmtBoxComponent translateY={translateY} handleHidePop={handleHidePop} post={post} user_id={user_id} />
+                    {!isSubCmt ? <CmtBoxComponent translateY={translateY} handleHidePop={handleHidePop} post={post} user_id={user_id} />
+                        : <CmtBoxComponent translateY={translateY} handleHidePop={handleHidePop} user_id={user_id} comment_id={comment_id} isSubCmt />}
                 </ModalPop>
 
             </RowComponent>

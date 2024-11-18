@@ -36,8 +36,8 @@ export const ImageProvider = ({ children }) => {
   }, []);
 
   const classifyImage = async (imageUri) => {
-    console.log("uri", imageUri);
-    console.log("uri2", imageUri.uri);
+    // console.log("uri", imageUri);
+    // console.log("uri2", imageUri.uri);
 
     if (!imageUri || !imageUri.uri) {
       console.error("No image URI available");
@@ -55,8 +55,9 @@ export const ImageProvider = ({ children }) => {
       const jpegData = jpeg.decode(imageBuffer, true);
       const imageTensor = imageToTensor(jpegData);
 
-      const predictions = await model.classify(imageTensor);
-      setPredictions(predictions);
+      const predictionsReuslt = await model.classify(imageTensor);
+      setPredictions(predictionsReuslt);
+      console.log("Predictions:", predictions);
     } catch (error) {
       console.error("Error classifying image:", error);
     }
@@ -106,7 +107,7 @@ export const ImageProvider = ({ children }) => {
   };
 
   return (
-    <ImageCheckContext.Provider value={{ image, setImage, predictions, setPredictions, selectImage, modelReady, lastVisiblePost, setLastVisiblePost }}>
+    <ImageCheckContext.Provider value={{ image, setImage, predictions, setPredictions, selectImage, modelReady, lastVisiblePost, setLastVisiblePost, classifyImage }}>
       {children}
     </ImageCheckContext.Provider>
   );

@@ -27,9 +27,10 @@ import ImagesPaperComponent from '../component/ImagesPaperComponent';
 import YoutubePlayerComponent from '../component/YoutubePlayerComponent';
 import { useDispatch, useSelector } from 'react-redux';
 import { createFollow } from '../redux/slices/FollowerSlice';
-import { updateEmojiByField, startListeningEmoji, createEmoji, deleteEmoji } from "../redux/slices/EmojiSlice";
-import { startListeningCommentByPostId } from '../redux/slices/CommentSlice';
+import { updateEmojiByField, startListeningEmojiPost, createEmoji, deleteEmoji, startListeningEmojiCmt } from "../redux/slices/EmojiSlice";
+import { startListeningCommentByPostId, countCommentsAndSubComments } from '../redux/slices/CommentSlice';
 import { startListeningUserByID } from '../redux/slices/UserSlices';
+import { countSubComments, startListeningSubCommentByPostId } from '../redux/slices/SubCommentSlice';
 
 
 
@@ -57,7 +58,15 @@ const DetailPostScreen = () => {
     const comments = useSelector(state => state.comment[post.post_id])
 
 
+    const [dataPostCmt, setDataPostCmt] = useState(0); // Sử dụng state để lưu kết quả   
 
+    useEffect(() => {
+        const fetchCommentCount = async () => {
+            const countCmt = await countCommentsAndSubComments({ post_id: post.post_id });
+            setDataPostCmt(formatNumber({ num: countCmt })); // Cập nhật state với kết quả
+        };
+        fetchCommentCount();
+    }, []);
 
 
     useEffect(() => {
@@ -203,21 +212,13 @@ const DetailPostScreen = () => {
         }
     };
 
-    // useEffect(() => {
-    //     console.log(isFlag);
-    // }, [isFlag]);
-
-
-    // useEffect(() => {
-    //     dispatch(startListeningCommentByPostId({ post_id: post.post_id }));
-    //     console.log("comments", comments)
-    //     // console.log("post", post)
-    //     // console.log("user", user)
-    // }, [])
 
     const handleAd = () => {
         console.log(componentPosition);
     };
+
+
+
     return (
         <View style={{ flex: 1 }}>
 
@@ -308,14 +309,16 @@ const DetailPostScreen = () => {
                 </View>
             </View>
 
-            <ScrollView style={{
-                flex: 1,
-                paddingHorizontal: "3.5%",
-                backgroundColor: "rgba(255, 255, 255, 1)",
-                // backgroundColor: "blue",
-                marginTop: 90,
-                marginBottom: 55,
-            }}
+            <ScrollView
+
+                style={{
+                    flex: 1,
+                    paddingHorizontal: "3.5%",
+                    backgroundColor: "rgba(255, 255, 255, 1)",
+                    // backgroundColor: "blue",
+                    marginTop: 90,
+                    marginBottom: 55,
+                }}
                 onScroll={offSetY => {
                     animation.setValue(offSetY.nativeEvent.contentOffset.y);
                 }}>
@@ -595,10 +598,28 @@ const DetailPostScreen = () => {
                 </View>
 
 
+                <View style={{
+                    borderBottomWidth: 5,
+                    position: "relative",
+                    borderRadius: 10,
+                    borderColor: "rgba(0,0,0,0.2)",
+                    marginVertical: 10, // Khoảng cách trên dưới của đường kẻ
+                }} />
+
+                <Text style={{
+                    fontSize: 17,
+                    fontWeight: "bold",
+                }}>Toàn bộ bình luận {dataPostCmt}</Text>
 
 
-                {/* Comment Component Test */}
-                {!comments ? null : <CommentComponentTest post_id={post.post_id} comments={comments} />}
+
+                {/* Comment List */}
+                {!comments ? null :
+                    comments.map((comment, index) => {
+                        return (
+                            <CommentsPost key={index} comment={comment} />
+                        )
+                    })}
 
             </ScrollView >
 
@@ -608,19 +629,72 @@ const DetailPostScreen = () => {
 
 
 }
-const CommentsPost = ({ comment }) => {
 
+
+export const CommentsPost = React.memo(({ comment }) => {
+    const navigate = useNavigation();
     const user = useSelector((state) => state.user[comment.user_id]);
     const dispatch = useDispatch();
-
+    const [dataPostCmt, setDataPostCmt] = useState(0); // Sử dụng state để lưu kết quả   
+    const emoji = useSelector(state => state.emoji[comment.comment_id]);
+    const countEmoji = calculateEmojiCounts({ emojiList: emoji, comment_id: comment.comment_id, }).totalCount;
 
     useEffect(() => {
-        if (!user) dispatch(startListeningUserByID({ user_id: comment.user_id }));
-
+        if (!user) { dispatch(startListeningUserByID({ user_id: comment.user_id })); }
+        dispatch(startListeningEmojiCmt({ comment_id: comment.comment_id }));
+        dispatch(startListeningSubCommentByPostId({ comment_id: comment.comment_id }));
     }, []);
-    const handleAd = () => {
-        console.log(componentPosition);
+
+    useEffect(() => {
+        console.log("emoji Run");
+        const fetchCommentCount = async () => {
+            const countCmt = await countSubComments({ comment_id: comment.comment_id });
+            // console.log("countCmt", countCmt);
+            // console.log("countCmt", countCmt != 0 ? "Trả lời " : "Teo");
+            setDataPostCmt(formatNumber({ num: countCmt })); // Cập nhật state với kết quả
+        };
+        fetchCommentCount();
+    }, [emoji]);
+
+
+
+    const handleBtnEmoji = async () => {
+        // console.log("comment", comment.comment_id);
+        // console.log("emojiType", emoji ? emoji : "null");
+        const existingEmoji = !emoji ? false : emoji.find(e => e.user_id === user.user_id && e.comment_id === comment.comment_id);
+        console.log("existingEmoji", existingEmoji);
+        if (existingEmoji) {
+            console.log("deleteEmoji");
+            // Nếu người dùng ấn lại đúng emoji mà họ đã tương tác trước đó -> DELETE
+            await dispatch(deleteEmoji({ comment_id: comment.comment_id, user_id: user.user_id }));
+        } else {
+            console.log("createEmoji");
+            // Nếu người dùng chưa tương tác -> CREATE
+            await dispatch(createEmoji({
+                emoji_id: "",
+                post_id: "",
+                comment_id: comment.comment_id,
+                sub_comment_id: "",
+                user_id: user.user_id,
+                count_like: 1,
+                count_heart: 0,
+                count_laugh: 0,
+                count_sad: 0,
+            }));
+        }
+        dispatch(startListeningEmojiCmt({ comment_id: comment.comment_id }));
     };
+
+
+
+
+    const handleAd = () => {
+        console.log("Ad");
+    };
+
+    const handleNavigateCommentScreen = () => {
+        navigate.navigate("CommentScreen", { comment: comment, user: user });
+    }
     return (
         user ?
             <View>
@@ -665,10 +739,10 @@ const CommentsPost = ({ comment }) => {
                         height: "auto",
                         flexDirection: 'column',
                     }}>
-                        <Text
+                        {comment.content ? <Text
                             style={{ fontSize: 15 }}
                         // onLongPress={(text) => fetchCopiedText(text.)}
-                        >{comment.content}</Text>
+                        >{comment.content}</Text> : <></>}
 
                         {comment.imgPost ?
                             <Image
@@ -692,66 +766,41 @@ const CommentsPost = ({ comment }) => {
                         // backgroundColor: "red",
                         justifyContent: "flex-end",
                     }}>
-                    <ButtonsComponent onPress={handleAd}
-                        onLongPress={handleAd}
-                        isButton
-                        style={{ flexDirection: "row", alignItems: 'center', }}>
+                    <View style={{ width: "45%" }} />
+                    <TouchableOpacity onPress={handleNavigateCommentScreen}
+                        style={{ flexDirection: "row", alignItems: 'center', flex: 1, alignSelf: "center" }}>
                         <Image
                             style={{
                                 width: 20,
                                 height: 20,
+                                marginRight: 5,
                             }}
                             source={require('../../assets/appIcons/comment-out-post.png')}
                             contentFit="cover"
                         />
-                        <Text style={{ fontSize: 13 }}>Phản hồi</Text>
+                        <Text style={{ fontSize: 12, }}>{dataPostCmt == 0 ? "Trả lời " : dataPostCmt} </Text>
 
-                    </ButtonsComponent>
-
-                    <ButtonsComponent onPress={handleAd}
-                        onLongPress={handleAd}
-                        isButton
-                        style={{ marginLeft: "10%", flexDirection: "row", alignItems: 'center', }}>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleBtnEmoji}
+                        style={{ flexDirection: "row", alignItems: 'center', flex: 1, alignSelf: "center" }}>
                         <Image
                             style={{
                                 width: 20,
                                 height: 20,
+                                marginRight: 5,
                             }}
-                            source={require('../../assets/appIcons/like-out-post.png')}
+                            source={countEmoji != 0 && countEmoji ? require('../../assets/emojiIcons/like-emoji.png') : require('../../assets/appIcons/like-out-post.png')}
                             contentFit="cover"
                         />
-                        <Text style={{ fontSize: 13 }}>Nhấn thích</Text>
+                        <Text style={{ fontSize: 12, }}>{countEmoji != 0 && countEmoji ? countEmoji : "Nhấn thích"}</Text>
 
-                    </ButtonsComponent>
+                    </TouchableOpacity>
                 </RowComponent>
             </View>
             :
             <></>
     )
-}
-export const CommentComponentTest = React.memo(({ post_id, comments }) => {
-
-    // useEffect(() => {
-    //     if (!comments) {
-    //         startListeningCommentByPostId({ post_id: post_id })
-    //         console.log("comments", comments)
-    //     }
-    // }, [comments])
-
-
-    return (
-        <>
-            {comments.map((comment, index) => {
-                return (
-                    <CommentsPost key={index} comment={comment} />
-                )
-            })}
-        </>
-
-    )
-
 })
-
 export default React.memo(DetailPostScreen)
 
 const styles = StyleSheet.create({})

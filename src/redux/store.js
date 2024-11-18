@@ -11,7 +11,9 @@ import FollowerSlice from './slices/FollowerSlice';
 import FavoriteSlice from './slices/FavoriteSlice';
 import EmojiSlice from './slices/EmojiSlice';
 import EventSlice from './slices/EventSlice';
-import  NotiSlice  from './slices/NotiSlice';
+import NotiSlice from './slices/NotiSlice';
+import SubCommentSlice from './slices/SubCommentSlice';
+import { sub } from '@tensorflow/tfjs';
 
 
 export const store = configureStore({
@@ -28,6 +30,7 @@ export const store = configureStore({
                 emoji: EmojiSlice,
                 event: EventSlice,
                 noti: NotiSlice,
+                subComment: SubCommentSlice,
         },
 })
 

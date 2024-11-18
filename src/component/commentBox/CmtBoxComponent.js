@@ -5,8 +5,13 @@ import { Image } from 'expo-image';
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from 'expo-image-picker';
 import { useSelector, useDispatch } from 'react-redux';
+import * as FileSystem from 'expo-file-system';
+import * as jpeg from 'jpeg-js';
 
-import { createComment, getComment } from '../../redux/slices/CommentSlice';
+
+
+import { createComment, getComment, } from '../../redux/slices/CommentSlice';
+import { createSubComment } from '../../redux/slices/SubCommentSlice';
 
 import { ImageCheckContext } from '../../context/ImageProvider';
 import RowComponent from '../RowComponent';
@@ -15,43 +20,56 @@ import {
     IconsOptionComponent,
 } from '../';
 import { appInfo } from '../../constains/appInfo';
+import { sub } from '@tensorflow/tfjs';
 // import ButtonsComponent from '../ButtonsComponent';
 // import IconsOptionComponent from './IconsOptionComponent';
 const convertToPercentage = (value) => (value * 100).toFixed(2) + "%";
 
-const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id }) => {
-
-    const { image, setImage, selectImage, modelReady, predictions, setPredictions } = useContext(ImageCheckContext);
+const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id, isSubCmt, comment_id, tag_user_id }) => {
+    const { model, image, setImage, selectImage, modelReady, predictions, setPredictions, classifyImage } = useContext(ImageCheckContext);
     const [content, setContent] = useState("");
 
 
     const dispatch = useDispatch();
 
 
-    const dataCmt = {
+    const dataCmt = !isSubCmt ? {
         comment_id: "",
         post_id: post.post_id,
         user_id: user_id,
         content: content,
-        count_like: 0,
-        count_comment: 0,
+        created_at: Date.now(),
+        imgPost: image,
+    } : {
+        comment_id: comment_id,
+        sub_comment_id: "",
+        tag_user_id: tag_user_id,
+        user_id: user_id,
+        content: content,
         created_at: Date.now(),
         imgPost: image,
     }
 
 
-    const btnDangComment = () => {
+
+
+    const btnDangComment = async () => {
         // console.log("dang comment");
+        // console.log("imageimageimage", image);
         if (content || image) {
             handleHidePop();
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Đang xử lý...', ToastAndroid.SHORT);
 
+            } else {
+                alert('Đang xử lý...');
+            }
             if (image) {
+                // const classify = await classifyImage(image);
+                // console.log("classify", classify);
+                // console.log("if (image)ageimage", image);
                 // Show a loading indicator if needed
-                if (Platform.OS === 'android') {
-                    ToastAndroid.show('Đang xử lý...', ToastAndroid.SHORT);
-                } else {
-                    alert('Đang xử lý...');
-                }
+
 
                 // Wait for predictions to be ready
                 const waitForPredictions = new Promise((resolve) => {
@@ -83,17 +101,16 @@ const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id }) => {
                     } else {
                         alert('Hình ảnh không phù hợp');
                     }
-                    setImage(null);
-                    setPredictions(null);
+
                     return;
                 }
             }
 
-            setImage(null);
-            setPredictions(null);
+
 
             // Dispatch the comment action only after predictions are ready
-            dispatch(createComment(dataCmt));
+            isSubCmt ? dispatch(createSubComment(dataCmt)) : dispatch(createComment(dataCmt));
+
 
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Đang đăng bình luận!', ToastAndroid.SHORT);
@@ -108,6 +125,8 @@ const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id }) => {
             }
             handleHidePop();
         }
+        setImage(null);
+        setPredictions(null);
     };
 
     return (

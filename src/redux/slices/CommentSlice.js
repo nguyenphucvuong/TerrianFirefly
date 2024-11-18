@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, where, updateDoc, onSnapshot, query } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, where, updateDoc, onSnapshot, query, or, orderBy } from 'firebase/firestore';
 import { db, storage } from '../../firebase/FirebaseConfig'; // Firebase config
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase Storage
 
@@ -12,17 +12,15 @@ const initialState = {
 
 
 export const createComment = createAsyncThunk('data/createComment', async (
-    { comment_id, post_id, user_id, content, count_like, count_comment, created_at, imgPost }
+    { comment_id, post_id, user_id, content, created_at, imgPost }
 ) => {
     try {
-        console.log("toi day", imgPost)
+        // console.log("toi day", imgPost)
         const docRef = await addDoc(collection(db, 'Comment'), {
             comment_id,
             post_id,
             user_id,
             content,
-            count_like,
-            count_comment,
             created_at,
             imgPost: "",
         });
@@ -61,6 +59,7 @@ export const createComment = createAsyncThunk('data/createComment', async (
 });
 
 
+
 export const getComment = createAsyncThunk('data/getComment', async ({ post_id }) => {
     try {
         const querySnapshot = await getDocs(collection(db, "Comment"), where('post_id', "==", post_id));
@@ -77,10 +76,11 @@ export const getComment = createAsyncThunk('data/getComment', async ({ post_id }
 
 export const startListeningCommentByPostId = ({ post_id }) => (dispatch) => {
     if (!post_id) return;
-    console.log("post_id", post_id)
+    // console.log("post_id", post_id)
     const commentQuery = query(
         collection(db, "Comment"),
-        where("post_id", "==", post_id)
+        where("post_id", "==", post_id),
+        orderBy("created_at", "desc")
     );
     const uncomment = onSnapshot(commentQuery, (querySnapshot) => {
         // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -89,11 +89,76 @@ export const startListeningCommentByPostId = ({ post_id }) => (dispatch) => {
         // console.log("commentPostById", commentPostById)
         dispatch(setComentById({ commentPostById, post_id }));
     }, (error) => {
-        console.error('Error fetching follower: ', error);
+        console.error('Error fetching comment: ', error);
     });
 
     return uncomment; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
 };
+
+
+export const countCommentsAndSubCommentsRealTime = ({ post_id, setTotalCount }) => {
+    try {
+        const commentsQuery = query(
+            collection(db, 'Comment'),
+            where('post_id', '==', post_id)
+        );
+        const unsubscribeComments = onSnapshot(commentsQuery, (commentsSnapshot) => {
+            let commentsCount = commentsSnapshot.size;
+            let subCommentsCount = 0;
+
+            commentsSnapshot.forEach((doc) => {
+                const commentId = doc.id;
+                const subCommentsQuery = query(
+                    collection(db, 'SubComment'),
+                    where('comment_id', '==', commentId)
+                );
+                onSnapshot(subCommentsQuery, (subCommentsSnapshot) => {
+                    subCommentsCount += subCommentsSnapshot.size;
+                    const totalCount = commentsCount + subCommentsCount;
+                    setTotalCount(totalCount);
+                });
+            });
+        });
+        return () => {
+            unsubscribeComments();
+        };
+    } catch (error) {
+        console.error('Lỗi:', error);
+    }
+};
+
+export const countCommentsAndSubComments = async ({ post_id }) => {
+    try {
+        const commentsQuery = query(
+            collection(db, 'Comment'),
+            where('post_id', '==', post_id)
+        );
+        const commentsSnapshot = await getDocs(commentsQuery);
+        const commentsCount = commentsSnapshot.size;
+
+        let subCommentsCount = 0;
+
+        for (const doc of commentsSnapshot.docs) {
+            const commentId = doc.id;
+            const subCommentsQuery = query(
+                collection(db, 'SubComment'),
+                where('comment_id', '==', commentId)
+            );
+            const subCommentsSnapshot = await getDocs(subCommentsQuery);
+            subCommentsCount += subCommentsSnapshot.size;
+        }
+
+        const totalCount = commentsCount + subCommentsCount;
+
+        // console.log('Tổng số lượng comment và subcomment:', totalCount);
+        return totalCount;
+    } catch (error) {
+        console.error('Lỗi:', error);
+    }
+};
+
+
+
 
 
 export const CommentSlice = createSlice({
@@ -103,10 +168,11 @@ export const CommentSlice = createSlice({
         setComentById: (state, action) => {
             const { commentPostById, post_id } = action.payload;
             state[post_id] = commentPostById;
-            console.log("commentPostById setcommentPostById", post_id)
-            console.log("commentPostById setcommentPostById", commentPostById)
+            // console.log("commentPostById setcommentPostById", post_id)
+            // console.log("commentPostById setcommentPostById", commentPostById)
             state.status = 'succeeded';
         },
+
     },
     extraReducers: (builder) => {
         builder

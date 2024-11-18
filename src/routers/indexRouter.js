@@ -4,7 +4,7 @@ import {
     PictureScreen, DetailPostScreen, BackgroundScreen, InfomationScreen, AchievementsScreen, NickNameScreen,
     SettingScreen, UserManagementScreen, AccountDetailsScreen, EventManagementScreen, AddEditEventScreen,
     HashtagManagerScreen, NotificationManagement, ManagePostsScreen, SetUpAccountScreen, FollowerScreen,
-    PersonScreen
+    PersonScreen, CommentScreen
 } from "../views"
 import HomeTab from '../tabs/homeTab';
 import { ButtonBackComponent, IconComponent } from "../component";
@@ -42,6 +42,7 @@ const IndexRouter = () => {
             <Stack.Screen name='DetailPost' component={DetailPostScreen} />
             <Stack.Screen name='PersonScreen' component={PersonScreen} />
             <Stack.Screen name='BackgroundScreen' component={BackgroundScreen} options={{ headerShown: false }} />
+            <Stack.Screen name='CommentScreen' component={CommentScreen} options={{ headerShown: false }} />
             <Stack.Screen name='InfomationScreen' component={InfomationScreen}
                 options={() => IconBack("Thông Tin Cá Nhân")} />
             <Stack.Screen name='AchievementsScreen' component={AchievementsScreen} options={{ headerShown: false }} />

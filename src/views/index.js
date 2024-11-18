@@ -28,6 +28,7 @@ import EventManagementScreen from './EventManagementScreen';
 import AddEditEventScreen from './AddEditEventScreen';
 import FollowerScreen from './FollowerScreen';
 import FollowUp from './FollowUp';
+import CommentScreen from './CommentScreen';
 
 export {
       HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen,
@@ -36,6 +37,7 @@ export {
       ManagePostsScreen, SetUpAccountScreen, WellcomScreen, LoginScreen,
       RegisterScreen, ForgotPassword, VerificationCodeScreen, CreatePostScreen, FollowerScreen,
       FollowUp, ResetPasswordScreen, HashtagManagerScreen, EventManagementScreen, AddEditEventScreen,
+      CommentScreen,
 };
 
 

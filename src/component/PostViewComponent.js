@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserByField, startListeningUserByID } from "../redux/slices/UserSlices";
-import { startListeningEmoji } from "../redux/slices/EmojiSlice";
+import { startListeningEmojiPost } from "../redux/slices/EmojiSlice";
 import { createFollow } from "../redux/slices/FollowerSlice";
 import { startListeningCommentByPostId } from "../redux/slices/CommentSlice";
 
@@ -47,7 +47,7 @@ const PostViewComponent = ({ post, user }) => {
     const comments = useSelector(state => state.comment[post.post_id])
 
     useEffect(() => {
-        dispatch(startListeningEmoji({ post_id: post.post_id }));
+        dispatch(startListeningEmojiPost({ post_id: post.post_id }));
         dispatch(startListeningCommentByPostId({ post_id: post.post_id }));
     }, []);
 

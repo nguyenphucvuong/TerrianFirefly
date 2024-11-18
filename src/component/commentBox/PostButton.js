@@ -3,7 +3,8 @@ import { Text, View, Animated, StyleSheet, TouchableOpacity } from 'react-native
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Image } from 'expo-image'
 import { useDispatch, useSelector } from 'react-redux'
-import { createEmoji, deleteEmoji, updateEmojiByField, startListeningEmoji } from '../../redux/slices/EmojiSlice'
+import { createEmoji, deleteEmoji, updateEmojiByField, startListeningEmojiPost } from '../../redux/slices/EmojiSlice'
+import { countCommentsAndSubComments, countCommentsAndSubCommentsRealTime } from '../../redux/slices/CommentSlice'
 
 
 import RowComponent from '../RowComponent'
@@ -15,6 +16,7 @@ import { appInfo } from '../../constains/appInfo'
 import { appcolor } from '../../constains/appcolor'
 import EmojiBoxComponent from './EmojiBoxComponent'
 import { calculateEmojiCounts } from '../../utils'
+import { sub } from '@tensorflow/tfjs'
 
 
 const formatNumber = (num) => {
@@ -37,7 +39,23 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
     const dispatch = useDispatch();
 
     const dataPostView = formatNumber(post.count_view);
-    const dataPostCmt = null; // chưa có dữ liệu tạm thời để trống
+    const [dataPostCmt, setDataPostCmt] = useState(0); // Sử dụng state để lưu kết quả   
+
+    useEffect(() => {
+        const fetchCommentCount = async () => {
+            const countCmt = await countCommentsAndSubComments({ post_id: post.post_id });
+            setDataPostCmt(formatNumber(countCmt)); // Cập nhật state với kết quả
+        };
+        fetchCommentCount();
+    }, []);
+
+    // useEffect(() => {
+    //     const fetchCommentCount = async () => {
+    //         const countCmt = await countCommentsAndSubCommentsRealTime({ post_id: post.post_id, setTotalCount: setDataPostCmt });
+    //         // setDataPostCmt(formatNumber(countCmt)); // Cập nhật state với kết quả
+    //     };
+    //     fetchCommentCount();
+    // }, []);
 
     const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
 
@@ -76,7 +94,8 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
             }
             setIconEmoji(foundEmojiType);
         };
-        getEmoji();
+
+        emoji ? getEmoji() : setIconEmoji("default");
     }, [emoji]);
 
 
@@ -137,6 +156,8 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
             await dispatch(createEmoji({
                 emoji_id: "",
                 post_id: post.post_id,
+                comment_id: "",
+                sub_comment_id: "",
                 user_id: user.user_id,
                 isComment: false,
                 comment_id: "",
@@ -264,7 +285,7 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
                     <Text
                         style={[StyleGlobal.text, {
                             color: "gray",
-                        }]}>{dataPostCmt + 1000}</Text>
+                        }]}>{dataPostCmt}</Text>
                 </View>
 
                 <View

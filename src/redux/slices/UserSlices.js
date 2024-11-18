@@ -353,8 +353,8 @@ export const UserSlices = createSlice({
     },
     setUserById: (state, action) => {
       // const { user_id, userById } = action.payload;
-      console.log("userByIddddds ", action.payload);
-      console.log("user_id, ", action.payload.user_id);
+      // console.log("userByIddddds ", action.payload);
+      // console.log("user_id, ", action.payload.user_id);
       state[action.payload.user_id] = action.payload;
     },
   },
