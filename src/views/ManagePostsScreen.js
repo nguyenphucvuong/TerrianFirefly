@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Swipeable } from "react-native-gesture-handler";
 import Entypo from "react-native-vector-icons/Entypo";
@@ -16,41 +16,45 @@ import { StyleGlobal } from "../styles/StyleGlobal";
 import { appInfo } from "../constains/appInfo";
 //components
 import { IconComponent, AvatarEx } from "../component";
-const DATAPost = [
-  {
-    id: 1,
-    body: "sdhabskba",
-    imgPost:
-      "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/images%2F21742F54-B0AA-42F8-A8FE-83A6EFF53194.jpg?alt=media&token=af04bb35-71ce-4859-b754-ced2bb7a0df7",
-    status_post_id: 1,
-    user_id: "user1",
-    title: "đáád",
-  },
-  {
-    id: 2,
-    body: "áđa",
-    imgPost:
-      "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/images%2FFA18237D-7E46-4A41-9639-FBF75967100E.jpg?alt=media&token=cf469e6f-2826-46a8-980b-27cf8399d487",
-    status_post_id: 1,
-    user_id: "user1",
-    title: "gfdh",
-  },
-];
-const DataUser = [
-  {
-    user_id: "user1",
-    username: "ađá",
-    imgUser:
-      "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/avatar%2F9BDB416F-F92C-4A73-9CD2-84CB7C240DBE.jpg?alt=media&token=ab3ffb0f-3ece-4f41-8193-7331e7383713",
-  },
-];
+
+import { useDispatch, useSelector } from "react-redux";
+import { getRealtimePostsByStatus } from "../redux/slices/PostSlice";
+import { getUserByField } from "../redux/slices/UserSlices";
+
 const ManagePostsScreen = () => {
   const navigation = useNavigation(); // Sử dụng hook navigation\
+  const dispatch = useDispatch();
 
-  // Tìm thông tin người dùng từ user_id
-  const getUserDetails = (userId) => {
-    return DataUser.find((user) => user.user_id === userId);
-  };
+  // Lấy dữ liệu bài viết từ Redux
+  const { postReport, loading, error } = useSelector((state) => state.post);
+  //const [loading, setLoading] = useState(true);
+  // Lấy dữ liệu bài viết khi màn hình được tải
+  useEffect(() => {
+    dispatch(getRealtimePostsByStatus());  // Lắng nghe thay đổi bài viết
+
+    // Cleanup khi component unmount
+    return () => {
+    };
+  }, [dispatch]);
+
+  console.log("datapost", postReport);
+  
+  if (loading) {
+    return (
+      <View style={StyleGlobal.container}>
+        <Text>Đang tải dữ liệu...</Text>
+      </View>
+    );
+  }
+
+  if (!Array.isArray(postReport) || postReport.length === 0) {
+    return (
+      <View style={StyleGlobal.container}>
+        <Text>Không có bài viết nào để hiển thị.</Text>
+      </View>
+    );
+  }
+  
   const rightSwipe = () => {
     return (
       <TouchableOpacity style={{ alignSelf: "center" }}>
@@ -73,13 +77,13 @@ const ManagePostsScreen = () => {
       </TouchableOpacity>
     );
   };
+
   return (
     <View style={StyleGlobal.container}>
       <FlatList
-        data={DATAPost}
+        data={postReport}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => {
-          const user = getUserDetails(item.user_id); // Lấy thông tin người dùng từ user_id
-
           return (
             <Swipeable
               renderRightActions={rightSwipe}
@@ -88,11 +92,13 @@ const ManagePostsScreen = () => {
               <TouchableOpacity>
                 <View style={styles.viewFlatList}>
                   {/* Ảnh bài viết */}
-                  <Image
-                    width={appInfo.widthWindows * 0.17}
-                    height={appInfo.heightWindows * 0.08}
-                    source={{ uri: item.imgPost }}
-                  />
+                <Image
+                  url={ item?.imgPost || "https://via.placeholder.com/150"}
+                  style={{
+                    width: appInfo.widthWindows * 0.17,
+                    height: appInfo.heightWindows * 0.08,
+                  }}
+                />
                   <View style={{ marginLeft: 10 }}>
                     <View
                       style={{
@@ -106,15 +112,18 @@ const ManagePostsScreen = () => {
                         size={40}
                         round={20}
                         url={
-                          user?.imgUser ||
-                          "https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg"
+                            item.user?.imgUser ||
+                            "https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg"
+                          
                         }
                       />
                       <View
                         style={{ justifyContent: "center", marginLeft: "3%" }}
                       >
                         {/* Tên người dùng */}
-                        <Text style={{ fontWeight: "bold" }}>Người vi phạm: {user?.username}</Text>
+                        <Text style={{ fontWeight: "bold" }}>
+                        Người vi phạm: {item.user?.username || "Chưa xác định"}
+                        </Text>
                         {/* Nội dung bài viết */}
                         <Text>Bài viết vi phạm: {item.title}</Text>
                       </View>
@@ -127,7 +136,6 @@ const ManagePostsScreen = () => {
             </Swipeable>
           );
         }}
-        keyExtractor={(item) => item.id.toString()} // Dùng id chuyển thành string cho keyExtractor
       />
     </View>
   );

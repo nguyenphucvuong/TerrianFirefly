@@ -29,6 +29,7 @@ import {
   updatePassword,
   signInWithEmailAndPassword,
   sendEmailVerification,
+  signOut,
 } from "firebase/auth";
 
 const ResetPasswordScreen = ({ navigation, route }) => {
@@ -90,13 +91,14 @@ const ResetPasswordScreen = ({ navigation, route }) => {
               "Chưa xác thực",
               "Vui lòng kiểm tra email để xác thực tài khoản."
           );
+        
       }
+      
         // Lấy reference đến tài liệu của người dùng
         const userRef = doc(collection(db, "user"), user.user_id);
         const newData = {
           passWord: newPassword,
         };
-
         // Cập nhật mật khẩu mới trong Firestore
         await updateDoc(userRef, newData);
         console.log("User updated!");
@@ -106,12 +108,13 @@ const ResetPasswordScreen = ({ navigation, route }) => {
           "Thành công",
           "Mật khẩu đã được cập nhật trong Firebase Auth và Firestore."
         );
-        navigation.navigate("LoginScreen"); // Điều hướng đến màn hình đăng nhập sau khi cập nhật thành công
+        await signOut(auth);
       }
     } catch (error) {
       console.error("Lỗi cập nhật mật khẩu:", error);
       Alert.alert("Lỗi", "Đã xảy ra lỗi. Vui lòng thử lại.");
     } finally {
+      navigation.navigate("LoginScreen"); // Điều hướng đến màn hình home sau khi cập nhật thành công
       setisLoading(false); // Đặt trạng thái loading về false ở đây
     }
   };
