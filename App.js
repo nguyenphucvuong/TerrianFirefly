@@ -7,6 +7,7 @@ import React, {
   useContext,
   createContext,
   useRef,
+  useCallback,
 } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -32,8 +33,11 @@ import { Title } from "react-native-paper";
 import { NotiProvider } from "./src/context/NotiProvider";
 import { useNotification } from "./src/context/NotiProvider";
 
+import { SplashScreenComponent } from "./src/views";
 
 const MainApp = () => {
+  const [appIsReady, setAppIsReady] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState("");
   const [channels, setChannels] = useState([]);
   const [notification, setNotification] = useState(undefined);
@@ -44,25 +48,44 @@ const MainApp = () => {
 
   const { schedulePushNotification } = useNotification();
   const noti = useSelector((state) => state.noti.noti);
-  
+
   const navigation = useNavigation();
+
   useEffect(() => {
-    // Tắt cảnh báo thư viện không hỗ trợ
-    LogBox.ignoreLogs(['Warning: Component "RCTView" contains the string ref']);
-    // Bắt các promise bị từ chối
-    LogBox.ignoreLogs(['Possible Unhandled Promise Rejection']);
+    // Tắt các cảnh báo không cần thiết
+    LogBox.ignoreLogs([
+      'Warning: Component "RCTView" contains the string ref',
+      "Possible Unhandled Promise Rejection",
+    ]);
   }, []);
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState(null);
+
+  // Lắng nghe trạng thái người dùng Firebase
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (navigation) {
-        navigation.navigate(currentUser ? "IndexTab" : "WellcomScreen");
+      setUser(currentUser); // Cập nhật trạng thái người dùng
+      if (currentUser) {
+        console.log("User is logged in, navigating to IndexTab");
+      } else {
+        console.log("No user logged in, navigating to WellcomScreen");
       }
     });
-    return () => unsubscribe();
+  
+    return () => unsubscribe(); // Hủy đăng ký khi component bị huỷ
   }, [navigation]);
+
   useEffect(() => {
+    if (appIsReady && isLoadingData) {
+      if (user) {
+        navigation.navigate("IndexTab"); // Điều hướng đến IndexTab nếu đã đăng nhập
+      } else {
+        navigation.navigate("WellcomScreen"); // Điều hướng đến WellcomScreen nếu chưa đăng nhập
+      }
+    }
+  }, [appIsReady, isLoadingData, user, navigation]);
+
+  useEffect(() => {
+    setAppIsReady(false);
     const listenToUser = async () => {
       try {
         if (user) {
@@ -72,6 +95,9 @@ const MainApp = () => {
       } catch (error) {
         console.error("Error listening to user data:", error);
       }
+      finally{
+        setAppIsReady(true);
+      }
     };
 
     listenToUser();
@@ -79,71 +105,48 @@ const MainApp = () => {
 
   const today = new Date();
   const value = today.toISOString(); // Đảm bảo là định dạng ISO
-  useEffect(() => {
-    // dispatch(getPostsByField({ field: "created_at", quantity: "2", lastVisiblePost: null }));
-    //dispatch(getPostsFirstTime());
-    //dispatch(getHashtag());
-  }, []);
-
-  useEffect(() => {
-    const fetchEventsData = async () => {
-      try {
-        await dispatch(fetchEvents()); // Gọi action async
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      }
-    };
-    fetchEventsData();
-
-  });
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
-  useEffect(() => {
-    const unsubscribeEvent = fetchEvents()(dispatch);
-    // console.log(object)
-    return () => unsubscribeEvent();
-  }, [dispatch]);
-
-  useEffect(() => {
-    const unsubscribeHashtag = getHashtag(dispatch);
-    return () => unsubscribeHashtag();
-  }, [dispatch]);
 
   
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
+
+
+  // useEffect(() => {
+  //   // const unsubscribeHashtag = getHashtag(dispatch);
+  //   // return () => unsubscribeHashtag();
+  // }, [dispatch]);
+
+  
+
+  //load dữ liệu trước khi vào màn hình app
   useEffect(() => {
-    dispatch(getPostsFirstTime());
-
-    registerForPushNotificationsAsync().then(
-      (token) => token && setExpoPushToken(token)
-    );
-    if (Platform.OS === "android") {
-      Notifications.getNotificationChannelsAsync().then((value) =>
-        setChannels(value ?? [])
-      );
-    }
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        setNotification(notification);
-      });
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-      });
-    return () => {
-      notificationListener.current &&
-        Notifications.removeNotificationSubscription(
-          notificationListener.current
-        );
-      responseListener.current &&
-        Notifications.removeNotificationSubscription(responseListener.current);
+    const prepareApp = async () => {
+      try {
+        setAppIsReady(false);
+        const fetchData = [
+          dispatch(fetchEvents(dispatch)),
+          dispatch(getPostsFirstTime()),
+          dispatch(getHashtag(dispatch)),
+        ];
+        await Promise.all(fetchData); // Chờ tất cả các tác vụ tải dữ liệu hoàn thành
+      } catch (error) {
+        console.error("Error during app preparation:", error);
+      } finally {
+        setIsLoadingData(true); // Đánh dấu dữ liệu đã tải xong
+        setAppIsReady(true); // Đánh dấu ứng dụng đã sẵn sàng
+      }
     };
-  }, []);
+    prepareApp();
+  }, [dispatch]);
 
+  if (!appIsReady || !isLoadingData) {
+    return <SplashScreenComponent />; // Hiển thị splash screen khi đang tải
+  }
   return (
     <>
       <StatusBar
@@ -151,7 +154,7 @@ Notifications.setNotificationHandler({
         translucent={true}
         backgroundColor="white"
       />
-      <StackNavigator />
+      <StackNavigator initialRouteName={user ? "IndexTab" : "WellcomScreen"} />
     </>
   );
 };
@@ -210,9 +213,9 @@ const App = () => {
       <ImageProvider>
         <NotiProvider>
           <SafeAreaProvider>
-          <NavigationContainer>
-            <MainApp />
-          </NavigationContainer>
+            <NavigationContainer>
+              <MainApp />
+            </NavigationContainer>
           </SafeAreaProvider>
         </NotiProvider>
       </ImageProvider>

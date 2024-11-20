@@ -12,6 +12,7 @@ const initialState = {
   usersFollowed: [],
   userpostsFavorites: [],
   followingUsers: [],
+  userReport: [],
 };
 
 // Thiết lập listener thời gian thực cho dữ liệu người dùng
@@ -339,6 +340,37 @@ export const startListeningUserByID = ({ user_id }) => (dispatch) => {
 };
 
 
+//
+export const listenToUserWithStatus = createAsyncThunk(
+  "data/listenToUserWithStatus",
+  async (_, { dispatch }) => {
+    try {
+      const q = query(collection(db, "user"), where("status_user_id", "!=", 0));
+
+      const unsubscribe = onSnapshot(
+        q,
+        (querySnapshot) => {
+          const usersWithStatus = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          // Dispatch action để lưu dữ liệu vào state
+          dispatch(setUserReport(usersWithStatus));
+        },
+        (error) => {
+          console.error("Error in realtime listener:", error);
+          dispatch(setError(error.message));
+        }
+      );
+
+      return unsubscribe;  // Trả về hàm unsubscribe thay vì dispatch trực tiếp trong payload
+    } catch (error) {
+      console.error("Error listening to users with status:", error);
+      throw error;
+    }
+  }
+);
 
 
 
@@ -356,6 +388,12 @@ export const UserSlices = createSlice({
       // console.log("userByIddddds ", action.payload);
       // console.log("user_id, ", action.payload.user_id);
       state[action.payload.user_id] = action.payload;
+    },
+    setUserReport: (state, action) => {
+      state.userReport = action.payload;  // Cập nhật mảng userReport
+    },
+    setError: (state, action) => {
+      state.errorUser = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -414,9 +452,16 @@ export const UserSlices = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
+      // Đặt xử lý khi async thunk được hoàn thành
+      .addCase(listenToUserWithStatus.fulfilled, (state) => {
+        // Nếu cần, có thể xử lý dữ liệu sau khi lắng nghe thay đổi
+      })
+      .addCase(listenToUserWithStatus.rejected, (state, action) => {
+        state.errorUser = action.error.message;
+      })
   },
 });
 
-export const { setUser, setError, setUserById } = UserSlices.actions;
+export const { setUser, setError, setUserById, setUserReport } = UserSlices.actions;
 
 export default UserSlices.reducer;
