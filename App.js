@@ -25,6 +25,7 @@ import { Title } from "react-native-paper";
 import { NotiProvider } from "./src/context/NotiProvider";
 import { useNotification } from "./src/context/NotiProvider";
 import { LogBox } from "react-native";
+import { getAllNoti } from "./src/redux/slices/NotiSlice";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -45,6 +46,13 @@ const MainApp = () => {
 
   const { schedulePushNotification } = useNotification();
   const noti = useSelector((state) => state.noti.noti);
+  const notiList = useSelector((state) => state.noti.notiList);
+
+  useEffect(() => {
+    const unsubscribe = getAllNoti(dispatch);
+    return () => unsubscribe();
+  
+  }, [dispatch]);
 
   useEffect(() => {
     const unsubscribeEvent = fetchEvents()(dispatch);

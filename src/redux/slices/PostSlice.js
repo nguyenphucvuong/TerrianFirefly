@@ -31,36 +31,81 @@ const initialState = {
 
 // Tạo async thunk để thêm dữ liệu lên Firestore
 
+// export const createPost = createAsyncThunk(
+//   "data/createPost",
+//   async (newData) => {
+//     try {
+//       // Thêm dữ liệu mới vào Firestore
+//       const docRef = await addDoc(collection(db, "Posts"), newData);
+
+//       const imgUrls = [];
+
+//       // Tải lên từng ảnh trong imgPost
+//       for (const img of newData.imgPost) {
+//         const response = await fetch(img);
+//         const blob = await response.blob(); // Chuyển đổi URL thành dạng nhị phân
+//         console.log("so nhi phan", blob);
+//         const imgRef = ref(storage, `images/${img.split("/").pop()}`); // Đặt tên cho ảnh
+//         await uploadBytes(imgRef, blob); // Tải lên ảnh
+
+//         // Lấy URL tải về
+//         const imgUrl = await getDownloadURL(imgRef);
+//         imgUrls.push(imgUrl); // Lưu URL vào mảng
+//       }
+
+//       console.log(imgUrls);
+//       // Lấy tài liệu vừa thêm từ Firestore
+//       const docSnap = await getDoc(docRef);
+
+//       await updateDoc(docRef, {
+//         post_id: docRef.id,
+//         imgPost: imgUrls, // Lưu ID vào tài liệu
+//       });
+
+//       if (docSnap.exists()) {
+//         // Trả về dữ liệu của tài liệu vừa thêm
+//         return { post_id: docSnap.id, ...docSnap.data() };
+//       } else {
+//         throw new Error("No such document!");
+//       }
+//     } catch (error) {
+//       console.error("Error adding document: ", error);
+//       throw error;
+//     }
+//   }
+// );
+
 export const createPost = createAsyncThunk(
   "data/createPost",
   async (newData) => {
     try {
       // Thêm dữ liệu mới vào Firestore
       const docRef = await addDoc(collection(db, "Posts"), newData);
-
       const imgUrls = [];
 
-      // Tải lên từng ảnh trong imgPost
-      for (const img of newData.imgPost) {
+      // Tải lên tất cả ảnh
+      const uploadPromises = newData.imgPost.map(async (img) => {
         const response = await fetch(img);
         const blob = await response.blob(); // Chuyển đổi URL thành dạng nhị phân
-        console.log("so nhi phan", blob);
         const imgRef = ref(storage, `images/${img.split("/").pop()}`); // Đặt tên cho ảnh
-        await uploadBytes(imgRef, blob); // Tải lên ảnh
 
-        // Lấy URL tải về
+        // Tải lên ảnh và lấy URL tải về
+        await uploadBytes(imgRef, blob);
         const imgUrl = await getDownloadURL(imgRef);
-        imgUrls.push(imgUrl); // Lưu URL vào mảng
-      }
+        imgUrls.push(imgUrl);
+      });
 
-      console.log(imgUrls);
-      // Lấy tài liệu vừa thêm từ Firestore
-      const docSnap = await getDoc(docRef);
+      // Chờ tất cả ảnh được tải lên
+      await Promise.all(uploadPromises);
 
+      // Cập nhật tài liệu với ID và URL ảnh
       await updateDoc(docRef, {
         post_id: docRef.id,
-        imgPost: imgUrls, // Lưu ID vào tài liệu
+        imgPost: imgUrls,
       });
+
+      // Lấy tài liệu vừa thêm từ Firestore
+      const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         // Trả về dữ liệu của tài liệu vừa thêm
@@ -69,11 +114,12 @@ export const createPost = createAsyncThunk(
         throw new Error("No such document!");
       }
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Error adding document:", error.message);
       throw error;
     }
   }
 );
+
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getPostsFirstTime = createAsyncThunk(
   "data/getPostsFirstTime",

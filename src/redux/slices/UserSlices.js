@@ -1,18 +1,55 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { db, auth, storage } from '../../firebase/FirebaseConfig';
-import { collection, addDoc, doc, getDoc, getDocs, query, where, updateDoc, onSnapshot, orderBy } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Firebase Storage
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { db, auth, storage } from "../../firebase/FirebaseConfig";
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  updateDoc,
+  onSnapshot,
+  orderBy,
+} from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; // Firebase Storage
 
 // Trạng thái ban đầu
 const initialState = {
   user: null,
   userByField: {},
-  statusUser: 'idle',
+  statusUser: "idle",
   errorUser: null,
   usersFollowed: [],
   userpostsFavorites: [],
   followingUsers: [],
+  userEvent: {},
 };
+
+export const getUserEvent = (user_id) => (dispatch) => {
+  const q = query(collection(db, "user"), where("user_id", "==", user_id));
+
+  const unsubscribe = onSnapshot(
+    q,
+    (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        const userData = {
+          id: querySnapshot.docs[0].id,
+          ...querySnapshot.docs[0].data(),
+        };
+        dispatch(setUserEvent(userData));
+      }
+    },
+    (error) => {
+      console.error("Error in realtime listener:", error);
+      dispatch(setError(error.message));
+    }
+  );
+
+  return unsubscribe; // Trả về hàm unsubscribe để có thể ngừng listener khi không cần thiết
+};
+
+// Tạo
 
 // Thiết lập listener thời gian thực cho dữ liệu người dùng
 export const listenToUserRealtime = (email) => (dispatch) => {
@@ -121,25 +158,25 @@ export const getUserByField = createAsyncThunk(
   }
 );
 
-
 // Tạo async thunk để cập nhật dữ liệu Firestore
-export const updateUser = createAsyncThunk('data/upDateUser', async ({ user_id, newData }) => {
+export const updateUser = createAsyncThunk(
+  "data/upDateUser",
+  async ({ user_id, newData }) => {
+    try {
+      if (!user_id) {
+        throw new Error("User ID is required.");
+      }
 
-  try {
-    if (!user_id) {
-      throw new Error("User ID is required.");
+      const userDocRef = doc(collection(db, "user"), user_id);
+      await updateDoc(userDocRef, newData);
+      console.log("User updated!");
+
+      //Alert.alert("Thành công", "Đã cập nhật Firestore.");
+    } catch (error) {
+      console.error("Error updating user:", error);
     }
-
-    const userDocRef = doc(collection(db, "user"), user_id);
-    await updateDoc(userDocRef, newData);
-    console.log("User updated!");
-
-    //Alert.alert("Thành công", "Đã cập nhật Firestore.");
-  } catch (error) {
-    console.error("Error updating user:", error);
   }
-});
-
+);
 
 export const updateUserPassword = createAsyncThunk(
   "data/updateUserPassword",
@@ -215,14 +252,16 @@ export const getUserFromFollowedUsers = createAsyncThunk(
   async ({ field, currentUserId }, { getState }) => {
     try {
       // Lấy danh sách user ID đã được follow
-      const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
+      const followedUserIds = await getFollowedUserIds({
+        currentUserId: currentUserId,
+      });
       // console.log('followedUserIds',followedUserIds);
 
       // Nếu không có user nào được follow, trả về mảng rỗng
       if (followedUserIds.length === 0) {
         return { usersFollowed: [] };
       }
-      // console.log('followedUserIds2',followedUserIds); 
+      // console.log('followedUserIds2',followedUserIds);
       // Tạo query lấy bài đăng từ những người dùng đã được follow
       let userQuery = query(
         collection(db, "user"),
@@ -230,13 +269,12 @@ export const getUserFromFollowedUsers = createAsyncThunk(
       );
       // console.log('userQuery',userQuery);
 
-
       const querySnapshot = await getDocs(userQuery);
       // console.log('querySnapshot1',querySnapshot);
 
       // Trả về mảng rỗng nếu không có user nào
       if (querySnapshot.empty) {
-        console.log('empty');
+        console.log("empty");
         return { usersFollowed: [] };
       }
       const usersFollowed = querySnapshot.docs.map((doc) => ({
@@ -274,14 +312,16 @@ export const getUserFromFollowingUsers = createAsyncThunk(
   async ({ field, currentUserId }, { getState }) => {
     try {
       // Lấy danh sách user ID đã được follow
-      const followedUserIds = await getFollowingUsersIds({ currentUserId: currentUserId });
+      const followedUserIds = await getFollowingUsersIds({
+        currentUserId: currentUserId,
+      });
       //console.log('followedUserIds',followedUserIds);
 
       // Nếu không có user nào được follow, trả về mảng rỗng
       if (followedUserIds.length === 0) {
         return { followingUsers: [] };
       }
-      // console.log('followedUserIds2',followedUserIds); 
+      // console.log('followedUserIds2',followedUserIds);
       // Tạo query lấy bài đăng từ những người dùng đã được follow
       let userQuery = query(
         collection(db, "user"),
@@ -289,13 +329,12 @@ export const getUserFromFollowingUsers = createAsyncThunk(
       );
       // console.log('userQuery',userQuery);
 
-
       const querySnapshot = await getDocs(userQuery);
       // console.log('querySnapshot1',querySnapshot);
 
       // Trả về mảng rỗng nếu không có user nào
       if (querySnapshot.empty) {
-        console.log('empty');
+        console.log("empty");
         return { followingUsers: [] };
       }
       const followingUsers = querySnapshot.docs.map((doc) => ({
@@ -323,6 +362,9 @@ export const UserSlices = createSlice({
       state.user = action.payload;
       state.errorUser = null; // Reset lỗi khi có dữ liệu người dùng mới
     },
+    setUserEvent: (state, action) => {
+      state.userEvent = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -330,7 +372,7 @@ export const UserSlices = createSlice({
         const { user_id, userById } = action.payload;
         state[user_id] = userById;
       })
-      .addCase(getUserByField.pending, (state) => { })
+      .addCase(getUserByField.pending, (state) => {})
       .addCase(getUserByField.rejected, (state, action) => {
         state.errorUser = action.error.message;
       })
@@ -379,10 +421,10 @@ export const UserSlices = createSlice({
       .addCase(getUserFromFollowingUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
-      })
+      });
   },
 });
 
-export const { setUser, setError } = UserSlices.actions;
+export const { setUser, setError, setUserEvent } = UserSlices.actions;
 
 export default UserSlices.reducer;

@@ -14,7 +14,7 @@ export const NotiProvider = ({ children }) => {
   const schedulePushNotification = async ({ title, body }) => {
     await Notifications.scheduleNotificationAsync({
       content: { title, body },
-      trigger: { seconds: 1 },
+      trigger: { seconds: 2 },
     });
   };
 
@@ -23,7 +23,9 @@ export const NotiProvider = ({ children }) => {
     // Kiểm tra nếu user và user.user_id không null hoặc undefined
     if (user && user.user_id) {
       // Lọc thông báo của người dùng hiện tại (targetUser_id = user.user_id)
-      const uncheckedNotis = noti.filter((n) => !n.checked && n.targetUser_id === user.user_id);
+      const uncheckedNotis = noti.filter(
+        (n) => !n.checked && n.targetUser_id === user.user_id && n.noti_id != "temp"
+      ); // Chỉ chọn thông báo đã có noti_id
 
       Promise.all(
         uncheckedNotis.map(async (notiItem) => {
@@ -32,7 +34,7 @@ export const NotiProvider = ({ children }) => {
         })
       );
     }
-  }, [noti, dispatch, user]); // Thêm 'user' vào dependencies
+  }, [noti, dispatch, user]); 
 
   return (
     <NotifiContext.Provider value={{ schedulePushNotification }}>
