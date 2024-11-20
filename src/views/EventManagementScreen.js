@@ -21,7 +21,7 @@ import Entypo from "react-native-vector-icons/Entypo";
 export default function EventManagementScreen() {
   const dispatch = useDispatch();
   const navigation = useNavigation();
-
+  const user = useSelector((state) => state.user.user);
   // Lấy dữ liệu sự kiện từ Redux Store
   const events = useSelector((state) => state.event.events);
   const statusEvent = useSelector((state) => state.event.statusEvent);
@@ -111,7 +111,11 @@ export default function EventManagementScreen() {
     <View style={styles.container}>
       {/* Danh sách sự kiện */}
       <FlatList
-        data={events}
+        data={
+          Array.isArray(events)
+            ? events.filter((item) => item.role_id === user.roleid)
+            : []
+          }
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           const status = getStatusStyle(item.end_date);

@@ -28,6 +28,7 @@ import EventManagementScreen from './EventManagementScreen';
 import AddEditEventScreen from './AddEditEventScreen';
 import FollowerScreen from './FollowerScreen';
 import FollowUp from './FollowUp';
+import SplashScreenComponent from '../component/SplashScreenComponent';
 
 export {
       HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen,
@@ -35,7 +36,7 @@ export {
       SettingScreen, AccountDetailsScreen, ArticleScreen, FavouriteScreen, GroupScreen, NotificationManagement,
       ManagePostsScreen, SetUpAccountScreen, WellcomScreen, LoginScreen,
       RegisterScreen, ForgotPassword, VerificationCodeScreen, CreatePostScreen, FollowerScreen,
-      FollowUp, ResetPasswordScreen, HashtagManagerScreen, EventManagementScreen, AddEditEventScreen,
+      FollowUp, ResetPasswordScreen, HashtagManagerScreen, EventManagementScreen, AddEditEventScreen, SplashScreenComponent,
 };
 
 
