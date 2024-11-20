@@ -12,38 +12,20 @@ const initialState = {
 
 
 
-export const createSubComment = createAsyncThunk('data/createSubComment', async (
-    { sub_comment_id, comment_id, user_id, content, created_at, imgPost, tag_user_id }
+export const createReport = createAsyncThunk('data/createReport', async (
+    { report_id, user_id, reason, created_at, type }
 ) => {
     try {
-        console.log("toi day", sub_comment_id, comment_id, user_id, content, created_at, imgPost)
+        // console.log("toi day", report_id, user_id, reason, created_at, type)
         const docRef = await addDoc(collection(db, 'SubComment'), {
-            sub_comment_id,
-            comment_id,
+            report_id,
             user_id,
-            tag_user_id: tag_user_id ? tag_user_id : "",
-            content,
+            reason,
             created_at,
-            imgPost: "",
+            type,
         });
-        // console.log("toi day", img_id)
-        // console.log("toi day33", img_id.uri)
-        // Kiểm tra nếu có một ảnh trong newData
-        if (imgPost) {
-            const response = await fetch(imgPost.uri);
-            const blob = await response.blob(); // Chuyển đổi URL thành dạng nhị phân
-            const imgRef = ref(storage, `images/${imgPost.uri.split("/").pop()}`); // Đặt tên cho ảnh
 
-            // Tải lên ảnh và lấy URL tải về
-            await uploadBytes(imgRef, blob);
-            const imgUrl = await getDownloadURL(imgRef);
 
-            // Cập nhật tài liệu với ID và URL ảnh
-            await updateDoc(docRef, {
-                sub_comment_id: docRef.id,
-                imgPost: imgUrl,
-            });
-        }
         const docSnap = await getDoc(docRef);
         await updateDoc(docRef, {
             sub_comment_id: docRef.id,

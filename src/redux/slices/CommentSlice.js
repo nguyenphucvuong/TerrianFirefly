@@ -74,13 +74,14 @@ export const getComment = createAsyncThunk('data/getComment', async ({ post_id }
     }
 });
 
-export const startListeningCommentByPostId = ({ post_id }) => (dispatch) => {
+export const startListeningCommentByPostId = ({ post_id, sortBy }) => (dispatch) => {
     if (!post_id) return;
     // console.log("post_id", post_id)
     const commentQuery = query(
         collection(db, "Comment"),
         where("post_id", "==", post_id),
-        orderBy("created_at", "desc")
+        orderBy("created_at", sortBy)
+        // orderBy("created_at", "desc", "asc")
     );
     const uncomment = onSnapshot(commentQuery, (querySnapshot) => {
         // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

@@ -116,29 +116,6 @@ export const getPostsFirstTime = createAsyncThunk(
   }
 );
 
-// Hàm để cập nhật số lượt xem cho bài viết
-const updatePostViewCount = async (docs) => {
-  await Promise.all(
-    docs.map(async (doc) => {
-      const currentCountView = doc.data().count_view || 0;
-      await updateDoc(doc.ref, {
-        count_view: currentCountView + 1,
-      });
-    })
-  );
-};
-
-// Hàm lấy danh sách user ID đã được follow
-const getFollowedUserIds = async ({ currentUserId }) => {
-  const followerQuery = query(
-    collection(db, "Follower"),
-    where("follower_user_id", "==", currentUserId)
-  );
-  const followerSnapshot = await getDocs(followerQuery);
-  //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
-
-  return followerSnapshot.docs.map((doc) => doc.data().user_id);
-};
 
 // Hàm chính để lấy bài viết mới
 export const getPostsRefresh = createAsyncThunk(
@@ -223,6 +200,31 @@ export const getPostsByField = createAsyncThunk(
   }
 );
 
+// Hàm để cập nhật số lượt xem cho bài viết
+const updatePostViewCount = async (docs) => {
+  await Promise.all(
+    docs.map(async (doc) => {
+      const currentCountView = doc.data().count_view || 0;
+      await updateDoc(doc.ref, {
+        count_view: currentCountView + 1,
+      });
+    })
+  );
+};
+
+// Hàm lấy danh sách user ID đã được follow
+const getFollowedUserIds = async ({ currentUserId }) => {
+  const followerQuery = query(
+    collection(db, "Follower"),
+    where("follower_user_id", "==", currentUserId)
+  );
+  const followerSnapshot = await getDocs(followerQuery);
+  //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
+
+  return followerSnapshot.docs.map((doc) => doc.data().user_id);
+};
+
+// Hàm lấy bài đăng từ những người dùng chưa được follow
 export const getPostsFromUnfollowedUsers = createAsyncThunk(
   "data/getPostsFromUnfollowedUsers",
   async ({ field, quantity, currentUserId }, { getState }) => {
@@ -280,6 +282,73 @@ export const getPostsFromUnfollowedUsers = createAsyncThunk(
     }
   }
 );
+
+// Hàm lấy bài đăng từ những người dùng đã được follow
+export const getPostsFromFollowedUsers = createAsyncThunk(
+  "data/getPostsFromFollowedUsers",
+  async ({ field, quantity, currentUserId }, { getState }) => {
+    try {
+      // Lấy danh sách user ID đã được follow
+      const followedUserIds = await getFollowedUserIds({
+        currentUserId: currentUserId,
+      });
+
+      // Nếu không có user nào được follow, trả về mảng rỗng
+      if (followedUserIds.length === 0) {
+        return { postData: [], lastVisiblePost: null };
+      }
+
+      // Kiểm tra lastVisiblePostFollower để lấy bài đăng từ trang trước đó
+      const lastVisiblePostId = getState().post.lastVisiblePostFollower;
+      //console.log("currentUserId", getState().post.lastVisiblePostFollower);
+      let lastVisibleDoc = null;
+
+      if (lastVisiblePostId) {
+        const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
+        lastVisibleDoc = await getDoc(lastVisibleDocRef);
+      }
+
+      // Tạo query lấy bài đăng từ những người dùng đã được follow
+      let postsQuery = query(
+        collection(db, "Posts"),
+        orderBy(field, "desc"),
+        limit(quantity),
+        where("user_id", "in", followedUserIds)
+      );
+
+      if (lastVisibleDoc) {
+        postsQuery = query(postsQuery, startAfter(lastVisibleDoc));
+      }
+
+      const querySnapshot = await getDocs(postsQuery);
+
+      // Trả về mảng rỗng nếu không có bài đăng nào
+      if (querySnapshot.empty) {
+        return { postData: [], lastVisiblePost: null };
+      }
+
+      // Cập nhật lượt xem
+      await updatePostViewCount(querySnapshot.docs);
+
+      // Lấy ID của bài đăng cuối cùng để hỗ trợ paginating
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return {
+        postData: postData,
+        lastVisiblePost: lastVisible ? lastVisible.id : null,
+      };
+    } catch (error) {
+      console.error("Error fetching posts from followed users: ", error);
+      throw error;
+    }
+  }
+);
+
+
 // hàm lấy bài đăng của người dùng
 export const getPostUsers = createAsyncThunk(
   "data/getPostUsers",
@@ -382,70 +451,6 @@ export const getPostsFromFavouriteUsers = createAsyncThunk(
   }
 );
 
-// Hàm lấy bài đăng từ những người dùng đã được follow
-export const getPostsFromFollowedUsers = createAsyncThunk(
-  "data/getPostsFromFollowedUsers",
-  async ({ field, quantity, currentUserId }, { getState }) => {
-    try {
-      // Lấy danh sách user ID đã được follow
-      const followedUserIds = await getFollowedUserIds({
-        currentUserId: currentUserId,
-      });
-
-      // Nếu không có user nào được follow, trả về mảng rỗng
-      if (followedUserIds.length === 0) {
-        return { postData: [], lastVisiblePost: null };
-      }
-
-      // Kiểm tra lastVisiblePostFollower để lấy bài đăng từ trang trước đó
-      const lastVisiblePostId = getState().post.lastVisiblePostFollower;
-      //console.log("currentUserId", getState().post.lastVisiblePostFollower);
-      let lastVisibleDoc = null;
-
-      if (lastVisiblePostId) {
-        const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
-        lastVisibleDoc = await getDoc(lastVisibleDocRef);
-      }
-
-      // Tạo query lấy bài đăng từ những người dùng đã được follow
-      let postsQuery = query(
-        collection(db, "Posts"),
-        orderBy(field, "desc"),
-        limit(quantity),
-        where("user_id", "in", followedUserIds)
-      );
-
-      if (lastVisibleDoc) {
-        postsQuery = query(postsQuery, startAfter(lastVisibleDoc));
-      }
-
-      const querySnapshot = await getDocs(postsQuery);
-
-      // Trả về mảng rỗng nếu không có bài đăng nào
-      if (querySnapshot.empty) {
-        return { postData: [], lastVisiblePost: null };
-      }
-
-      // Cập nhật lượt xem
-      await updatePostViewCount(querySnapshot.docs);
-
-      // Lấy ID của bài đăng cuối cùng để hỗ trợ paginating
-      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-      const postData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      return {
-        postData: postData,
-        lastVisiblePost: lastVisible ? lastVisible.id : null,
-      };
-    } catch (error) {
-      console.error("Error fetching posts from followed users: ", error);
-      throw error;
-    }
-  }
-);
 
 export const updatePostsByField = createAsyncThunk(
   "data/updatePostsByField",
@@ -558,6 +563,7 @@ export const PostSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
+
       //getPostsFromFavouriteUsers
       .addCase(getPostsFromFavouriteUsers.pending, (state) => {
         state.loading = true;

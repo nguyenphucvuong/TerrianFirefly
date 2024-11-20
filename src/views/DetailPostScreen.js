@@ -10,6 +10,7 @@ import Feather from 'react-native-vector-icons/Feather'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import RNPickerSelect from 'react-native-picker-select';
 
 import { appInfo } from '../constains/appInfo'
 import { appcolor } from '../constains/appcolor'
@@ -35,7 +36,7 @@ import { countSubComments, startListeningSubCommentByPostId } from '../redux/sli
 
 
 const DetailPostScreen = () => {
-    const inset = useSafeAreaInsets();
+    const inset = useSafeAreaInsets(); // Hook để lấy vùng an toàn của thiết bị
     const navigation = useNavigation();
     const route = useRoute().params;
 
@@ -43,20 +44,25 @@ const DetailPostScreen = () => {
     // console.log("user.user_id", user.user_id)
     // console.log("post_user_id", post_user_id)
 
-    const follower = useSelector(state => state.follower.follower);
+    const follower = useSelector(state => state.follower.follower); // Lấy dữ liệu từ store
     const dispatch = useDispatch();
-    const isFlag = follower.some(f => f.user_id === post.user_id && f.follower_user_id === user.user_id);
+    const isFlag = follower.some(f => f.user_id === post.user_id && f.follower_user_id === user.user_id); // Kiểm tra xem người dùng đã theo dõi chưa
     // const comment = useSelector(state => state.comment.commentList);
 
     const [iconEmoji, setIconEmoji] = useState("default");
-    const emoji = useSelector(state => state.emoji[post.post_id]);
-    const countEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id })
+    const emoji = useSelector(state => state.emoji[post.post_id]); // Lấy dữ liệu emoji từ store
+    const countEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id }) // Tính toán số lượng emoji
     const likeCount = formatNumber({ num: countEmoji.likeCount });
     const heartCount = formatNumber({ num: countEmoji.heartCount });
     const laughCount = formatNumber({ num: countEmoji.laughCount });
     const sadCount = formatNumber({ num: countEmoji.sadCount });
     const comments = useSelector(state => state.comment[post.post_id])
 
+
+    const [selectedValue, setSelectedValue] = useState('desc'); // Giá trị mặc định của Picker
+    useEffect(() => {
+        dispatch(startListeningCommentByPostId({ post_id: post.post_id, sortBy: selectedValue }));
+    }, [selectedValue]);
 
     const [dataPostCmt, setDataPostCmt] = useState(0); // Sử dụng state để lưu kết quả   
 
@@ -603,13 +609,49 @@ const DetailPostScreen = () => {
                     position: "relative",
                     borderRadius: 10,
                     borderColor: "rgba(0,0,0,0.2)",
-                    marginVertical: 10, // Khoảng cách trên dưới của đường kẻ
+                    marginVertical: 15, // Khoảng cách trên dưới của đường kẻ
                 }} />
 
-                <Text style={{
-                    fontSize: 17,
-                    fontWeight: "bold",
-                }}>Toàn bộ bình luận {dataPostCmt}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: 17, fontWeight: "bold" }}>
+                        Toàn bộ bình luận {dataPostCmt} - {selectedValue == "desc" ? "Mới nhất" : "Cũ nhất"}
+                    </Text>
+
+                    <RNPickerSelect
+                        placeholder={{ label: "Chọn một mục...", value: null }}
+                        onValueChange={(value) => setSelectedValue(value)}
+                        items={[
+                            { label: 'Mới nhất', value: 'desc' },
+                            { label: 'Cũ nhất', value: 'asc' },
+                        ]}
+                        value={selectedValue} // Giá trị mặc định
+                        style={{
+                            inputAndroid: {
+                                fontSize: 17,
+                                fontWeight: "bold",
+                                paddingVertical: 8,
+                                paddingHorizontal: 10,
+                                borderWidth: 1,
+                                borderColor: 'gray',
+                                borderRadius: 4,
+                                color: 'black',
+                                paddingRight: 30, // để đảm bảo văn bản không chồng lên biểu tượng bên phải
+                            },
+                            inputIOS: {
+                                fontSize: 17,
+                                fontWeight: "bold",
+                                paddingVertical: 8,
+                                paddingHorizontal: 10,
+                                borderWidth: 1,
+                                borderColor: 'gray',
+                                borderRadius: 4,
+                                color: 'black',
+                                paddingRight: 30, // để đảm bảo văn bản không chồng lên biểu tượng bên phải
+                            }
+                        }}
+                    />
+                </View>
+
 
 
 
@@ -654,7 +696,8 @@ export const CommentsPost = React.memo(({ comment }) => {
             setDataPostCmt(formatNumber({ num: countCmt })); // Cập nhật state với kết quả
         };
         fetchCommentCount();
-    }, [emoji]);
+        // }, [emoji]);
+    }, []);
 
 
 
@@ -796,6 +839,13 @@ export const CommentsPost = React.memo(({ comment }) => {
 
                     </TouchableOpacity>
                 </RowComponent>
+                {dataPostCmt != 0 ?
+                    <TouchableOpacity onPress={handleNavigateCommentScreen}
+                        style={{ flexDirection: "row", flex: 1, marginLeft: 10, marginBottom: 15 }}>
+
+                        <Text style={{ fontSize: 13, fontWeight: "bold", color: appcolor.primary }}>Xem {dataPostCmt} phản hồi khác... </Text>
+
+                    </TouchableOpacity> : <></>}
             </View>
             :
             <></>
