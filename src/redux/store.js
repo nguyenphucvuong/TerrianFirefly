@@ -13,32 +13,34 @@ import EmojiSlice from './slices/EmojiSlice';
 import EventSlice from './slices/EventSlice';
 import NotiSlice from './slices/NotiSlice';
 import SubCommentSlice from './slices/SubCommentSlice';
+import RequestSlice from './slices/RequestSlice';
 import { sub } from '@tensorflow/tfjs';
 
 
 export const store = configureStore({
-        reducer: {
-                post: Post,
-                hashtag: HashtagSlice,
-                comment: CommentSlice,
-                background: BackgroundSlice,
-                achievement: AchievementSlice,
-                nickname: NicknameSlice,
-                user: UserSlices,
-                follower: FollowerSlice,
-                favorite: FavoriteSlice,
-                emoji: EmojiSlice,
-                event: EventSlice,
-                noti: NotiSlice,
-                subComment: SubCommentSlice,
-        },
-        middleware: (getDefaultMiddleware) =>
-                getDefaultMiddleware({
-                  serializableCheck: {
-                    ignoredActions: ['data/getRealtimePostsByStatus/fulfilled', 'data/listenToUserWithStatus/fulfilled'],
-                    ignoredPaths: ['payload'],
-                  },
-                }),
+  reducer: {
+    post: Post,
+    hashtag: HashtagSlice,
+    comment: CommentSlice,
+    background: BackgroundSlice,
+    achievement: AchievementSlice,
+    nickname: NicknameSlice,
+    user: UserSlices,
+    follower: FollowerSlice,
+    favorite: FavoriteSlice,
+    emoji: EmojiSlice,
+    event: EventSlice,
+    noti: NotiSlice,
+    subComment: SubCommentSlice,
+    request: RequestSlice,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['data/getRealtimePostsByStatus/fulfilled', 'data/listenToUserWithStatus/fulfilled'],
+        ignoredPaths: ['payload'],
+      },
+    }),
 })
 
 

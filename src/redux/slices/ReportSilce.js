@@ -5,98 +5,148 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase
 
 // Trạng thái ban đầu
 const initialState = {
-    comment: [],
     status: 'idle',
     error: null,
 };
 
-
-
 export const createReport = createAsyncThunk('data/createReport', async (
-    { report_id, user_id, reason, created_at, type }
+    { report_id, user_id, reason, created_at, type, status }
 ) => {
     try {
         // console.log("toi day", report_id, user_id, reason, created_at, type)
-        const docRef = await addDoc(collection(db, 'SubComment'), {
+        const docRef = await addDoc(collection(db, 'Report'), {
             report_id,
             user_id,
             reason,
             created_at,
             type,
+            status,
         });
 
 
         const docSnap = await getDoc(docRef);
         await updateDoc(docRef, {
-            sub_comment_id: docRef.id,
+            report_id: docRef.id,
         });
 
         if (docSnap.exists()) {
-            return { sub_comment_id: docSnap.id, ...docSnap.data() };
+            return { report_id: docSnap.id, ...docSnap.data() };
         } else {
-            throw new Error('No such document!');
+            throw new Error('No such report!');
         }
     } catch (error) {
-        console.error('Error adding document: ', error);
+        console.error('Error adding report: ', error);
         throw error;
     }
 });
 
 
+export const updateReport = updateReport(
+    "user/updateReport",
+    async ({ report_id, field, value }, { getState, dispatch }) => {
+        try {
+            const reportRef = doc(db, "Report", report_id); // Tham chiếu đến tài liệu người dùng
+            // Cập nhật các trường trong tài liệu
+            await updateDoc(reportRef, {
+                [field]: value,
+            });
 
-
-
-export const startListeningSubCommentByPostId = ({ comment_id }) => (dispatch) => {
-    if (!comment_id) return;
-    // console.log("comment_id", comment_id)
-    const commentQuery = query(
-        collection(db, "SubComment"),
-        where("comment_id", "==", comment_id),
-        orderBy("created_at", "desc")
-    );
-    const uncomment = onSnapshot(commentQuery, (querySnapshot) => {
-        // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
-        const subCommentPostById = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // console.log("commentPostById", commentPostById)
-        dispatch(setSubComentById({ subCommentPostById, comment_id }));
-    }, (error) => {
-        console.error('Error fetching subComment: ', error);
-    });
-
-    return uncomment; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
-};
-
-export const countSubComments = async ({ comment_id }) => {
-    try {
-        const commentsQuery = query(
-            collection(db, 'SubComment'),
-            where('comment_id', '==', comment_id)
-        );
-        const commentsSnapshot = await getDocs(commentsQuery);
-
-
-
-        const totalCount = commentsSnapshot.size;
-
-        // console.log('Tổng số lượng subcomment:', totalCount);
-        return totalCount;
-    } catch (error) {
-        console.error('Lỗi:', error);
+            // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
+            const updatedSnap = await getDoc(reportRef);
+            console.log("updatedSnap", updatedSnap.data());
+            if (updatedSnap.exists()) {
+                return {
+                    id: updatedSnap.id,
+                    ...updatedSnap.data(),
+                };
+            } else {
+                throw new Error("Report not found");
+            }
+        } catch (error) {
+            console.error("Error Update Report: ", error);
+            throw error;
+        }
     }
+);
+
+export const startListeningReportByPostId = ({ }) => (dispatch) => {
+    const reportQuery = query(
+        collection(db, "Report"),
+        where("type", "==", "post"),
+    );
+    const unReport = onSnapshot(reportQuery, (querySnapshot) => {
+
+        const reportPostById = querySnapshot.docs.map(doc => {
+            const data = doc.data(); // Extract post_id from the report content 
+            return { id: doc.id, ...data };
+        });
+        reportPostById.forEach(report => {
+            dispatch(setReportPostById({ reportData: report, report_id: report.report_id }));
+        });
+    }, (error) => {
+        console.error('Error fetching report: ', error);
+    });
+    return unReport;
+};
+
+export const startListeningReportByCommentId = ({ }) => (dispatch) => {
+    const reportQuery = query(
+        collection(db, "Report"),
+        where("type", "==", "comment"),
+    );
+    const unReport = onSnapshot(reportQuery, (querySnapshot) => {
+
+        const reportPostById = querySnapshot.docs.map(doc => {
+            const data = doc.data(); // Extract post_id from the report content 
+            return { id: doc.id, ...data };
+        });
+        reportPostById.forEach(report => {
+            dispatch(setReportCommentById({ reportData: report, report_id: report.report_id }));
+        });
+    }, (error) => {
+        console.error('Error fetching report: ', error);
+    });
+    return unReport;
+};
+
+export const startListeningReportBySubCommentId = ({ }) => (dispatch) => {
+    const reportQuery = query(
+        collection(db, "Report"),
+        where("type", "==", "subComment"),
+    );
+    const unReport = onSnapshot(reportQuery, (querySnapshot) => {
+
+        const reportPostById = querySnapshot.docs.map(doc => {
+            const data = doc.data(); // Extract post_id from the report content 
+            return { id: doc.id, ...data };
+        });
+        reportPostById.forEach(report => {
+            dispatch(setReportSubCommentById({ reportData: report, report_id: report.report_id }));
+        });
+    }, (error) => {
+        console.error('Error fetching report: ', error);
+    });
+    return unReport;
 };
 
 
-export const SubCommentSlice = createSlice({
-    name: 'subComment',
+export const ReportSlice = createSlice({
+    name: 'report',
     initialState,
     reducers: {
-        setSubComentById: (state, action) => {
-            const { subCommentPostById, comment_id } = action.payload;
-            state[comment_id] = subCommentPostById;
+        setReportPostById: (state, action) => {
+            const { reportData, report_id } = action.payload;
+            state.post[report_id] = reportData;
             // console.log("subCommentPostById comment_id", comment_id)
             // console.log("subCommentPostById", subCommentPostById)
             state.status = 'succeeded';
+        },
+
+        setReportCommentById: (state, action) => {
+
+        },
+        setReportSubCommentById: (state, action) => {
+
         },
     },
     extraReducers: (builder) => {
@@ -105,6 +155,6 @@ export const SubCommentSlice = createSlice({
     },
 });
 
-export const { setSubComentById } = SubCommentSlice.actions
+export const { setReportPostById, setReportCommentById, setReportSubCommentById } = ReportSlice.actions
 
-export default SubCommentSlice.reducer;
+export default ReportSlice.reducer;

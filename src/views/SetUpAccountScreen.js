@@ -41,12 +41,13 @@ import {
 } from "firebase/firestore";
 const SetUpAccountScreen = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const authUser = auth.currentUser;
   const user = useSelector((state) => state.user.user);
-//   useEffect(() => {
-//     const unsubscribe = dispatch(listenToUserRealtime(user.email));
-//     return () => unsubscribe();
-// }, [dispatch, user.email]);
+  //   useEffect(() => {
+  //     const unsubscribe = dispatch(listenToUserRealtime(user.email));
+  //     return () => unsubscribe();
+  // }, [dispatch, user.email]);
   //khai bao
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.numberPhone);
@@ -60,8 +61,8 @@ const SetUpAccountScreen = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  
-   //firebase
+
+  //firebase
   const handleLinkPhone = () => {
     setIsModalVisible(true);
   };
@@ -77,7 +78,7 @@ const SetUpAccountScreen = () => {
         numberPhone: inputPhone,
       };
       console.log("user.user_id", user.user_id);
-      
+
       await dispatch(updateUser({ user_id: user.user_id, newData }));
       setPhoneError("");
       setIsModalVisible(false);
@@ -240,11 +241,15 @@ const SetUpAccountScreen = () => {
           alignItems: "center",
         }}
       >
-        <Text style={[styles.sizeTitle, {color: "#CC2B52"}]}>Yêu cầu cấp quyền admin</Text>
+        <Text style={[styles.sizeTitle, { color: "#CC2B52" }]}>Yêu cầu cấp quyền admin</Text>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          onPress={() => { navigation.navigate("RequestAdminScreen", { user: user }) }}
+          style={styles.button}
+        >
           <Text style={{ color: "#0286FF" }}>Gửi Yêu Cầu</Text>
         </TouchableOpacity>
+
       </View>
       {/* Modal nhập số điện thoại */}
       <Modal

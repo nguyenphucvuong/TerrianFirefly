@@ -11,7 +11,7 @@ import { StyleGlobal } from '../styles/StyleGlobal'
 import { appInfo } from '../constains/appInfo'
 //components
 import { IconComponent, ButtonFunctionComponent } from '../component'
-const SettingScreen = () => { 
+const SettingScreen = () => {
     const authUser = auth.currentUser;
     const navigation = useNavigation(); // Sử dụng hook navigation
     //FireBase
@@ -20,13 +20,13 @@ const SettingScreen = () => {
     //thoát đăng nhập
     const handleLogout = async () => {
         try {
-          await signOut(auth);
-          // Có thể điều hướng người dùng trở lại màn hình đăng nhập
-          navigation.navigate("LoginScreen");
+            await signOut(auth);
+            // Có thể điều hướng người dùng trở lại màn hình đăng nhập
+            navigation.navigate("LoginScreen");
         } catch (error) {
-          Alert.alert("Lỗi", "Đã xảy ra lỗi khi thoát đăng nhập. Vui lòng thử lại.");
+            Alert.alert("Lỗi", "Đã xảy ra lỗi khi thoát đăng nhập. Vui lòng thử lại.");
         }
-      };
+    };
     return (
         <View style={StyleGlobal.container}>
             {/* Gạch ngang User */}
@@ -52,39 +52,46 @@ const SettingScreen = () => {
                             <Text>Admin</Text>
                             <View style={styles.separator} />
                         </View>
-                        {/* Người Dùng */}
+                        {/* Người Dùng */}{/* role_id 1 */}
                         <TouchableOpacity style={styles.buttonRow} onPress={() => navigation.navigate('UserManagementScreen')}>
                             <Text style={styles.buttonText}>Quản Lý Người Dùng</Text>
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
-                        {/* Bài Viết */}
+                        {/* Bài Viết */}{/* role_id 2 */}
                         <TouchableOpacity style={styles.buttonRow} onPress={() => navigation.navigate('ManagePostsScreen')}>
                             <Text style={styles.buttonText}>Quản Lý Bài Viết</Text>
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
-                        {/* Sự Kiện */}
+                        {/* Sự Kiện */}{/* role_id 2 */}
                         <TouchableOpacity style={styles.buttonRow}
-                        onPress={() => navigation.navigate('EventManagementScreen')}
+                            onPress={() => navigation.navigate('EventManagementScreen')}
                         >
                             <Text style={styles.buttonText}>Quản Lý Sự Kiện</Text>
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
-                        {/* Hashtag */}
+                        {/* Hashtag */}{/* role_id 1 */}
                         <TouchableOpacity style={styles.buttonRow}
-                        onPress={() => navigation.navigate('HashtagManagerScreen')}
+                            onPress={() => navigation.navigate('HashtagManagerScreen')}
                         >
                             <Text style={styles.buttonText}>Quản Lý Hashtag</Text>
+                            <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
+                        </TouchableOpacity>
+                        {/* Các Yêu Cầu Quản Trị */}{/* role_id 1 */}
+                        <TouchableOpacity style={styles.buttonRow}
+                            onPress={() => navigation.navigate('ManageRequestScreen')}
+                        >
+                            <Text style={styles.buttonText}>Các Yêu Cầu Quản Trị</Text>
                             <IconComponent name={'chevron-right'} size={24} color={'gray'} style={styles.iconStyle} />
                         </TouchableOpacity>
                     </View>
                 ) : null
             }
-            <ButtonFunctionComponent 
-            name={'Thoát Đăng Nhập'} 
-            backgroundColor={'red'} 
-            colorText={'#FFFFFF'} 
-            style={styles.button2} 
-            onPress={handleLogout}
+            <ButtonFunctionComponent
+                name={'Thoát Đăng Nhập'}
+                backgroundColor={'red'}
+                colorText={'#FFFFFF'}
+                style={styles.button2}
+                onPress={handleLogout}
             />
         </View>
     )

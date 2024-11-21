@@ -276,6 +276,12 @@ const CommentScreen = () => {
                     marginVertical: 10, // Khoảng cách trên dưới của đường kẻ
                 }} />
 
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: 17, fontWeight: "bold" }}>
+                        Toàn bộ bình luận {dataPostCmt}
+                    </Text>
+                </View>
+
                 {/* SubComment List */}
                 {!subComments ? null :
                     subComments.map((subComment, index) => {

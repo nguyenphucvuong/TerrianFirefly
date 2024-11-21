@@ -70,7 +70,7 @@ export const startListeningSubCommentByPostId = ({ comment_id }) => (dispatch) =
     const commentQuery = query(
         collection(db, "SubComment"),
         where("comment_id", "==", comment_id),
-        orderBy("created_at", "desc")
+        orderBy("created_at", "asc")
     );
     const uncomment = onSnapshot(commentQuery, (querySnapshot) => {
         // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
