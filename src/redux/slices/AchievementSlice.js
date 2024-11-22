@@ -8,7 +8,7 @@ const initialState = {
     userAchievement: null,
     statusAchievement: 'idle',
     error: null,
-};
+}; 
 
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getAchievement = createAsyncThunk('data/getAchievement', async () => {

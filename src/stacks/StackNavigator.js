@@ -5,7 +5,6 @@ import {
   BackgroundScreen,
   InfomationScreen,
   AchievementsScreen,
-  NickNameScreen,
   UserManagementScreen,
   SettingScreen,
   AccountDetailsScreen,
@@ -111,11 +110,7 @@ const StackNavigator = () => {
         component={AchievementsScreen}
         options={() => IconBack("Danh Hiệu")}
       />
-      <Stack.Screen
-        name="NickNameScreen"
-        component={NickNameScreen}
-        options={() => IconBack("Danh Hiệu")}
-      />
+
       <Stack.Screen
         name="SettingScreen"
         component={SettingScreen}

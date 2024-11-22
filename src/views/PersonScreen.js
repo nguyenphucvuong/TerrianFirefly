@@ -25,6 +25,7 @@ import { listenToUserRealtime, listenToUserRealtime2, listenToUserRealtimeFollow
 import { getPostUsers, getPostsFromFavouriteUsers } from '../../src/redux/slices/PostSlice';
 import { getUserFromFollowedUsers, getUserFromFollowingUsers, listenToFollowerRealtime, listenToFollowingRealtime } from '../redux/slices/FollowerSlice';
 import { getUserAchievement, listenToUserAchievementRealtime } from '../redux/slices/AchievementSlice';
+// import { getTotalEmoji } from '../redux/slices/EmojiSlice';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -42,13 +43,17 @@ const PersonScreen = ({ isAvatar }) => {
     const post = useSelector((state) => state.post.postByUser);
     const postFavourite = useSelector((state) => state.post.postFavourite);
     const userAchievement = useSelector((state) => state.achievement.userAchievement) || {};
+    const totalEmoji = useSelector((state) => state.emoji.totalEmoji) || {};
     const dispatch = useDispatch();
     const isFocused = useIsFocused(); // Kiểm tra khi tab được focus
- 
     //route
     const route = useRoute();
     const userPost = route.params?.userPost ?? {};
     const isFromAvatar = route.params?.isFromAvatar ?? isAvatar;
+
+    const [user, setUser] = useState(dataUser);
+    const follower = useSelector(state => state.follower.follower);
+    const isFlag = follower.some(f => f.user_id === userPost.user_id);
 
     //log
     //console.log('dataUser', dataUser);
@@ -56,10 +61,11 @@ const PersonScreen = ({ isAvatar }) => {
     //console.log('followUp', followUp);
     //console.log('followingUsers',followingUsers);
     //console.log('userAchievement', userAchievement);
+    // console.log('totalEmoji',totalEmoji);
+    //console.log('userPost',userPost);
+    // console.log('isFromAvatar', isFromAvatar);
 
-
-    const follower = useSelector(state => state.follower.follower);
-    const isFlag = follower.some(f => f.user_id === userPost.user_id);
+    //console.log('user', user);
 
     const handleFollowButton = useCallback(() => {
         const handleFollowUser = async () => {
@@ -121,28 +127,33 @@ const PersonScreen = ({ isAvatar }) => {
     }
     useEffect(() => {
         if (isFocused) {
-            const fetchData = async () => {
+            const fetchData = async ()  => {
                 try {
                     // Kiểm tra nếu đang từ avatar, lấy thông tin người dùng
-                    if (isFromAvatar) {
-                        //console.log('Fetching user data in real-time');
-                        await dispatch(listenToUserRealtime2(userPost.email));  // Nếu cần async
-                    } 
-                    //Danh Hiệu
-                    await dispatch(listenToUserAchievementRealtime({ achie_id: isFromAvatar ? userPost.achie_id : dataUser.achie_id }));
-                    await dispatch(getUserAchievement({ achie_id: isFromAvatar ? userPost.achie_id : dataUser.achie_id }));
-                    //lắng nghe realtime về followers
-                    await dispatch(listenToFollowerRealtime({ follower_user_id: isFromAvatar ? userPost.user_id : dataUser.user_id }));
-                    //lắng nghe realtime về following
-                    await dispatch(listenToFollowingRealtime({ follower_user_id: isFromAvatar ? userPost.user_id : dataUser.user_id }));
-                    // Bài viết 
-                    await dispatch(getPostUsers({ field: "created_at", currentUserId: isFromAvatar ? userPost.user_id : dataUser.user_id }));
-                    // Yêu thích
-                    await dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: isFromAvatar ? userPost.user_id : dataUser.user_id }));
-                    // Theo dõi
-                    await dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: isFromAvatar ? userPost.user_id : dataUser.user_id }));
-                    // Người theo dõi
-                    await dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: isFromAvatar ? userPost.user_id : dataUser.user_id }));
+                    if (isFocused && !dataUser) {
+                        await dispatch(listenToUserRealtime2(user.email));
+                    }
+                    if (user.achie_id) {
+                        //Danh Hiệu
+                        await dispatch(listenToUserAchievementRealtime({ achie_id: user.achie_id }));
+                        await dispatch(getUserAchievement({ achie_id: user.achie_id }));
+                    }
+                    if (user.user_id) {
+                        //lắng nghe realtime về followers
+                        await dispatch(listenToFollowerRealtime({ follower_user_id: user.user_id }));
+                        //lắng nghe realtime về following
+                        await dispatch(listenToFollowingRealtime({ follower_user_id: user.user_id }));
+                        // Bài viết 
+                        await dispatch(getPostUsers({ field: "created_at", currentUserId: user.user_id }));
+                        // Yêu thích
+                        await dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: user.user_id }));
+                        // Theo dõi
+                        await dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user.user_id }));
+                        // Người theo dõi
+                        await dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: user.user_id }));
+                    }
+                    //tổng số biểu cảm
+                    //  dispatch(getTotalEmoji({ currentUserId: post.post_id}));
 
                 } catch (error) {
                     console.error("Error during data fetching: ", error);
@@ -151,7 +162,13 @@ const PersonScreen = ({ isAvatar }) => {
 
             fetchData();
         }
-    }, [isFocused, isFromAvatar, userPost.user_id, dataUser.user_id, userPost.achie_id, dataUser.achie_id, dispatch]);
+    }, [isFocused, isFromAvatar, user, dispatch]);
+    //xử lý xét dữ liệu vào user
+    useEffect(() => {
+        const currentUser = isFromAvatar ? userPost : dataUser;
+        //Chỉ cập nhật user khi thực sự cần:
+        if (currentUser !== user) setUser(currentUser);
+    }, [isFromAvatar, userPost, dataUser, user]);
 
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
@@ -170,11 +187,11 @@ const PersonScreen = ({ isAvatar }) => {
             <View >
                 <View style={styles.upperHeaderPlacehholder} />
                 <View style={styles.header}>
-                    <ImageBackground source={{ uri: isFromAvatar ? iUser.backgroundUser : dataUser.backgroundUser }} style={styles.imageBackground}>
+                    <ImageBackground source={{ uri: user.backgroundUser }} style={styles.imageBackground}>
                         <View style={styles.upperrHeader}>
                             <Animated.View style={[styles.avatarHeader, avatarHeaderAnimation, isFromAvatar && { marginLeft: '7%' }]}>
-                                <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={isFromAvatar ? iUser.imgUser : dataUser.imgUser} />
-                                <Text style={styles.avatarText}>{isFromAvatar ? iUser.username : dataUser.username}</Text>
+                                <AvatarEx size={appInfo.heightWindows * 0.035} round={90} url={user.imgUser} />
+                                <Text style={styles.avatarText}>{user.username}</Text>
                             </Animated.View>
                         </View>
                         {
@@ -214,12 +231,12 @@ const PersonScreen = ({ isAvatar }) => {
                         }}>
                             <Animated.View style={[styles.avatar, avatarAnimation]}>
                                 <AvatarEx
-                                    url={isFromAvatar ? iUser.imgUser : dataUser.imgUser}
+                                    url={user.imgUser}
                                     size={appInfo.widthWindows * 0.22}
                                     round={20}
                                     frame={userAchievement.nameAchie}
-                                    name={isFromAvatar ? iUser.username : dataUser.username} />
-                                <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{isFromAvatar ? iUser.username : dataUser.username}</Text>
+                                    name={user.username} />
+                                <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username.length > 20 ? user.username.slice(0, 20) : user.username}</Text>
                             </Animated.View>
 
 
@@ -279,8 +296,8 @@ const PersonScreen = ({ isAvatar }) => {
                                 name={'credit-card'}
                                 size={appInfo.heightWindows * 0.025}
                                 color={'#33363F'}
-                                text={'ID: ' + (isFromAvatar ? iUser.user_id : dataUser.user_id)}
-                                onPress={() => copyToClipboard(isFromAvatar ? iUser.user_id : dataUser.user_id)} />
+                                text={'ID: ' + (user.user_id)}
+                                onPress={() => copyToClipboard(user.user_id)} />
                             <IconComponent
                                 name={'user'}
                                 size={appInfo.heightWindows * 0.025}
@@ -297,7 +314,7 @@ const PersonScreen = ({ isAvatar }) => {
                             <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                         </View>
                         {/*  Tab Navigation */}
-                        <TabRecipe post={post} postFavourite={postFavourite} user={isFromAvatar ? iUser : dataUser} />
+                        <TabRecipe post={post} postFavourite={postFavourite} user={user} />
                     </View>
                 </ScrollView>
             </View>
@@ -343,7 +360,7 @@ const styles = StyleSheet.create({
         marginRight: 'auto',
         bottom: appInfo.heightWindows * 0.003,
         left: appInfo.widthWindows * 0.05,
-        alignItems: 'center',
+        alignItems: 'flex-start',
     },
     avatarHeader: {
         position: 'absolute',

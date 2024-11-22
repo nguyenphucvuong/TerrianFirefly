@@ -69,10 +69,11 @@ const TabRecipe = ({ post, postFavourite, user }) => {
               height: tabHeights[index] || 'auto',
               paddingBottom: appInfo.heightWindows * 0.08,
             }}
+            pointerEvents={index === activeTabIndex ? 'auto' : 'none'} // Chỉ tab đang hoạt động nhận sự kiện
           >
             <ScrollView
               scrollEnabled={false}
-              contentContainerStyle={{ paddingBottom: '38%' }}
+              contentContainerStyle={{ paddingBottom: appInfo.heightWindows * 0.15 }}
               onContentSizeChange={(contentWidth, contentHeight) =>
                 handleContentSizeChange(index, contentWidth, contentHeight)
               }

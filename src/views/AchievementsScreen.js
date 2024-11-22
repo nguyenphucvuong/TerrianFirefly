@@ -43,7 +43,7 @@ const AchievementsScreen = () => {
         dispatch(getAchievement());
     
     },[]);
-    console.log('achievement', achievement);
+    // console.log('achievement', achievement);
     // console.log('selectedId', selectedId);
     return (
         <View style={StyleGlobal.container}>

@@ -158,7 +158,7 @@ export const listenToFollowingRealtime = ({ follower_user_id }) => (dispatch) =>
             if (!querySnapshot.empty) {
                 // Lấy tất cả user_id của những người đã follow
                 const followedUserIds = querySnapshot.docs.map((doc) => doc.data().follower_user_id);
-                console.log('followedUserIds', followedUserIds);
+                //console.log('followedUserIds', followedUserIds);
 
                 if (followedUserIds.length > 0) {
                     // Tạo query để lấy dữ liệu của các user từ bảng user

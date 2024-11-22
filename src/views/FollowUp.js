@@ -1,5 +1,5 @@
 import { FlatList, View, TouchableOpacity, StyleSheet, Text, Image } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigation, useRoute } from '@react-navigation/native';
 //styles
@@ -9,9 +9,10 @@ import { appInfo } from '../constains/appInfo'
 //components
 import { AvatarEx, ButtonFunctionComponent } from '../component';
 //redux
-import {listenToFollowerRealtime } from '../redux/slices/FollowerSlice';
+import { createFollow } from "../redux/slices/FollowerSlice";
 const FollowUp = () => {
     const [isClick, setIsClick] = useState({}); // Lưu trạng thái cho từng item bằng id
+    const dispatch = useDispatch();
     //route
     const route = useRoute();
     // const followUp = route.params?.followUp ?? [];

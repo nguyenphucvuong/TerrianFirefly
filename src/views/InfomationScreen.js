@@ -83,9 +83,6 @@ const InfomationScreen = () => {
         hanndleDisPlay();
         console.log('aaaaaaaa');
         
-        //dispatch(getUser(user.email));
-        // const unsubscribe = dispatch(listenToUserRealtime(user.email));
-        // return () => unsubscribe();
     }, [user]);
 
 
@@ -96,14 +93,6 @@ const InfomationScreen = () => {
         setGender(user.gender);
         setAvatarImage(user.imgUser);
     }
-    // const handleSetPhone = (text) => {
-    //     setPhone(text);
-    //     setIsEditing(true);
-    // }
-    // const handleBlur = () => {
-    //     setIsEditing(false); // Đánh dấu kết thúc chỉnh sửa khi người dùng dừng nhập
-    //     // Gửi dữ liệu mới lên Firebase (nếu muốn)
-    // };
 
     //Gender
     const hanldeGender = (gender) => {
@@ -144,17 +133,10 @@ const InfomationScreen = () => {
                             name={'Chọn Ảnh Đại Diện'}
                             onPress={() => handleImagePickerPress()}
                             colorText={'#000000'} />
-                        {/* Chọn Thành Tựu */}
-                        <ButtonFunctionComponent
-                            style={styles.button}
-                            onPress={() => navigation.navigate('AchievementsScreen')}
-                            backgroundColor={'#D9D9D9'}
-                            name={'Chọn Thành Tựu'}
-                            colorText={'#000000'} />
                     </View>
                     <View style={{ marginTop: '3%' }}>
                         <Text style={StyleGlobal.textTitleContent}>Tên</Text>
-                        <InputComponents iconName={'user'} value={userName} onChangeText={(text) => setUserName(text)} maxLength={30} />
+                        <InputComponents iconName={'user'} value={userName} onChangeText={(text) => setUserName(text)} maxLength={20} />
                     </View>  
                     {user.numberPhone &&
                         <View style={{ marginTop: '3%' }}>

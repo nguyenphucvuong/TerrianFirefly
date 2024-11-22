@@ -25,7 +25,7 @@ import MoreOptionPostComponent from "./moreOptionBox/MoreOptionPostComponent";
 import YoutubePlayerComponent from "./YoutubePlayerComponent";
 import { TouchableOpacity } from "react-native";
 import { op } from "@tensorflow/tfjs";
-
+import { getUserAchievement, listenToUserAchievementRealtime } from '../redux/slices/AchievementSlice';
 
 
 const PostViewComponent = ({ post, user }) => {
@@ -39,6 +39,10 @@ const PostViewComponent = ({ post, user }) => {
     const userId = post.user_id; // Lấy user_id từ post
     // const [userPost, setUserPost] = useState(null);
     const userPost = useSelector((state) => state.user[userId]);
+    const userAchievement = useSelector((state) => state.achievement.userAchievement) || {};
+   // console.log('userAchievement',userAchievement);
+   // console.log('userPost',userPost);
+    
     // const [isFollow, setIsFollow] = useState(false);
     const follower = useSelector((state) => state.follower.follower);
     const isFollow = follower.some(f => f.user_id === post.user_id);
@@ -54,13 +58,16 @@ const PostViewComponent = ({ post, user }) => {
     //     handleGetUserPost();
     // }, [userId]);
 
-    useEffect(() => {
+    useEffect(() => { 
         if (!userPost) {
             // dispatch(getUserByField({ user_id: userId }));
             dispatch(startListeningUserByID({ user_id: userId }));
+            //Danh Hiệu
+            //  dispatch(listenToUserAchievementRealtime({ achie_id: userPost.achie_id }));
+            //  dispatch(getUserAchievement({ achie_id: userPost.achie_id }));
         }
     }, [userId]);
-
+ 
 
 
     const userPostCheck = () => {
@@ -154,7 +161,7 @@ const PostViewComponent = ({ post, user }) => {
                                     alignItems: "center",
                                 }}>
 
-                                <AvatarEx size={40} round={30} url={userPost.imgUser} frame={userPost.frame_user} />
+                                <AvatarEx size={40} round={30} url={userPost.imgUser} />
                                 <View
                                     style={{
                                         height: "100%",
@@ -164,7 +171,7 @@ const PostViewComponent = ({ post, user }) => {
                                         // backgroundColor: "red",
                                     }}
                                 >
-                                    <Text style={StyleGlobal.textName}>{userPost.username}</Text>
+                                    <Text style={StyleGlobal.textName}>{userPost.username.length > 20 ? userPost.username.slice(0,20) : userPost.username}</Text>
                                     <Text style={StyleGlobal.textInfo}>{handleTime({ timestamp: post.created_at })}</Text>
                                 </View>
                             </TouchableOpacity>

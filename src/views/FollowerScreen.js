@@ -1,5 +1,5 @@
 import { FlatList, View, TouchableOpacity, StyleSheet, Text, Image } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSelector, useDispatch } from "react-redux";
 //styles
@@ -10,21 +10,45 @@ import { appInfo } from '../constains/appInfo'
 import { AvatarEx, ButtonFunctionComponent } from '../component'
 //redux
 import { getUserFromFollowingUsers } from "../redux/slices/UserSlices";
+import { createFollow } from "../redux/slices/FollowerSlice";
 
 const FollowerScreen = () => {
-    const [isClick, setIsClick] = useState({}); // Lưu trạng thái cho từng item bằng id
+    const [isClick, setIsClick] = useState(false); // Lưu trạng thái cho từng item bằng id
     const followingUsers = useSelector((state) => state.follower.following);
+    const userID = useSelector((state) => state.user.user.user_id);
+    const dispatch = useDispatch();
     //su ly follower
-    const handleFollower = (item) => {
-        // Thay đổi trạng thái dựa trên id của item
-        setIsClick((prev) => ({
-            ...prev,
-            [item.id]: prev[item.id] === 'Followed' ? 'FollowBack' : 'Followed' 
-        }));
+    const handleFollower = (user) => {
+        // Đổi trạng thái
+        setIsClick((prev) => !prev);
+        //console.log('item',item);
+        
+        // Xử lý logic cập nhật theo dõi (có thể gọi API)
+        if (!isClick) {
+            console.log(`Đã theo dõi: ${isClick}`);
+            // Gọi API để thêm vào danh sách theo dõi
+            // const handleFollowUser = async () => {
+            //     await dispatch(createFollow({ follower_user_id: userID, user_id: user.user_id }));
+            //     // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+            // }
+            // handleFollowUser();
+        } else {
+            console.log(`Đã hủy theo dõi: ${isClick}`);
+            // Gọi API để xóa khỏi danh sách theo dõi
+        }
     };
+    const handleFollowButton = useCallback(() => {
+        const handleFollowUser = async () => {
+            await dispatch(createFollow({ follower_user_id: user.user_id, user_id: userId }));
+            // await dispatch(startListeningFollowers({ follower_user_id: user.user_id }));
+        }
+        handleFollowUser();
+    });
     //console.log('followingUsers', followingUsers);
     //console.log('isClick',isClick);
+    console.log('user',userID);
     
+
     return (
         <View style={StyleGlobal.container}>
             {followingUsers.length !== 0 ?
