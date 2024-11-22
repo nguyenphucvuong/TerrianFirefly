@@ -110,7 +110,7 @@ function RegisterScreen() {
         username: userName,
         numberPhone: "",
         email: email,
-        roleid: 1,
+        roleid: 0,
         imgUser:
           "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/avatar%2Favatar.jpg?alt=media&token=42cfc0ed-75cc-4feb-9a0f-19f6203643c5",
         gender: "",

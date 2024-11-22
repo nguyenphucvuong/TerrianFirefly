@@ -18,7 +18,7 @@ import ButtonFunctionComponent from "../component/ButtonFunctionComponent";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchHashtags, // Thêm import để lấy hashtag
+  getHashtag, // Thêm import để lấy hashtag
   addHashtagToFirestore,
   deleteHashtagFromFirestore,
 } from "../redux/slices/HashtagSlice";
@@ -41,11 +41,14 @@ const HashtagManagerScreen = () => {
   const dispatch = useDispatch();
   const colorPickerTextRef = useRef(null);
   const colorPickerBackgroundRef = useRef(null);
-  // Lắng nghe sự thay đổi từ Firestore khi component mount
-  useEffect(() => {
-    
-  }, [user.role_id]);
 
+
+  useEffect(() => {
+    const unsubscribeHashtag = getHashtag(dispatch);
+    return () => unsubscribeHashtag();
+  }, [dispatch]);
+
+  // Lắng nghe sự thay đổi từ Firestore khi component mount
   if (statusHashtag === "loading") {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }

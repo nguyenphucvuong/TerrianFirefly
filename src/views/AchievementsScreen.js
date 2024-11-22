@@ -22,8 +22,11 @@ const AchievementsScreen = () => {
     // const achievement = "";
     // const user = "";
     const dispatch = useDispatch();
-    //
-    const [isNickname, setNickname] = useState(user.nickname);
+    //tìm achie_id
+    const findAchievement = achievement.find(item => item.achie_id === user.achie_id);
+    //console.log('findAchievement',findAchievement);
+    
+    const [isNickname, setNickname] = useState(findAchievement.nickname);
     //Xử lý chọn nickname
     const hanldeSelectAchievement = (item) => {
         try {
@@ -43,8 +46,8 @@ const AchievementsScreen = () => {
         dispatch(getAchievement());
     
     },[]);
-    // console.log('achievement', achievement);
-    // console.log('selectedId', selectedId);
+    console.log('achievement', achievement);
+    console.log('isNickname', isNickname);
     return (
         <View style={StyleGlobal.container}>
             {

@@ -12,6 +12,7 @@ import {
   getCountFromServer,
   updateDoc,
   where,
+  onSnapshot,
 } from "firebase/firestore";
 import { db, storage } from "../../firebase/FirebaseConfig"; // Firebase config
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase Storage
@@ -27,6 +28,8 @@ const initialState = {
   postByField: [],
   postByUser: [],
   postFavourite: [],
+  postReport: [],
+  loading: false,
 };
 
 // Tạo async thunk để thêm dữ liệu lên Firestore
@@ -320,14 +323,14 @@ const getFavouriteUserIds = async ({ currentUserId }) => {
   try {
     const favouriteQuery = query(
       collection(db, "Favorite"),
-      where("user_id", "==", currentUserId)  // Lấy bài viết yêu thích của currentUserId
+      where("user_id", "==", currentUserId) // Lấy bài viết yêu thích của currentUserId
     );
 
     const favouriteSnapshot = await getDocs(favouriteQuery);
     // Lấy danh sách post_id từ các bài viết mà người dùng yêu thích
     //console.log('favouriteSnapshot', favouriteSnapshot.docs.map((doc) => doc.data().post_id));
-    
-    return favouriteSnapshot.docs.map((doc) => doc.data().post_id);  // Trả về post_id của bài viết yêu thích
+
+    return favouriteSnapshot.docs.map((doc) => doc.data().post_id); // Trả về post_id của bài viết yêu thích
   } catch (error) {
     console.error("Error fetching favourite post IDs: ", error);
     throw error;
@@ -467,11 +470,66 @@ export const updatePostsByField = createAsyncThunk(
   }
 );
 
+export const getRealtimePostsByStatus = createAsyncThunk(
+  "data/getRealtimePostsByStatus",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const postsQuery = query(
+        collection(db, "Posts"),
+        where("status_post_id", "!=", 0)
+      );
+
+      // Lắng nghe thay đổi từ Firestore
+      const unsubscribe = onSnapshot(postsQuery, async (querySnapshot) => {
+        try {
+          const postsWithUser = await Promise.all(
+            querySnapshot.docs.map(async (doc) => {
+              const post = { id: doc.id, ...doc.data() };
+
+
+              // Lấy thông tin người dùng từ user_id
+              const userQuery = query(
+                collection(db, "user"),
+                where("user_id", "==", post.user_id)
+              );
+              const userSnapshot = await getDocs(userQuery);
+
+              if (!userSnapshot.empty) {
+                const user = userSnapshot.docs[0].data();
+                post.user = { id: userSnapshot.docs[0].id, ...user };
+              } else {
+                post.user = null;
+              }
+
+              return post;
+            })
+          );
+
+          // Dispatch chỉ dữ liệu tuần tự hóa, không chứa hàm
+          dispatch(setPostsWithUser(postsWithUser));
+        } catch (error) {
+          rejectWithValue(error.message);
+        }
+      });
+      
+      return () => unsubscribe(); 
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+
 // Tạo slice cho Post
 export const PostSlice = createSlice({
   name: "post",
   initialState,
-  reducers: {},
+  reducers: {
+    setPostsWithUser: (state, action) => {
+      state.postReport = action.payload;  // Cập nhật dữ liệu vào postReport
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Xử lý khi thêm dữ liệu thành công
@@ -586,10 +644,24 @@ export const PostSlice = createSlice({
       .addCase(getPostUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      
+      // Xử lý trạng thái khi lắng nghe thay đổi bài viết thành công
+      .addCase(getRealtimePostsByStatus.pending, (state) => {
+        state.loading = true;  // Đang lắng nghe
+      })
+      .addCase(getRealtimePostsByStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("Updated posts:", action.payload); // Kiểm tra dữ liệu nhận được
+        // Không cần cập nhật postReport trong action.fulfilled nữa vì đã được xử lý trong setPostsWithUser
+      })
+      .addCase(getRealtimePostsByStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const {} = PostSlice.actions;
+export const { setPostsWithUser } = PostSlice.actions;
 
 export default PostSlice.reducer;

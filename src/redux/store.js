@@ -27,6 +27,13 @@ export const store = configureStore({
                 event: EventSlice,
                 noti: NotiSlice,
         },
+        middleware: (getDefaultMiddleware) =>
+                getDefaultMiddleware({
+                  serializableCheck: {
+                    ignoredActions: ['data/getRealtimePostsByStatus/fulfilled', 'data/listenToUserWithStatus/fulfilled'],
+                    ignoredPaths: ['payload'],
+                  },
+                }),
 })
 
 

@@ -25,6 +25,8 @@ import {
   EventManagementScreen,
   AddEditEventScreen,
   PersonScreen,
+  SplashScreenComponent,
+  
 } from "../views";
 
 import IndexTab from "../tabs/indexTab";
@@ -63,6 +65,11 @@ const StackNavigator = () => {
       <Stack.Screen
         name="WellcomScreen"
         component={WellcomScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SplashScreenComponent"
+        component={SplashScreenComponent}
         options={{ headerShown: false }}
       />
       <Stack.Screen
