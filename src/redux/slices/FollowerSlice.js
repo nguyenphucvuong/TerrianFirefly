@@ -102,213 +102,250 @@ export const startListeningFollowers = ({ follower_user_id }) => (dispatch) => {
 
     return unsubscribe; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
 };
-export const listenToFollowerRealtime = ({ follower_user_id }) => (dispatch) => {
-    // Lấy query từ bảng Follower để tìm các follower_user_id tương ứng
-    const followerQuery = query(
-        collection(db, "Follower"),
-        where('follower_user_id', "==", follower_user_id)
-    );
 
-    const unsubscribe = onSnapshot(
-        followerQuery,
-        async (querySnapshot) => {
-            if (!querySnapshot.empty) {
-                // Lấy tất cả user_id của những người đã follow
-                const followedUserIds = querySnapshot.docs.map((doc) => doc.data().user_id);
+//     // Lấy query từ bảng Follower để tìm các follower_user_id tương ứng
+//     const followerQuery = query(
+//         collection(db, "Follower"),
+//         where('user_id', "==", follower_user_id)
+//     );
 
-                if (followedUserIds.length > 0) {
-                    // Tạo query để lấy dữ liệu của các user từ bảng user
-                    const userQuery = query(
-                        collection(db, "user"),
-                        where("user_id", "in", followedUserIds)
-                    );
+//     const unsubscribe = onSnapshot(
+//         followerQuery,
+//         async (querySnapshot) => {
+//             if (!querySnapshot.empty) {
+//                 // Lấy tất cả user_id của những người đã follow
+//                 const followedUserIds = querySnapshot.docs.map((doc) => doc.data().follower_user_id);
+//                 //console.log('followedUserIds', followedUserIds);
 
-                    // Lắng nghe sự thay đổi thời gian thực từ bảng user
-                    const userSnapshot = await getDocs(userQuery);
+//                 if (followedUserIds.length > 0) {
+//                     // Tạo query để lấy dữ liệu của các user từ bảng user
+//                     const userQuery = query(
+//                         collection(db, "user"),
+//                         where("user_id", "in", followedUserIds)
+//                     );
 
-                    if (!userSnapshot.empty) {
-                        const followersData = userSnapshot.docs.map((doc) => ({
-                            id: doc.id,
-                            ...doc.data(),
-                        }));
+//                     // Lắng nghe sự thay đổi thời gian thực từ bảng user
+//                     const userSnapshot = await getDocs(userQuery);
+//                     if (!userSnapshot.empty) {
+//                         const followersData = userSnapshot.docs.map((doc) => ({
+//                             id: doc.id,
+//                             ...doc.data(),
+//                         }));
 
-                        // Gửi dữ liệu followers vào Redux
-                        dispatch(setFollowers(followersData));
-                    }
-                }
-            }
-        },
-        (error) => {
-            console.error("Lỗi trong listener thời gian thực:", error);
-        }
-    );
+//                         // Gửi dữ liệu following vào Redux
+//                         dispatch(setFollowing(followersData));
+//                     }
+//                 }
+//             }
+//         },
+//         (error) => {
+//             console.error("Lỗi trong listener thời gian thực:", error);
+//         }
+//     );
 
-    return unsubscribe; // Trả về hàm unsubscribe để dừng listener khi không cần thiết
-};
-export const listenToFollowingRealtime = ({ follower_user_id }) => (dispatch) => {
-    // Lấy query từ bảng Follower để tìm các follower_user_id tương ứng
-    const followerQuery = query(
-        collection(db, "Follower"),
-        where('user_id', "==", follower_user_id)
-    );
+//     return unsubscribe; // Trả về hàm unsubscribe để dừng listener khi không cần thiết
+// };
+// // Hàm lấy danh sách user ID đã được follow
+// const getFollowedUserIds = async ({ currentUserId }) => {
+//     //console.log('currentUserId', currentUserId);
 
-    const unsubscribe = onSnapshot(
-        followerQuery,
-        async (querySnapshot) => {
-            if (!querySnapshot.empty) {
-                // Lấy tất cả user_id của những người đã follow
-                const followedUserIds = querySnapshot.docs.map((doc) => doc.data().follower_user_id);
-                //console.log('followedUserIds', followedUserIds);
+//     const followerQuery = query(
+//         collection(db, "Follower"),
+//         where("follower_user_id", "==", currentUserId)
+//     );
+//     const followerSnapshot = await getDocs(followerQuery);
+//     //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
 
-                if (followedUserIds.length > 0) {
-                    // Tạo query để lấy dữ liệu của các user từ bảng user
-                    const userQuery = query(
-                        collection(db, "user"),
-                        where("user_id", "in", followedUserIds)
-                    );
+//     return followerSnapshot.docs.map((doc) => doc.data().user_id);
+// };
 
-                    // Lắng nghe sự thay đổi thời gian thực từ bảng user
-                    const userSnapshot = await getDocs(userQuery);
-                    if (!userSnapshot.empty) {
-                        const followersData = userSnapshot.docs.map((doc) => ({
-                            id: doc.id,
-                            ...doc.data(),
-                        }));
+// // Hàm lấy bài đăng từ những người dùng đã được follow
+// export const getUserFromFollowedUsers = createAsyncThunk(
+//     "data/getUserFromFollowedUsers",
+//     async ({ field, currentUserId }, { getState, dispatch }) => {
+//         try {
+//             // Lấy danh sách user ID đã được follow
+//             const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
+//             // console.log('followedUserIds',followedUserIds);
 
-                        // Gửi dữ liệu following vào Redux
-                        dispatch(setFollowing(followersData));
-                    }
-                }
-            }
-        },
-        (error) => {
-            console.error("Lỗi trong listener thời gian thực:", error);
-        }
-    );
+//             // Nếu không có user nào được follow, trả về mảng rỗng
+//             if (followedUserIds.length === 0) {
+//                 return [];
+//             }
+//             // console.log('followedUserIds2',followedUserIds); 
+//             // Tạo query lấy bài đăng từ những người dùng đã được follow
+//             let userQuery = query(
+//                 collection(db, "user"),
+//                 where("user_id", "in", followedUserIds)
+//             );
+//             // console.log('userQuery',userQuery);
 
-    return unsubscribe; // Trả về hàm unsubscribe để dừng listener khi không cần thiết
-};
+
+//             const querySnapshot = await getDocs(userQuery);
+//             // console.log('querySnapshot1',querySnapshot);
+
+//             // Trả về mảng rỗng nếu không có user nào
+//             if (querySnapshot.empty) { 
+//                 console.log('empty');
+//                 return [];
+//             }
+//             // Trả về danh sách followers
+//             const follower = querySnapshot.docs.map((doc) => ({
+//                 id: doc.id,
+//                 ...doc.data(),
+//             }));
+//             //console.log('followerfollower',follower);
+
+//             // Gửi dữ liệu following vào Redux
+//             dispatch(setFollowers(follower));
+//             // console.log('follower',follower);
+
+//             // return {
+//             //     follower,
+//             // };
+//         } catch (error) {
+//             console.error("Error fetching user from followed users: ", error);
+//             throw error;
+//         }
+//     }
+// );
 // Hàm lấy danh sách user ID đã được follow
-const getFollowedUserIds = async ({ currentUserId }) => {
-    //console.log('currentUserId', currentUserId);
+// const getFollowingUsersIds = async ({ currentUserId }) => {
+//     //console.log('currentUserId', currentUserId);
 
-    const followerQuery = query(
-        collection(db, "Follower"),
-        where("follower_user_id", "==", currentUserId)
-    );
-    const followerSnapshot = await getDocs(followerQuery);
-    //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
+//     const followerQuery = query(
+//         collection(db, "Follower"),
+//         where("user_id", "==", currentUserId)
+//     );
+//     const followerSnapshot = await getDocs(followerQuery);
+//     //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().follower_user_id));
+//     //lấy danh sách follower_user_id từ user_id
+//     return followerSnapshot.docs.map((doc) => doc.data().follower_user_id);
+// };
+// // Hàm lấy người dùng từ những người dùng đã follow
+// export const getUserFromFollowingUsers = createAsyncThunk(
+//     "data/getUserFromFollowingUsers",
+//     async ({ field, currentUserId }, { getState }) => {
+//         try {
+//             // Lấy danh sách user ID đã được follow
+//             const followedUserIds = await getFollowingUsersIds({ currentUserId: currentUserId });
+//             //console.log('followedUserIds',followedUserIds);
 
-    return followerSnapshot.docs.map((doc) => doc.data().user_id);
-};
-
-// Hàm lấy bài đăng từ những người dùng đã được follow
-export const getUserFromFollowedUsers = createAsyncThunk(
-    "data/getUserFromFollowedUsers",
-    async ({ field, currentUserId }, { getState }) => {
-        try {
-            // Lấy danh sách user ID đã được follow
-            const followedUserIds = await getFollowedUserIds({ currentUserId: currentUserId });
-            // console.log('followedUserIds',followedUserIds);
-
-            // Nếu không có user nào được follow, trả về mảng rỗng
-            if (followedUserIds.length === 0) {
-                return [];
-            }
-            // console.log('followedUserIds2',followedUserIds); 
-            // Tạo query lấy bài đăng từ những người dùng đã được follow
-            let userQuery = query(
-                collection(db, "user"),
-                where("user_id", "in", followedUserIds)
-            );
-            // console.log('userQuery',userQuery);
+//             // Nếu không có user nào được follow, trả về mảng rỗng
+//             if (followedUserIds.length === 0) {
+//                 return [];
+//             }
+//             // console.log('followedUserIds2',followedUserIds); 
+//             // Tạo query lấy bài đăng từ những người dùng đã được follow
+//             let userQuery = query(
+//                 collection(db, "user"),
+//                 where("user_id", "in", followedUserIds)
+//             );
+//             //console.log('userQuery',userQuery);
 
 
-            const querySnapshot = await getDocs(userQuery);
-            // console.log('querySnapshot1',querySnapshot);
+//             const querySnapshot = await getDocs(userQuery);
+//             // console.log('querySnapshot1',querySnapshot);
 
-            // Trả về mảng rỗng nếu không có user nào
-            if (querySnapshot.empty) {
-                console.log('empty');
-                return [];
-            }
-            // Trả về danh sách followers
-            const follower = querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            //console.log('followerfollower',follower);
+//             // Trả về mảng rỗng nếu không có user nào
+//             if (querySnapshot.empty) {
+//                 console.log('empty');
+//                 return [];
+//             }
+//             const following = querySnapshot.docs.map((doc) => ({
+//                 id: doc.id,
+//                 ...doc.data(),
+//             }));
+//             // console.log('following',following);
 
-            return follower;
-            // console.log('follower',follower);
+//             return following;
 
-            // return {
-            //     follower,
-            // };
-        } catch (error) {
-            console.error("Error fetching user from followed users: ", error);
-            throw error;
-        }
-    }
-);
-// Hàm lấy danh sách user ID đã được follow
-const getFollowingUsersIds = async ({ currentUserId }) => {
-    //console.log('currentUserId', currentUserId);
+//         } catch (error) {
+//             console.error("Error fetching user from followed users: ", error);
+//             throw error;
+//         }
+//     }
+// );
+// Hàm lấy và lắng nghe người dùng từ những người dùng đã follow
+export const startListeningFollowingUsers = ({ currentUserId }) => (dispatch) => {
+    if (!currentUserId) return;
 
     const followerQuery = query(
         collection(db, "Follower"),
         where("user_id", "==", currentUserId)
     );
-    const followerSnapshot = await getDocs(followerQuery);
-    //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().follower_user_id));
-    //lấy danh sách follower_user_id từ user_id
-    return followerSnapshot.docs.map((doc) => doc.data().follower_user_id);
-};
-// Hàm lấy người dùng từ những người dùng đã follow
-export const getUserFromFollowingUsers = createAsyncThunk(
-    "data/getUserFromFollowingUsers",
-    async ({ field, currentUserId }, { getState }) => {
-        try {
-            // Lấy danh sách user ID đã được follow
-            const followedUserIds = await getFollowingUsersIds({ currentUserId: currentUserId });
-            //console.log('followedUserIds',followedUserIds);
 
-            // Nếu không có user nào được follow, trả về mảng rỗng
-            if (followedUserIds.length === 0) {
-                return [];
+    const unsubscribe = onSnapshot(followerQuery, async (querySnapshot) => {
+        if (!querySnapshot.empty) {
+            // Lấy tất cả user_id của những người đã follow
+            const followingUserIds = querySnapshot.docs.map((doc) => doc.data().follower_user_id);
+            
+            if (followingUserIds.length > 0) {
+                // Tạo query để lấy dữ liệu của các user từ bảng user
+                const userQuery = query(
+                    collection(db, "user"),
+                    where("user_id", "in", followingUserIds)
+                );
+
+                const userSnapshot = await getDocs(userQuery);
+
+                if (!userSnapshot.empty) {
+                    const followingsData = userSnapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }));
+
+                    // Gửi dữ liệu followings vào Redux
+                    dispatch(setFollowing(followingsData));
+                }
             }
-            // console.log('followedUserIds2',followedUserIds); 
-            // Tạo query lấy bài đăng từ những người dùng đã được follow
-            let userQuery = query(
-                collection(db, "user"),
-                where("user_id", "in", followedUserIds)
-            );
-            //console.log('userQuery',userQuery);
-
-
-            const querySnapshot = await getDocs(userQuery);
-            // console.log('querySnapshot1',querySnapshot);
-
-            // Trả về mảng rỗng nếu không có user nào
-            if (querySnapshot.empty) {
-                console.log('empty');
-                return [];
-            }
-            const following = querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            // console.log('following',following);
-
-            return following;
-           
-        } catch (error) {
-            console.error("Error fetching user from followed users: ", error);
-            throw error;
         }
-    }
-);
+    }, (error) => {
+        console.error('Error fetching following: ', error);
+    });
 
+    return unsubscribe; // Trả về hàm unsubscribe để dừng lắng nghe khi không cần thiết
+};
+// Hàm lấy và lắng nghe dữ liệu người dùng theo ID đã follow
+export const startListeningFollowedUsers = ({ currentUserId }) => (dispatch) => {
+    if (!currentUserId) return;
+
+    const followerQuery = query(
+        collection(db, "Follower"),
+        where("follower_user_id", "==", currentUserId)
+    );
+
+    const unsubscribe = onSnapshot(followerQuery, async (querySnapshot) => {
+        if (!querySnapshot.empty) {
+            // Lấy tất cả user_id của những người đã follow
+            const followedUserIds = querySnapshot.docs.map((doc) => doc.data().user_id);
+
+            if (followedUserIds.length > 0) {
+                // Tạo query để lấy dữ liệu của các user từ bảng user
+                const userQuery = query(
+                    collection(db, "user"),
+                    where("user_id", "in", followedUserIds)
+                );
+
+                const userSnapshot = await getDocs(userQuery);
+
+                if (!userSnapshot.empty) {
+                    const followersData = userSnapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }));
+
+                    // Gửi dữ liệu followers vào Redux
+                    dispatch(setFollowers(followersData));
+                }
+            }
+        }
+    }, (error) => {
+        console.error('Error fetching follower: ', error);
+    });
+
+    return unsubscribe; // Trả về hàm unsubscribe để dừng lắng nghe khi không cần thiết
+};
 export const FollowerSlice = createSlice({
     name: 'follower',
     initialState,
@@ -374,34 +411,6 @@ export const FollowerSlice = createSlice({
             .addCase(deleteFollow.rejected, (state, action) => {
                 state.error = action.error.message;
                 state.status = 'failed';
-            })
-            //getUserFromFollowedUsers
-            .addCase(getUserFromFollowedUsers.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(getUserFromFollowedUsers.fulfilled, (state, action) => {
-                state.loading = false;
-                state.follower = action.payload;
-                state.status = "succeeded";
-            })
-            .addCase(getUserFromFollowedUsers.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.error.message;
-            })
-            //getUserFromFollowingUsers
-            .addCase(getUserFromFollowingUsers.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(getUserFromFollowingUsers.fulfilled, (state, action) => {
-                state.loading = false;
-                state.following = action.payload;
-                state.status = "succeeded";
-            })
-            .addCase(getUserFromFollowingUsers.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.error.message;
             })
     },
 });

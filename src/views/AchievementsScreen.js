@@ -1,13 +1,8 @@
 import { View, FlatList, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native'
 import React, { useMemo, useRef, useEffect, useState } from 'react'
-import {
-    BottomSheetModal,
-    BottomSheetView,
-    BottomSheetModalProvider,
-} from '@gorhom/bottom-sheet';
 import { useSelector, useDispatch } from "react-redux";
 //components
-import { AvatarEx, IconComponent, ButtonBackComponent, ButtonFunctionComponent, SkeletonComponent } from '../component';
+import {IconComponent, SkeletonComponent } from '../component';
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 // Lấy chiều cao màn hình để tính toán
@@ -26,7 +21,7 @@ const AchievementsScreen = () => {
     const findAchievement = achievement.find(item => item.achie_id === user.achie_id);
     //console.log('findAchievement',findAchievement);
     
-    const [isNickname, setNickname] = useState(findAchievement.nickname);
+    const [isNickname, setNickname] = useState(findAchievement?.nickname);
     //Xử lý chọn nickname
     const hanldeSelectAchievement = (item) => {
         try {
@@ -46,8 +41,8 @@ const AchievementsScreen = () => {
         dispatch(getAchievement());
     
     },[]);
-    console.log('achievement', achievement);
-    console.log('isNickname', isNickname);
+    //console.log('achievement', achievement);
+    // console.log('isNickname', isNickname);
     return (
         <View style={StyleGlobal.container}>
             {

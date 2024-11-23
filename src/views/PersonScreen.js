@@ -21,10 +21,10 @@ import TabRecipe from '../component/TabRecipe';
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
 //redux
-import { listenToUserRealtime, listenToUserRealtime2, listenToUserRealtimeFollowed, listenToUserRealtimeFollowing } from '../redux/slices/UserSlices';
+import { listenToUserRealtime, listenToUserRealtime2, startListeningFavourite, startListeningHashtag } from '../redux/slices/UserSlices';
 import { getPostUsers, getPostsFromFavouriteUsers } from '../../src/redux/slices/PostSlice';
-import { getUserFromFollowedUsers, getUserFromFollowingUsers, listenToFollowerRealtime, listenToFollowingRealtime } from '../redux/slices/FollowerSlice';
-import { getUserAchievement, listenToUserAchievementRealtime } from '../redux/slices/AchievementSlice';
+import { startListeningFollowedUsers, startListeningFollowingUsers } from '../redux/slices/FollowerSlice';
+import { getUserAchievement, listenToUserAchievementRealtime, startListeningAchieByID } from '../redux/slices/AchievementSlice';
 // import { getTotalEmoji } from '../redux/slices/EmojiSlice';
 
 const Tab = createMaterialTopTabNavigator();
@@ -35,26 +35,30 @@ const LOWER_HEADER_HEIGHT = appInfo.heightWindows * 0.14;
 
 const PersonScreen = ({ isAvatar }) => {
     const navigation = useNavigation();
+    const dispatch = useDispatch();
+    const isFocused = useIsFocused(); // Kiểm tra khi tab được focus
+    const [prevAchieId, setPrevAchieId] = useState(null); // Lưu achie_id cũ
+    const [prevUser_id, setPrevUser_id] = useState(null); // Lưu user_id cũ
+
+    //route
+    const route = useRoute();
+    const userPost = route.params?.userPost ?? {};
+    const isFromAvatar = route.params?.isFromAvatar ?? isAvatar;
     //firebase
     const followUp = useSelector((state) => state.follower.follower);
     const followingUsers = useSelector((state) => state.follower.following);
     const dataUser = useSelector((state) => state.user.user);
     const iUser = useSelector((state) => state.user.iUser) || {};
     const post = useSelector((state) => state.post.postByUser);
-    const postFavourite = useSelector((state) => state.post.postFavourite);
-    const userAchievement = useSelector((state) => state.achievement.userAchievement) || {};
+    const postFavourite = useSelector((state) => state.user.postFavourite);
     const totalEmoji = useSelector((state) => state.emoji.totalEmoji) || {};
-    const dispatch = useDispatch();
-    const isFocused = useIsFocused(); // Kiểm tra khi tab được focus
-    //route
-    const route = useRoute();
-    const userPost = route.params?.userPost ?? {};
-    const isFromAvatar = route.params?.isFromAvatar ?? isAvatar;
-
+    const userHashtag = useSelector((state) => state.user.userHashtag);
+    
+    //
     const [user, setUser] = useState(dataUser);
     const follower = useSelector(state => state.follower.follower);
     const isFlag = follower.some(f => f.user_id === userPost.user_id);
-
+    const userAchievement = useSelector((state) => state.achievement[user?.achie_id]) || null;
     //log
     //console.log('dataUser', dataUser);
     //console.log('iUser', iUser);
@@ -64,8 +68,11 @@ const PersonScreen = ({ isAvatar }) => {
     // console.log('totalEmoji',totalEmoji);
     //console.log('userPost',userPost);
     // console.log('isFromAvatar', isFromAvatar);
-
+    //console.log('prevUser_id', prevUser_id);
+    // console.log('prevAchieId',prevAchieId);
     //console.log('user', user);
+    // console.log('postFavourite', postFavourite);
+    //console.log('userHashtag', userHashtag);
 
     const handleFollowButton = useCallback(() => {
         const handleFollowUser = async () => {
@@ -116,53 +123,45 @@ const PersonScreen = ({ isAvatar }) => {
             extrapolate: 'clamp',
         }),
     };
-    //BottomSheet
-    const snapPoints = useMemo(() => ['30%'], []);
-    const bottomSheetModalRef = useRef(null);
-    const handleManagement = () => {
-        bottomSheetModalRef.current?.present();
-    }
-    const onClose = () => {
-
-    }
     useEffect(() => {
-        if (isFocused) {
-            const fetchData = async ()  => {
-                try {
-                    // Kiểm tra nếu đang từ avatar, lấy thông tin người dùng
-                    if (isFocused && !dataUser) {
-                        await dispatch(listenToUserRealtime2(user.email));
-                    }
-                    if (user.achie_id) {
-                        //Danh Hiệu
-                        await dispatch(listenToUserAchievementRealtime({ achie_id: user.achie_id }));
-                        await dispatch(getUserAchievement({ achie_id: user.achie_id }));
-                    }
-                    if (user.user_id) {
-                        //lắng nghe realtime về followers
-                        await dispatch(listenToFollowerRealtime({ follower_user_id: user.user_id }));
-                        //lắng nghe realtime về following
-                        await dispatch(listenToFollowingRealtime({ follower_user_id: user.user_id }));
-                        // Bài viết 
-                        await dispatch(getPostUsers({ field: "created_at", currentUserId: user.user_id }));
-                        // Yêu thích
-                        await dispatch(getPostsFromFavouriteUsers({ field: "created_at", currentUserId: user.user_id }));
-                        // Theo dõi
-                        await dispatch(getUserFromFollowedUsers({ field: "created_at", currentUserId: user.user_id }));
-                        // Người theo dõi
-                        await dispatch(getUserFromFollowingUsers({ field: "created_at", currentUserId: user.user_id }));
-                    }
-                    //tổng số biểu cảm
-                    //  dispatch(getTotalEmoji({ currentUserId: post.post_id}));
+        if (!isFocused) return;
 
-                } catch (error) {
-                    console.error("Error during data fetching: ", error);
+        const fetchData = async () => {
+            try {
+                // Kiểm tra nếu đang từ avatar, lấy thông tin người dùng
+
+                // await dispatch(listenToUserRealtime2(user.email));
+
+                // Kiểm tra achie_id có thay đổi không
+                if (user?.achie_id !== prevAchieId) {
+                    // Chỉ dispatch khi achie_id thay đổi
+                    console.log('ccccccccccccc');
+                    //Danh Hiệu
+                    dispatch(startListeningAchieByID({ achie_id: user?.achie_id }));
+                    setPrevAchieId(user?.achie_id); // Cập nhật achie_id cũ
                 }
-            };
+                
+                // Bài viết 
+                await dispatch(getPostUsers({ field: "created_at", currentUserId: user.user_id }));
+                // Yêu thích
+                await dispatch(startListeningFavourite({ field: "created_at", currentUserId: user.user_id }));
+                //Chủ đề
+                await dispatch(startListeningHashtag({ field: "created_at", currentUserId: user.user_id }));
 
-            fetchData();
-        }
-    }, [isFocused, isFromAvatar, user, dispatch]);
+                // Theo dõi
+                await dispatch(startListeningFollowedUsers({ field: "created_at", currentUserId: user.user_id }));
+                // Người theo dõi
+                await dispatch(startListeningFollowingUsers({ field: "created_at", currentUserId: user.user_id }));
+                //tổng số biểu cảm
+                //  dispatch(getTotalEmoji({ currentUserId: post.post_id}));
+
+            } catch (error) {
+                console.error("Error during data fetching: ", error);
+            }
+        };
+
+        fetchData();
+    }, [isFocused, isFromAvatar, user, prevAchieId, user.user_id, dispatch]);
     //xử lý xét dữ liệu vào user
     useEffect(() => {
         const currentUser = isFromAvatar ? userPost : dataUser;
@@ -234,7 +233,7 @@ const PersonScreen = ({ isAvatar }) => {
                                     url={user.imgUser}
                                     size={appInfo.widthWindows * 0.22}
                                     round={20}
-                                    frame={userAchievement.nameAchie}
+                                    frame={userAchievement?.nameAchie}
                                     name={user.username} />
                                 <Text style={[StyleGlobal.textTitleContent, { marginTop: '3%' }]}>{user.username.length > 20 ? user.username.slice(0, 20) : user.username}</Text>
                             </Animated.View>
@@ -302,7 +301,7 @@ const PersonScreen = ({ isAvatar }) => {
                                 name={'user'}
                                 size={appInfo.heightWindows * 0.025}
                                 color={'#33363F'}
-                                text={userAchievement.nickname}
+                                text={userAchievement?.nickname}
                                 onPress={() => navigation.navigate('AchievementsScreen')}
                                 disabled={isFromAvatar} />
                         </View>
@@ -314,7 +313,7 @@ const PersonScreen = ({ isAvatar }) => {
                             <StatisticsComponent quantity={0} name={'Lượt Thích'} />
                         </View>
                         {/*  Tab Navigation */}
-                        <TabRecipe post={post} postFavourite={postFavourite} user={user} />
+                        <TabRecipe post={post} postFavourite={postFavourite} user={user} hashtag={userHashtag} />
                     </View>
                 </ScrollView>
             </View>

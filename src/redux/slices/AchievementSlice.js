@@ -8,7 +8,7 @@ const initialState = {
     userAchievement: null,
     statusAchievement: 'idle',
     error: null,
-}; 
+};
 
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
 export const getAchievement = createAsyncThunk('data/getAchievement', async () => {
@@ -25,55 +25,44 @@ export const getAchievement = createAsyncThunk('data/getAchievement', async () =
         throw error;
     }
 });
-// Thiết lập listener thời gian thực cho dữ liệu người dùng
-export const listenToUserAchievementRealtime = (achie_id) => (dispatch) => {
-    const q = query(collection(db, "Achievements"), where("achie_id", "==", achie_id));
 
-    const unsubscribe = onSnapshot(
-        q,
-        (querySnapshot) => {
-            if (!querySnapshot.empty) {
-                const userData = {
-                    id: querySnapshot.docs[0].id,
-                    ...querySnapshot.docs[0].data(),
-                };
-                //console.log('userData',userData);
-                
-                dispatch(setUserAchievement(userData));
-            }
-        },
-        (error) => {
-            console.error("Error in realtime listener:", error);
-        }
+export const startListeningAchieByID = ({ achie_id }) => (dispatch) => {
+    if (!achie_id) return;
+
+    //console.log('achie_id',achie_id);
+
+    const followerQuery = query(
+        collection(db, "Achievements"),
+        where("achie_id", "==", achie_id)
     );
-
-    return unsubscribe; // Trả về hàm unsubscribe để có thể ngừng listener khi không cần thiết
-};
-export const getUserAchievement = createAsyncThunk('data/getUserAchievement', async ({ achie_id }) => {
-    try {
-        const q = query(collection(db, "Achievements"), where("achie_id", "==", achie_id));
-        const querySnapshot = await getDocs(q);
-
-        const achievementData = {
+    const unsubscribe = onSnapshot(followerQuery, (querySnapshot) => {
+        // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
+        const achieById = {
             id: querySnapshot.docs[0].id,
             ...querySnapshot.docs[0].data(),
         };
-        //console.log('achievementData', achievementData);
+        //console.log("userById00", userById)
+        dispatch(setAchieById(achieById));
 
-        return achievementData; // Trả về danh sách bài đăng
-    } catch (error) {
-        console.error('Error fetching posts: ', error);
-        throw error;
-    }
-});
+        // console.log("followers", followers)
+    }, (error) => {
+        console.error('Error fetching follower: ', error);
+    });
+
+    return unsubscribe; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
+};
 // Tạo slice cho Post
 export const AchievementSlice = createSlice({
     name: 'achievement',
     initialState,
     reducers: {
-        setUserAchievement: (state, action) => {
-            state.userAchievement = action.payload;
-            state.errorUser = null; // Reset lỗi khi có dữ liệu người dùng mới
+        // setUserAchievement: (state, action) => {
+        //     state.userAchievement = action.payload;
+        //     state.errorUser = null; // Reset lỗi khi có dữ liệu người dùng mới
+        // },
+        setAchieById: (state, action) => {
+            state[action.payload.achie_id] = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -91,21 +80,21 @@ export const AchievementSlice = createSlice({
                 state.statusAchievement = 'failed'; // Đánh dấu không thành công
             })
             //
-            .addCase(getUserAchievement.fulfilled, (state, action) => {
-                state.userAchievement = action.payload; // Cập nhật danh sách
-                state.statusAchievement = 'succeeded'; // Đánh dấu thành công
-            })
-            .addCase(getUserAchievement.pending, (state) => {
-                state.statusAchievement = 'loading'; // Đánh dấu trạng thái đang tải
-            })
-            .addCase(getUserAchievement.rejected, (state, action) => {
-                state.error = action.error.message; // lưu lỗi
-                state.statusAchievement = 'failed'; // Đánh dấu không thành công
-            });
+            // .addCase(getUserAchievement.fulfilled, (state, action) => {
+            //     state.userAchievement = action.payload; // Cập nhật danh sách
+            //     state.statusAchievement = 'succeeded'; // Đánh dấu thành công
+            // })
+            // .addCase(getUserAchievement.pending, (state) => {
+            //     state.statusAchievement = 'loading'; // Đánh dấu trạng thái đang tải
+            // })
+            // .addCase(getUserAchievement.rejected, (state, action) => {
+            //     state.error = action.error.message; // lưu lỗi
+            //     state.statusAchievement = 'failed'; // Đánh dấu không thành công
+            // });
 
     },
 });
 
-export const { setUserAchievement } = AchievementSlice.actions
+export const { setUserAchievement, setAchieById } = AchievementSlice.actions
 
 export default AchievementSlice.reducer;

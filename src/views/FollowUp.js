@@ -9,22 +9,21 @@ import { appInfo } from '../constains/appInfo'
 //components
 import { AvatarEx, ButtonFunctionComponent } from '../component';
 //redux
-import { createFollow } from "../redux/slices/FollowerSlice";
+import { createFollow, deleteFollow } from "../redux/slices/FollowerSlice";
 const FollowUp = () => {
-    const [isClick, setIsClick] = useState({}); // Lưu trạng thái cho từng item bằng id
     const dispatch = useDispatch();
-    //route
-    const route = useRoute();
     // const followUp = route.params?.followUp ?? [];
     const followUp = useSelector((state) => state.follower.follower);
+    const userID = useSelector((state) => state.user.user.user_id);
+
     //su ly follow
-    const handleFollow = (item) => {
-        // Thay đổi trạng thái dựa trên id của item
-        setIsClick((prev) => ({
-            ...prev,
-            [item.id]: prev[item.id] === 'Followed' ? 'FollowBack' : 'Followed'
-        }));
+    const handleUnFollow = (user) => {
+        console.log(`Đã hủy theo dõi: ${user.username}`);
+        // Hủy theo dõi
+        dispatch(deleteFollow({ follower_user_id: userID, user_id: user.user_id }));
+
     };
+
 
     //console.log('user1234', user);
     //console.log('followUp', followUp);
@@ -34,9 +33,8 @@ const FollowUp = () => {
                 (
                     <FlatList
                         data={followUp}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item) => item.user_id}
                         renderItem={({ item }) => {
-                            const isFollowing = isClick[item.id] === 'Followed';
                             return (
                                 <TouchableOpacity >
                                     <View style={[styles.viewFlatList]}>
@@ -50,11 +48,11 @@ const FollowUp = () => {
                                             <Text style={StyleGlobal.text}>{item.username}</Text>
                                         </View>
                                         <ButtonFunctionComponent
-                                            name2={isFollowing ? 'Theo Dõi' : 'Đã Theo Dõi'}
-                                            backgroundColor={isFollowing ? '#FFFFFF' : '#D9D9D9'}
-                                            colorText={isFollowing ? '#0286FF' : '#000'}
-                                            style={isFollowing ? styles.button2 : styles.button}
-                                            onPress={() => handleFollow(item)}
+                                            name2={'Đã Theo Dõi'}
+                                            backgroundColor={'#D9D9D9'}
+                                            colorText={'#000'}
+                                            style={styles.button}
+                                            onPress={() => handleUnFollow(item)}
                                         />
 
                                     </View>
