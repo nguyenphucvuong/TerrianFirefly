@@ -6,7 +6,6 @@ import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 const initialState = {
     emojiList: [],
     currentEmoji: [],
-    totalEmoji: [],
     status: 'idle',
     error: null,
 };
@@ -148,26 +147,6 @@ export const startListeningEmoji = ({ user_id }) => (dispatch) => {
     return unEmoji;
 };
 
-//tổng số biểu tượng cảm xúc
-export const getTotalEmoji = createAsyncThunk(
-    "data/getTotalEmojigetTotalEmoji",
-    async ({ currentPostId }) => {
-        try {
-            const q = query(collection(db, "Emoji"), where("post_id", "==", currentPostId));
-            const querySnapshot = await getDocs(q);
-            const totalEmojiData = {
-                id: querySnapshot.docs[0].id,
-                ...querySnapshot.docs[0].data(),
-            };
-            console.log('totalEmojiData', totalEmojiData);
-
-            return totalEmojiData; // Trả về danh sách bài đăng
-        } catch (error) {
-            console.error("Error getTotalEmoji emoji: ", error);
-            throw error;
-        }
-    }
-);
 export const EmojiSlice = createSlice({
     name: 'emoji',
     initialState,
@@ -223,18 +202,6 @@ export const EmojiSlice = createSlice({
                 state.status = 'loading';
             })
             .addCase(deleteEmoji.rejected, (state, action) => {
-                state.error = action.error.message;
-                state.status = 'failed';
-            })
-            //Total Emoji
-            .addCase(getTotalEmoji.fulfilled, (state, action) => {
-                state.totalEmoji = action.payload;
-                state.status = 'succeeded';
-            })
-            .addCase(getTotalEmoji.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(getTotalEmoji.rejected, (state, action) => {
                 state.error = action.error.message;
                 state.status = 'failed';
             })

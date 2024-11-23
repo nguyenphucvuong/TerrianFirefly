@@ -13,6 +13,7 @@ const initialState = {
   postFavourite: [],
   userReport: [],
   userHashtag: [],
+  totalEmoji: 0,
 };
 
 // Thiết lập listener thời gian thực cho dữ liệu người dùng
@@ -285,7 +286,7 @@ export const startListeningFavourite = ({ currentUserId }) => (dispatch) => {
     if (!querySnapshot.empty) {
       // Lấy tất cả user_id của những người yêu thích
       const favouriteUserIds = querySnapshot.docs.map((doc) => doc.data().post_id);
-      
+
       if (favouriteUserIds.length > 0) {
         // Tạo query để lấy dữ liệu của các user từ bảng Posts
         const userQuery = query(
@@ -314,7 +315,7 @@ export const startListeningFavourite = ({ currentUserId }) => (dispatch) => {
 };
 
 export const startListeningHashtag = ({ currentUserId }) => (dispatch) => {
-  
+
   if (!currentUserId) return;
   const hashtagQuery = query(
     collection(db, "HashtagGroup"),
@@ -326,8 +327,8 @@ export const startListeningHashtag = ({ currentUserId }) => (dispatch) => {
       // Lấy tất cả user_id của những người yêu thích
       const hashtagUserIds = querySnapshot.docs.map((doc) => doc.data().HashtagID);
       //console.log('hashtagUserIds',hashtagUserIds);
-      
-      if (hashtagUserIds.length > 0) { 
+
+      if (hashtagUserIds.length > 0) {
         // Tạo query để lấy dữ liệu của các user từ bảng Posts
         const userQuery = query(
           collection(db, "Hashtag"),
@@ -354,6 +355,89 @@ export const startListeningHashtag = ({ currentUserId }) => (dispatch) => {
   return unsubscribe; // Trả về hàm unsubscribe để dừng lắng nghe khi không cần thiết
 };
 
+//Lắng nghe và lấy Emoji
+export const startListeningTotalEmoji = ({ currentUserId }) => (dispatch, getState) => {
+  if (!currentUserId) return;
+
+  // Lắng nghe thay đổi từ bảng Posts
+  const followerQuery = query(
+    collection(db, "Posts"),
+    where("user_id", "==", currentUserId)
+  );
+
+  const unsubscribePosts = onSnapshot(followerQuery, async (querySnapshot) => {
+    if (!querySnapshot.empty) {
+      // Lấy tất cả post_id từ bảng Posts
+      const emojiUserIds = querySnapshot.docs.map((doc) => doc.data().post_id);
+      console.log('emojiUserIds', emojiUserIds);
+
+      if (emojiUserIds.length > 0) {
+        // Lắng nghe thay đổi trong bảng Emoji cho các post_id
+        const emojiQuery = query(
+          collection(db, "Emoji"),
+          where("post_id", "in", emojiUserIds)
+        );
+
+        const unsubscribeEmoji = onSnapshot(emojiQuery, (emojiSnapshot) => {
+          if (!emojiSnapshot.empty) {
+            // Lấy dữ liệu emoji từ snapshot
+            const totalEmoji = emojiSnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+
+            const total = totalLike(totalEmoji);
+            // Kiểm tra xem total có thay đổi so với dữ liệu trước đó không
+            const currentTotal = getState().user.total_interact_id;
+            if (total !== currentTotal) {
+              // Nếu có thay đổi, cập nhật vào Redux
+              const newData = {
+                total_interact_id: total,
+              };
+              dispatch(updateUser({ user_id: currentUserId, newData: newData }));
+              dispatch(setTotalEmoji(total));  // Gửi dữ liệu totalEmoji vào Redux
+            }
+          } else {
+            console.log("No emoji data found for the posts.");
+          }
+        }, (error) => {
+          console.error("Error fetching emoji data: ", error);
+        });
+
+        // Trả về hàm unsubscribe để dừng lắng nghe sự thay đổi trong bảng Emoji khi không cần thiết
+        return unsubscribeEmoji;
+      } else {
+        console.log("No posts found for this user.");
+      }
+    }
+  }, (error) => {
+    console.error('Error fetching posts data: ', error);
+  });
+
+  // Trả về hàm unsubscribe để dừng lắng nghe sự thay đổi trong bảng Posts khi không cần thiết
+  return unsubscribePosts;
+};
+
+//Tính tổng
+const totalLike = (item) => {
+  if (!Array.isArray(item)) {
+    console.log("Input is not an array");
+    return 0; // Trả về 0 nếu item không phải là mảng
+  }
+
+  const totalSum = item.reduce((acc, curr) => {
+    acc.count_heart += curr.count_heart;
+    acc.count_laugh += curr.count_laugh;
+    acc.count_like += curr.count_like;
+    acc.count_sad += curr.count_sad;
+
+    return acc;
+  }, { count_heart: 0, count_laugh: 0, count_like: 0, count_sad: 0 });
+
+  // Tính tổng các giá trị count_heart, count_laugh, count_like, count_sad
+  const finalTotal = totalSum.count_heart + totalSum.count_laugh + totalSum.count_like + totalSum.count_sad;
+  return finalTotal;
+};
 
 // Tạo slice cho user
 export const UserSlices = createSlice({
@@ -385,6 +469,9 @@ export const UserSlices = createSlice({
     },
     setUserHashtag: (state, action) => {
       state.userHashtag = action.payload;
+    },
+    setTotalEmoji: (state, action) => {
+      state.totalEmoji = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -418,6 +505,6 @@ export const UserSlices = createSlice({
   },
 });
 
-export const { setUser, setError, setUserById, setIUser, setUserReport, setUserHashtag, setFavourite } = UserSlices.actions;
+export const { setUser, setError, setUserById, setIUser, setUserReport, setUserHashtag, setFavourite, setTotalEmoji } = UserSlices.actions;
 
 export default UserSlices.reducer;

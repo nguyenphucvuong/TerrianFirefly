@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text, Alert, LogBox, Clipboard } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, ImageBackground, ScrollView, Animated, Text, Alert, LogBox, Clipboard, Modal, Image } from 'react-native'
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigation, useRoute, useIsFocused } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -15,17 +15,16 @@ import {
 //style
 import { StyleGlobal } from '../styles/StyleGlobal'
 //components
-import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx, ButtonBackComponent } from '../component';
+import { SkeletonComponent, IconComponent, StatisticsComponent, AvatarEx, ButtonBackComponent, ButtonFunctionComponent } from '../component';
 import TabRecipe from '../component/TabRecipe';
 //constains
 import { appInfo } from '../constains/appInfo';
 import { appcolor } from '../constains/appcolor';
 //redux
-import { listenToUserRealtime, listenToUserRealtime2, startListeningFavourite, startListeningHashtag } from '../redux/slices/UserSlices';
-import { getPostUsers, getPostsFromFavouriteUsers } from '../../src/redux/slices/PostSlice';
+import { startListeningFavourite, startListeningHashtag, startListeningTotalEmoji } from '../redux/slices/UserSlices';
+import { getPostUsers } from '../../src/redux/slices/PostSlice';
 import { startListeningFollowedUsers, startListeningFollowingUsers } from '../redux/slices/FollowerSlice';
-import { getUserAchievement, listenToUserAchievementRealtime, startListeningAchieByID } from '../redux/slices/AchievementSlice';
-// import { getTotalEmoji } from '../redux/slices/EmojiSlice';
+import { startListeningAchieByID } from '../redux/slices/AchievementSlice';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -39,6 +38,7 @@ const PersonScreen = ({ isAvatar }) => {
     const isFocused = useIsFocused(); // Kiểm tra khi tab được focus
     const [prevAchieId, setPrevAchieId] = useState(null); // Lưu achie_id cũ
     const [prevUser_id, setPrevUser_id] = useState(null); // Lưu user_id cũ
+    const [isVisible, setIsVisible] = useState(false); // Trạng thái hiển thị Modal
 
     //route
     const route = useRoute();
@@ -51,10 +51,11 @@ const PersonScreen = ({ isAvatar }) => {
     const iUser = useSelector((state) => state.user.iUser) || {};
     const post = useSelector((state) => state.post.postByUser);
     const postFavourite = useSelector((state) => state.user.postFavourite);
-    const totalEmoji = useSelector((state) => state.emoji.totalEmoji) || {};
     const userHashtag = useSelector((state) => state.user.userHashtag);
-    
+    const totalEmoji = useSelector((state) => state.user.totalEmoji);
+
     //
+
     const [user, setUser] = useState(dataUser);
     const follower = useSelector(state => state.follower.follower);
     const isFlag = follower.some(f => f.user_id === userPost.user_id);
@@ -65,7 +66,7 @@ const PersonScreen = ({ isAvatar }) => {
     //console.log('followUp', followUp);
     //console.log('followingUsers',followingUsers);
     //console.log('userAchievement', userAchievement);
-    // console.log('totalEmoji',totalEmoji);
+    //console.log('totalEmoji',totalEmoji);
     //console.log('userPost',userPost);
     // console.log('isFromAvatar', isFromAvatar);
     //console.log('prevUser_id', prevUser_id);
@@ -123,6 +124,11 @@ const PersonScreen = ({ isAvatar }) => {
             extrapolate: 'clamp',
         }),
     };
+    const handldeTotalEmoji = () => {
+        setIsVisible(true); // Hiển thị Modal
+    }
+ 
+
     useEffect(() => {
         if (!isFocused) return;
 
@@ -140,20 +146,19 @@ const PersonScreen = ({ isAvatar }) => {
                     dispatch(startListeningAchieByID({ achie_id: user?.achie_id }));
                     setPrevAchieId(user?.achie_id); // Cập nhật achie_id cũ
                 }
-                
+
                 // Bài viết 
                 await dispatch(getPostUsers({ field: "created_at", currentUserId: user.user_id }));
                 // Yêu thích
                 await dispatch(startListeningFavourite({ field: "created_at", currentUserId: user.user_id }));
                 //Chủ đề
                 await dispatch(startListeningHashtag({ field: "created_at", currentUserId: user.user_id }));
-
                 // Theo dõi
                 await dispatch(startListeningFollowedUsers({ field: "created_at", currentUserId: user.user_id }));
                 // Người theo dõi
                 await dispatch(startListeningFollowingUsers({ field: "created_at", currentUserId: user.user_id }));
                 //tổng số biểu cảm
-                //  dispatch(getTotalEmoji({ currentUserId: post.post_id}));
+                await dispatch(startListeningTotalEmoji({ field: "created_at", currentUserId: user.user_id }));
 
             } catch (error) {
                 console.error("Error during data fetching: ", error);
@@ -210,6 +215,34 @@ const PersonScreen = ({ isAvatar }) => {
                         <Text style={styles.toastText}>Đã sao chép thành công!</Text>
                     </View>
                 )}
+                {/* Modal */}
+                <Modal
+                    visible={isVisible}
+                    transparent
+                    animationType="slide"
+                    onRequestClose={() => setIsVisible(false)} // Đóng Modal khi nhấn nút Back
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <Image  source={require('../../assets/appIcons/likeEmoji.png')} style={{width: appInfo.heightWindows * 0.1, height: appInfo.heightWindows * 0.1}}/>
+                            <Text style={styles.modalText}>
+                                {user.username}
+                            </Text>
+                            {/* Nội dung thông báo */}
+                            <Text style={{fontSize: 14, color: '#RRGGBBAA', marginBottom: '10%'}}>
+                                Tổng lượt thích: {totalEmoji}
+                            </Text>
+
+                            {/* Nút Đóng */}
+                            <ButtonFunctionComponent
+                                name={'Đóng'}
+                                backgroundColor={'#8B84E9'}
+                                colorText={'#FFFFFF'}
+                                onPress={() => setIsVisible(false)}
+                                style={styles.button} />
+                        </View>
+                    </View>
+                </Modal>
                 <ScrollView
                     nestedScrollEnabled={true}
                     scrollEventThrottle={16}
@@ -310,7 +343,7 @@ const PersonScreen = ({ isAvatar }) => {
                             <StatisticsComponent quantity={post.length} name={'Bài Viết'} />
                             <StatisticsComponent quantity={followUp.length} name={'Theo Dõi'} onPress={() => navigation.navigate('FollowUp')} />
                             <StatisticsComponent quantity={followingUsers.length} name={'Người Theo Dõi'} onPress={() => navigation.navigate('FollowerScreen')} />
-                            <StatisticsComponent quantity={0} name={'Lượt Thích'} />
+                            <StatisticsComponent quantity={totalEmoji} name={'Lượt Thích'} onPress={() => handldeTotalEmoji()} />
                         </View>
                         {/*  Tab Navigation */}
                         <TabRecipe post={post} postFavourite={postFavourite} user={user} hashtag={userHashtag} />
@@ -485,6 +518,32 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         fontSize: 16,
         color: '#000000',
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Màu nền trong suốt
+    },
+    modalContent: {
+        width: 300,
+        padding: 20,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        alignItems: 'center',
+        position: 'relative',
+    },
+    closeButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    modalText: {
+        fontSize: 18,
+        marginVertical: 20,
+    },
+    button: {
+        width: '100%',
+        height: appInfo.heightWindows * 0.05,
     },
 
 });
