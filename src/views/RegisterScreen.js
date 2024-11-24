@@ -109,7 +109,7 @@ function RegisterScreen() {
         username: userName,
         numberPhone: "",
         email: email,
-        roleid: 1,
+        roleid: 0,
         imgUser:
           "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/avatar%2Favatar.jpg?alt=media&token=42cfc0ed-75cc-4feb-9a0f-19f6203643c5",
         gender: "",
@@ -120,6 +120,7 @@ function RegisterScreen() {
         backgroundUser:
           "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/background%2Fbackground4.jpg?alt=media&token=31c49a20-9146-46cc-8df6-496093d45194",
         frame_user: "",
+        report_count: 0,
       });
       await updateDoc(docRef, {
         user_id: docRef.id, // Lưu ID vào tài liệu

@@ -54,7 +54,7 @@ const ManagePostsScreen = () => {
       </View>
     );
   }
-  
+  //xoa
   const rightSwipe = () => {
     return (
       <TouchableOpacity style={{ alignSelf: "center" }}>
@@ -66,9 +66,10 @@ const ManagePostsScreen = () => {
       </TouchableOpacity>
     );
   };
+  //
   const leftSwipe = () => {
     return (
-      <TouchableOpacity style={{ alignSelf: "center" }}>
+      <TouchableOpacity style={{ alignSelf: "center" }} >
         <Entypo
           name="circle-with-minus"
           size={appInfo.heightWindows * 0.05}
