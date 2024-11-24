@@ -11,8 +11,8 @@ const ArticleScreen = ({ post, user }) => {
 
     const [loading, setLoading] = useState(false);
 
-    // console.log('user1',user);
-    //console.log('post1', post);
+    // console.log('user_id',user.user_id);
+    // console.log('post.user_id.', post.user_id);
     return (
         <>
             {post.length === 0 ? (
@@ -25,8 +25,11 @@ const ArticleScreen = ({ post, user }) => {
                     data={post}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => {
+                        //console.log('item?.user_id === user?.user_id ? item : ',item?.user_id === user?.user_id ? item : []);
+                        
                         return (
-                            <PostViewComponent post={item} images={item.images} user={user} />
+                            
+                            <PostViewComponent post={item?.user_id === user?.user_id ? item : null} images={item.images} user={user} />
                         )
                     }}
                     contentContainerStyle={{ flexGrow: 1 }}
