@@ -74,7 +74,7 @@ const ManagePostsScreen = () => {
     >
       <Entypo
         name="circle-with-cross"
-        size={20}
+        size={35}
         color="red"
       />
     </TouchableOpacity>
@@ -91,7 +91,7 @@ const ManagePostsScreen = () => {
     >
       <Entypo
         name="circle-with-minus"
-        size={20}
+        size={35}
         color="green"
       />
     </TouchableOpacity>
