@@ -16,6 +16,7 @@ const FollowerScreen = () => {
     const followUp = useSelector((state) => state.follower.follower);
     const userID = useSelector((state) => state.user.user.user_id);
     const dispatch = useDispatch();
+    const navigation = useNavigation();
     // Kiểm tra trạng thái đã theo dõi
     const followUpSet = new Set(followUp.map(f => f.user_id));
 
@@ -50,7 +51,7 @@ const FollowerScreen = () => {
                             const isFollowingBack = checkIfFollowingBack(item);
                             //console.log('isFollowingBack', isFollowingBack);
                             return (
-                                <TouchableOpacity >
+                                <TouchableOpacity onPress={() => navigation.navigate("PersonScreen", { userPost: item, isFromAvatar: true })} >
                                     <View style={[styles.viewFlatList]}>
                                         <AvatarEx
                                             size={50}

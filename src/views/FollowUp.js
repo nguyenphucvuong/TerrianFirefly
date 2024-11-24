@@ -12,6 +12,7 @@ import { AvatarEx, ButtonFunctionComponent } from '../component';
 import { createFollow, deleteFollow } from "../redux/slices/FollowerSlice";
 const FollowUp = () => {
     const dispatch = useDispatch();
+    const navigation = useNavigation();
     // const followUp = route.params?.followUp ?? [];
     const followUp = useSelector((state) => state.follower.follower);
     const userID = useSelector((state) => state.user.user.user_id);
@@ -36,7 +37,7 @@ const FollowUp = () => {
                         keyExtractor={(item) => item.user_id}
                         renderItem={({ item }) => {
                             return (
-                                <TouchableOpacity >
+                                <TouchableOpacity onPress={() => navigation.navigate("PersonScreen", { userPost: item, isFromAvatar: true })} >
                                     <View style={[styles.viewFlatList]}>
                                         <AvatarEx
                                             size={50}

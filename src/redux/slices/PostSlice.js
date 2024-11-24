@@ -555,6 +555,7 @@ export const PostSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
+      
       .addCase(getPostUsers.fulfilled, (state, action) => {
         state.loading = false;
         state.postByUser = action.payload.postData;

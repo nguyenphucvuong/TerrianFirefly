@@ -2,26 +2,32 @@ import { View, FlatList, Text, StyleSheet, TouchableOpacity, Image, Alert } from
 import React, { useMemo, useRef, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from "react-redux";
 //components
-import {IconComponent, SkeletonComponent } from '../component';
+import { IconComponent, SkeletonComponent } from '../component';
 //styles
 import { StyleGlobal } from '../styles/StyleGlobal';
 // Lấy chiều cao màn hình để tính toán
 import { appInfo } from '../constains/appInfo';
 //redux
-import { getAchievement} from '../redux/slices/AchievementSlice';
-import { getUser, updateUser, listenToUserRealtime } from '../redux/slices/UserSlices';
+import { getAchievement } from '../redux/slices/AchievementSlice';
+import { updateUser } from '../redux/slices/UserSlices';
 const AchievementsScreen = () => {
     //Firebase
     const achievement = useSelector((state) => state.achievement.achievement);
     const user = useSelector((state) => state.user.user);
+    const totalEmoji = useSelector((state) => state.user.totalEmoji);
     // const achievement = "";
     // const user = "";
     const dispatch = useDispatch();
     //tìm achie_id
     const findAchievement = achievement.find(item => item.achie_id === user.achie_id);
-    //console.log('findAchievement',findAchievement);
-    
-    const [isNickname, setNickname] = useState(findAchievement?.nickname);
+    //console.log('findAchievement', findAchievement);
+
+    const [isNickname, setNickname] = useState(findAchievement?.nickname || '');
+    useEffect(() => {
+        if (findAchievement?.nickname) {
+            setNickname(findAchievement.nickname); // Cập nhật khi có dữ liệu mới
+        }
+    }, [findAchievement]);
     //Xử lý chọn nickname
     const hanldeSelectAchievement = (item) => {
         try {
@@ -29,7 +35,7 @@ const AchievementsScreen = () => {
             const newData = {
                 achie_id: item.achie_id,
             }
-            console.log('newData', newData);
+            //console.log('newData', newData);
             dispatch(updateUser({ user_id: user.user_id, newData: newData }));
             Alert.alert("Thông Báo", "Cập Nhật Thành Công");
         } catch (error) {
@@ -39,9 +45,9 @@ const AchievementsScreen = () => {
     //cập nhật lại dữ liệu 
     useEffect(() => {
         dispatch(getAchievement());
-    
-    },[]);
-    //console.log('achievement', achievement);
+
+    }, [dispatch]);
+    // console.log('achievement', achievement);
     // console.log('isNickname', isNickname);
     return (
         <View style={StyleGlobal.container}>
@@ -65,8 +71,9 @@ const AchievementsScreen = () => {
                     ) : (
                         <FlatList
                             data={achievement}
+                            keyExtractor={(item) => item.id}
                             renderItem={({ item }) => {
-                                const isLocked = item.level > user.total_interact_id; //kiểm tra level > hơn total_interact_id sẽ không click
+                                const isLocked = item.level > totalEmoji; //kiểm tra level > hơn total_interact_id sẽ không click
                                 return (
                                     <TouchableOpacity style={[styles.buttonRow, { borderColor: isNickname === item.nickname ? '#90CAF9' : 'gray' }]}
                                         onPress={() => !isLocked && hanldeSelectAchievement(item)}>
@@ -82,7 +89,7 @@ const AchievementsScreen = () => {
                                     </TouchableOpacity>
                                 )
                             }}
-                            keyExtractor={(item) => item.achie_id.toString()}
+
                         />
                     )
             }

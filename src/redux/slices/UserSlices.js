@@ -369,7 +369,7 @@ export const startListeningTotalEmoji = ({ currentUserId }) => (dispatch, getSta
     if (!querySnapshot.empty) {
       // Lấy tất cả post_id từ bảng Posts
       const emojiUserIds = querySnapshot.docs.map((doc) => doc.data().post_id);
-      console.log('emojiUserIds', emojiUserIds);
+      //console.log('emojiUserIds', emojiUserIds);
 
       if (emojiUserIds.length > 0) {
         // Lắng nghe thay đổi trong bảng Emoji cho các post_id
@@ -387,16 +387,7 @@ export const startListeningTotalEmoji = ({ currentUserId }) => (dispatch, getSta
             }));
 
             const total = totalLike(totalEmoji);
-            // Kiểm tra xem total có thay đổi so với dữ liệu trước đó không
-            const currentTotal = getState().user.total_interact_id;
-            if (total !== currentTotal) {
-              // Nếu có thay đổi, cập nhật vào Redux
-              const newData = {
-                total_interact_id: total,
-              };
-              dispatch(updateUser({ user_id: currentUserId, newData: newData }));
-              dispatch(setTotalEmoji(total));  // Gửi dữ liệu totalEmoji vào Redux
-            }
+            dispatch(setTotalEmoji(total));  // Gửi dữ liệu totalEmoji vào Redux
           } else {
             console.log("No emoji data found for the posts.");
           }

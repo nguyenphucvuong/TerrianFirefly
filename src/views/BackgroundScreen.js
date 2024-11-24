@@ -14,11 +14,12 @@ import { StyleGlobal } from '../styles/StyleGlobal';
 import { appInfo } from '../constains/appInfo';
 //Redux
 import { getBackground } from '../redux/slices/BackgroundSlice';
-import { getUser, updateUser, uploadImage, listenToUserRealtime } from '../redux/slices/UserSlices';
+import {updateUser } from '../redux/slices/UserSlices';
 const BackgroundScreen = () => {
     //FireBase
     const arrBackground = useSelector((state) => state.background.background);
     const user = useSelector((state) => state.user.user);
+    const totalEmoji = useSelector((state) => state.user.totalEmoji);
     const [level, setLevel] = useState('');
     // const arrBackground = "";
     // const user = "";
@@ -52,10 +53,8 @@ const BackgroundScreen = () => {
     //cập nhật lại dữ liệu 
     useEffect(() => {
         dispatch(getBackground());
-        const unsubscribe = dispatch(listenToUserRealtime(user.email));
-        return () => unsubscribe();
-    }, [dispatch, user.email]);
-    //console.log('background',background);
+    }, [dispatch]);
+    //console.log('arrBackground',arrBackground);
 
     return (
         <View style={{ flex: 1 }}>
@@ -109,14 +108,14 @@ const BackgroundScreen = () => {
                                 data={arrBackground}
                                 renderItem={({ item }) => {
                                     const isSelected = selectedId === item.nameBackground;
-                                    const isLocked = item.level > user.total_interact_id; //kiểm tra level > hơn total_interact_id sẽ không click
+                                    const isLocked = item.level > totalEmoji; //kiểm tra level > hơn totalEmoji sẽ không click
                                     return (
                                         <TouchableOpacity style={{ flex: 1, margin: 5 }}
                                             onPress={() => !isLocked && handldeOpenPress(item)} >
 
                                             <Image
                                                 style={[styles.image, { borderColor: isSelected ? '#90CAF9' : 'white', borderWidth: 3, }]}
-                                                source={{ url: item.nameBackground }}
+                                                source={{ uri: item.nameBackground }}
                                             />
                                             {isLocked ? (
                                                 <IconComponent
