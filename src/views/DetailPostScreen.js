@@ -32,6 +32,7 @@ import { updateEmojiByField, startListeningEmojiPost, createEmoji, deleteEmoji, 
 import { startListeningCommentByPostId, countCommentsAndSubComments } from '../redux/slices/CommentSlice';
 import { startListeningUserByID } from '../redux/slices/UserSlices';
 import { countSubComments, startListeningSubCommentByCommentId } from '../redux/slices/SubCommentSlice';
+import { startListeningPostByID } from '../redux/slices/PostSlice';
 
 
 
@@ -41,6 +42,16 @@ const DetailPostScreen = () => {
     const route = useRoute().params;
 
     const { post, userPost, post_user_id, } = route;
+    const postCheck = useSelector(state => state.post[post.post_id]);
+    useEffect(() => {
+        const fetchPost = async () => {
+            await dispatch(startListeningPostByID({ post_id: post.post_id }));
+        }
+        fetchPost();
+
+
+    }, []);
+
     // console.log("user.user_id", user.user_id)
     // console.log("post_user_id", post_user_id)
     const user = useSelector(state => state.user.user);
@@ -157,7 +168,6 @@ const DetailPostScreen = () => {
                 user_id: user.user_id,
                 comment_id: "",
                 sub_comment_id: "",
-                isComment: false,
                 count_like: emojiType === "like" ? 1 : 0,
                 count_heart: emojiType === "heart" ? 1 : 0,
                 count_laugh: emojiType === "laugh" ? 1 : 0,
@@ -227,6 +237,17 @@ const DetailPostScreen = () => {
     };
 
 
+    if (postCheck) {
+        // console.log(postCheck)
+        if (postCheck.status_post_id == 2) {
+            // console.log("postCheck.status_post_id == 2")
+            return (
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <Text>Đã xảy ra lỗi</Text>
+                </View>
+            )
+        }
+    }
 
     return (
         <View style={{ flex: 1 }}>
