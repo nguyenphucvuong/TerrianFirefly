@@ -7,12 +7,12 @@ import { appInfo } from '../constains/appInfo';
 
 const { width } = Dimensions.get('window');
 
-const TabRecipe = ({ post, user }) => {
+const TabRecipe = ({ post, postFavourite, user, hashtag }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [tabHeights, setTabHeights] = useState([0, 0, 0]);
   const animatedValue = useRef(new Animated.Value(0)).current;
   const [selectedTab, setSelectedTab] = useState('articles');
-
+  
   const handleContentSizeChange = (index, contentWidth, contentHeight) => {
     setTabHeights((prevHeights) => {
       const newHeights = [...prevHeights];
@@ -39,11 +39,11 @@ const TabRecipe = ({ post, user }) => {
     });
   const screens = [
     <ArticleScreen post={post} user={user} key="0" />,
-    <FavouriteScreen key="1" />,
-    <GroupScreen key="2" />,
+    <FavouriteScreen postFavourite={postFavourite} user={user} key="1" />,
+    <GroupScreen key="2"  hashtag={hashtag} />,
   ];
   return (
-    <View style={{ flex: 1 }}>
+    <View  >
       {/* Tab Navigation Buttons */}
       <View style={styles.tabBar}>
         <TouchableOpacity onPress={() => [animateTabTransition(0), setSelectedTab('articles')]} style={styles.tab}>
@@ -58,7 +58,7 @@ const TabRecipe = ({ post, user }) => {
       </View>
 
       {/* Animated Tab Content */}
-      <View style={{ flex: 1 }}>
+      <View >
         {screens.map((screen, index) => (
           <Animated.View
             key={index}
@@ -69,10 +69,11 @@ const TabRecipe = ({ post, user }) => {
               height: tabHeights[index] || 'auto',
               paddingBottom: appInfo.heightWindows * 0.08,
             }}
+            pointerEvents={index === activeTabIndex ? 'auto' : 'none'} // Chỉ tab đang hoạt động nhận sự kiện
           >
             <ScrollView
               scrollEnabled={false}
-              contentContainerStyle={{ paddingBottom: '38%' }}
+              contentContainerStyle={{ paddingBottom: appInfo.heightWindows * 0.15 }}
               onContentSizeChange={(contentWidth, contentHeight) =>
                 handleContentSizeChange(index, contentWidth, contentHeight)
               }

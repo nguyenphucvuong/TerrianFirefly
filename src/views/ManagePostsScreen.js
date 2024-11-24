@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   View,
   FlatList,
@@ -6,150 +7,225 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import React, { useState, useEffect } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import RNPickerSelect from "react-native-picker-select";
+import { useSelector, useDispatch } from "react-redux";
 import { Swipeable } from "react-native-gesture-handler";
 import Entypo from "react-native-vector-icons/Entypo";
 //styles
 import { StyleGlobal } from "../styles/StyleGlobal";
-//constains
-import { appInfo } from "../constains/appInfo";
 //components
-import { IconComponent, AvatarEx } from "../component";
-
-import { useDispatch, useSelector } from "react-redux";
-import { getRealtimePostsByStatus } from "../redux/slices/PostSlice";
-import { getUserByField } from "../redux/slices/UserSlices";
+import { AvatarEx } from "../component";
+//redux actions
+import {
+  getRealtimePostsByStatus,
+  updatePostsByField,
+} from "../redux/slices/PostSlice";
+import { startListeningRequestAccepted } from "../redux/slices/RequestSlice";
 
 const ManagePostsScreen = () => {
-  const navigation = useNavigation(); // Sử dụng hook navigation\
   const dispatch = useDispatch();
+  const { postReport, loading } = useSelector((state) => state.post);
+  const { accepted } = useSelector((state) => state.request);
+  const user = useSelector((state) => state.user.user);
 
-  // Lấy dữ liệu bài viết từ Redux
-  const { postReport, loading, error } = useSelector((state) => state.post);
-  //const [loading, setLoading] = useState(true);
-  // Lấy dữ liệu bài viết khi màn hình được tải
+  const [expandedItems, setExpandedItems] = useState({});
+  const [filterStatus, setFilterStatus] = useState(1);
+
   useEffect(() => {
-    dispatch(getRealtimePostsByStatus());  // Lắng nghe thay đổi bài viết
-
-    // Cleanup khi component unmount
-    return () => {
-    };
+    dispatch(getRealtimePostsByStatus());
+    dispatch(startListeningRequestAccepted(dispatch));
   }, [dispatch]);
 
-  console.log("datapost", postReport);
-  
-  if (loading) {
-    return (
-      <View style={StyleGlobal.container}>
-        <Text>Đang tải dữ liệu...</Text>
-      </View>
-    );
-  }
+  // Lọc bài viết theo vai trò người dùng và status_post_id
+  const filterPosts = () => {
+    let filtered = [];
+    if (user.roleid === 1) {
+      filtered = postReport;
+    } else if (user.roleid === 2) {
+      filtered = postReport.filter((post) =>
+        accepted.some(
+          (request) =>
+            user.user_id === request.user_id &&
+            Array.isArray(post.hashtag) &&
+            post.hashtag.includes(request.hashtag_id)
+        )
+      );
+    }
+    return filtered.filter((post) => post.status_post_id === filterStatus);
+  };
 
-  if (!Array.isArray(postReport) || postReport.length === 0) {
-    return (
-      <View style={StyleGlobal.container}>
-        <Text>Không có bài viết nào để hiển thị.</Text>
-      </View>
-    );
-  }
-  //xoa
-  const rightSwipe = () => {
-    return (
-      <TouchableOpacity style={{ alignSelf: "center" }}>
-        <Entypo
-          name="circle-with-cross"
-          size={appInfo.heightWindows * 0.05}
-          color={"red"}
-        />
-      </TouchableOpacity>
-    );
+  const filteredPosts = filterPosts();
+
+  const toggleExpand = (id) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
-  //
-  const leftSwipe = () => {
-    return (
-      <TouchableOpacity style={{ alignSelf: "center" }} >
-        <Entypo
-          name="circle-with-minus"
-          size={appInfo.heightWindows * 0.05}
-          color={"green"}
-        />
-      </TouchableOpacity>
-    );
-  };
+
+  const rightSwipe = (post_id) => (
+    <TouchableOpacity
+      style={{ alignSelf: "center" }}
+      onPress={() => {
+        dispatch(
+          updatePostsByField({ post_id, field: "status_post_id", value: 2 })
+        );
+      }}
+    >
+      <Entypo
+        name="circle-with-cross"
+        size={20}
+        color="red"
+      />
+    </TouchableOpacity>
+  );
+
+  const leftSwipe = (post_id) => (
+    <TouchableOpacity
+      style={{ alignSelf: "center" }}
+      onPress={() => {
+        dispatch(
+          updatePostsByField({ post_id, field: "status_post_id", value: 0 })
+        );
+      }}
+    >
+      <Entypo
+        name="circle-with-minus"
+        size={20}
+        color="green"
+      />
+    </TouchableOpacity>
+  );
 
   return (
     <View style={StyleGlobal.container}>
-      <FlatList
-        data={postReport}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => {
-          return (
-            <Swipeable
-              renderRightActions={rightSwipe}
-              renderLeftActions={leftSwipe}
-            >
-              <TouchableOpacity>
-                <View style={styles.viewFlatList}>
-                  {/* Ảnh bài viết */}
-                <Image
-                  url={ item?.imgPost || "https://via.placeholder.com/150"}
-                  style={{
-                    width: appInfo.widthWindows * 0.17,
-                    height: appInfo.heightWindows * 0.08,
-                  }}
-                />
-                  <View style={{ marginLeft: 10 }}>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignSelf: "center",
-                        marginBottom: 5,
-                      }}
-                    >
-                      {/* Ảnh đại diện người dùng */}
-                      <AvatarEx
-                        size={40}
-                        round={20}
-                        url={
-                            item.user?.imgUser ||
-                            "https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg"
-                          
-                        }
-                      />
-                      <View
-                        style={{ justifyContent: "center", marginLeft: "3%" }}
-                      >
-                        {/* Tên người dùng */}
-                        <Text style={{ fontWeight: "bold" }}>
-                        Người vi phạm: {item.user?.username || "Chưa xác định"}
-                        </Text>
-                        {/* Nội dung bài viết */}
-                        <Text>Bài viết vi phạm: {item.title}</Text>
-                      </View>
-                    </View>
-                    {/* Tiêu đề bài viết */}
-                    <Text>Nội dung: {item.body}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </Swipeable>
-          );
+      {/* Thanh lọc bài viết */}
+      <RNPickerSelect
+        onValueChange={(value) => setFilterStatus(value)}
+        items={[
+          { label: "Đang xử lý", value: 1 },
+          { label: "Bài viết vi phạm", value: 2 },
+        ]}
+        style={{
+          inputAndroid: {
+            color: "black",
+            backgroundColor: "#f0f0f0",
+            padding: 10,
+            borderRadius: 5,
+            marginBottom: 10,
+          },
         }}
+        placeholder={{ label: "Chọn trạng thái bài viết", value: null }}
+        value={filterStatus}
       />
+
+      {/* Hiển thị khi đang tải dữ liệu */}
+      {loading ? (
+        <Text>Đang tải dữ liệu...</Text>
+      ) : filteredPosts.length === 0 ? (
+        // Hiển thị nếu không có bài viết nào
+        <Text>Không có bài viết nào để hiển thị.</Text>
+      ) : (
+        // Hiển thị danh sách bài viết
+        <FlatList
+          data={filteredPosts}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => {
+            const images = Array.isArray(item.imgPost) ? item.imgPost : [];
+            const isExpanded = expandedItems[item.id];
+            return (
+              <Swipeable
+                renderRightActions={() => rightSwipe(item.id)}
+                renderLeftActions={() => leftSwipe(item.id)}
+              >
+                <View style={styles.card}>
+                  <AvatarEx
+                    size={40}
+                    round={20}
+                    url={
+                      item.user?.imgUser ||
+                      "https://png.pngtree.com/png-clipart/20210608/ourlarge/pngtree-dark-gray-simple-avatar-png-image_3418404.jpg"
+                    }
+                  />
+                  <View style={styles.info}>
+                    <Text style={styles.username}>
+                      Tên : {item.user?.username || "Chưa xác định"}
+                    </Text>
+                    <Text style={styles.title}>Tiêu đề :{item.title}</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => toggleExpand(item.id)}>
+                    <Entypo
+                      name={isExpanded ? "chevron-up" : "chevron-down"}
+                      size={20}
+                      color="black"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {isExpanded && (
+                  <View style={styles.expandedContent}>
+                    <View>
+                      {images.length > 0 ? (
+                        images.map((imgUri, index) => (
+                          <Image
+                            key={index}
+                            source={{ uri: imgUri }}
+                            style={styles.postImage}
+                            resizeMode="contain"
+                          />
+                        ))
+                      ) : (
+                        <Text>Không có hình ảnh</Text>
+                      )}
+                    </View>
+                    <Text>Nội dung :{item.body}</Text>
+                  </View>
+                )}
+              </Swipeable>
+            );
+          }}
+        />
+      )}
     </View>
   );
 };
+
 const styles = StyleSheet.create({
-  viewFlatList: {
+  card: {
     flexDirection: "row",
-    borderColor: "#D9D9D9",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 5,
-    marginBottom: appInfo.heightWindows * 0.015,
     alignItems: "center",
+    backgroundColor: "white",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  info: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  username: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  title: {
+    fontSize: 14,
+    color: "#555",
+  },
+  expandedContent: {
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+  },
+  postImage: {
+    width: "100%",
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 10,
+    alignSelf: "center",
   },
 });
+
 export default ManagePostsScreen;

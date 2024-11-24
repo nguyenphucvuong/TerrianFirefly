@@ -5,7 +5,6 @@ import {
   BackgroundScreen,
   InfomationScreen,
   AchievementsScreen,
-  NickNameScreen,
   UserManagementScreen,
   SettingScreen,
   AccountDetailsScreen,
@@ -27,7 +26,9 @@ import {
   AddEditEventScreen,
   PersonScreen,
   SplashScreenComponent,
-  
+  CommentScreen,
+  RequestAdminScreen,
+  ManageRequestScreen,
 } from "../views";
 
 import IndexTab from "../tabs/indexTab";
@@ -116,13 +117,9 @@ const StackNavigator = () => {
       <Stack.Screen
         name="AchievementsScreen"
         component={AchievementsScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="NickNameScreen"
-        component={NickNameScreen}
         options={() => IconBack("Danh Hiệu")}
       />
+
       <Stack.Screen
         name="SettingScreen"
         component={SettingScreen}
@@ -236,6 +233,22 @@ const StackNavigator = () => {
         component={NotificationScreen}
         options={() => IconBack("Thông Báo")}
       />
+      <Stack.Screen
+        name="CommentScreen"
+        component={CommentScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="RequestAdminScreen"
+        component={RequestAdminScreen}
+        options={() => IconBack("Yêu Cầu Quyền Quản Trị")}
+      />
+      <Stack.Screen
+        name="ManageRequestScreen"
+        component={ManageRequestScreen}
+        options={() => IconBack("Yêu Cầu Quản Trị")}
+      />
+
     </Stack.Navigator>
   );
 };

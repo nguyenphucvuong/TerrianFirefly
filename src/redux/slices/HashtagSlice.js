@@ -9,12 +9,14 @@ import {
   query,
   deleteDoc,
   onSnapshot,
+  where,
 } from "firebase/firestore";
 import { db } from "../../firebase/FirebaseConfig"; // Firebase config
 import { storage } from "../../firebase/FirebaseConfig"; // Firebase config
 // Trạng thái ban đầu
 const initialState = {
   hashtag: [],
+  specical: [],
   statusHashtag: "idle",
   errorHashtag: null,
   isDeleting: false, // Thêm trạng thái cho việc xóa
@@ -152,6 +154,50 @@ export const getHashtag = (dispatch) => {
   }
 };
 
+export const startListeningHashtags = () => (dispatch) => {
+  const q = query(
+    collection(db, "Hashtag"),
+    where("role_id", "==", 1),
+  );
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const hashtagData = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    // hashtagData.forEach((hashtag) => {
+    //   // console.log("hashtaghashtag", hashtag)
+    //   // console.log("hashtaghashtaghashtag_id", hashtag.hashtag_id)
+    //   dispatch(setHashtagSpecical({ hashtag: hashtag, hashtag_id: hashtag.hashtag_id }));
+    // });
+    dispatch(setHashtagSpecical(hashtagData));
+  });
+  return unsubscribe;
+};
+
+export const startListeningHashtagById = ({ hashtag_id }) => (dispatch) => {
+  // console.log("hashtag_idhashtag_id", hashtag_id)
+  const q = query(
+    collection(db, "Hashtag"),
+    where("role_id", "==", 1),
+    where("hashtag_id", "==", hashtag_id),
+  );
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const hashtagData = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    // hashtagData.forEach((hashtag) => {
+    //   // console.log("hashtaghashtag", hashtag)
+    //   // console.log("hashtaghashtaghashtag_id", hashtag.hashtag_id)
+    //   dispatch(setHashtagSpecical({ hashtag: hashtag, hashtag_id: hashtag.hashtag_id }));
+    // });
+    // console.log("hashtagData", hashtagData)
+    dispatch(setHashtagSpecicalById({ hashtag: hashtagData, hashtag_id: hashtag_id }));
+  });
+  return unsubscribe;
+};
+
+
 // Tạo slice cho hashtag
 export const HashtagSlice = createSlice({
   name: "hashtag",
@@ -160,12 +206,28 @@ export const HashtagSlice = createSlice({
     sethashtag: (state, action) => {
       state.hashtag = action.payload;
     },
+    setHashtagSpecical: (state, action) => {
+      // const { hashtag, hashtag_id } = action.payload;
+      // // console.log("hashtaghashtag", hashtag)
+      // // console.log("hashtaghashtaghashtag_id", hashtag_id)
+      // state.specical[hashtag_id] = hashtag;
+      // console.log(state.specical)
+      state.specical = action.payload
+      // console.log("specical", state.specical)
+      state.status = 'succeeded';
+    },
+    setHashtagSpecicalById: (state, action) => {
+      const { hashtag, hashtag_id } = action.payload;
+      state[hashtag_id] = hashtag;
+      state.status = 'succeeded';
+    },
+
   },
   extraReducers: (builder) => {
     builder;
   },
 });
 
-export const { sethashtag } = HashtagSlice.actions;
+export const { sethashtag, setHashtagSpecical, setHashtagSpecicalById } = HashtagSlice.actions;
 
 export default HashtagSlice.reducer;

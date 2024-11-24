@@ -11,15 +11,15 @@ const initialState = {
 };
 
 export const createEmoji = createAsyncThunk('data/createEmoji', async (
-    { emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad }) => {
+    { emoji_id, post_id, comment_id, sub_comment_id, user_id, count_like, count_heart, count_laugh, count_sad }) => {
     // console.log("emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad", emoji_id, post_id, user_id, isComment, comment_id, count_like, count_heart, count_laugh, count_sad)
     try {
         const docRef = await addDoc(collection(db, 'Emoji'), {
             emoji_id: emoji_id,
             post_id: post_id,
-            user_id: user_id,
-            isComment: isComment,
             comment_id: comment_id,
+            sub_comment_id: sub_comment_id,
+            user_id: user_id,
             count_like: count_like,
             count_heart: count_heart,
             count_laugh: count_laugh,
@@ -31,9 +31,9 @@ export const createEmoji = createAsyncThunk('data/createEmoji', async (
         await updateDoc(docRef, {
             emoji_id: docRef.id,
             post_id: post_id,
-            user_id: user_id,
-            isComment: isComment,
             comment_id: comment_id,
+            sub_comment_id: sub_comment_id,
+            user_id: user_id,
             count_like: count_like,
             count_heart: count_heart,
             count_laugh: count_laugh,
@@ -46,19 +46,30 @@ export const createEmoji = createAsyncThunk('data/createEmoji', async (
             throw new Error('No such document!');
         }
     } catch (error) {
-        console.error('Error adding document: ', error);
+        console.error('Error adding Emoji: ', error);
         throw error;
     }
 });
 
-export const deleteEmoji = createAsyncThunk('data/deleteEmoji', async ({ post_id, user_id }, { getState, dispatch }) => {
+export const deleteEmoji = createAsyncThunk('data/deleteEmoji', async ({ post_id, comment_id, sub_comment_id, user_id }, { getState, dispatch }) => {
     // console.log("post_id, user_id", post_id, user_id)
     try {
-        const emojiQuery = query(
+        const emojiQuery = post_id ? query(
             collection(db, 'Emoji'),
             where('post_id', '==', post_id),
             where('user_id', '==', user_id)
-        );
+        ) : comment_id ? query(
+            collection(db, 'Emoji'),
+            where('comment_id', '==', comment_id),
+            where('user_id', '==', user_id)
+        ) : sub_comment_id ? query(
+            collection(db, 'Emoji'),
+            where('sub_comment_id', '==', sub_comment_id),
+            where('user_id', '==', user_id)
+        ) : null;
+
+
+
         const querySnapshot = await getDocs(emojiQuery);
         for (const docSnapshot of querySnapshot.docs) {
             await deleteDoc(docSnapshot.ref);
@@ -67,7 +78,7 @@ export const deleteEmoji = createAsyncThunk('data/deleteEmoji', async ({ post_id
         console.log(`Successfully deleted Emoji relationship between ${post_id} and ${user_id}`);
         return { post_id, user_id };
     } catch (error) {
-        console.error('Error deleting document: ', error);
+        console.error('Error deleting Emoji: ', error);
         throw error;
     }
 });
@@ -92,14 +103,24 @@ export const getEmoji = createAsyncThunk('data/getEmoji', async ({ post_id, user
 
 export const updateEmojiByField = createAsyncThunk(
     "data/updateEmojiByField",
-    async ({ post_id, user_id, count_like, count_heart, count_laugh, count_sad }, { getState, dispatch }) => {
+    async ({ post_id, comment_id, sub_comment_id, user_id, count_like, count_heart, count_laugh, count_sad }, { getState, dispatch }) => {
         // console.log("post_id, user_id, count_like, count_heart, count_laugh, count_sad", post_id, user_id, count_like, count_heart, count_laugh, count_sad)
         try {
-            const emojiQuery = query(
-                collection(db, "Emoji"),
-                where("post_id", "==", post_id),
-                where("user_id", "==", user_id)
-            );
+            const emojiQuery = post_id ? query(
+                collection(db, 'Emoji'),
+                where('post_id', '==', post_id),
+                where('user_id', '==', user_id)
+            ) : comment_id ? query(
+                collection(db, 'Emoji'),
+                where('comment_id', '==', comment_id),
+                where('user_id', '==', user_id)
+            ) : sub_comment_id ? query(
+                collection(db, 'Emoji'),
+                where('sub_comment_id', '==', sub_comment_id),
+                where('user_id', '==', user_id)
+            ) : null;
+
+
             const querySnapshot = await getDocs(emojiQuery);
 
             if (!querySnapshot.empty) {
@@ -123,28 +144,23 @@ export const updateEmojiByField = createAsyncThunk(
 
 
 
-
-
-
-
-
-export const startListeningEmoji = ({ user_id }) => (dispatch) => {
+export const startListeningEmojiPost = ({ post_id }) => (dispatch) => {
     // console.log("!post_id || !user_id", !post_id || !user_id)
     // if (!user_id) return;
 
     const emojiQuery = query(
         collection(db, "Emoji"),
-        // where('user_id', "==", user_id),
+        where('post_id', "==", post_id),
     );
     const unEmoji = onSnapshot(emojiQuery, (querySnapshot) => {
         const emojis = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         // console.log("emojis", emojis);
         if (emojis.length > 0) {
             // Dispatch only the first document if available
-            dispatch(setEmoji(emojis));
+            dispatch(setEmoji({ emojis, post_id })); // Dispatch the first document
         } else {
             console.log("No document found");
-            dispatch(setEmoji([])); // Empty array if no document is found
+            dispatch(setEmoji({ emojis: [], post_id })); // Empty array if no document is found
         }
     }, (error) => {
         console.error('Error fetching Emoji: ', error);
@@ -152,15 +168,81 @@ export const startListeningEmoji = ({ user_id }) => (dispatch) => {
 
     return unEmoji;
 };
+
+export const startListeningEmojiCmt = ({ comment_id }) => (dispatch) => {
+    // console.log("!post_id || !user_id", !post_id || !user_id)
+    // if (!user_id) return;
+
+    const emojiQuery = query(
+        collection(db, "Emoji"),
+        where('comment_id', "==", comment_id),
+    );
+    const unEmoji = onSnapshot(emojiQuery, (querySnapshot) => {
+        const emojis = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // console.log("emojiscomment_id", emojis);
+        if (emojis.length > 0) {
+            // Dispatch only the first document if available
+            dispatch(setEmojiCmt({ emojis, comment_id: comment_id })); // Dispatch the first document
+        } else {
+            console.log("No document found");
+            dispatch(setEmojiCmt({ emojis: [], comment_id: comment_id })); // Empty array if no document is found
+        }
+    }, (error) => {
+        console.error('Error fetching Emoji: ', error);
+    });
+
+    return unEmoji;
+};
+export const startListeningEmojiSubCmt = ({ sub_comment_id }) => (dispatch) => {
+    // console.log("!post_id || !user_id", !post_id || !user_id)
+    // if (!user_id) return;
+
+    const emojiQuery = query(
+        collection(db, "Emoji"),
+        where('sub_comment_id', "==", sub_comment_id),
+    );
+    const unEmoji = onSnapshot(emojiQuery, (querySnapshot) => {
+        const emojis = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // console.log("emojis", emojis);
+        if (emojis.length > 0) {
+            // Dispatch only the first document if available
+            dispatch(setEmojiSubCmt({ emojis, sub_comment_id: sub_comment_id })); // Dispatch the first document
+        } else {
+            console.log("No document found");
+            dispatch(setEmojiSubCmt({ emojis: [], sub_comment_id: sub_comment_id })); // Empty array if no document is found
+        }
+    }, (error) => {
+        console.error('Error fetching Emoji: ', error);
+    });
+
+    return unEmoji;
+};
+
 export const EmojiSlice = createSlice({
     name: 'emoji',
     initialState,
     reducers: {
+
         setEmoji: (state, action) => {
-            state.emojiList = action.payload;
-            // console.log("emojiList setemojiLists", action.payload)
+            const { emojis, post_id } = action.payload;
+            state[post_id] = emojis;
+            // console.log("emojiList setemojiLists", post_id)
             state.status = 'succeeded';
         },
+        setEmojiCmt: (state, action) => {
+            const { emojis, comment_id } = action.payload;
+            state[comment_id] = emojis;
+            // console.log("emojiList setemojiLists", post_id)
+            state.status = 'succeeded';
+        },
+        setEmojiSubCmt: (state, action) => {
+            const { emojis, sub_comment_id } = action.payload;
+            state[sub_comment_id] = emojis;
+            // console.log("emojiList setemojiLists", post_id)
+            state.status = 'succeeded';
+        },
+
+
         setCurrentEmoji: (state, action) => {
             state.currentEmoji = action.payload;
             state.status = 'succeeded';
@@ -213,6 +295,6 @@ export const EmojiSlice = createSlice({
     },
 });
 
-export const { setCurrentEmoji, setEmoji, addEmoji, removeEmoji } = EmojiSlice.actions
+export const { setCurrentEmoji, setEmoji, setEmojiCmt, setEmojiSubCmt, addEmoji, removeEmoji } = EmojiSlice.actions
 
 export default EmojiSlice.reducer;
