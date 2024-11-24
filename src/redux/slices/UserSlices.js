@@ -98,7 +98,7 @@ export const updateUserState = createAsyncThunk(
 
       // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
       const updatedSnap = await getDoc(userRef);
-      console.log("updatedSnap", updatedSnap.data());
+      // console.log("updatedSnap", updatedSnap.data());
       if (updatedSnap.exists()) {
         return {
           id: updatedSnap.id,

@@ -14,7 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 const Tab = createBottomTabNavigator();
 const getRouteName = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route);
-  if (routeName == "picture" || routeName == "DetailPost" || routeName == "PersonScreen") {
+  if (routeName == "picture" || routeName == "DetailPost" || routeName == "PersonScreen" || routeName == "CommentScreen") {
     return "none";
   }
   return "flex";
