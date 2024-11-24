@@ -14,6 +14,7 @@ import EventSlice from './slices/EventSlice';
 import NotiSlice from './slices/NotiSlice';
 import SubCommentSlice from './slices/SubCommentSlice';
 import RequestSlice from './slices/RequestSlice';
+import ReportSlice from './slices/ReportSilce';
 import { sub } from '@tensorflow/tfjs';
 
 
@@ -33,6 +34,7 @@ export const store = configureStore({
     noti: NotiSlice,
     subComment: SubCommentSlice,
     request: RequestSlice,
+    report: ReportSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

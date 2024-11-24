@@ -40,11 +40,12 @@ const DetailPostScreen = () => {
     const navigation = useNavigation();
     const route = useRoute().params;
 
-    const { post, user, userPost, post_user_id, } = route;
+    const { post, userPost, post_user_id, } = route;
     // console.log("user.user_id", user.user_id)
     // console.log("post_user_id", post_user_id)
+    const user = useSelector(state => state.user.user);
 
-    const follower = useSelector(state => state.follower.follower); // Lấy dữ liệu từ store
+    const follower = useSelector(state => state.follower.follower);
     const dispatch = useDispatch();
     const isFlag = follower.some(f => f.user_id === post.user_id && f.follower_user_id === user.user_id); // Kiểm tra xem người dùng đã theo dõi chưa
     // const comment = useSelector(state => state.comment.commentList);
@@ -72,7 +73,7 @@ const DetailPostScreen = () => {
             setDataPostCmt(formatNumber({ num: countCmt })); // Cập nhật state với kết quả
         };
         fetchCommentCount();
-    }, []);
+    }, [comments]);
 
 
     useEffect(() => {
@@ -154,8 +155,9 @@ const DetailPostScreen = () => {
                 emoji_id: "",
                 post_id: post.post_id,
                 user_id: user.user_id,
-                isComment: false,
                 comment_id: "",
+                sub_comment_id: "",
+                isComment: false,
                 count_like: emojiType === "like" ? 1 : 0,
                 count_heart: emojiType === "heart" ? 1 : 0,
                 count_laugh: emojiType === "laugh" ? 1 : 0,
@@ -270,26 +272,40 @@ const DetailPostScreen = () => {
                                 width: "65%",
                             }}>
                             <AvatarEx size={30} round={10} url={userPost.imgUser} frame={userPost.frame_user} />
-                            <Text style={{ fontSize: 15, fontWeight: "bold", paddingHorizontal: "3%" }}>{userPost.username}</Text>
+
+                            <View style={{ width: "auto", flexDirection: "row", paddingHorizontal: "3%", }}>
+                                <Text style={{ fontSize: 15, fontWeight: "bold" }}>{userPost.username}</Text>
+                                {userPost.roleid != 0 ? <Image
+                                    source={require("../../assets/appIcons/crown.png")}
+                                    style={{
+                                        width: 20,
+                                        height: 20,
+                                        marginLeft: 10,
+                                    }}
+                                /> : null}
+                            </View>
                         </TouchableOpacity>
 
-                        {userPostCheck() ?
-                            isFlag ?
-                                <></>
-                                : <ButtonsComponent isButton onPress={handleFollowButton}
-                                    style={{
-                                        borderColor: "rgba(121,141,218,1)",
-                                        borderRadius: 100,
-                                        borderWidth: 2,
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        width: 80,
-                                        height: "100%",
-                                    }}
-                                >
-                                    <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
-                                </ButtonsComponent>
-                            : <></>}
+                        {user.status_user_id == 2 ? <></> :
+                            userPostCheck() ?
+                                isFlag ?
+                                    <></>
+                                    : <TouchableOpacity
+                                        disabled={user.status_user_id == 2 ? true : false}
+                                        onPress={handleFollowButton}
+                                        style={{
+                                            borderColor: "rgba(121,141,218,1)",
+                                            borderRadius: 100,
+                                            borderWidth: 2,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            width: 80,
+                                            height: "100%",
+                                        }}
+                                    >
+                                        <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
+                                    </TouchableOpacity>
+                                : <></>}
                     </Animated.View>
                 </View>
 
@@ -305,14 +321,15 @@ const DetailPostScreen = () => {
                 </View>
             </RowComponent>
             {/* Quick Comment */}
+
             <View style={{
                 flex: 1, position: 'absolute', zIndex: 999, bottom: 0, right: 0, left: 0, height: 55,
                 backgroundColor: "white",
                 justifyContent: "flex-end",
             }}>
-                <View style={{ height: "100%", }} >
+                {user.status_user_id == 2 ? <></> : <View style={{ height: "100%", }} >
                     {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={userPost} user={user} />}
-                </View>
+                </View>}
             </View>
 
             <ScrollView
@@ -382,41 +399,57 @@ const DetailPostScreen = () => {
                                 justifyContent: "center",
                                 // backgroundColor: "yellow",
                             }}>
-                                <Text style={{
-                                    fontSize: 15,
-                                    fontWeight: "bold",
-                                }}>{userPost.username}</Text>
+                                <View style={{ width: "auto", flexDirection: "row", }}>
+                                    <Text style={{
+                                        fontSize: 15,
+                                        fontWeight: "bold",
+                                    }}>{userPost.username}</Text>
+                                    {userPost.roleid != 0 ? <Image
+                                        source={require("../../assets/appIcons/crown.png")}
+                                        style={{
+                                            width: 20,
+                                            height: 20,
+                                            marginLeft: 10,
+                                        }}
+                                    /> : null}
+                                </View>
+
                                 <Text style={{
                                     fontSize: 12,
                                     color: "#BFBFBF",
                                 }}>{handleTime({ timestamp: post.created_at })}</Text>
+                                {userPost.status_user_id == 2 ? <Text style={{ color: "tomato", fontSize: 13 }}>Vô hiệu hóa</Text> : null}
+
                             </View>
                         </TouchableOpacity>
-                        {userPostCheck() ?
-                            isFlag ? <></>
+                        {user.status_user_id == 2 ? <></> :
+                            userPostCheck() ?
+                                isFlag ? <></>
+                                    :
+                                    <View style={{
+                                        flex: 1,
+                                        paddingHorizontal: "2%",
+                                        alignItems: "center",
+                                        // backgroundColor: "red",
+                                    }}>
+                                        <TouchableOpacity
+                                            disabled={user.status_user_id == 2 ? true : false}
+                                            onPress={handleFollowButton}
+                                            style={{
+                                                borderColor: "rgba(121,141,218,1)",
+                                                borderRadius: 100,
+                                                borderWidth: 2,
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                width: "70%",
+                                                height: "30%",
+                                            }}
+                                        >
+                                            <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 :
-                                <View style={{
-                                    flex: 1,
-                                    paddingHorizontal: "2%",
-                                    alignItems: "center",
-                                    // backgroundColor: "red",
-                                }}>
-                                    <ButtonsComponent isButton onPress={handleFollowButton}
-                                        style={{
-                                            borderColor: "rgba(121,141,218,1)",
-                                            borderRadius: 100,
-                                            borderWidth: 2,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            width: "70%",
-                                            height: "30%",
-                                        }}
-                                    >
-                                        <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)" }}>Theo dõi</Text>
-                                    </ButtonsComponent>
-                                </View>
-                            :
-                            <></>}
+                                <></>}
 
                     </View>
 
@@ -489,6 +522,7 @@ const DetailPostScreen = () => {
                     flexDirection: "row",
                 }} >
                     <TouchableOpacity
+                        disabled={user.status_user_id == 2 ? true : false}
                         onPress={() => handleBtnEmoji("like")}
                         activeOpacity={0.8}
                         style={{
@@ -517,6 +551,7 @@ const DetailPostScreen = () => {
                         }}>{likeCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
+                        disabled={user.status_user_id == 2 ? true : false}
                         onPress={() => handleBtnEmoji("heart")}
                         activeOpacity={0.8}
                         style={{
@@ -545,6 +580,7 @@ const DetailPostScreen = () => {
                         }}>{heartCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
+                        disabled={user.status_user_id == 2 ? true : false}
                         onPress={() => handleBtnEmoji("laugh")}
                         activeOpacity={0.8}
                         style={{
@@ -573,6 +609,7 @@ const DetailPostScreen = () => {
                         }}>{laughCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
+                        disabled={user.status_user_id == 2 ? true : false}
                         onPress={() => handleBtnEmoji("sad")}
                         activeOpacity={0.8}
                         style={{
@@ -659,7 +696,7 @@ const DetailPostScreen = () => {
                 {!comments ? null :
                     comments.map((comment, index) => {
                         return (
-                            <CommentsPost key={index} comment={comment} />
+                            <CommentsPost key={comment.comment_id} comment={comment} />
                         )
                     })}
 
@@ -674,21 +711,23 @@ const DetailPostScreen = () => {
 
 
 export const CommentsPost = React.memo(({ comment }) => {
-    const navigate = useNavigation();
+    const navigation = useNavigation();
     const user = useSelector((state) => state.user[comment.user_id]);
     const dispatch = useDispatch();
     const [dataPostCmt, setDataPostCmt] = useState(0); // Sử dụng state để lưu kết quả   
     const emoji = useSelector(state => state.emoji[comment.comment_id]);
     const countEmoji = calculateEmojiCounts({ emojiList: emoji, comment_id: comment.comment_id, }).totalCount;
+    const subComment = useSelector(state => state.subComment[comment.comment_id]);
+    const currentUser = useSelector(state => state.user.user);
 
     useEffect(() => {
         if (!user) { dispatch(startListeningUserByID({ user_id: comment.user_id })); }
         dispatch(startListeningEmojiCmt({ comment_id: comment.comment_id }));
         dispatch(startListeningSubCommentByPostId({ comment_id: comment.comment_id }));
+        // console.log("emoji Run");
     }, []);
 
     useEffect(() => {
-        console.log("emoji Run");
         const fetchCommentCount = async () => {
             const countCmt = await countSubComments({ comment_id: comment.comment_id });
             // console.log("countCmt", countCmt);
@@ -696,10 +735,7 @@ export const CommentsPost = React.memo(({ comment }) => {
             setDataPostCmt(formatNumber({ num: countCmt })); // Cập nhật state với kết quả
         };
         fetchCommentCount();
-        // }, [emoji]);
-    }, []);
-
-
+    }, [subComment]);
 
     const handleBtnEmoji = async () => {
         // console.log("comment", comment.comment_id);
@@ -728,15 +764,13 @@ export const CommentsPost = React.memo(({ comment }) => {
         dispatch(startListeningEmojiCmt({ comment_id: comment.comment_id }));
     };
 
+    const handleNagigatePersonScreen = () => {
+        navigation.navigate("PersonScreen", { userPost: user, isFromAvatar: true });
+    }
 
-
-
-    const handleAd = () => {
-        console.log("Ad");
-    };
 
     const handleNavigateCommentScreen = () => {
-        navigate.navigate("CommentScreen", { comment: comment, user: user });
+        navigation.navigate("CommentScreen", { comment: comment, user: user });
     }
     return (
         user ?
@@ -753,28 +787,47 @@ export const CommentsPost = React.memo(({ comment }) => {
                         height={appInfo.widthWindows / 5.7}
                         style={{ alignItems: "center" }}
                     >
-                        <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
-                        <View
+                        <TouchableOpacity
+                            onPress={handleNagigatePersonScreen}
+                            activeOpacity={0.8}
                             style={{
-                                height: "80%",
-                                width: "80%",
-                                justifyContent: "center",
-                                paddingLeft: "3%",
-                            }}
-                        >
-                            <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
-                            <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: comment.created_at })}</Text>
+                                flexDirection: "row",
+                            }}>
+                            <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                            <View
+                                style={{
+                                    height: "80%",
+                                    width: "80%",
+                                    justifyContent: "center",
+                                    paddingLeft: "3%",
+                                }}
+                            >
+                                <View style={{ width: "auto", flexDirection: "row", }}>
+                                    <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
 
-                        </View>
-                        <View
-                            style={{
-                                width: "10%",
-                                height: "100%",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <MoreOptionPostComponent size={20} user_id={user.user_id} isComment />
-                        </View>
+                                    {user.roleid != 0 ? <Image
+                                        source={require("../../assets/appIcons/crown.png")}
+                                        style={{
+                                            width: 15,
+                                            height: 15,
+                                            marginLeft: 5,
+                                        }}
+                                    /> : null}
+                                </View>
+                                <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: comment.created_at })}</Text>
+
+                            </View>
+                            <View
+                                style={{
+                                    width: "10%",
+                                    height: "100%",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <MoreOptionPostComponent size={20} user_id={user.user_id} comment_id={comment.comment_id} comment_user_id={comment.user_id} isComment />
+                            </View>
+                        </TouchableOpacity>
+
                     </RowComponent>
                     {/* Content Comment */}
                     <View style={{
@@ -824,7 +877,9 @@ export const CommentsPost = React.memo(({ comment }) => {
                         <Text style={{ fontSize: 12, }}>{dataPostCmt == 0 ? "Trả lời " : dataPostCmt} </Text>
 
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={handleBtnEmoji}
+                    <TouchableOpacity
+                        disabled={currentUser.status_user_id == 2 ? true : false}
+                        onPress={handleBtnEmoji}
                         style={{ flexDirection: "row", alignItems: 'center', flex: 1, alignSelf: "center" }}>
                         <Image
                             style={{
@@ -851,6 +906,6 @@ export const CommentsPost = React.memo(({ comment }) => {
             <></>
     )
 })
-export default React.memo(DetailPostScreen)
+export default DetailPostScreen
 
 const styles = StyleSheet.create({})

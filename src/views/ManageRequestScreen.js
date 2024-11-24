@@ -28,9 +28,9 @@ const ManageRequestScreen = () => {
 
 
     useEffect(() => {
-        dispatch(startListeningRequestAccepted({}));
-        dispatch(startListeningRequestPending({}));
-        dispatch(startListeningRequestRejected({}));
+        // dispatch(startListeningRequestAccepted({}));
+        // dispatch(startListeningRequestPending({}));
+        // dispatch(startListeningRequestRejected({}));
     }, []);
 
     useEffect(() => {
@@ -73,6 +73,7 @@ const ManageRequestScreen = () => {
 }
 
 const RenderRequestItem = ({ item, index }) => {
+    const navigation = useNavigation();
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user[item.user_id]);
     const hashtag = useSelector((state) => state.hashtag[item.hashtag_id]);
@@ -96,14 +97,17 @@ const RenderRequestItem = ({ item, index }) => {
         dispatch(updateRequest({ request_id: item.request_id, field: "status", value: "rejected" }))
         dispatch(updateUser({ user_id: item.user_id, newData: { roleid: 0 } }))
     }
-
+    const handleNagigatePersonScreen = () => {
+        navigation.navigate("PersonScreen", { userPost: user, isFromAvatar: true });
+    }
     return user ? (
         <View
             key={index}
             style={{
                 padding: 10,
                 margin: 10,
-                backgroundColor: item.status == "accepted" ? "chartreuse" : item.status == "rejected" ? "crimson" : "white",
+                // backgroundColor: item.status == "accepted" ? "chartreuse" : item.status == "rejected" ? "crimson" : "white",
+                backgroundColor: "white",
                 flexDirection: 'column',
                 borderRadius: 10,
                 shadowOffset: {
@@ -118,23 +122,30 @@ const RenderRequestItem = ({ item, index }) => {
                 style={{
                     flexDirection: 'row',
                 }}>
-                <Image
-                    source={{ uri: user.imgUser }}
+                <TouchableOpacity
+                    onPress={handleNagigatePersonScreen}
                     style={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: 25,
-                        marginRight: 10,
-                    }}
-                />
-                <View
-                    style={{
-                        flexDirection: 'column',
-                        justifyContent: 'center',
+                        flexDirection: 'row',
                     }}>
-                    <Text style={{ alignSelf: 'baseline', fontWeight: "bold" }}>{user.username}</Text>
-                    <Text style={{ alignSelf: 'baseline', color: appcolor.textGray }}>{user.user_id}</Text>
-                </View>
+
+                    <Image
+                        source={{ uri: user.imgUser }}
+                        style={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: 25,
+                            marginRight: 10,
+                        }}
+                    />
+                    <View
+                        style={{
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                        }}>
+                        <Text style={{ alignSelf: 'baseline', fontWeight: "bold" }}>{user.username}</Text>
+                        <Text style={{ alignSelf: 'baseline', color: appcolor.textGray }}>{user.user_id}</Text>
+                    </View>
+                </TouchableOpacity>
                 {item.status != "accepted" && item.status != "rejected" ? <TouchableOpacity
                     onPress={() => handleAcceptRequest()}
                     style={{
@@ -163,7 +174,7 @@ const RenderRequestItem = ({ item, index }) => {
                 </TouchableOpacity> : null}
             </View>
 
-            <Text style={{ color: appcolor.textGray, margin: 10 }}>Nội dung yêu cầu: </Text>
+            <Text style={{ margin: 10, fontWeight: "bold" }}>Nội dung yêu cầu: </Text>
             <Text style={{ margin: 10 }}>{item.description}</Text>
             {hashtag ? <View
                 style={{

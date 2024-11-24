@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, where, updateDoc, onSnapshot, query, orderBy, or } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, where, updateDoc, onSnapshot, query, orderBy, or, doc } from 'firebase/firestore';
 import { db, storage } from '../../firebase/FirebaseConfig'; // Firebase config
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase Storage
 
@@ -13,10 +13,10 @@ const initialState = {
 
 
 export const createSubComment = createAsyncThunk('data/createSubComment', async (
-    { sub_comment_id, comment_id, user_id, content, created_at, imgPost, tag_user_id }
+    { sub_comment_id, comment_id, user_id, content, created_at, imgPost, tag_user_id, sub_comment_status_id }
 ) => {
     try {
-        console.log("toi day", sub_comment_id, comment_id, user_id, content, created_at, imgPost)
+        // console.log("toi day", sub_comment_id, comment_id, user_id, content, created_at, imgPost)
         const docRef = await addDoc(collection(db, 'SubComment'), {
             sub_comment_id,
             comment_id,
@@ -25,6 +25,7 @@ export const createSubComment = createAsyncThunk('data/createSubComment', async 
             content,
             created_at,
             imgPost: "",
+            sub_comment_status_id,
         });
         // console.log("toi day", img_id)
         // console.log("toi day33", img_id.uri)
@@ -61,6 +62,23 @@ export const createSubComment = createAsyncThunk('data/createSubComment', async 
 });
 
 
+export const updateSubCommentByField = createAsyncThunk(
+    "data/updateSubCommentByField",
+    async ({ sub_comment_id, field, value }, { getState, dispatch }) => {
+        console.log(sub_comment_id, field, value)
+
+        try {
+            const subCommentRef = doc(db, "SubComment", sub_comment_id);
+
+            await updateDoc(subCommentRef, {
+                [field]: value,
+            });
+        } catch (error) {
+            console.error("Error updating subComment: ", error);
+            throw error;
+        }
+    }
+);
 
 
 
@@ -70,6 +88,7 @@ export const startListeningSubCommentByPostId = ({ comment_id }) => (dispatch) =
     const commentQuery = query(
         collection(db, "SubComment"),
         where("comment_id", "==", comment_id),
+        where("sub_comment_status_id", "<", 2),
         orderBy("created_at", "asc")
     );
     const uncomment = onSnapshot(commentQuery, (querySnapshot) => {
@@ -89,7 +108,8 @@ export const countSubComments = async ({ comment_id }) => {
     try {
         const commentsQuery = query(
             collection(db, 'SubComment'),
-            where('comment_id', '==', comment_id)
+            where('comment_id', '==', comment_id),
+            where("sub_comment_status_id", "<", 2),
         );
         const commentsSnapshot = await getDocs(commentsQuery);
 
@@ -104,6 +124,27 @@ export const countSubComments = async ({ comment_id }) => {
     }
 };
 
+export const startListeningSubCommentByID = ({ sub_comment_id }) => (dispatch) => {
+    if (!comment_id) return;
+
+    const subCommentQuery = query(
+        collection(db, "SubComment"),
+        where("sub_comment_id", "==", sub_comment_id)
+    );
+    const unsubscribe = onSnapshot(subCommentQuery, (querySnapshot) => {
+        const subCommentById = {
+            id: querySnapshot.docs[0].id,
+            ...querySnapshot.docs[0].data(),
+        };
+        dispatch(setSubCommentById({ sub_comment_id: sub_comment_id, subCommentById: subCommentById }));
+    }, (error) => {
+        console.error('Error fetching follower: ', error);
+    });
+
+    return unsubscribe; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
+};
+
+
 
 export const SubCommentSlice = createSlice({
     name: 'subComment',
@@ -114,6 +155,13 @@ export const SubCommentSlice = createSlice({
             state[comment_id] = subCommentPostById;
             // console.log("subCommentPostById comment_id", comment_id)
             // console.log("subCommentPostById", subCommentPostById)
+            state.status = 'succeeded';
+        },
+        setSubCommentById: (state, action) => {
+            const { sub_comment_id, subCommentById } = action.payload;
+            state[sub_comment_id] = subCommentById;
+            // console.log("commentPostById setcommentPostById", post_id)
+            // console.log("commentPostById setcommentPostById", commentPostById)
             state.status = 'succeeded';
         },
     },

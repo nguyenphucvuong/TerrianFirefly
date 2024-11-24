@@ -1,19 +1,21 @@
 import { RefreshControl, ScrollView, Text, View, FlatList, ActivityIndicator, Image } from "react-native";
 import React, { useCallback, useContext, useState, useEffect } from "react";
-import { StyleGlobal } from "../styles/StyleGlobal";
-import { data } from "../constains/data";
 import { useSelector, useDispatch } from "react-redux";
+
+import { SkeletonComponent } from "../component";
+
+import PostViewComponent from "../component/PostViewComponent";
+
 import { getPostsByField, getPostsRefresh, getPostsFromUnfollowedUsers } from '../../src/redux/slices/PostSlice';
 import { startListeningFollowers } from "../redux/slices/FollowerSlice";
 import { startListeningFavorites } from "../redux/slices/FavoriteSlice";
 import { startListeningEmoji } from "../redux/slices/EmojiSlice";
-import { SkeletonComponent } from "../component";
-
-
-import PostViewComponent from "../component/PostViewComponent";
 import { ImageCheckContext } from "../context/ImageProvider";
 import { getUserByField } from "../redux/slices/UserSlices";
 import { getNoti } from "../redux/slices/NotiSlice";
+import { startListeningReportBySubCommentId, startListeningReportByPostId, startListeningReportByCommentId } from "../redux/slices/ReportSilce";
+import { startListeningRequestAccepted, startListeningRequestPending, startListeningRequestRejected, } from '../redux/slices/RequestSlice';
+import { startListeningSubCommentByPostId } from "../redux/slices/SubCommentSlice";
 
 const HomeScreen = () => {
 
@@ -44,6 +46,13 @@ const HomeScreen = () => {
         await dispatch(startListeningFavorites({ user_id: user.user_id }));
         // await dispatch(startListeningEmoji({ user_id: user.user_id }));
         // dispatch(getPostsByField({ field: "created_at", quantity: 3, isFollow: false, currentUserId: user?.user_id }));
+        await dispatch(startListeningReportByPostId({}));
+        await dispatch(startListeningReportBySubCommentId({}));
+        await dispatch(startListeningReportByCommentId({}));
+
+        await dispatch(startListeningRequestAccepted({}));
+        await dispatch(startListeningRequestPending({}));
+        await dispatch(startListeningRequestRejected({}));
       }
       fetchData();
     }

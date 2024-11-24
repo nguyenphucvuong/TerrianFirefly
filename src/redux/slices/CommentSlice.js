@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, where, updateDoc, onSnapshot, query, or, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, where, updateDoc, onSnapshot, query, or, orderBy, doc } from 'firebase/firestore';
 import { db, storage } from '../../firebase/FirebaseConfig'; // Firebase config
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase Storage
 
@@ -12,7 +12,7 @@ const initialState = {
 
 
 export const createComment = createAsyncThunk('data/createComment', async (
-    { comment_id, post_id, user_id, content, created_at, imgPost }
+    { comment_id, post_id, user_id, content, created_at, imgPost, comment_status_id }
 ) => {
     try {
         // console.log("toi day", imgPost)
@@ -23,6 +23,7 @@ export const createComment = createAsyncThunk('data/createComment', async (
             content,
             created_at,
             imgPost: "",
+            comment_status_id
         });
         // console.log("toi day", img_id)
         // console.log("toi day33", img_id.uri)
@@ -58,6 +59,22 @@ export const createComment = createAsyncThunk('data/createComment', async (
     }
 });
 
+export const updateCommentByField = createAsyncThunk(
+    "data/updateCommentByField",
+    async ({ comment_id, field, value }, { getState, dispatch }) => {
+        console.log(comment_id, field, value)
+        try {
+            const commentRef = doc(db, "Comment", comment_id);
+
+            await updateDoc(commentRef, {
+                [field]: value,
+            });
+        } catch (error) {
+            console.error("Error updating comment: ", error);
+            throw error;
+        }
+    }
+);
 
 
 export const getComment = createAsyncThunk('data/getComment', async ({ post_id }) => {
@@ -80,6 +97,7 @@ export const startListeningCommentByPostId = ({ post_id, sortBy }) => (dispatch)
     const commentQuery = query(
         collection(db, "Comment"),
         where("post_id", "==", post_id),
+        where('comment_status_id', '<', 2),
         orderBy("created_at", sortBy)
         // orderBy("created_at", "desc", "asc")
     );
@@ -88,7 +106,7 @@ export const startListeningCommentByPostId = ({ post_id, sortBy }) => (dispatch)
         // const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
         const commentPostById = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         // console.log("commentPostById", commentPostById)
-        dispatch(setComentById({ commentPostById, post_id }));
+        dispatch(setComentByPostId({ commentPostById, post_id }));
     }, (error) => {
         console.error('Error fetching comment: ', error);
     });
@@ -97,11 +115,12 @@ export const startListeningCommentByPostId = ({ post_id, sortBy }) => (dispatch)
 };
 
 
-export const countCommentsAndSubCommentsRealTime = ({ post_id, setTotalCount }) => {
+export const countCommentsAndSubCommentsRealTime = ({ post_id }) => {
     try {
         const commentsQuery = query(
             collection(db, 'Comment'),
-            where('post_id', '==', post_id)
+            where('post_id', '==', post_id),
+            where('comment_status_id', '<', 2),
         );
         const unsubscribeComments = onSnapshot(commentsQuery, (commentsSnapshot) => {
             let commentsCount = commentsSnapshot.size;
@@ -111,14 +130,17 @@ export const countCommentsAndSubCommentsRealTime = ({ post_id, setTotalCount }) 
                 const commentId = doc.id;
                 const subCommentsQuery = query(
                     collection(db, 'SubComment'),
-                    where('comment_id', '==', commentId)
+                    where('comment_id', '==', commentId),
+                    where("sub_comment_status_id", "<", 2),
+
                 );
                 onSnapshot(subCommentsQuery, (subCommentsSnapshot) => {
                     subCommentsCount += subCommentsSnapshot.size;
                     const totalCount = commentsCount + subCommentsCount;
-                    setTotalCount(totalCount);
+                    // setTotalCount(totalCount);
                 });
             });
+            return commentsCount + subCommentsCount;
         });
         return () => {
             unsubscribeComments();
@@ -132,7 +154,8 @@ export const countCommentsAndSubComments = async ({ post_id }) => {
     try {
         const commentsQuery = query(
             collection(db, 'Comment'),
-            where('post_id', '==', post_id)
+            where('post_id', '==', post_id),
+            where('comment_status_id', '<', 2),
         );
         const commentsSnapshot = await getDocs(commentsQuery);
         const commentsCount = commentsSnapshot.size;
@@ -143,7 +166,8 @@ export const countCommentsAndSubComments = async ({ post_id }) => {
             const commentId = doc.id;
             const subCommentsQuery = query(
                 collection(db, 'SubComment'),
-                where('comment_id', '==', commentId)
+                where('comment_id', '==', commentId),
+                where("sub_comment_status_id", "<", 2),
             );
             const subCommentsSnapshot = await getDocs(subCommentsQuery);
             subCommentsCount += subCommentsSnapshot.size;
@@ -159,6 +183,27 @@ export const countCommentsAndSubComments = async ({ post_id }) => {
 };
 
 
+export const startListeningCommentByID = ({ comment_id }) => (dispatch) => {
+    if (!comment_id) return;
+
+    const commentQuery = query(
+        collection(db, "Comment"),
+        where("comment_id", "==", comment_id)
+    );
+    const unsubscribe = onSnapshot(commentQuery, (querySnapshot) => {
+        const commentById = {
+            id: querySnapshot.docs[0].id,
+            ...querySnapshot.docs[0].data(),
+        };
+        dispatch(setCommentById({ comment_id: comment_id, commentById: commentById }));
+    }, (error) => {
+        console.error('Error fetching follower: ', error);
+    });
+
+    return unsubscribe; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
+};
+
+
 
 
 
@@ -166,9 +211,16 @@ export const CommentSlice = createSlice({
     name: 'comment',
     initialState,
     reducers: {
-        setComentById: (state, action) => {
+        setComentByPostId: (state, action) => {
             const { commentPostById, post_id } = action.payload;
             state[post_id] = commentPostById;
+            // console.log("commentPostById setcommentPostById", post_id)
+            // console.log("commentPostById setcommentPostById", commentPostById)
+            state.status = 'succeeded';
+        },
+        setCommentById: (state, action) => {
+            const { comment_id, commentById } = action.payload;
+            state[comment_id] = commentById;
             // console.log("commentPostById setcommentPostById", post_id)
             // console.log("commentPostById setcommentPostById", commentPostById)
             state.status = 'succeeded';
@@ -177,33 +229,10 @@ export const CommentSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(createComment.fulfilled, (state, action) => {
-                state.comment.push(action.payload);
-                state.status = 'succeeded';
-            })
-            .addCase(createComment.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(createComment.rejected, (state, action) => {
-                state.error = action.error.message;
-                state.status = 'failed';
-            })
-
-            .addCase(getComment.fulfilled, (state, action) => {
-                state.comment = action.payload;
-                state.status = 'succeeded';
-            })
-            .addCase(getComment.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(getComment.rejected, (state, action) => {
-                state.error = action.error.message;
-                state.status = 'failed';
-            });
 
     },
 });
 
-export const { setComentById } = CommentSlice.actions
+export const { setComentByPostId, setCommentById } = CommentSlice.actions
 
 export default CommentSlice.reducer;

@@ -1,26 +1,33 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, where, updateDoc, onSnapshot, query, orderBy, or } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, where, updateDoc, onSnapshot, query, orderBy, or, doc, deleteDoc } from 'firebase/firestore';
 import { db, storage } from '../../firebase/FirebaseConfig'; // Firebase config
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase Storage
+import { sub } from '@tensorflow/tfjs';
 
 // Trạng thái ban đầu
 const initialState = {
+    post: [],
+    comment: [],
+    subComment: [],
     status: 'idle',
     error: null,
 };
 
+
 export const createReport = createAsyncThunk('data/createReport', async (
-    { report_id, user_id, reason, created_at, type, status }
+    { report_id, item_id, item_type, status, reported_at, status_changed_at, user_id_reported, user_id_reporter }
 ) => {
     try {
         // console.log("toi day", report_id, user_id, reason, created_at, type)
         const docRef = await addDoc(collection(db, 'Report'), {
             report_id,
-            user_id,
-            reason,
-            created_at,
-            type,
+            item_id,
+            item_type,
             status,
+            reported_at,
+            status_changed_at,
+            user_id_reported,
+            user_id_reporter,
         });
 
 
@@ -41,9 +48,10 @@ export const createReport = createAsyncThunk('data/createReport', async (
 });
 
 
-export const updateReport = updateReport(
+export const updateReport = createAsyncThunk(
     "user/updateReport",
-    async ({ report_id, field, value }, { getState, dispatch }) => {
+    async ({ report_id, field, value }, { getState, dispatch, rejectWithValue }) => {
+        console.log(report_id, field, value)
         try {
             const reportRef = doc(db, "Report", report_id); // Tham chiếu đến tài liệu người dùng
             // Cập nhật các trường trong tài liệu
@@ -65,14 +73,32 @@ export const updateReport = updateReport(
         } catch (error) {
             console.error("Error Update Report: ", error);
             throw error;
+            // return rejectWithValue("Error updating report");
         }
     }
 );
 
+export const deleteReport = createAsyncThunk(
+    "user/deleteReport",
+    async ({ report_id }, { getState, dispatch, rejectWithValue }) => {
+        try {
+            const reportRef = doc(db, "Report", report_id); // Tham chiếu đến tài liệu người dùng
+            // Cập nhật các trường trong tài liệu
+            await deleteDoc(reportRef);
+            return report_id;
+        } catch (error) {
+            console.error("Error Delete Report: ", error);
+            throw error;
+            // return rejectWithValue("Error updating report");
+        }
+    }
+);
+
+
 export const startListeningReportByPostId = ({ }) => (dispatch) => {
     const reportQuery = query(
         collection(db, "Report"),
-        where("type", "==", "post"),
+        where("item_type", "==", "post"),
     );
     const unReport = onSnapshot(reportQuery, (querySnapshot) => {
 
@@ -80,9 +106,7 @@ export const startListeningReportByPostId = ({ }) => (dispatch) => {
             const data = doc.data(); // Extract post_id from the report content 
             return { id: doc.id, ...data };
         });
-        reportPostById.forEach(report => {
-            dispatch(setReportPostById({ reportData: report, report_id: report.report_id }));
-        });
+        dispatch(setReportPostById(reportPostById));
     }, (error) => {
         console.error('Error fetching report: ', error);
     });
@@ -92,7 +116,7 @@ export const startListeningReportByPostId = ({ }) => (dispatch) => {
 export const startListeningReportByCommentId = ({ }) => (dispatch) => {
     const reportQuery = query(
         collection(db, "Report"),
-        where("type", "==", "comment"),
+        where("item_type", "==", "comment"),
     );
     const unReport = onSnapshot(reportQuery, (querySnapshot) => {
 
@@ -100,9 +124,8 @@ export const startListeningReportByCommentId = ({ }) => (dispatch) => {
             const data = doc.data(); // Extract post_id from the report content 
             return { id: doc.id, ...data };
         });
-        reportPostById.forEach(report => {
-            dispatch(setReportCommentById({ reportData: report, report_id: report.report_id }));
-        });
+
+        dispatch(setReportCommentById(reportPostById));
     }, (error) => {
         console.error('Error fetching report: ', error);
     });
@@ -112,7 +135,7 @@ export const startListeningReportByCommentId = ({ }) => (dispatch) => {
 export const startListeningReportBySubCommentId = ({ }) => (dispatch) => {
     const reportQuery = query(
         collection(db, "Report"),
-        where("type", "==", "subComment"),
+        where("item_type", "==", "subComment"),
     );
     const unReport = onSnapshot(reportQuery, (querySnapshot) => {
 
@@ -120,9 +143,7 @@ export const startListeningReportBySubCommentId = ({ }) => (dispatch) => {
             const data = doc.data(); // Extract post_id from the report content 
             return { id: doc.id, ...data };
         });
-        reportPostById.forEach(report => {
-            dispatch(setReportSubCommentById({ reportData: report, report_id: report.report_id }));
-        });
+        dispatch(setReportSubCommentById(reportPostById));
     }, (error) => {
         console.error('Error fetching report: ', error);
     });
@@ -135,18 +156,16 @@ export const ReportSlice = createSlice({
     initialState,
     reducers: {
         setReportPostById: (state, action) => {
-            const { reportData, report_id } = action.payload;
-            state.post[report_id] = reportData;
-            // console.log("subCommentPostById comment_id", comment_id)
-            // console.log("subCommentPostById", subCommentPostById)
+            state.post = action.payload;
             state.status = 'succeeded';
         },
-
         setReportCommentById: (state, action) => {
-
+            state.comment = action.payload;
+            state.status = 'succeeded';
         },
         setReportSubCommentById: (state, action) => {
-
+            state.subComment = action.payload;
+            state.status = 'succeeded';
         },
     },
     extraReducers: (builder) => {

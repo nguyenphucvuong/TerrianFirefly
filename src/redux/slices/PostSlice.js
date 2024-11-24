@@ -136,6 +136,7 @@ export const getPostsRefresh = createAsyncThunk(
       let postsQuery = query(
         collection(db, "Posts"),
         orderBy("created_at", "desc"),
+        where("status_post_id", "<", 2),
         limit("3")
       );
       if (followedUserIds.length > 0) {
@@ -246,6 +247,7 @@ export const getPostsFromUnfollowedUsers = createAsyncThunk(
       let postsQuery = query(
         collection(db, "Posts"),
         orderBy(field, "desc"),
+        where("status_post_id", "<", 2),
         limit(quantity)
       );
 
@@ -316,6 +318,7 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
         collection(db, "Posts"),
         orderBy(field, "desc"),
         limit(quantity),
+        where("status_post_id", "<", 2),
         where("user_id", "in", followedUserIds)
       );
 
@@ -526,6 +529,30 @@ export const getRealtimePostsByStatus = createAsyncThunk(
 );
 
 
+// export const startListeningPostByID = createAsyncThunk(
+//   "data/startListeningPostByID",
+//   async ({ post_id }, { dispatch, rejectWithValue }) => {
+export const startListeningPostByID = ({ post_id }) => (dispatch) => {
+  // console.log("post_id", post_id);
+  const postQuery = query(
+    collection(db, "Posts"),
+    where("post_id", "==", post_id)
+  );
+  const unsubscribe = onSnapshot(postQuery, (querySnapshot) => {
+    const postById = querySnapshot.docs.map(doc => {
+      const data = doc.data(); // Extract post_id from the report content 
+      return { id: doc.id, ...data };
+    });
+
+    // console.log("postById", postById[0]);
+    dispatch(setPostById({ post_id: post_id, postById: postById[0] }));
+  }, (error) => {
+    console.error('Error fetching report: ', error);
+  });
+  return unsubscribe;
+}
+
+
 
 // Tạo slice cho Post
 export const PostSlice = createSlice({
@@ -533,8 +560,16 @@ export const PostSlice = createSlice({
   initialState,
   reducers: {
     setPostsWithUser: (state, action) => {
-      state.postReport = action.payload;  // Cập nhật dữ liệu vào postReport
+      state.postReport = action.payload;
     },
+    setPostById: (state, action) => {
+      const { post_id, postById } = action.payload;
+
+
+      state[post_id] = postById;
+
+      state.status = "succeeded";
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -669,6 +704,6 @@ export const PostSlice = createSlice({
   },
 });
 
-export const { setPostsWithUser } = PostSlice.actions;
+export const { setPostsWithUser, setPostById } = PostSlice.actions;
 
 export default PostSlice.reducer;

@@ -27,6 +27,7 @@ import MoreOptionPostComponent from "./moreOptionBox/MoreOptionPostComponent";
 import YoutubePlayerComponent from "./YoutubePlayerComponent";
 import { TouchableOpacity } from "react-native";
 import { op } from "@tensorflow/tfjs";
+import { appcolor } from "../constains/appcolor";
 
 
 
@@ -35,6 +36,9 @@ const PostViewComponent = ({ post, user }) => {
 
         return <></>;
     }
+    // else if (post?.status_post_id == 2) {
+    //     return <></>;
+    // }
 
 
     const dispatch = useDispatch();
@@ -45,6 +49,7 @@ const PostViewComponent = ({ post, user }) => {
     const follower = useSelector((state) => state.follower.follower);
     const isFollow = follower.some(f => f.user_id === post.user_id && f.follower_user_id === user.user_id);
     const comments = useSelector(state => state.comment[post.post_id])
+
 
     useEffect(() => {
         dispatch(startListeningEmojiPost({ post_id: post.post_id }));
@@ -172,30 +177,44 @@ const PostViewComponent = ({ post, user }) => {
                                         // backgroundColor: "red",
                                     }}
                                 >
-                                    <Text style={StyleGlobal.textName}>{userPost.username}</Text>
+                                    <View style={{ width: "auto", flexDirection: "row" }}>
+                                        <Text style={StyleGlobal.textName}>{userPost.username}</Text>
+                                        {userPost.roleid != 0 ? <Image
+                                            source={require("../../assets/appIcons/crown.png")}
+                                            style={{
+                                                width: 20,
+                                                height: 20,
+                                                marginLeft: 10,
+                                            }}
+                                        /> : null}
+                                        {userPost.status_user_id == 2 ? <Text style={{ color: "tomato", marginLeft: 10 }}>Vô hiệu hóa</Text> : null}
+                                    </View>
                                     <Text style={StyleGlobal.textInfo}>{handleTime({ timestamp: post.created_at })}</Text>
+
                                 </View>
+
                             </TouchableOpacity>
 
-                            {userPostCheck() ?
-                                <TouchableOpacity
-                                    disabled={isFollow}
-                                    activeOpacity={0.6}
-                                    onPress={handleFollowButton}
-                                    style={{
-                                        borderColor: "rgba(121,141,218,1)",
-                                        borderRadius: 100,
-                                        borderWidth: 1,
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        width: "22%",
-                                        height: "50%",
-                                        paddingHorizontal: "2%",
-                                        opacity: isFollow ? 0 : 1,
-                                    }}
-                                >
-                                    <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>Theo dõi</Text>
-                                </TouchableOpacity> : <></>}
+                            {user.status_user_id == 2 ? <></> :
+                                userPostCheck() ?
+                                    <TouchableOpacity
+                                        disabled={isFollow}
+                                        activeOpacity={0.6}
+                                        onPress={handleFollowButton}
+                                        style={{
+                                            borderColor: "rgba(121,141,218,1)",
+                                            borderRadius: 100,
+                                            borderWidth: 1,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            width: "22%",
+                                            height: "50%",
+                                            paddingHorizontal: "2%",
+                                            opacity: isFollow ? 0 : 1,
+                                        }}
+                                    >
+                                        <Text style={{ ...StyleGlobal.text, color: "rgba(101,128,255,1)", fontWeight: "bold" }}>Theo dõi</Text>
+                                    </TouchableOpacity> : <></>}
 
                             <SkeletonComponent Data={userPost.userId} isButton>
                                 <View

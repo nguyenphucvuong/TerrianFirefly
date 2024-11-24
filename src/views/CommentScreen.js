@@ -40,7 +40,9 @@ const CommentScreen = () => {
     const countEmoji = calculateEmojiCounts({ emojiList: emoji, comment_id: comment.comment_id, }).totalCount;
     const currentUser = useSelector((state) => state.user.user);
 
-
+    useEffect(() => {
+        // console.log("currentUser", currentUser)
+    }, [])
 
 
 
@@ -146,7 +148,7 @@ const CommentScreen = () => {
                         alignItems: "center",
                     }}
                 >
-                    <MoreOptionPostComponent size={30} user_id={user.user_id} isComment />
+                    <MoreOptionPostComponent size={30} user_id={currentUser.user_id} comment_user_id={user.user_id} comment_id={comment.comment_id} isComment />
                 </View>
             </RowComponent>
             {/* Quick Comment */}
@@ -156,8 +158,10 @@ const CommentScreen = () => {
                 justifyContent: "flex-end",
             }}>
                 <View style={{ height: "100%", }} >
+
                     {/* {<AnimatedQuickCmtComponent isNomal isImgIn post={post} userPost={userPost} user={user} />} */}
-                    {<AnimatedQuickCmtComponent isNomal isImgIn isSubCmt user={user} comment_id={comment.comment_id} />}
+                    {currentUser.status_user_id == 2 ? null :
+                        <AnimatedQuickCmtComponent isNomal isImgIn isSubCmt user={currentUser} comment_id={comment.comment_id} />}
                 </View>
             </View>
             <ScrollView
@@ -181,28 +185,45 @@ const CommentScreen = () => {
                         height={appInfo.widthWindows / 5.7}
                         style={{ alignItems: "center" }}
                     >
-                        <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
-                        <View
-                            style={{
-                                height: "80%",
-                                width: "80%",
-                                justifyContent: "center",
-                                paddingLeft: "3%",
-                            }}
+                        <TouchableOpacity
+                            onPress={() => handleNagigatePersonScreen(user)}
+                            activeOpacity={0.8}
+                            style={{ flexDirection: "row", alignItems: "center", height: "100%" }}
                         >
-                            <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
-                            <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: comment.created_at })}</Text>
+                            <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                            <View
+                                style={{
+                                    height: "80%",
+                                    width: "80%",
+                                    justifyContent: "center",
+                                    paddingLeft: "3%",
+                                }}
+                            >
+                                <View style={{ width: "auto", flexDirection: "row", }}>
+                                    <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
 
-                        </View>
-                        <View
-                            style={{
-                                width: "10%",
-                                height: "100%",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <MoreOptionPostComponent size={20} user_id={user.user_id} isComment />
-                        </View>
+                                    {user.roleid != 0 ? <Image
+                                        source={require("../../assets/appIcons/crown.png")}
+                                        style={{
+                                            width: 15,
+                                            height: 15,
+                                            marginLeft: 5,
+                                        }}
+                                    /> : null}
+                                </View>
+                                <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: comment.created_at })}</Text>
+
+                            </View>
+                            <View
+                                style={{
+                                    width: "10%",
+                                    height: "100%",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <MoreOptionPostComponent size={20} user_id={currentUser.user_id} comment_user_id={user.user_id} comment_id={comment.comment_id} isComment />
+                            </View>
+                        </TouchableOpacity>
                     </RowComponent>
                     {/* Content Comment */}
                     <View style={{
@@ -293,13 +314,7 @@ const CommentScreen = () => {
 
 
             </ScrollView >
-            <ModalPop
-                visible={isVisible}
-                transparent={true}
-                onRequestClose={handleHidePop}
-            >
-                <CmtBoxComponent translateY={translateY} handleHidePop={handleHidePop} user_id={currentUser.user_id} comment_id={comment.comment_id} tag_user_id={user.user_id} isSubCmt />
-            </ModalPop>
+
         </>
     )
 }
@@ -313,14 +328,16 @@ const CommentsPost = React.memo(({ subComment, comment }) => {
     const emoji = useSelector(state => state.emoji[subComment.sub_comment_id]);
     const countEmoji = calculateEmojiCounts({ emojiList: emoji, sub_comment_id: subComment.sub_comment_id, }).totalCount;
     const currentUser = useSelector((state) => state.user.user);
+
+
     const userTag = useSelector((state) => state.user[subComment.tag_user_id]);
 
 
     useEffect(() => {
         if (!user) dispatch(startListeningUserByID({ user_id: subComment.user_id }));
         dispatch(startListeningEmojiSubCmt({ sub_comment_id: subComment.sub_comment_id }));
-        console.log("subComment", subComment, subComment.tag_user_id);
-        console.log("object", userTag);
+        // console.log("subComment", subComment, subComment.tag_user_id);
+        // console.log("object", userTag);
         // dispatch(startListeningSubCommentByPostId({ comment_id: subComment.comment_id }));
     }, []);
     useEffect(() => {
@@ -410,28 +427,45 @@ const CommentsPost = React.memo(({ subComment, comment }) => {
                         height={appInfo.widthWindows / 5.7}
                         style={{ alignItems: "center" }}
                     >
-                        <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
-                        <View
-                            style={{
-                                height: "80%",
-                                width: "80%",
-                                justifyContent: "center",
-                                paddingLeft: "3%",
-                            }}
+                        <TouchableOpacity
+                            onPress={() => handleNagigatePersonScreen(user)}
+                            activeOpacity={0.8}
+                            style={{ flexDirection: "row", alignItems: "center", height: "100%" }}
                         >
-                            <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
-                            <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: subComment.created_at })}</Text>
+                            <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                            <View
+                                style={{
+                                    height: "80%",
+                                    width: "80%",
+                                    justifyContent: "center",
+                                    paddingLeft: "3%",
+                                }}
+                            >
+                                <View style={{ width: "auto", flexDirection: "row", }}>
+                                    <Text style={[StyleGlobal.textName, { fontSize: 12 }]}>{user.username}</Text>
 
-                        </View>
-                        <View
-                            style={{
-                                width: "10%",
-                                height: "100%",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <MoreOptionPostComponent size={20} user_id={user.user_id} isComment />
-                        </View>
+                                    {user.roleid != 0 ? <Image
+                                        source={require("../../assets/appIcons/crown.png")}
+                                        style={{
+                                            width: 15,
+                                            height: 15,
+                                            marginLeft: 5,
+                                        }}
+                                    /> : null}
+                                </View>
+                                <Text style={[StyleGlobal.textInfo, { fontSize: 12 }]}>{handleTime({ timestamp: subComment.created_at })}</Text>
+
+                            </View>
+                            <View
+                                style={{
+                                    width: "10%",
+                                    height: "100%",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <MoreOptionPostComponent size={20} user_id={currentUser.user_id} sub_comment_id={subComment.sub_comment_id} sub_comment_user_id={user.user_id} isSubCmt />
+                            </View>
+                        </TouchableOpacity>
                     </RowComponent>
                     {/* Content Comment */}
                     <View style={{
@@ -444,8 +478,6 @@ const CommentsPost = React.memo(({ subComment, comment }) => {
                                 <Text style={{ fontSize: 15, color: appcolor.primary }}
                                     onPress={() => handleNagigatePersonScreen(userTag)}
                                 >@{userTag.username}</Text> : <></>}
-
-
                             {subComment.content ? <Text
                                 style={{ fontSize: 15 }}
                             // onLongPress={(text) => fetchCopiedText(text.)}

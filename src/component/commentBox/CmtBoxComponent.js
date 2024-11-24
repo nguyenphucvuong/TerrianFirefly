@@ -7,6 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useSelector, useDispatch } from 'react-redux';
 import * as FileSystem from 'expo-file-system';
 import * as jpeg from 'jpeg-js';
+import { FontAwesome } from '@expo/vector-icons';
 
 
 
@@ -40,6 +41,7 @@ const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id, isSubCmt, c
         content: content,
         created_at: Date.now(),
         imgPost: image,
+        comment_status_id: 0,
     } : {
         comment_id: comment_id,
         sub_comment_id: "",
@@ -48,6 +50,7 @@ const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id, isSubCmt, c
         content: content,
         created_at: Date.now(),
         imgPost: image,
+        sub_comment_status_id: 0,
     }
 
 
@@ -111,7 +114,8 @@ const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id, isSubCmt, c
             // Dispatch the comment action only after predictions are ready
             isSubCmt ? dispatch(createSubComment(dataCmt)) : dispatch(createComment(dataCmt));
 
-
+            setImage(null);
+            setPredictions(null);
             if (Platform.OS === 'android') {
                 ToastAndroid.show('Đang đăng bình luận!', ToastAndroid.SHORT);
             } else {
@@ -178,33 +182,31 @@ const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id, isSubCmt, c
                     style={{
                         width: 200,
                         height: 200,
-                        backgroundColor: "red",
                     }}>
                     {<>
                         <TouchableOpacity
                             style={{
                                 width: 25,
                                 height: 25,
-                                backgroundColor: "green",
+                                backgroundColor: "red",
                                 position: "absolute",
                                 zIndex: 1,
                                 top: 0,
                                 right: 0,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                borderRadius: 30,
                             }}
                             onPress={() => { console.log("Clearing image"); setImage(null); setPredictions(null); }}
                         >
-                            <Image source={require('../../../assets/appIcons/close_icon.png')}
-                                style={{
-                                    width: 25,
-                                    height: 25,
-                                    contentFit: "cover",
-                                }} />
+                            <FontAwesome name="times" size={17} color="white" />
                         </TouchableOpacity>
                         {image && <Image source={image}
                             style={{
                                 width: 200,
                                 height: 200,
                                 contentFit: "cover",
+                                borderRadius: 10,
                             }} />}
                     </>}
                 </View>}

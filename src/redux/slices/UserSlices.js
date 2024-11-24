@@ -74,7 +74,7 @@ export const updateUserState = createAsyncThunk(
 
       // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
       const updatedSnap = await getDoc(userRef);
-      console.log("updatedSnap", updatedSnap.data());
+      // console.log("updatedSnap", updatedSnap.data());
       if (updatedSnap.exists()) {
         return {
           id: updatedSnap.id,
@@ -323,15 +323,11 @@ export const startListeningUserByID = ({ user_id }) => (dispatch) => {
     where("user_id", "==", user_id)
   );
   const unsubscribe = onSnapshot(followerQuery, (querySnapshot) => {
-    // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
     const userById = {
       id: querySnapshot.docs[0].id,
       ...querySnapshot.docs[0].data(),
     };
-    // console.log("userById00", userById)
     dispatch(setUserById(userById));
-    // console.log("followers", followers)
   }, (error) => {
     console.error('Error fetching follower: ', error);
   });
