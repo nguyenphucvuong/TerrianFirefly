@@ -14,6 +14,7 @@ const initialState = {
   userReport: [],
   userHashtag: [],
   totalEmoji: 0,
+  skipAutoNavigation: false,
 };
 
 // Thiết lập listener thời gian thực cho dữ liệu người dùng
@@ -464,6 +465,9 @@ export const UserSlices = createSlice({
     setTotalEmoji: (state, action) => {
       state.totalEmoji = action.payload;
     },
+    setSkipAutoNavigation: (state, action) => {
+      state.skipAutoNavigation = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -496,6 +500,6 @@ export const UserSlices = createSlice({
   },
 });
 
-export const { setUser, setError, setUserById, setIUser, setUserReport, setUserHashtag, setFavourite, setTotalEmoji } = UserSlices.actions;
+export const { setUser, setError, setUserById, setIUser, setUserReport, setUserHashtag, setFavourite, setTotalEmoji, setSkipAutoNavigation  } = UserSlices.actions;
 
 export default UserSlices.reducer;

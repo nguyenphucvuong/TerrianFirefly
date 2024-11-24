@@ -17,7 +17,7 @@ import "react-native-gesture-handler";
 import StackNavigator from "./src/stacks/StackNavigator";
 import { Provider } from "react-redux";
 import { useDispatch, useSelector } from "react-redux";
-import { listenToUserRealtime } from "./src/redux/slices/UserSlices";
+import { listenToUserRealtime, } from "./src/redux/slices/UserSlices";
 import { LogBox } from "react-native";
 import { auth, db } from "./src/firebase/FirebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
@@ -40,6 +40,7 @@ const MainApp = () => {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState("");
   const [channels, setChannels] = useState([]);
+  const skipAutoNavigation = useSelector((state) => state.user.skipAutoNavigation);
   const [notification, setNotification] = useState(undefined);
   const notificationListener = useRef();
   const responseListener = useRef();
@@ -70,19 +71,19 @@ const MainApp = () => {
         console.log("No user logged in, navigating to WellcomScreen");
       }
     });
-  
+
     return () => unsubscribe(); // Hủy đăng ký khi component bị huỷ
   }, [navigation]);
 
   useEffect(() => {
-    if (appIsReady && isLoadingData) {
+    if (appIsReady && isLoadingData && !skipAutoNavigation) {
       if (user) {
-        navigation.navigate("IndexTab"); // Điều hướng đến IndexTab nếu đã đăng nhập
+        navigation.navigate("IndexTab");
       } else {
-        navigation.navigate("WellcomScreen"); // Điều hướng đến WellcomScreen nếu chưa đăng nhập
+        navigation.navigate("WellcomScreen");
       }
     }
-  }, [appIsReady, isLoadingData, user, navigation]);
+  }, [appIsReady, isLoadingData, user, skipAutoNavigation, navigation]);
 
   useEffect(() => {
     setAppIsReady(false);
@@ -94,8 +95,7 @@ const MainApp = () => {
         }
       } catch (error) {
         console.error("Error listening to user data:", error);
-      }
-      finally{
+      } finally {
         setAppIsReady(true);
       }
     };
@@ -106,7 +106,6 @@ const MainApp = () => {
   const today = new Date();
   const value = today.toISOString(); // Đảm bảo là định dạng ISO
 
-  
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
@@ -115,13 +114,10 @@ const MainApp = () => {
     }),
   });
 
-
   // useEffect(() => {
   //   // const unsubscribeHashtag = getHashtag(dispatch);
   //   // return () => unsubscribeHashtag();
   // }, [dispatch]);
-
-  
 
   //load dữ liệu trước khi vào màn hình app
   useEffect(() => {
