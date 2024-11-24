@@ -159,7 +159,6 @@ const PostButton = ({ toggleExpand, handleShowPop, post, user, user_post, handle
                 comment_id: "",
                 sub_comment_id: "",
                 user_id: user.user_id,
-                isComment: false,
                 count_like: emojiType === "like" ? 1 : 0,
                 count_heart: emojiType === "heart" ? 1 : 0,
                 count_laugh: emojiType === "laugh" ? 1 : 0,
