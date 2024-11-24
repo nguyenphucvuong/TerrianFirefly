@@ -20,7 +20,6 @@ import { db, auth } from "../firebase/FirebaseConfig";
 //redux
 import { getUser, listenToUserRealtime } from "../redux/slices/UserSlices";
 import { getAchievement } from "../redux/slices/AchievementSlice";
-import { getNickname } from "../redux/slices/NicknameSlice";
 import { useDispatch, useSelector } from "react-redux";
 //
 import {

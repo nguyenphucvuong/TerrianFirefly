@@ -15,7 +15,7 @@ import { getUserByField } from "../redux/slices/UserSlices";
 import { getNoti } from "../redux/slices/NotiSlice";
 import { startListeningReportBySubCommentId, startListeningReportByPostId, startListeningReportByCommentId } from "../redux/slices/ReportSilce";
 import { startListeningRequestAccepted, startListeningRequestPending, startListeningRequestRejected, } from '../redux/slices/RequestSlice';
-import { startListeningSubCommentByPostId } from "../redux/slices/SubCommentSlice";
+import { startListeningSubCommentByCommentId } from "../redux/slices/SubCommentSlice";
 
 const HomeScreen = () => {
 

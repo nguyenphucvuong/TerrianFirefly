@@ -44,6 +44,7 @@ const UserManagementScreen = () => {
     } else if (selectedTypeValue == "sub_comment") {
       serReport(reportSubComment);
     }
+    // console.log("object", report)
   }, [selectedTypeValue, selectedStatusValue, reportPost, reportComment, reportSubComment]);
 
 
@@ -152,83 +153,93 @@ const ReportItem = ({ item, index }) => {
 
 
   useEffect(() => {
+    // console.log("item.item_type", item.item_type, item.item_id)
     dispatch(startListeningUserByID({ user_id: item.user_id_reported }));
     if (item.item_type == "post") {
-      console.log("vo day")
+      // console.log("vo day post")
       dispatch(startListeningPostByID({ post_id: item.item_id }));
     } else if (item.item_type == "comment") {
+      // console.log("vo day comment")
       dispatch(startListeningCommentByID({ comment_id: item.item_id }));
-    } else if (item.item_type == "subComment") {
-      dispatch(startListeningSubCommentByID({ subComment_id: item.item_id }));
+    } else if (item.item_type == "sub_comment") {
+      // console.log("vo day subcomment")
+      dispatch(startListeningSubCommentByID({ sub_comment_id: item.item_id }));
     }
     // console.log("item", item)
   }, []);
   useEffect(() => {
-    if (item.item_type == "post") {
-      setItemReport(post);
-      setItemStatus('status_post_id');
-      // console.log("post", post)
-    } else if (item.item_type == "comment") {
-      setItemReport(comment);
-      setItemStatus('comment_status_id');
-    } else if (item.item_type == "subComment") {
-      setItemReport(subComment);
-      setItemStatus('sub_comment_status_id');
-    }
+    const handleCheckReport = async () => {
+      if (item.item_type == "post") {
+        setItemReport(post);
+        setItemStatus('status_post_id');
+        // console.log("post", post)
+      } else if (item.item_type == "comment") {
+        setItemReport(comment);
+        setItemStatus('comment_status_id');
+      } else if (item.item_type == "sub_comment") {
+        setItemReport(subComment);
+        setItemStatus('sub_comment_status_id');
+        // console.log("ItemReport subComment", itemReport)
+      }
 
-    // Kiểm tra xem bài đăng, bình luận, bình luận phụ đã bị xóa chưa
-    if (item.item_type == "post" && post && post.status_post_id == 2) {
-      dispatch(deleteReport({ report_id: item.report_id }));
-    } else if (item.item_type == "comment" && comment && comment.comment_status_id == 2) {
-      dispatch(deleteReport({ report_id: item.report_id }));
-    } else if (item.item_type == "subComment" && subComment && subComment.sub_comment_status_id == 2) {
-      dispatch(deleteReport({ report_id: item.report_id }));
-    }
+      // Kiểm tra xem bài đăng, bình luận, bình luận phụ đã bị xóa chưa
+      if (item.item_type == "post" && post && post.status_post_id == 2 && item.status == 1) {
+        await dispatch(deleteReport({ report_id: item.report_id }));
+      } else if (item.item_type == "comment" && comment && comment.comment_status_id == 2 && item.status == 1) {
+        await dispatch(deleteReport({ report_id: item.report_id }));
+      } else if (item.item_type == "sub_comment" && subComment && subComment.sub_comment_status_id == 2 && item.status == 1) {
+        await dispatch(deleteReport({ report_id: item.report_id }));
+      }
 
-    // Kiểm tra thời gian báo cáo đã quá 3 ngày chưa
-    if (item.item_type == "post" && post && post.status_post_id == 1 && item.status == 1 && item.status_changed_at <= Date.now() - 259200000) {
-      dispatch(updateReport({ report_id: item.report_id, field: "status", value: 2 }));
-      checkUserCountReport();
-    } else if (item.item_type == "comment" && comment && comment.comment_status_id == 1 && item.status == 1 && item.status_changed_at <= Date.now() - 259200000) {
-      dispatch(updateReport({ report_id: item.report_id, field: "status", value: 2 }));
-      checkUserCountReport();
-    } else if (item.item_type == "subComment" && subComment && subComment.sub_comment_status_id == 1 && item.status == 1 && item.status_changed_at <= Date.now() - 259200000) {
-      dispatch(updateReport({ report_id: item.report_id, field: "status", value: 2 }));
-      checkUserCountReport();
+      // Kiểm tra thời gian báo cáo đã quá 3 ngày chưa
+      if (item.item_type == "post" && post && post.status_post_id == 1 && item.status == 1 && item.status_changed_at <= Date.now() - 259200000) {
+        await dispatch(updateReport({ report_id: item.report_id, field: "status", value: 2 }));
+        checkUserCountReport();
+        await dispatch(updatePostsByField({ post_id: item.item_id, field: "status_post_id", value: 2 }));
+      } else if (item.item_type == "comment" && comment && comment.comment_status_id == 1 && item.status == 1 && item.status_changed_at <= Date.now() - 259200000) {
+        await dispatch(updateReport({ report_id: item.report_id, field: "status", value: 2 }));
+        checkUserCountReport();
+        await dispatch(updateCommentByField({ comment_id: item.item_id, field: "comment_status_id", value: 2 }));
+      } else if (item.item_type == "sub_comment" && subComment && subComment.sub_comment_status_id == 1 && item.status == 1 && item.status_changed_at <= Date.now() - 259200000) {
+        await dispatch(updateReport({ report_id: item.report_id, field: "status", value: 2 }));
+        checkUserCountReport();
+        await dispatch(updateSubCommentByField({ sub_comment_id: item.item_id, field: "sub_comment_status_id", value: 2 }));
+      }
     }
+    handleCheckReport();
     // console.log("itemReport", itemReport)
   }, [post, comment, subComment]);
   const handleNagigatePersonScreen = () => {
     navigation.navigate("PersonScreen", { userPost: user, isFromAvatar: true });
   }
 
-  const checkUserCountReport = () => {
+  const checkUserCountReport = async () => {
     if (user.report_count >= 2) {
-      dispatch(updateUserState({ user_id: user.user_id, field: "status", value: 2 }));
+      await dispatch(updateUserState({ user_id: user.user_id, field: "status", value: 2 }));
     } else {
-      dispatch(updateUserState({ user_id: user.user_id, field: "report_count", value: user.report_count + 1 }));
-      dispatch(updateUserState({ user_id: user.user_id, field: "status", value: 1 }));
+      await (updateUserState({ user_id: user.user_id, field: "report_count", value: user.report_count + 1 }));
+      await (updateUserState({ user_id: user.user_id, field: "status", value: 1 }));
     }
   }
 
-  const handleSendWarning = () => {
+  const handleSendWarning = async () => {
     if (item.status == 0) {
-      dispatch(updateReport({ report_id: item.report_id, field: "status", value: 1 }));
+      await dispatch(updateReport({ report_id: item.report_id, field: "status", value: 1 }));
     } else if (item.status == 1) {
-      dispatch(updateReport({ report_id: item.report_id, field: "status", value: 2 }));
+      await dispatch(updateReport({ report_id: item.report_id, field: "status", value: 2 }));
     }
-    dispatch(updateReport({ report_id: item.report_id, field: "status_changed_at", value: Date.now() }));
+    await dispatch(updateReport({ report_id: item.report_id, field: "status_changed_at", value: Date.now() }));
 
   }
 
-  const handleDeleteReport = () => {
-    dispatch(deleteReport({ report_id: item.report_id }));
+  const handleDeleteReport = async () => {
+    await dispatch(deleteReport({ report_id: item.report_id }));
     if (item.item_type == "post") {
-      dispatch(updatePostsByField({ post_id: item.item_id, field: itemStatus, value: 2 }));
+      await dispatch(updatePostsByField({ post_id: item.item_id, field: itemStatus, value: 0 }));
     } else if (item.item_type == "comment") {
-      dispatch(updateCommentByField({ comment_id: item.item_id, field: itemStatus, value: 2 }));
+      await dispatch(updateCommentByField({ comment_id: item.item_id, field: itemStatus, value: 0 }));
     } else if (item.item_type == "subComment") {
-      dispatch(updateSubCommentByField({ subComment_id: item.item_id, field: itemStatus, value: 2 }));
+      await dispatch(updateSubCommentByField({ subComment_id: item.item_id, field: itemStatus, value: 0 }));
     }
   }
 
@@ -286,6 +297,7 @@ const ReportItem = ({ item, index }) => {
             <Text style={{ alignSelf: 'baseline', fontWeight: "bold" }}>{user.username}</Text>
             <Text style={{ alignSelf: 'baseline', color: appcolor.textGray }}>Id: {user.user_id}</Text>
           </View>
+
         </TouchableOpacity>
         {item.status != 1 && item.status != 2 ?
           <TouchableOpacity
@@ -334,6 +346,13 @@ const ReportItem = ({ item, index }) => {
           <Text style={{ fontWeight: "bold" }}>Id {item.item_type}: </Text>
           <Text style={{}}>{item.item_id}</Text>
         </View>
+        <View
+          style={{
+            flexDirection: 'row',
+          }}>
+          <Text style={{ fontWeight: "bold" }}>Status change time: {formatDate({ timestamp: item.status_changed_at })} </Text>
+        </View>
+
         <View
           style={{
             flexDirection: 'row',

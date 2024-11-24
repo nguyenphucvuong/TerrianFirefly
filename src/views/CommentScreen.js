@@ -21,7 +21,7 @@ import { handleTime, formatNumber, calculateEmojiCounts } from '../utils/index'
 import { StyleGlobal } from '../styles/StyleGlobal'
 import { startListeningEmojiSubCmt, createEmoji, deleteEmoji } from '../redux/slices/EmojiSlice'
 import { getUserByField, startListeningUserByID } from '../redux/slices/UserSlices'
-import { startListeningSubCommentByPostId } from '../redux/slices/SubCommentSlice'
+import { startListeningSubCommentByCommentId } from '../redux/slices/SubCommentSlice'
 import { countSubComments } from '../redux/slices/SubCommentSlice'
 import { appcolor } from '../constains/appcolor'
 
@@ -260,6 +260,7 @@ const CommentScreen = () => {
                     }}>
                     <View style={{ width: "45%" }} />
                     <TouchableOpacity
+                        disabled={currentUser.status_user_id == 2 ? true : false}
                         onPress={() => handleShowPop()}
                         style={{ flexDirection: "row", alignItems: 'center', flex: 1, alignSelf: "center" }}>
                         <Image
@@ -277,6 +278,8 @@ const CommentScreen = () => {
 
 
                     <TouchableOpacity onPress={handleBtnEmoji}
+                        disabled={currentUser.status_user_id == 2 ? true : false}
+
                         style={{ flexDirection: "row", alignItems: 'center', flex: 1, alignSelf: "center" }}>
                         <Image
                             style={{
@@ -509,6 +512,8 @@ const CommentsPost = React.memo(({ subComment, comment }) => {
                     }}>
                     <View style={{ width: "45%" }} />
                     <TouchableOpacity
+                        disabled={currentUser.status_user_id == 2 ? true : false}
+
                         onPress={() => handleShowPop()}
                         style={{ flexDirection: "row", alignItems: 'center', flex: 1, alignSelf: "center" }}>
                         <Image
@@ -527,6 +532,7 @@ const CommentsPost = React.memo(({ subComment, comment }) => {
 
 
                     <TouchableOpacity onPress={handleBtnEmoji}
+                        disabled={currentUser.status_user_id == 2 ? true : false}
                         style={{ flexDirection: "row", alignItems: 'center', flex: 1, alignSelf: "center" }}>
                         <Image
                             style={{

@@ -31,7 +31,7 @@ import { createFollow } from '../redux/slices/FollowerSlice';
 import { updateEmojiByField, startListeningEmojiPost, createEmoji, deleteEmoji, startListeningEmojiCmt } from "../redux/slices/EmojiSlice";
 import { startListeningCommentByPostId, countCommentsAndSubComments } from '../redux/slices/CommentSlice';
 import { startListeningUserByID } from '../redux/slices/UserSlices';
-import { countSubComments, startListeningSubCommentByPostId } from '../redux/slices/SubCommentSlice';
+import { countSubComments, startListeningSubCommentByCommentId } from '../redux/slices/SubCommentSlice';
 
 
 
@@ -222,7 +222,8 @@ const DetailPostScreen = () => {
 
 
     const handleAd = () => {
-        console.log(componentPosition);
+        //console.log("toi day");
+        //console.log(componentPosition);
     };
 
 
@@ -386,7 +387,7 @@ const DetailPostScreen = () => {
                                 alignItems: "center",
                                 width: "50%",
                                 height: "100%",
-                                paddingLeft: 13,
+                                paddingLeft: "3%"
                             }}>
 
 
@@ -723,7 +724,7 @@ export const CommentsPost = React.memo(({ comment }) => {
     useEffect(() => {
         if (!user) { dispatch(startListeningUserByID({ user_id: comment.user_id })); }
         dispatch(startListeningEmojiCmt({ comment_id: comment.comment_id }));
-        dispatch(startListeningSubCommentByPostId({ comment_id: comment.comment_id }));
+        dispatch(startListeningSubCommentByCommentId({ comment_id: comment.comment_id }));
         // console.log("emoji Run");
     }, []);
 

@@ -82,7 +82,7 @@ export const updateSubCommentByField = createAsyncThunk(
 
 
 
-export const startListeningSubCommentByPostId = ({ comment_id }) => (dispatch) => {
+export const startListeningSubCommentByCommentId = ({ comment_id }) => (dispatch) => {
     if (!comment_id) return;
     // console.log("comment_id", comment_id)
     const commentQuery = query(
@@ -96,7 +96,7 @@ export const startListeningSubCommentByPostId = ({ comment_id }) => (dispatch) =
         // const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
         const subCommentPostById = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         // console.log("commentPostById", commentPostById)
-        dispatch(setSubComentById({ subCommentPostById, comment_id }));
+        dispatch(setSubCommentByCommentId({ subCommentPostById, comment_id }));
     }, (error) => {
         console.error('Error fetching subComment: ', error);
     });
@@ -125,8 +125,8 @@ export const countSubComments = async ({ comment_id }) => {
 };
 
 export const startListeningSubCommentByID = ({ sub_comment_id }) => (dispatch) => {
-    if (!comment_id) return;
-
+    if (!sub_comment_id) return;
+    // console.log("sub_comment_id", sub_comment_id)
     const subCommentQuery = query(
         collection(db, "SubComment"),
         where("sub_comment_id", "==", sub_comment_id)
@@ -150,7 +150,7 @@ export const SubCommentSlice = createSlice({
     name: 'subComment',
     initialState,
     reducers: {
-        setSubComentById: (state, action) => {
+        setSubCommentByCommentId: (state, action) => {
             const { subCommentPostById, comment_id } = action.payload;
             state[comment_id] = subCommentPostById;
             // console.log("subCommentPostById comment_id", comment_id)
@@ -159,9 +159,9 @@ export const SubCommentSlice = createSlice({
         },
         setSubCommentById: (state, action) => {
             const { sub_comment_id, subCommentById } = action.payload;
+            // console.log("subaction.payload", action.payload)
             state[sub_comment_id] = subCommentById;
-            // console.log("commentPostById setcommentPostById", post_id)
-            // console.log("commentPostById setcommentPostById", commentPostById)
+            // console.log("state[sub_comment_id]", state[sub_comment_id])
             state.status = 'succeeded';
         },
     },
@@ -171,6 +171,6 @@ export const SubCommentSlice = createSlice({
     },
 });
 
-export const { setSubComentById } = SubCommentSlice.actions
+export const { setSubCommentById, setSubCommentByCommentId } = SubCommentSlice.actions
 
 export default SubCommentSlice.reducer;

@@ -27,7 +27,6 @@ const initialState = {
   error: null,
   postByField: [],
   postByUser: [],
-  postFavourite: [],
   postReport: [],
   loading: false,
 };
@@ -391,71 +390,6 @@ export const getPostUsers = createAsyncThunk(
   }
 );
 
-// Hàm lấy danh sách user ID đã được yêu thích
-const getFavouriteUserIds = async ({ currentUserId }) => {
-  try {
-    const favouriteQuery = query(
-      collection(db, "Favorite"),
-      where("user_id", "==", currentUserId)  // Lấy bài viết yêu thích của currentUserId
-    );
-
-    const favouriteSnapshot = await getDocs(favouriteQuery);
-    // Lấy danh sách post_id từ các bài viết mà người dùng yêu thích
-    //console.log('favouriteSnapshot', favouriteSnapshot.docs.map((doc) => doc.data().post_id));
-
-    return favouriteSnapshot.docs.map((doc) => doc.data().post_id);  // Trả về post_id của bài viết yêu thích
-  } catch (error) {
-    console.error("Error fetching favourite post IDs: ", error);
-    throw error;
-  }
-};
-
-//hàm lấy bài người dùng đã yêu thích
-export const getPostsFromFavouriteUsers = createAsyncThunk(
-  "data/getPostsFromFavouriteUsers",
-  async ({ field, currentUserId }, { getState }) => {
-    // console.log('currentUserId',currentUserId);
-
-    try {
-      // Lấy danh sách user ID đã được follow
-      const favouriteUserIds = await getFavouriteUserIds({
-        currentUserId: currentUserId,
-      });
-      //console.log('favouriteUserIds', favouriteUserIds);
-
-      // Nếu không có user nào được follow, trả về mảng rỗng
-      if (favouriteUserIds.length === 0) {
-        return { postData: [] };
-      }
-
-      // Tạo query lấy bài đăng từ những người dùng đã được yêu thích
-      let postsQuery = query(
-        collection(db, "Posts"),
-        orderBy(field, "desc"),
-        where("post_id", "in", favouriteUserIds)
-      );
-
-      const querySnapshot = await getDocs(postsQuery);
-
-      // Trả về mảng rỗng nếu không có bài đăng nào
-      if (querySnapshot.empty) {
-        return { postData: [] };
-      }
-
-      const postData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      return {
-        postData: postData,
-      };
-    } catch (error) {
-      console.error("Error fetching posts from favourite users: ", error);
-      throw error;
-    }
-  }
-);
 
 
 export const updatePostsByField = createAsyncThunk(
@@ -657,27 +591,12 @@ export const PostSlice = createSlice({
         state.error = action.error.message;
       })
 
-      //getPostsFromFavouriteUsers
-      .addCase(getPostsFromFavouriteUsers.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(getPostsFromFavouriteUsers.fulfilled, (state, action) => {
-        state.loading = false;
-        state.postFavourite = action.payload.postData;
-        state.lastVisiblePostFollower = action.payload.lastVisiblePost;
-        state.status = "succeeded";
-      })
-      .addCase(getPostsFromFavouriteUsers.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
-      })
-
       //getPostUsers
       .addCase(getPostUsers.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+
       .addCase(getPostUsers.fulfilled, (state, action) => {
         state.loading = false;
         state.postByUser = action.payload.postData;

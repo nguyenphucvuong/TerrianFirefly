@@ -135,15 +135,16 @@ export const startListeningReportByCommentId = ({ }) => (dispatch) => {
 export const startListeningReportBySubCommentId = ({ }) => (dispatch) => {
     const reportQuery = query(
         collection(db, "Report"),
-        where("item_type", "==", "subComment"),
+        where("item_type", "==", "sub_comment"),
     );
     const unReport = onSnapshot(reportQuery, (querySnapshot) => {
 
-        const reportPostById = querySnapshot.docs.map(doc => {
+        const reportSubComment = querySnapshot.docs.map(doc => {
             const data = doc.data(); // Extract post_id from the report content 
             return { id: doc.id, ...data };
         });
-        dispatch(setReportSubCommentById(reportPostById));
+        // console.log("reportSubComment", reportSubComment)
+        dispatch(setReportSubCommentById(reportSubComment));
     }, (error) => {
         console.error('Error fetching report: ', error);
     });

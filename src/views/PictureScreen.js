@@ -59,7 +59,7 @@ const PictureScreen = ({ }) => {
     // favorite
     const favorite = useSelector(state => state.favorite.currentFavorite);
     // const [isFavorite, setIsFavorite] = useState(false);
-    const isFavorite = favorite.some(f => f.post_id === post.post_id);
+    const isFavorite = favorite.some(f => f.post_id === post.post_id && f.user_id === user.user_id);
 
 
     const dataPostView = formatNumber({ num: post.count_view });

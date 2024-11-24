@@ -5,7 +5,6 @@ import PersonScreen from './PersonScreen';
 import BackgroundScreen from './BackgroundScreen';
 import InfomationScreen from './InfomationScreen';
 import AchievementsScreen from './AchievementsScreen';
-import NickNameScreen from './NickNameScreen';
 import DetailPostScreen from './DetailPostScreen';
 import UserManagementScreen from './UserManagementScreen';
 import SettingScreen from './SettingScreen';
@@ -35,7 +34,7 @@ import ManageRequestScreen from './ManageRequestScreen';
 
 export {
       HomeScreen, FollowScreen, PictureScreen, PersonScreen, BackgroundScreen,
-      InfomationScreen, AchievementsScreen, NickNameScreen, DetailPostScreen, UserManagementScreen,
+      InfomationScreen, AchievementsScreen, DetailPostScreen, UserManagementScreen,
       SettingScreen, AccountDetailsScreen, ArticleScreen, FavouriteScreen, GroupScreen, NotificationManagement,
       ManagePostsScreen, SetUpAccountScreen, WellcomScreen, LoginScreen,
       RegisterScreen, ForgotPassword, VerificationCodeScreen, CreatePostScreen, FollowerScreen,
