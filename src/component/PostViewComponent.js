@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserByField } from "../redux/slices/UserSlices";
+import { getUserByField, startListeningUserByID } from "../redux/slices/UserSlices";
 import { createFollow } from "../redux/slices/FollowerSlice";
 
 
@@ -25,7 +25,7 @@ import MoreOptionPostComponent from "./moreOptionBox/MoreOptionPostComponent";
 import YoutubePlayerComponent from "./YoutubePlayerComponent";
 import { TouchableOpacity } from "react-native";
 import { op } from "@tensorflow/tfjs";
-
+import { getUserAchievement, listenToUserAchievementRealtime, startListeningAchieByID } from '../redux/slices/AchievementSlice';
 
 
 const PostViewComponent = ({ post, user }) => {
@@ -39,6 +39,11 @@ const PostViewComponent = ({ post, user }) => {
     const userId = post.user_id; // Lấy user_id từ post
     // const [userPost, setUserPost] = useState(null);
     const userPost = useSelector((state) => state.user[userId]);
+    const userAchievement = useSelector((state) => userPost?.achie_id ? state.achievement[userPost.achie_id] : null);
+    // const userAchievement = useSelector((state) => state.achievement[userPost.achie_id] || {});
+    // console.log('userAchievement', userAchievement); 
+    // console.log('userPost.achie_id', userPost.achie_id);
+
     // const [isFollow, setIsFollow] = useState(false);
     const follower = useSelector((state) => state.follower.follower);
     const isFollow = follower.some(f => f.user_id === post.user_id);
@@ -56,11 +61,13 @@ const PostViewComponent = ({ post, user }) => {
 
     useEffect(() => {
         if (!userPost) {
-            dispatch(getUserByField({ user_id: userId }));
+            // dispatch(getUserByField({ user_id: userId }));
+            dispatch(startListeningUserByID({ user_id: userId }));
         }
-    }, [userId]);
-
-
+        if (userPost?.achie_id) {
+            dispatch(startListeningAchieByID({ achie_id: userPost.achie_id }));
+        }
+    }, [userId, userPost?.achie_id, dispatch]);
 
     const userPostCheck = () => {
         if (userId === user.user_id) {
@@ -153,7 +160,7 @@ const PostViewComponent = ({ post, user }) => {
                                     alignItems: "center",
                                 }}>
 
-                                <AvatarEx size={40} round={30} url={userPost.imgUser} frame={userPost.frame_user} />
+                                <AvatarEx size={40} round={30} url={userPost.imgUser} frame={userAchievement?.nameAchie} />
                                 <View
                                     style={{
                                         height: "100%",
@@ -163,7 +170,7 @@ const PostViewComponent = ({ post, user }) => {
                                         // backgroundColor: "red",
                                     }}
                                 >
-                                    <Text style={StyleGlobal.textName}>{userPost.username}</Text>
+                                    <Text style={StyleGlobal.textName}>{userPost.username.length > 20 ? userPost.username.slice(0, 20) : userPost.username}</Text>
                                     <Text style={StyleGlobal.textInfo}>{handleTime({ timestamp: post.created_at })}</Text>
                                 </View>
                             </TouchableOpacity>

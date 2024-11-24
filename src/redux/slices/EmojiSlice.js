@@ -122,12 +122,6 @@ export const updateEmojiByField = createAsyncThunk(
 );
 
 
-
-
-
-
-
-
 export const startListeningEmoji = ({ user_id }) => (dispatch) => {
     // console.log("!post_id || !user_id", !post_id || !user_id)
     // if (!user_id) return;
@@ -152,6 +146,7 @@ export const startListeningEmoji = ({ user_id }) => (dispatch) => {
 
     return unEmoji;
 };
+
 export const EmojiSlice = createSlice({
     name: 'emoji',
     initialState,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import {
-    PictureScreen, DetailPostScreen, BackgroundScreen, InfomationScreen, AchievementsScreen, NickNameScreen,
+    PictureScreen, DetailPostScreen, BackgroundScreen, InfomationScreen, AchievementsScreen,
     SettingScreen, UserManagementScreen, AccountDetailsScreen, EventManagementScreen, AddEditEventScreen,
     HashtagManagerScreen, NotificationManagement, ManagePostsScreen, SetUpAccountScreen, FollowerScreen,
     PersonScreen
@@ -45,8 +45,6 @@ const IndexRouter = () => {
             <Stack.Screen name='InfomationScreen' component={InfomationScreen}
                 options={() => IconBack("Thông Tin Cá Nhân")} />
             <Stack.Screen name='AchievementsScreen' component={AchievementsScreen} options={{ headerShown: false }} />
-            <Stack.Screen name='NickNameScreen' component={NickNameScreen}
-                options={() => IconBack("Danh Hiệu")} />
             <Stack.Screen name='SettingScreen' component={SettingScreen}
                 options={() => IconBack("Thiết Lập")} />
             <Stack.Screen name='UserManagementScreen' component={UserManagementScreen}

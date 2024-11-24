@@ -202,8 +202,8 @@ const DetailPostScreen = () => {
 
 
     const handleAd = () => {
-        console.log("toi day");
-        console.log(componentPosition);
+        //console.log("toi day");
+        //console.log(componentPosition);
     };
     return (
         <View style={{ flex: 1 }}>
@@ -347,7 +347,7 @@ const DetailPostScreen = () => {
                                 alignItems: "center",
                                 width: "50%",
                                 height: "100%",
-                                paddingLeft: 13,
+                                paddingLeft: "3%"
                             }}>
 
 
