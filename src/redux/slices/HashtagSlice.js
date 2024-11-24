@@ -16,6 +16,8 @@ import { storage } from "../../firebase/FirebaseConfig"; // Firebase config
 // Trạng thái ban đầu
 const initialState = {
   hashtag: [],
+  members: 0,
+  postCount: 0,
   specical: [],
   statusHashtag: "idle",
   errorHashtag: null,
@@ -153,6 +155,100 @@ export const getHashtag = (dispatch) => {
     console.error("Error setting up real-time event listener: ", error);
   }
 };
+export const startListeningMembers = ({ currentUserId }) => (dispatch) => {
+  if (!currentUserId) return;
+
+  // Lấy danh sách Hashtag mà người dùng hiện tại tham gia
+  const hashtagQuery = query(
+    collection(db, "HashtagGroup"),
+    where("UserID", "==", currentUserId)
+  );
+
+  const unsubscribe = onSnapshot(
+    hashtagQuery,
+    async (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        // Lấy tất cả HashtagID mà người dùng tham gia
+        const hashtagIds = querySnapshot.docs.map((doc) => doc.data().HashtagID);
+        //console.log("hashtagIds:", hashtagIds);
+
+        if (hashtagIds.length > 0) {
+          // Lấy toàn bộ số lượng người tham gia cho từng HashtagID
+          const memberCountsPromises = hashtagIds.map(async (hashtagId) => {
+            const countQuery = query(
+              collection(db, "HashtagGroup"),
+              where("HashtagID", "==", hashtagId)
+            );
+            const countSnapshot = await getDocs(countQuery);
+            return { hashtagId, count: countSnapshot.size }; // Trả về số lượng
+          });
+
+          // Chờ tất cả các promise hoàn thành
+          const memberCounts = await Promise.all(memberCountsPromises);
+
+          //console.log("memberCounts:", memberCounts);
+
+          // Gửi dữ liệu số lượng thành viên vào Redux
+          dispatch(setMembers(memberCounts));
+        }
+      }
+    },
+    (error) => {
+      console.error("Error fetching Hashtag: ", error);
+    }
+  );
+
+  return unsubscribe; // Trả về hàm unsubscribe để dừng lắng nghe
+};
+export const startListeningPostCount = ({ currentUserId }) => (dispatch) => {
+  if (!currentUserId) return;
+
+  // Lấy danh sách Hashtag mà người dùng hiện tại tham gia
+  const hashtagQuery = query(
+    collection(db, "HashtagGroup"),
+    where("UserID", "==", currentUserId)
+  );
+
+  const unsubscribe = onSnapshot(
+    hashtagQuery,
+    async (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        // Lấy tất cả HashtagID mà người dùng tham gia
+        const hashtagIds = querySnapshot.docs.map((doc) => doc.data().HashtagID);
+        //console.log("hashtagIds:", hashtagIds);
+
+        if (hashtagIds.length > 0) {
+          // Lấy toàn bộ số lượng người tham gia cho từng HashtagID
+          const hashtagCountsPromises = hashtagIds.map(async (hashtag) => {
+            const postQuery = query(
+              collection(db, "Posts"),
+              where("hashtag", "array-contains", hashtag) // Tìm bài viết chứa hashtag
+            );
+            const querySnapshot = await getDocs(postQuery);
+            return {
+              hashtag,
+              count: querySnapshot.size, // Đếm số lượng bài viết
+            };
+          });
+
+          // Chờ tất cả các truy vấn hoàn thành
+          const hashtagCounts = await Promise.all(hashtagCountsPromises);
+
+          //console.log("Số lượng bài viết theo hashtag:", hashtagCounts);
+
+          // Gửi dữ liệu số lượng thành viên vào Redux
+          dispatch(setPostCount(hashtagCounts));
+        }
+      }
+    },
+    (error) => {
+      console.error("Error fetching Hashtag: ", error);
+    }
+  );
+
+  return unsubscribe; // Trả về hàm unsubscribe để dừng lắng nghe
+};
+
 
 export const startListeningHashtags = () => (dispatch) => {
   const q = query(
@@ -206,6 +302,12 @@ export const HashtagSlice = createSlice({
     sethashtag: (state, action) => {
       state.hashtag = action.payload;
     },
+    setMembers: (state, action) => {
+      state.members = action.payload;
+    },
+    setPostCount: (state, action) => {
+      state.postCount = action.payload;
+    },
     setHashtagSpecical: (state, action) => {
       // const { hashtag, hashtag_id } = action.payload;
       // // console.log("hashtaghashtag", hashtag)
@@ -228,6 +330,9 @@ export const HashtagSlice = createSlice({
   },
 });
 
-export const { sethashtag, setHashtagSpecical, setHashtagSpecicalById } = HashtagSlice.actions;
+
+
+export const { sethashtag, setMembers, setPostCount, setHashtagSpecical, setHashtagSpecicalById } = HashtagSlice.actions;
+
 
 export default HashtagSlice.reducer;
