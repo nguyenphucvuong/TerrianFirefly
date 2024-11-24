@@ -12,13 +12,14 @@ import { auth } from "../firebase/FirebaseConfig";
 import { appInfo } from "../constains/appInfo";
 import { ButtonFunctionComponent } from "../component";
 import { StyleGlobal } from "../styles/StyleGlobal";
-import { getUser, updateUser } from "../redux/slices/UserSlices";
+import { getUser, updateUser, setSkipAutoNavigation } from "../redux/slices/UserSlices";
 import { useDispatch, useSelector } from "react-redux";
 
 
 const VerificationCodeScreen = ({ route, navigation }) => {
 
   const [isLoading, setisLoading] = useState(false);
+  const dispatch = useDispatch();
   const { email, code } = route.params;
   // Khởi tạo mảng 6 ô
   const [verificationCode, setVerificationCode] = useState(Array(6).fill('')); 
@@ -53,6 +54,7 @@ const VerificationCodeScreen = ({ route, navigation }) => {
     else if (enteredCode === code.toString()) {
       setisLoading(true);
       // Mã xác nhận đúng, điều hướng đến màn hình đặt lại mật khẩu
+      dispatch(setSkipAutoNavigation(true));
       navigation.navigate('ResetPasswordScreen', { email,  });
 
     } else {

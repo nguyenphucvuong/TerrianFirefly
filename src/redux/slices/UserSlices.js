@@ -14,6 +14,7 @@ const initialState = {
   userReport: [],
   userHashtag: [],
   totalEmoji: 0,
+  skipAutoNavigation: false,
 };
 let unsubscribeListener = null; // Biến toàn cục quản lý listener
 let unsubscribeListenerFavourite = null; // Biến toàn cục quản lý listener
@@ -102,7 +103,7 @@ export const updateUserState = createAsyncThunk(
 
       // Lấy lại thông tin người dùng đã được cập nhật từ Firestore
       const updatedSnap = await getDoc(userRef);
-      console.log("updatedSnap", updatedSnap.data());
+      // console.log("updatedSnap", updatedSnap.data());
       if (updatedSnap.exists()) {
         return {
           id: updatedSnap.id,
@@ -564,6 +565,9 @@ export const UserSlices = createSlice({
     setTotalEmoji: (state, action) => {
       state.totalEmoji = action.payload;
     },
+    setSkipAutoNavigation: (state, action) => {
+      state.skipAutoNavigation = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -596,6 +600,6 @@ export const UserSlices = createSlice({
   },
 });
 
-export const { setUser, setError, setUserById, setIUser, setUserReport, setUserHashtag, setFavourite, setTotalEmoji } = UserSlices.actions;
+export const { setUser, setError, setUserById, setIUser, setUserReport, setUserHashtag, setFavourite, setTotalEmoji, setSkipAutoNavigation  } = UserSlices.actions;
 
 export default UserSlices.reducer;

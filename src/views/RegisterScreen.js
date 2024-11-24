@@ -116,10 +116,11 @@ function RegisterScreen() {
         gender: "",
         passWord: password,
         status_user_id: 0,
-        total_interact_id: 0,
         backgroundUser:
           "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/background%2F62216ef8195ea956bcf8559794c2ad48_2674030335190781809.jpg?alt=media&token=ec4706fa-3f2f-4e56-a40e-733b2c7f9b93",
-      });
+        report_count: 0,
+        
+        });
       await updateDoc(docRef, {
         user_id: docRef.id, // Lưu ID vào tài liệu
       });

@@ -8,6 +8,7 @@ import {
   Modal,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -16,9 +17,13 @@ import {
   getUser,
   updateUser,
   getUserByField,
-  listenToUserRealtime
+  listenToUserRealtime,
 } from "../redux/slices/UserSlices";
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, } from "firebase/auth";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+} from "firebase/auth";
 //styles
 import { StyleGlobal } from "../styles/StyleGlobal";
 //constains
@@ -41,17 +46,23 @@ import {
 } from "firebase/firestore";
 const SetUpAccountScreen = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const authUser = auth.currentUser;
   const user = useSelector((state) => state.user.user);
-//   useEffect(() => {
-//     const unsubscribe = dispatch(listenToUserRealtime(user.email));
-//     return () => unsubscribe();
-// }, [dispatch, user.email]);
+  //   useEffect(() => {
+  //     const unsubscribe = dispatch(listenToUserRealtime(user.email));
+  //     return () => unsubscribe();
+  // }, [dispatch, user.email]);
   //khai bao
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.numberPhone);
   const [isEmailLinked, setIsEmailLinked] = useState(true);
   //const [isPhoneLinked, setIsPhoneLinked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Trạng thái ứng dụng đang chạy
+  const [showOldPassword, setShowOldPassword] = useState(false); // Ẩn/hiện mật khẩu cũ
+  const [showNewPassword, setShowNewPassword] = useState(false); // Ẩn/hiện mật khẩu mới
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Ẩn/hiện mật khẩu xác nhận
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [inputPhone, setInputPhone] = useState("");
@@ -60,8 +71,8 @@ const SetUpAccountScreen = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  
-   //firebase
+
+  //firebase
   const handleLinkPhone = () => {
     setIsModalVisible(true);
   };
@@ -72,20 +83,24 @@ const SetUpAccountScreen = () => {
   };
 
   const handleConfirmPhone = async () => {
+    setIsLoading(true);
     if (validatePhoneNumber(inputPhone)) {
-      const newData = {
-        numberPhone: inputPhone,
-      };
-      console.log("user.user_id", user.user_id);
-      
-      await dispatch(updateUser({ user_id: user.user_id, newData }));
-      setPhoneError("");
-      setIsModalVisible(false);
+      const newData = { numberPhone: inputPhone };
+      try {
+        await dispatch(updateUser({ user_id: user.user_id, newData }));
+        setPhoneError("");
+        setIsModalVisible(false);
+      } catch (error) {
+        Alert.alert(
+          "Lỗi",
+          "Không thể liên kết số điện thoại. Vui lòng thử lại."
+        );
+      }
     } else {
       setPhoneError("Số điện thoại không hợp lệ. Vui lòng nhập lại.");
     }
+    setIsLoading(false);
   };
-
   const handleCancelPhone = () => {
     setInputPhone("");
     setPhoneError("");
@@ -97,8 +112,7 @@ const SetUpAccountScreen = () => {
   };
 
   const handleConfirmPasswordChange = async () => {
-    //kiểm tra nhập vào
-    if (oldPassword != user.passWord) {
+    if (oldPassword !== user.passWord) {
       Alert.alert("Lỗi", "Mật khẩu không chính xác");
       return;
     }
@@ -106,34 +120,31 @@ const SetUpAccountScreen = () => {
       Alert.alert("Lỗi", "Vui lòng nhập mật khẩu mới và xác nhận mật khẩu.");
       return;
     }
-    if (newPassword === confirmPassword) {
-      // Thực hiện thay đổi mật khẩu
-      try {
-        if (authUser) {
-          // Xác thực lại người dùng
-          const credential = EmailAuthProvider.credential(
-            authUser.email,
-            oldPassword
-          );
-          await reauthenticateWithCredential(authUser, credential);
-          await updatePassword(authUser, newPassword);
-        }
-        const newData = {
-          passWord: newPassword,
-        };
-        await dispatch(updateUser({ user_id: user.user_id, newData }));
-        Alert.alert("Thông báo", "Mật khẩu đã được thay đổi thành công");
-        setOldPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        setPasswordError("");
-        setIsPasswordModalVisible(false);
-      } catch (error) {
-        Alert.alert("Lỗi", "Không thể cập nhật mật khẩu. Vui lòng thử lại.");
-      }
-    } else {
+    if (newPassword !== confirmPassword) {
       setPasswordError("Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại.");
+      return;
     }
+
+    setIsLoading(true); // Hiển thị trạng thái đang chạy
+
+    try {
+      if (authUser) {
+        const credential = EmailAuthProvider.credential(
+          authUser.email,
+          oldPassword
+        );
+        await reauthenticateWithCredential(authUser, credential);
+        await updatePassword(authUser, newPassword);
+      }
+
+      const newData = { passWord: newPassword };
+      await dispatch(updateUser({ user_id: user.user_id, newData }));
+      Alert.alert("Thành công", "Mật khẩu đã được thay đổi.");
+      handleCancelPasswordChange(); // Reset trạng thái modal
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể cập nhật mật khẩu. Vui lòng thử lại.");
+    }
+    setIsLoading(false); // Ẩn trạng thái đang chạy
   };
 
   const handleCancelPasswordChange = () => {
@@ -191,7 +202,9 @@ const SetUpAccountScreen = () => {
         />
         <View style={{ marginLeft: 10 }}>
           <Text style={styles.label}>Số điện thoại</Text>
-          <Text style={styles.value}>{user.numberPhone ? user.numberPhone : "chưa liên kết"}</Text>
+          <Text style={styles.value}>
+            {user.numberPhone ? user.numberPhone : "chưa liên kết"}
+          </Text>
         </View>
         {user.numberPhone ? (
           <TouchableOpacity
@@ -240,12 +253,20 @@ const SetUpAccountScreen = () => {
           alignItems: "center",
         }}
       >
-        <Text style={[styles.sizeTitle, {color: "#CC2B52"}]}>Yêu cầu cấp quyền admin</Text>
+        <Text style={[styles.sizeTitle, { color: "#CC2B52" }]}>
+          Yêu cầu cấp quyền admin
+        </Text>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("RequestAdminScreen", { user: user });
+          }}
+          style={styles.button}
+        >
           <Text style={{ color: "#0286FF" }}>Gửi Yêu Cầu</Text>
         </TouchableOpacity>
       </View>
+
       {/* Modal nhập số điện thoại */}
       <Modal
         visible={isModalVisible}
@@ -256,13 +277,19 @@ const SetUpAccountScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Nhập số điện thoại</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Số điện thoại"
-              keyboardType="phone-pad"
-              value={inputPhone}
-              onChangeText={setInputPhone}
-            />
+            {isLoading ? (
+              <ActivityIndicator size="large" color="#007AFF" />
+            ) : (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Số điện thoại"
+                  keyboardType="phone-pad"
+                  value={inputPhone}
+                  onChangeText={setInputPhone}
+                />
+              </>
+            )}
             {phoneError ? (
               <Text style={styles.errorText}>{phoneError}</Text>
             ) : null}
@@ -294,27 +321,46 @@ const SetUpAccountScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Đổi mật khẩu</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Mật khẩu cũ"
-              secureTextEntry
-              value={oldPassword}
-              onChangeText={setOldPassword}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Mật khẩu mới"
-              secureTextEntry
-              value={newPassword}
-              onChangeText={setNewPassword}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Xác nhận mật khẩu mới"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
+            {isLoading ? (
+              <ActivityIndicator size="large" color="#007AFF" />
+            ) : (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Mật khẩu cũ"
+                  secureTextEntry={!showOldPassword}
+                  value={oldPassword}
+                  onChangeText={setOldPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeIcon}
+                  onPress={() => setShowOldPassword(!showOldPassword)}
+                >
+                  <Image
+                    source={{
+                      uri: showOldPassword
+                        ? "https://img.icons8.com/ios-filled/50/000000/visible.png"
+                        : "https://img.icons8.com/ios-filled/50/000000/invisible.png",
+                    }}
+                    style={styles.icon}
+                  />
+                </TouchableOpacity>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Mật khẩu mới"
+                  secureTextEntry={!showOldPassword}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Xác nhận mật khẩu mới"
+                  secureTextEntry={!showOldPassword}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                />
+              </>
+            )}
             {passwordError ? (
               <Text style={styles.errorText}>{passwordError}</Text>
             ) : null}
@@ -451,6 +497,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 5,
     textAlign: "center",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 40,
+    top: 20,
+    width: 26,
+    height: 26,
+    tintColor: "#888",
   },
 });
 export default SetUpAccountScreen;

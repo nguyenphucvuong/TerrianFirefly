@@ -19,20 +19,33 @@ import {
 import Feather from 'react-native-vector-icons/Feather';
 import RowComponent from "../RowComponent";
 import MoreOptionItemComponent from './MoreOptionItemComponent';
+import { updateCommentByField } from '../../redux/slices/CommentSlice';
+import { updateSubCommentByField } from '../../redux/slices/SubCommentSlice';
+import { createReport } from '../../redux/slices/ReportSilce';
 
 
 // const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_id }) => {
-const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhiteDot, size }) => {
+const MoreOptionPostComponent = ({ style, post_id, comment_id, sub_comment_id, user_id, post_user_id, comment_user_id, sub_comment_user_id, isWhiteDot, size, isComment, isSubCmt }) => {
     const [isVisible, setIsVisible] = useState(false);
     const translateY = useState(new Animated.Value(appInfo.heightWindows))[0]; // Start offscreen
     // const translateY = useRef(new Animated.Value(0)).current; // Start offscreen
 
     const follower = useSelector((state) => state.follower.follower);
     const isFollow = follower.some(f => f.user_id === post_user_id);
-
     const favorite = useSelector(state => state.favorite.currentFavorite);
     // const [isFavorite, setIsFavorite] = useState(false);
-    const isFavorite = favorite.some(f => f.post_id === post_id && f.user_id === user_id);
+    const isFavorite = favorite.some(f => f.post_id === post_id);
+
+    const currentUser = useSelector((state) => state.user.user);
+
+
+
+    // useEffect(() => {
+    //     console.log("user_id", user_id);
+    //     console.log("comment_user_id", comment_user_id);
+    //     console.log("sub_comment_user_id", sub_comment_user_id);
+    // }, [comment_user_id, user_id, sub_comment_user_id])
+
     const dispatch = useDispatch();
 
 
@@ -55,10 +68,45 @@ const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhit
         }
     })
 
+    const dataReport = {
+        report_id: "",
+        item_id: isComment ? comment_id : isSubCmt ? sub_comment_id : post_id,
+        item_type: isComment ? "comment" : isSubCmt ? "sub_comment" : "post",
+        status: 0,
+        reported_at: Date.now(),
+        status_changed_at: null,
+        user_id_reported: isComment ? comment_user_id : isSubCmt ? sub_comment_user_id : post_user_id,
+        user_id_reporter: user_id,
+    }
     const handleReport = useCallback(() => {
-        dispatch(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
-        dispatch(updateUserState({ user_id: post_user_id, field: "status_user_id", value: 1 }));
+        if (isComment) {
+            console.log("Báo cáo bình luận");
+            // dispatch(updateUserState({ user_id: comment_user_id, field: "status_user_id", value: 1 }));
+            dispatch(updateCommentByField({ comment_id: comment_id, field: "comment_status_id", value: 1 }));
+            dispatch(createReport(dataReport));
+        } else if (isSubCmt) {
+            console.log("Báo cáo bình luận phụ");
+            // dispatch(updateUserState({ user_id: sub_comment_user_id, field: "status_user_id", value: 1 }));
+            dispatch(updateSubCommentByField({ sub_comment_id: sub_comment_id, field: "sub_comment_status_id", value: 1 }));
+            dispatch(createReport(dataReport));
+        } else {
+            console.log("Báo cáo bài viết");
+            // console.log(comment_user_id, sub_comment_user_id, post_user_id);
+            // dispatch(updateUserState({ user_id: post_user_id, field: "status_user_id", value: 1 }));
+            dispatch(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
+            dispatch(createReport(dataReport));
+        }
         handleHideInput();
+    })
+
+    const handleDeletePost = useCallback(() => {
+        dispatch(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 2 }));
+    })
+    const handleDeleteComment = useCallback(() => {
+        dispatch(updateCommentByField({ comment_id: comment_id, field: "comment_status_id", value: 2 }));
+    })
+    const handleDeleteSubComment = useCallback(() => {
+        dispatch(updateCommentByField({ comment_id: comment_id, field: "sub_comment_status_id", value: 2 }));
     })
 
     const userFollowCheck = () => {
@@ -145,35 +193,74 @@ const MoreOptionPostComponent = ({ style, post_id, user_id, post_user_id, isWhit
                             style={{
                             }}>
 
+                            {/* Ẩn bài viết */}
+                            {currentUser.status_user_id == 2 ? null :
+                                !isComment && !isSubCmt ?
+                                    user_id === post_user_id ?
+                                        <MoreOptionItemComponent
+                                            isRow
+                                            styleImg={{ width: 30, height: 30 }}
+                                            url={require('../../../assets/appIcons/hide-eye.png')}
+                                            text={"Xóa bài viết"}
+                                            onPress={handleDeletePost} /> : null : null
+                            }
+
+                            {/* Ẩn bình luận */}
+                            {currentUser.status_user_id == 2 ? null :
+                                isComment ?
+                                    user_id === comment_user_id ?
+                                        <MoreOptionItemComponent
+                                            isRow
+                                            styleImg={{ width: 30, height: 30 }}
+                                            url={require('../../../assets/appIcons/hide-eye.png')}
+                                            text={"Xóa bình luận"}
+                                            onPress={handleDeleteComment} /> : <></> : <></>}
+
+                            {/* Ẩn bình luận phụ */}
+                            {currentUser.status_user_id == 2 ? null :
+                                isSubCmt ?
+                                    user_id === sub_comment_user_id ?
+                                        <MoreOptionItemComponent
+                                            isRow
+                                            styleImg={{ width: 30, height: 30 }}
+                                            url={require('../../../assets/appIcons/hide-eye.png')}
+                                            text={"Xóa bình luận phụ"}
+                                            onPress={handleDeleteSubComment} /> : <></> : <></>}
+
                             {/* Hủy theo dõi */}
-                            {userFollowCheck() ?
-                                <MoreOptionItemComponent
-                                    isRow
-                                    url={require('../../../assets/appIcons/sad-unfollow.png')}
-                                    text={"Hủy theo dõi"}
-                                    onPress={handleDeleteFollow} /> : <></>}
+                            {currentUser.status_user_id == 2 ? null :
+                                isComment || isSubCmt ? <></> :
+                                    userFollowCheck() ?
+                                        <MoreOptionItemComponent
+                                            isRow
+                                            url={require('../../../assets/appIcons/sad-unfollow.png')}
+                                            text={"Hủy theo dõi"}
+                                            onPress={handleDeleteFollow} /> : <></>}
                             {/* Yêu thích */}
                             {/* {userFavoriteCheck() ? */}
-                            {!isFavorite ?
-                                <MoreOptionItemComponent
-                                    isRow
-                                    url={require('../../../assets/appIcons/favorite.png')}
-                                    text={"Yêu thích"}
-                                    onPress={handleFavorite} />
-                                :
-                                <MoreOptionItemComponent
-                                    isRow
-                                    url={require('../../../assets/appIcons/unfavorite.png')}
-                                    text={"Hủy yêu thích"}
-                                    onPress={handleFavorite} />
+                            {currentUser.status_user_id == 2 ? null :
+                                isComment || isSubCmt ? null :
+                                    !isFavorite ?
+                                        <MoreOptionItemComponent
+                                            isRow
+                                            url={require('../../../assets/appIcons/favorite.png')}
+                                            text={"Yêu thích"}
+                                            onPress={handleFavorite} />
+                                        :
+                                        <MoreOptionItemComponent
+                                            isRow
+                                            url={require('../../../assets/appIcons/unfavorite.png')}
+                                            text={"Hủy yêu thích"}
+                                            onPress={handleFavorite} />
                             }
                             {/* : <></>} */}
                             {/* Báo cáo */}
-                            <MoreOptionItemComponent
-                                isRow
-                                url={require('../../../assets/appIcons/report-flag.png')}
-                                text={"Báo cáo"}
-                                onPress={handleReport} />
+                            {currentUser.status_user_id == 2 ? null :
+                                <MoreOptionItemComponent
+                                    isRow
+                                    url={require('../../../assets/appIcons/report-flag.png')}
+                                    text={"Báo cáo"}
+                                    onPress={handleReport} />}
                             {/* Xoá bài viết */}
                             {/* {!userPostCheck() ? <MoreOptionItemComponent
                                 isRow
