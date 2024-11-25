@@ -93,6 +93,7 @@ export const getAllNoti = (dispatch) => {
 export const updateNotiByField = createAsyncThunk(
   "data/updateNotiByField",
   async ({ notiID, field, value }) => {
+    console.log("noti Id", notiID)
     try {
       // Tạo tham chiếu đến tài liệu trong Firestore
       const notiRef = doc(db, "Noti", notiID);

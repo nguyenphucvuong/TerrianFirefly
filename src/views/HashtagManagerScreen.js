@@ -18,11 +18,12 @@ import ButtonFunctionComponent from "../component/ButtonFunctionComponent";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchHashtags, // Thêm import để lấy hashtag
+  getHashtag, // Thêm import để lấy hashtag
   addHashtagToFirestore,
   deleteHashtagFromFirestore,
 } from "../redux/slices/HashtagSlice";
 import { uploadImage } from "../redux/slices/UserSlices";
+import { log } from "@tensorflow/tfjs";
 const HashtagManagerScreen = () => {
   //firebase
   const user = useSelector((state) => state.user.user);
@@ -34,24 +35,20 @@ const HashtagManagerScreen = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isLoading, setisLoading] = useState(false);
-  const { hashtags, isDeleting } = useSelector((state) => state.hashtag); // Lấy danh sách hashtags từ redux
+  const { hashtag, isDeleting } = useSelector((state) => state.hashtag); // Lấy danh sách hashtags từ redux
   const statusHashtag = useSelector((state) => state.hashtag.statusHashtag);
   const errorHashtag = useSelector((state) => state.hashtag.errorHashtag);
   const dispatch = useDispatch();
   const colorPickerTextRef = useRef(null);
   const colorPickerBackgroundRef = useRef(null);
-  // Lắng nghe sự thay đổi từ Firestore khi component mount
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // await dispatch(fetchHashtags());
-      } catch (error) {
-        console.error("Failed to fetch hashtags:", error);
-      }
-    };
-    fetchData();
-  }, [dispatch, user.role_id]);
 
+
+  useEffect(() => {
+    const unsubscribeHashtag = getHashtag(dispatch);
+    return () => unsubscribeHashtag();
+  }, [dispatch]);
+
+  // Lắng nghe sự thay đổi từ Firestore khi component mount
   if (statusHashtag === "loading") {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
@@ -68,36 +65,37 @@ const HashtagManagerScreen = () => {
       );
       return;
     }
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setAvatarImage(result.assets[0].uri);
+      if (!result.canceled) {
+        setAvatarImage(result.assets[0].uri);
+      }
+    } catch {
+      console.error("Error picking image: ", error);
     }
   };
-
+  
   const handleAddHashtag = async () => {
-    const hashtag_id = hashtags.filter((e) => {
-      return e.hashtag_id == hashtagName;
-      
-    });
+    console.log("hashtags", hashtag);
+    
     if (!hashtagName) {
       Alert.alert("Lỗi", "Vui lòng nhập tên hashtag.");
       return;
     }
-    
-    
-    if (hashtag_id[0].hashtag_id === hashtagName) {
+    // Kiểm tra nếu hashtag đã tồn tại
+    const hashtagExists = hashtag.some((e) => e.hashtag_id === hashtagName);
+
+    if (hashtagExists) {
       setModalVisible(false);
-      Alert.alert("Lỗi", "Hashtag Đã tồn tại.");
+      Alert.alert("Lỗi", "Hashtag đã tồn tại.");
       return;
     }
-
     setisLoading(true);
     try {
       setModalVisible(true);
@@ -124,7 +122,6 @@ const HashtagManagerScreen = () => {
       setisLoading(false);
     }
   };
-
   const handleDeleteHashtag = async (hashtag_id) => {
     try {
       await dispatch(deleteHashtagFromFirestore(hashtag_id)); // Xóa hashtag từ Firestore
@@ -158,9 +155,7 @@ const HashtagManagerScreen = () => {
         </TouchableOpacity>
 
         <View style={[styles.sampleHashtagContainer, { backgroundColor }]}>
-          <Text style={[styles.sampleHashtagText,]}>
-            #{hashtagName}
-          </Text>
+          <Text style={[styles.sampleHashtagText]}>#{hashtagName}</Text>
         </View>
       </View>
 
@@ -193,10 +188,10 @@ const HashtagManagerScreen = () => {
       />
       <FlatList
         data={
-          Array.isArray(hashtags)
-            ? hashtags.filter((item) => item.role_id === user.roleid)
+          Array.isArray(hashtag)
+            ? hashtag.filter((item) => item.role_id === user.roleid)
             : []
-        } // Sử dụng dữ liệu hashtags từ Redux
+        } // Sử dụng dữ liệu hashtag từ Redux
         keyExtractor={(item) => item.hashtag_id}
         renderItem={({ item }) => (
           <View

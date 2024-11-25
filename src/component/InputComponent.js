@@ -5,7 +5,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import { appInfo } from '../constains/appInfo';
 //styles
 import { StyleGlobal } from "../styles/StyleGlobal";
-const InputComponents = ({iconName, value, keyboardType, onChangeText, placeholder, editable }) => {
+const InputComponents = ({iconName, value, keyboardType, onChangeText, placeholder, editable, maxLength}) => {
     return (
         <View style={styles.textInput}>
             <Feather style={styles.icon} name={iconName} size={appInfo.heightWindows * 0.024} color={'#858585'} />
@@ -14,6 +14,7 @@ const InputComponents = ({iconName, value, keyboardType, onChangeText, placehold
                 keyboardType={keyboardType}
                 onChangeText={onChangeText}
                 placeholder={placeholder}
+                maxLength={maxLength}
                 editable={editable}
             />
         </View>

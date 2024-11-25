@@ -20,7 +20,6 @@ import { db, auth } from "../firebase/FirebaseConfig";
 //redux
 import { getUser, listenToUserRealtime } from "../redux/slices/UserSlices";
 import { getAchievement } from "../redux/slices/AchievementSlice";
-import { getNickname } from "../redux/slices/NicknameSlice";
 import { useDispatch, useSelector } from "react-redux";
 //
 import {
@@ -162,7 +161,6 @@ function LoginScreen() {
           // Signed up
           const userL = userCredential.user;
           if (userL.emailVerified) {
-            await dispatch(listenToUserRealtime(email));
             navigation.navigate("IndexTab");
             setisLoading(false);
           }

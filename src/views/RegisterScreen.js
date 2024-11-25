@@ -106,21 +106,21 @@ function RegisterScreen() {
     try {
       const docRef = await addDoc(collection(db, "user"), {
         user_id: "temp",
+        achie_id: "3qqV91QUIw4bXiol2XjK",
         username: userName,
         numberPhone: "",
         email: email,
-        roleid: 1,
+        roleid: 0,
         imgUser:
           "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/avatar%2Favatar.jpg?alt=media&token=42cfc0ed-75cc-4feb-9a0f-19f6203643c5",
         gender: "",
         passWord: password,
         status_user_id: 0,
-        nickname: "Người Dùng Mới",
-        total_interact_id: 0,
         backgroundUser:
-          "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/background%2Fbackground4.jpg?alt=media&token=31c49a20-9146-46cc-8df6-496093d45194",
-        frame_user: "",
-      });
+          "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/background%2F62216ef8195ea956bcf8559794c2ad48_2674030335190781809.jpg?alt=media&token=ec4706fa-3f2f-4e56-a40e-733b2c7f9b93",
+        report_count: 0,
+        
+        });
       await updateDoc(docRef, {
         user_id: docRef.id, // Lưu ID vào tài liệu
       });

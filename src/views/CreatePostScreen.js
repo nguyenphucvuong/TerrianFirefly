@@ -395,6 +395,7 @@ const CreatePostScreen = () => {
 
     if (!result.canceled) {
       const selectedImages = result.assets.map((asset) => asset.uri); // Lấy URI của các ảnh được chọn
+      console.log("selectedImages", selectedImages);
       const newImages = selectedImages.filter((uri) => !images.includes(uri));
 
       if (newImages.length > 0) {

@@ -20,13 +20,12 @@ import CmtBoxComponent from './CmtBoxComponent';
 import { ButtonsComponent } from '../';
 import PostButton from './PostButton';
 import { count } from 'firebase/firestore';
-import { createComment, getComment } from '../../redux/slices/CommentSlice';
 import { ImageCheckContext } from '../../context/ImageProvider';
 
 
 
 
-const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, handleNagigateDetailPost, isSubCmt, user }) => {
+const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, handleNagigateDetailPost, isSubCmt, user, comment_id }) => {
     // const [expanded, setExpanded] = useState(false);
     // const [isNomal] = [info.isNomal];
     var expanded = false;
@@ -91,9 +90,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
         // setIsShowEmojiBox(false);
     }
 
-    const handleLikePressed = () => {
-        handleShowPop();
-    }
+
 
 
     const handleHidePop = () => {
@@ -108,40 +105,13 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
         //     useNativeDriver: true,
         // }).start(setFalse());
     };
-
-    const [content, setContent] = useState(null);
+    const handleLikePressed = () => {
+        handleShowPop();
+    }
     const user_id = user?.user_id;
     // console.log("user_id", post.post_id, user_id, content);
 
-    const dataCmt = {
-        comment_id: "",
-        post_id: post.post_id,
-        user_id: user_id,
-        content: content,
-        count_like: 0,
-        count_comment: 0,
-        created_at: Date.now(),
-        img_id: "",
-    }
 
-
-    const btnDangComment = () => {
-        if (content) {
-            dispatch(createComment(dataCmt))
-            handleHidePop();
-            if (Platform.OS === 'android') {
-                ToastAndroid.show('Đang đăng bình luận!', ToastAndroid.SHORT);
-            } else {
-                alert('Đang đăng bình luận');
-            }
-        } else {
-            if (Platform.OS === 'android') {
-                ToastAndroid.show('Bình luận hoặc hình không được để trống!', ToastAndroid.SHORT);
-            } else {
-                alert('Bình luận không được để trống');
-            }
-        }
-    }
 
     // const ModalPopCmt = () => {
     //     return()
@@ -189,7 +159,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
                 transparent={true}
                 onRequestClose={handleHidePop}
             >
-                <CmtBoxComponent translateY={translateY} handleHidePop={handleHidePop} setContent={setContent} btnDangComment={btnDangComment} />
+                <CmtBoxComponent translateY={translateY} handleHidePop={handleHidePop} post={post} user_id={user_id} />
             </ModalPop>
 
 
@@ -247,7 +217,8 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
                     transparent={true}
                     onRequestClose={handleHidePop}
                 >
-                    <CmtBoxComponent translateY={translateY} handleHidePop={handleHidePop} setContent={setContent} btnDangComment={btnDangComment} />
+                    {!isSubCmt ? <CmtBoxComponent translateY={translateY} handleHidePop={handleHidePop} post={post} user_id={user_id} />
+                        : <CmtBoxComponent translateY={translateY} handleHidePop={handleHidePop} user_id={user_id} comment_id={comment_id} isSubCmt />}
                 </ModalPop>
 
             </RowComponent>
@@ -288,4 +259,4 @@ const styles = StyleSheet.create({
 
 })
 
-export default AnimatedQuickCmtComponent;
+export default React.memo(AnimatedQuickCmtComponent);

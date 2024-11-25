@@ -274,7 +274,11 @@ export const startListeningHashtagById = ({ hashtag_id }) => (dispatch) => {
   // console.log("hashtag_idhashtag_id", hashtag_id)
   const q = query(
     collection(db, "Hashtag"),
+<<<<<<< HEAD
     // where("role_id", "==", 1),
+=======
+    where("role_id", "==", 1),
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
     where("hashtag_id", "==", hashtag_id),
   );
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -288,7 +292,11 @@ export const startListeningHashtagById = ({ hashtag_id }) => (dispatch) => {
     //   dispatch(setHashtagSpecical({ hashtag: hashtag, hashtag_id: hashtag.hashtag_id }));
     // });
     // console.log("hashtagData", hashtagData)
+<<<<<<< HEAD
     dispatch(setHashtagSpecicalById({ hashtag: hashtagData[0], hashtag_id: hashtag_id }));
+=======
+    dispatch(setHashtagSpecicalById({ hashtag: hashtagData, hashtag_id: hashtag_id }));
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
   });
   return unsubscribe;
 };
@@ -330,6 +338,13 @@ export const HashtagSlice = createSlice({
   },
 });
 
+<<<<<<< HEAD
+=======
+
+
+export const { sethashtag, setMembers, setPostCount, setHashtagSpecical, setHashtagSpecicalById } = HashtagSlice.actions;
+
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
 
 
 export const { sethashtag, setMembers, setPostCount, setHashtagSpecical, setHashtagSpecicalById } = HashtagSlice.actions;

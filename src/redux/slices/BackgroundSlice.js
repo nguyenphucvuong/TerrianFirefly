@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, addDoc, getDoc, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, addDoc, getDoc, getDocs, orderBy, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase/FirebaseConfig'; // Firebase config
 
 // Trạng thái ban đầu
@@ -10,45 +10,44 @@ const initialState = {
 };
 
 // Tạo async thunk để lấy tất cả dữ liệu từ Firestore
-export const getBackground = createAsyncThunk('data/getBackground', async () => {
-  try {
-    const backgroundRef = collection(db, "Background");
-    const q = query(backgroundRef, orderBy('level')); // sắp xếp tăng dần theo level
+export const getBackground = () => (dispatch) => {
 
-    const querySnapshot = await getDocs(q);
-    const backgroundData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    return backgroundData;
-  } catch (error) {
-    console.error('Error fetching posts: ', error);
-    throw error;
-  }
-});
+  const backgroundRef = collection(db, "Background");
+  const backgroundQuery = query(backgroundRef, orderBy('level')); // sắp xếp tăng dần theo level
+
+  const unsubscribe = onSnapshot(backgroundQuery, (querySnapshot) => {
+
+    // Lấy tất cả các tài liệu từ querySnapshot và chuyển thành mảng
+    const backgrounds = querySnapshot.docs.map((doc) => ({
+      id: doc.id, // Lấy id của tài liệu
+      ...doc.data(), // Lấy dữ liệu của tài liệu
+    }));
+
+    dispatch(setBackground(backgrounds));
+
+
+  }, (error) => {
+    console.error('Error fetching follower: ', error);
+  });
+  return unsubscribe;
+
+};
 
 // Tạo slice cho Post
 export const BackgroundSlice = createSlice({
   name: 'background',
   initialState,
-  reducers: {},
+  reducers: {
+    setBackground: (state, action) => {
+      state.background = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
-
-      // Xử lý khi lấy dữ liệu thành công
-      .addCase(getBackground.fulfilled, (state, action) => {
-        state.background = action.payload; // Cập nhật danh sách
-        state.statusBackground = 'succeeded'; // Đánh dấu thành công
-      })
-      .addCase(getBackground.pending, (state) => {
-        state.statusBackground = 'loading'; // Đánh dấu trạng thái đang tải
-      })
-      .addCase(getBackground.rejected, (state, action) => {
-        state.error = action.error.message; // lưu lỗi
-        state.statusBackground = 'failed'; // Đánh dấu không thành công
-      });
 
   },
 });
 
-// export const { setPost } = PostSlice.actions
+export const { setBackground } = BackgroundSlice.actions
 
 export default BackgroundSlice.reducer;

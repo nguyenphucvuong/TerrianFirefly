@@ -1,10 +1,18 @@
 /* eslint-disable no-undef */
-import { Animated, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useContext, } from 'react'
+import { Animated, StyleSheet, Text, TextInput, TouchableOpacity, View, ToastAndroid, Platform } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
 import { Image } from 'expo-image';
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from 'expo-image-picker';
+import { useSelector, useDispatch } from 'react-redux';
+import * as FileSystem from 'expo-file-system';
+import * as jpeg from 'jpeg-js';
+import { FontAwesome } from '@expo/vector-icons';
 
+
+
+import { createComment, getComment, } from '../../redux/slices/CommentSlice';
+import { createSubComment } from '../../redux/slices/SubCommentSlice';
 
 import { ImageCheckContext } from '../../context/ImageProvider';
 import RowComponent from '../RowComponent';
@@ -13,15 +21,118 @@ import {
     IconsOptionComponent,
 } from '../';
 import { appInfo } from '../../constains/appInfo';
+import { sub } from '@tensorflow/tfjs';
 // import ButtonsComponent from '../ButtonsComponent';
 // import IconsOptionComponent from './IconsOptionComponent';
+const convertToPercentage = (value) => (value * 100).toFixed(2) + "%";
 
-const CmtBoxComponent = ({ translateY, handleHidePop, setContent, btnDangComment }) => {
-    const image = useContext(ImageCheckContext).image
-    const setImage = useContext(ImageCheckContext).setImage
-    const predictions = useContext(ImageCheckContext).predictions
-    const selectImage = useContext(ImageCheckContext).selectImage
-    const modelReady = useContext(ImageCheckContext).modelReady
+const CmtBoxComponent = ({ translateY, handleHidePop, post, user_id, isSubCmt, comment_id, tag_user_id }) => {
+    const { model, image, setImage, selectImage, modelReady, predictions, setPredictions, classifyImage } = useContext(ImageCheckContext);
+    const [content, setContent] = useState("");
+
+
+    const dispatch = useDispatch();
+
+
+    const dataCmt = !isSubCmt ? {
+        comment_id: "",
+        post_id: post.post_id,
+        user_id: user_id,
+        content: content,
+        created_at: Date.now(),
+        imgPost: image,
+        comment_status_id: 0,
+    } : {
+        comment_id: comment_id,
+        sub_comment_id: "",
+        tag_user_id: tag_user_id,
+        user_id: user_id,
+        content: content,
+        created_at: Date.now(),
+        imgPost: image,
+        sub_comment_status_id: 0,
+    }
+
+
+
+
+    const btnDangComment = async () => {
+        // console.log("dang comment");
+        // console.log("imageimageimage", image);
+        if (content || image) {
+            handleHidePop();
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Đang xử lý...', ToastAndroid.SHORT);
+
+            } else {
+                alert('Đang xử lý...');
+            }
+            if (image) {
+                // const classify = await classifyImage(image);
+                // console.log("classify", classify);
+                // console.log("if (image)ageimage", image);
+                // Show a loading indicator if needed
+
+
+                // Wait for predictions to be ready
+                const waitForPredictions = new Promise((resolve) => {
+                    const checkPredictions = setInterval(() => {
+                        if (predictions && predictions.length > 0) {
+                            clearInterval(checkPredictions);
+                            resolve();
+                        }
+                    }, 100); // Check every 100ms
+                });
+
+                waitForPredictions;
+
+                // Perform actions after predictions are ready
+                console.log("Neutral", predictions[0].probability);
+                console.log("Drawing", predictions[1].probability);
+                console.log("Hentai", predictions[2].probability);
+                console.log("Porn", predictions[3].probability);
+                console.log("Sexy", predictions[4].probability);
+                console.log("Neutral", convertToPercentage(predictions[0].probability));
+                console.log("Drawing", convertToPercentage(predictions[1].probability));
+                console.log("Hentai", convertToPercentage(predictions[2].probability));
+                console.log("Porn", convertToPercentage(predictions[3].probability));
+                console.log("Sexy", convertToPercentage(predictions[4].probability));
+
+                if (predictions[3].probability > 0.05 || predictions[2].probability > 0.05 || predictions[4].probability > 0.05) {
+                    if (Platform.OS === 'android') {
+                        ToastAndroid.show('Hình ảnh không phù hợp!', ToastAndroid.SHORT);
+                    } else {
+                        alert('Hình ảnh không phù hợp');
+                    }
+
+                    return;
+                }
+            }
+
+
+
+            // Dispatch the comment action only after predictions are ready
+            isSubCmt ? dispatch(createSubComment(dataCmt)) : dispatch(createComment(dataCmt));
+
+            setImage(null);
+            setPredictions(null);
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Đang đăng bình luận!', ToastAndroid.SHORT);
+            } else {
+                alert('Đang đăng bình luận');
+            }
+        } else {
+            if (Platform.OS === 'android') {
+                ToastAndroid.show('Bình luận hoặc hình không được để trống!', ToastAndroid.SHORT);
+            } else {
+                alert('Bình luận không được để trống');
+            }
+            handleHidePop();
+        }
+        setImage(null);
+        setPredictions(null);
+    };
+
     return (
         <Animated.View style={[styles.animatedContainer, { transform: [{ translateY }] }]}>
             <RowComponent width={"100%"} height={"auto"} style={{
@@ -71,31 +182,31 @@ const CmtBoxComponent = ({ translateY, handleHidePop, setContent, btnDangComment
                     style={{
                         width: 200,
                         height: 200,
-                        backgroundColor: "red",
                     }}>
                     {<>
                         <TouchableOpacity
                             style={{
                                 width: 25,
                                 height: 25,
-                                backgroundColor: "green",
+                                backgroundColor: "red",
                                 position: "absolute",
                                 zIndex: 1,
                                 top: 0,
                                 right: 0,
-                            }} >
-                            <Image source={require('../../../assets/appIcons/close_icon.png')}
-                                style={{
-                                    width: 25,
-                                    height: 25,
-                                    contentFit: "cover",
-                                }} />
+                                justifyContent: "center",
+                                alignItems: "center",
+                                borderRadius: 30,
+                            }}
+                            onPress={() => { console.log("Clearing image"); setImage(null); setPredictions(null); }}
+                        >
+                            <FontAwesome name="times" size={17} color="white" />
                         </TouchableOpacity>
                         {image && <Image source={image}
                             style={{
                                 width: 200,
                                 height: 200,
                                 contentFit: "cover",
+                                borderRadius: 10,
                             }} />}
                     </>}
                 </View>}
@@ -138,8 +249,7 @@ const CmtBoxComponent = ({ translateY, handleHidePop, setContent, btnDangComment
                         height: "100%",
                     }}
                 >
-                    <ButtonsComponent
-                        isButton
+                    <TouchableOpacity
                         onPress={btnDangComment}
                         style={{
                             borderRadius: 30,
@@ -156,7 +266,7 @@ const CmtBoxComponent = ({ translateY, handleHidePop, setContent, btnDangComment
                                 color: "white",
                                 fontSize: 12,
                             }} >Đăng</Text>
-                    </ButtonsComponent>
+                    </TouchableOpacity>
                 </LinearGradient>
 
             </View>

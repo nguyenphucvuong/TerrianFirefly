@@ -91,10 +91,12 @@ export const createEvent = createAsyncThunk(
       await updateDoc(docRef, {
         event_id: docRef.id,
         count_like: 0, // Giá trị mặc định cho số like
+        count_dislike: 0,
         count_view: 0,
+        user_like: [],
+        user_dislike: [],
         created_at: new Date().getTime(),
       });
-
       if (docSnap.exists()) {
         // Trả về dữ liệu của tài liệu vừa thêm
         return { id: docSnap.id, ...docSnap.data() };

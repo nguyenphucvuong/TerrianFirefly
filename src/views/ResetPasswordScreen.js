@@ -24,11 +24,16 @@ import { ButtonFunctionComponent } from "../component";
 import { StyleGlobal } from "../styles/StyleGlobal";
 import { appInfo } from "../constains/appInfo";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { getUser, updateUser } from "../redux/slices/UserSlices";
+import {
+  getUser,
+  updateUser,
+  setSkipAutoNavigation,
+} from "../redux/slices/UserSlices";
 import {
   updatePassword,
   signInWithEmailAndPassword,
   sendEmailVerification,
+  signOut,
 } from "firebase/auth";
 
 const ResetPasswordScreen = ({ navigation, route }) => {
@@ -78,7 +83,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
     try {
       // Đăng nhập với mật khẩu tạm thời
       await signInWithEmailAndPassword(auth, email, user.passWord);
-
+    
       // Cập nhật mật khẩu mới trong Firebase Auth
       const authUser = auth.currentUser;
       if (authUser) {
@@ -87,33 +92,43 @@ const ResetPasswordScreen = ({ navigation, route }) => {
           // Nếu chưa xác thực, gửi mã xác thực
           await sendEmailVerification(authUser);
           Alert.alert(
-              "Chưa xác thực",
-              "Vui lòng kiểm tra email để xác thực tài khoản."
+            "Chưa xác thực",
+            "Vui lòng kiểm tra email để xác thực tài khoản."
           );
-      }
+        }
+        await signOut(auth);
         // Lấy reference đến tài liệu của người dùng
         const userRef = doc(collection(db, "user"), user.user_id);
         const newData = {
           passWord: newPassword,
         };
-
         // Cập nhật mật khẩu mới trong Firestore
         await updateDoc(userRef, newData);
         console.log("User updated!");
-
-        // Thông báo thành công
+    
+        // Thông báo thành công và chờ phản hồi từ người dùng
         Alert.alert(
           "Thành công",
-          "Mật khẩu đã được cập nhật trong Firebase Auth và Firestore."
+          "Mật khẩu đã được cập nhật trong Firebase Auth và Firestore.",
+          [
+            {
+              text: "OK",
+              onPress: async () => {
+                // Sau khi nhấn OK, thực hiện sign out và điều hướng
+                dispatch(setSkipAutoNavigation(false)); // Đặt lại trạng thái
+                navigation.navigate("LoginScreen");
+              },
+            },
+          ]
         );
-        navigation.navigate("LoginScreen"); // Điều hướng đến màn hình đăng nhập sau khi cập nhật thành công
       }
     } catch (error) {
       console.error("Lỗi cập nhật mật khẩu:", error);
       Alert.alert("Lỗi", "Đã xảy ra lỗi. Vui lòng thử lại.");
     } finally {
-      setisLoading(false); // Đặt trạng thái loading về false ở đây
+      setisLoading(false); // Đặt trạng thái loading về false
     }
+    
   };
 
   return (
@@ -131,7 +146,11 @@ const ResetPasswordScreen = ({ navigation, route }) => {
       <View style={[styles.viewInput, { marginBottom: "15%" }]}>
         <Text style={{ marginBottom: "3%" }}>Password</Text>
         <View style={styles.input}>
-          <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
+          <Icon
+            name="lock"
+            size={appInfo.heightWindows * 0.028}
+            color="#858585"
+          />
           <TextInput
             secureTextEntry={checkPass}
             style={styles.textInput}
@@ -162,7 +181,11 @@ const ResetPasswordScreen = ({ navigation, route }) => {
       <View style={[styles.viewInput, { marginBottom: "23%" }]}>
         <Text style={{ marginBottom: "3%" }}>Xác Nhận Mật Khẩu</Text>
         <View style={styles.input}>
-          <Icon name="lock" size={appInfo.heightWindows * 0.028} color="#858585" />
+          <Icon
+            name="lock"
+            size={appInfo.heightWindows * 0.028}
+            color="#858585"
+          />
           <TextInput
             secureTextEntry={checkPass}
             style={styles.textInput}

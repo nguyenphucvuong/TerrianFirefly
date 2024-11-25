@@ -12,6 +12,7 @@ import {
   getCountFromServer,
   updateDoc,
   where,
+  onSnapshot,
 } from "firebase/firestore";
 import { db, storage } from "../../firebase/FirebaseConfig"; // Firebase config
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase Storage
@@ -26,8 +27,13 @@ const initialState = {
   error: null,
   postByField: [],
   postByUser: [],
+<<<<<<< HEAD
   postFavourite: [],
   postHashtag: [],
+=======
+  postReport: [],
+  loading: false,
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
 };
 
 //Lấy dữ liệu posts phù hợp với hashtag
@@ -160,29 +166,6 @@ export const getPostsFirstTime = createAsyncThunk(
   }
 );
 
-// Hàm để cập nhật số lượt xem cho bài viết
-const updatePostViewCount = async (docs) => {
-  await Promise.all(
-    docs.map(async (doc) => {
-      const currentCountView = doc.data().count_view || 0;
-      await updateDoc(doc.ref, {
-        count_view: currentCountView + 1,
-      });
-    })
-  );
-};
-
-// Hàm lấy danh sách user ID đã được follow
-const getFollowedUserIds = async ({ currentUserId }) => {
-  const followerQuery = query(
-    collection(db, "Follower"),
-    where("follower_user_id", "==", currentUserId)
-  );
-  const followerSnapshot = await getDocs(followerQuery);
-  //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
-
-  return followerSnapshot.docs.map((doc) => doc.data().user_id);
-};
 
 // Hàm chính để lấy bài viết mới
 export const getPostsRefresh = createAsyncThunk(
@@ -200,15 +183,16 @@ export const getPostsRefresh = createAsyncThunk(
       let postsQuery = query(
         collection(db, "Posts"),
         orderBy("created_at", "desc"),
+        where("status_post_id", "<", 2),
         limit("3")
       );
       if (followedUserIds.length > 0) {
         postsQuery = isFollow
           ? query(postsQuery, where("user_id", "in", followedUserIds))
           : query(
-              postsQuery,
-              where("user_id", "not-in", followedUserIds.slice(0, 10))
-            );
+            postsQuery,
+            where("user_id", "not-in", followedUserIds.slice(0, 10))
+          );
       }
 
       const querySnapshot = await getDocs(postsQuery);
@@ -267,6 +251,31 @@ export const getPostsByField = createAsyncThunk(
   }
 );
 
+// Hàm để cập nhật số lượt xem cho bài viết
+const updatePostViewCount = async (docs) => {
+  await Promise.all(
+    docs.map(async (doc) => {
+      const currentCountView = doc.data().count_view || 0;
+      await updateDoc(doc.ref, {
+        count_view: currentCountView + 1,
+      });
+    })
+  );
+};
+
+// Hàm lấy danh sách user ID đã được follow
+const getFollowedUserIds = async ({ currentUserId }) => {
+  const followerQuery = query(
+    collection(db, "Follower"),
+    where("follower_user_id", "==", currentUserId)
+  );
+  const followerSnapshot = await getDocs(followerQuery);
+  //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().user_id));
+
+  return followerSnapshot.docs.map((doc) => doc.data().user_id);
+};
+
+// Hàm lấy bài đăng từ những người dùng chưa được follow
 export const getPostsFromUnfollowedUsers = createAsyncThunk(
   "data/getPostsFromUnfollowedUsers",
   async ({ field, quantity, currentUserId }, { getState }) => {
@@ -285,6 +294,7 @@ export const getPostsFromUnfollowedUsers = createAsyncThunk(
       let postsQuery = query(
         collection(db, "Posts"),
         orderBy(field, "desc"),
+        where("status_post_id", "<", 2),
         limit(quantity)
       );
 
@@ -324,6 +334,74 @@ export const getPostsFromUnfollowedUsers = createAsyncThunk(
     }
   }
 );
+
+// Hàm lấy bài đăng từ những người dùng đã được follow
+export const getPostsFromFollowedUsers = createAsyncThunk(
+  "data/getPostsFromFollowedUsers",
+  async ({ field, quantity, currentUserId }, { getState }) => {
+    try {
+      // Lấy danh sách user ID đã được follow
+      const followedUserIds = await getFollowedUserIds({
+        currentUserId: currentUserId,
+      });
+
+      // Nếu không có user nào được follow, trả về mảng rỗng
+      if (followedUserIds.length === 0) {
+        return { postData: [], lastVisiblePost: null };
+      }
+
+      // Kiểm tra lastVisiblePostFollower để lấy bài đăng từ trang trước đó
+      const lastVisiblePostId = getState().post.lastVisiblePostFollower;
+      //console.log("currentUserId", getState().post.lastVisiblePostFollower);
+      let lastVisibleDoc = null;
+
+      if (lastVisiblePostId) {
+        const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
+        lastVisibleDoc = await getDoc(lastVisibleDocRef);
+      }
+
+      // Tạo query lấy bài đăng từ những người dùng đã được follow
+      let postsQuery = query(
+        collection(db, "Posts"),
+        orderBy(field, "desc"),
+        limit(quantity),
+        where("status_post_id", "<", 2),
+        where("user_id", "in", followedUserIds)
+      );
+
+      if (lastVisibleDoc) {
+        postsQuery = query(postsQuery, startAfter(lastVisibleDoc));
+      }
+
+      const querySnapshot = await getDocs(postsQuery);
+
+      // Trả về mảng rỗng nếu không có bài đăng nào
+      if (querySnapshot.empty) {
+        return { postData: [], lastVisiblePost: null };
+      }
+
+      // Cập nhật lượt xem
+      await updatePostViewCount(querySnapshot.docs);
+
+      // Lấy ID của bài đăng cuối cùng để hỗ trợ paginating
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return {
+        postData: postData,
+        lastVisiblePost: lastVisible ? lastVisible.id : null,
+      };
+    } catch (error) {
+      console.error("Error fetching posts from followed users: ", error);
+      throw error;
+    }
+  }
+);
+
+
 // hàm lấy bài đăng của người dùng
 export const getPostUsers = createAsyncThunk(
   "data/getPostUsers",
@@ -360,6 +438,7 @@ export const getPostUsers = createAsyncThunk(
   }
 );
 
+<<<<<<< HEAD
 // Hàm lấy danh sách user ID đã được yêu thích
 const getFavouriteUserIds = async ({ currentUserId }) => {
   try {
@@ -490,6 +569,9 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
     }
   }
 );
+=======
+
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
 
 export const updatePostsByField = createAsyncThunk(
   "data/updatePostsByField",
@@ -512,11 +594,98 @@ export const updatePostsByField = createAsyncThunk(
   }
 );
 
+export const getRealtimePostsByStatus = createAsyncThunk(
+  "data/getRealtimePostsByStatus",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const postsQuery = query(
+        collection(db, "Posts"),
+        where("status_post_id", "!=", 0)
+      );
+
+      // Lắng nghe thay đổi từ Firestore
+      const unsubscribe = onSnapshot(postsQuery, async (querySnapshot) => {
+        try {
+          const postsWithUser = await Promise.all(
+            querySnapshot.docs.map(async (doc) => {
+              const post = { id: doc.id, ...doc.data() };
+
+
+              // Lấy thông tin người dùng từ user_id
+              const userQuery = query(
+                collection(db, "user"),
+                where("user_id", "==", post.user_id)
+              );
+              const userSnapshot = await getDocs(userQuery);
+
+              if (!userSnapshot.empty) {
+                const user = userSnapshot.docs[0].data();
+                post.user = { id: userSnapshot.docs[0].id, ...user };
+              } else {
+                post.user = null;
+              }
+
+              return post;
+            })
+          );
+
+          // Dispatch chỉ dữ liệu tuần tự hóa, không chứa hàm
+          dispatch(setPostsWithUser(postsWithUser));
+        } catch (error) {
+          rejectWithValue(error.message);
+        }
+      });
+
+      return () => unsubscribe();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+// export const startListeningPostByID = createAsyncThunk(
+//   "data/startListeningPostByID",
+//   async ({ post_id }, { dispatch, rejectWithValue }) => {
+export const startListeningPostByID = ({ post_id }) => (dispatch) => {
+  // console.log("post_id", post_id);
+  const postQuery = query(
+    collection(db, "Posts"),
+    where("post_id", "==", post_id)
+  );
+  const unsubscribe = onSnapshot(postQuery, (querySnapshot) => {
+    const postById = querySnapshot.docs.map(doc => {
+      const data = doc.data(); // Extract post_id from the report content 
+      return { id: doc.id, ...data };
+    });
+
+    // console.log("postById", postById[0]);
+    dispatch(setPostById({ post_id: post_id, postById: postById[0] }));
+  }, (error) => {
+    console.error('Error fetching report: ', error);
+  });
+  return unsubscribe;
+}
+
+
+
 // Tạo slice cho Post
 export const PostSlice = createSlice({
   name: "post",
   initialState,
-  reducers: {},
+  reducers: {
+    setPostsWithUser: (state, action) => {
+      state.postReport = action.payload;
+    },
+    setPostById: (state, action) => {
+      const { post_id, postById } = action.payload;
+
+
+      state[post_id] = postById;
+
+      state.status = "succeeded";
+    }
+  },
   extraReducers: (builder) => {
     builder
       // Xử lý khi thêm dữ liệu thành công
@@ -602,27 +771,13 @@ export const PostSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
-      //getPostsFromFavouriteUsers
-      .addCase(getPostsFromFavouriteUsers.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(getPostsFromFavouriteUsers.fulfilled, (state, action) => {
-        state.loading = false;
-        state.postFavourite = action.payload.postData;
-        state.lastVisiblePostFollower = action.payload.lastVisiblePost;
-        state.status = "succeeded";
-      })
-      .addCase(getPostsFromFavouriteUsers.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
-      })
 
       //getPostUsers
       .addCase(getPostUsers.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+
       .addCase(getPostUsers.fulfilled, (state, action) => {
         state.loading = false;
         state.postByUser = action.payload.postData;
@@ -633,13 +788,28 @@ export const PostSlice = createSlice({
         state.error = action.error.message;
       })
 
+<<<<<<< HEAD
       //for hashtag
       .addCase(getPostsHashtag.fulfilled, (state, action) => {
         state.postHashtag = action.payload.postHashtag;
+=======
+      // Xử lý trạng thái khi lắng nghe thay đổi bài viết thành công
+      .addCase(getRealtimePostsByStatus.pending, (state) => {
+        state.loading = true;  // Đang lắng nghe
+      })
+      .addCase(getRealtimePostsByStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("Updated posts:", action.payload); // Kiểm tra dữ liệu nhận được
+        // Không cần cập nhật postReport trong action.fulfilled nữa vì đã được xử lý trong setPostsWithUser
+      })
+      .addCase(getRealtimePostsByStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
       });
   },
 });
 
-export const {} = PostSlice.actions;
+export const { setPostsWithUser, setPostById } = PostSlice.actions;
 
 export default PostSlice.reducer;

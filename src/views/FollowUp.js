@@ -1,5 +1,5 @@
 import { FlatList, View, TouchableOpacity, StyleSheet, Text, Image } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigation, useRoute } from '@react-navigation/native';
 //styles
@@ -8,19 +8,24 @@ import { StyleGlobal } from '../styles/StyleGlobal'
 import { appInfo } from '../constains/appInfo'
 //components
 import { AvatarEx, ButtonFunctionComponent } from '../component';
+//redux
+import { createFollow, deleteFollow } from "../redux/slices/FollowerSlice";
 const FollowUp = () => {
-    const [isClick, setIsClick] = useState({}); // Lưu trạng thái cho từng item bằng id
-    //route
-    const route = useRoute();
-    const followUp = route.params?.followUp ?? [];
-    //su ly follow
-    const handleFollow = (item) => {
-        // Thay đổi trạng thái dựa trên id của item
-        setIsClick((prev) => ({
-            ...prev,
-            [item.id]: prev[item.id] === 'Followed' ? 'FollowBack' : 'Followed'
-        }));
+    const dispatch = useDispatch();
+    const navigation = useNavigation();
+    // const followUp = route.params?.followUp ?? [];
+    const followUp = useSelector((state) => state.follower.follower);
+    const userID = useSelector((state) => state.user.user.user_id);
+
+    //su ly unfollow
+    const handleUnFollow = (user) => {
+        console.log(`Đã hủy theo dõi: ${user.username}`);
+        // Hủy theo dõi
+        dispatch(deleteFollow({ follower_user_id: userID, user_id: user.user_id }));
+
     };
+
+
     //console.log('user1234', user);
     //console.log('followUp', followUp);
     return (
@@ -29,11 +34,10 @@ const FollowUp = () => {
                 (
                     <FlatList
                         data={followUp}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item) => item.user_id}
                         renderItem={({ item }) => {
-                            const isFollowing = isClick[item.id] === 'Followed';
                             return (
-                                <TouchableOpacity >
+                                <TouchableOpacity onPress={() => navigation.navigate("PersonScreen", { userPost: item, isFromAvatar: true })} >
                                     <View style={[styles.viewFlatList]}>
                                         <AvatarEx
                                             size={50}
@@ -45,11 +49,11 @@ const FollowUp = () => {
                                             <Text style={StyleGlobal.text}>{item.username}</Text>
                                         </View>
                                         <ButtonFunctionComponent
-                                            name2={isFollowing ? 'Theo Dõi' : 'Đã Theo Dõi'}
-                                            backgroundColor={isFollowing ? '#FFFFFF' : '#D9D9D9'}
-                                            colorText={isFollowing ? '#0286FF' : '#000'}
-                                            style={isFollowing ? styles.button2 : styles.button}
-                                            onPress={() => handleFollow(item)}
+                                            name2={'Đã Theo Dõi'}
+                                            backgroundColor={'#D9D9D9'}
+                                            colorText={'#000'}
+                                            style={styles.button}
+                                            onPress={() => handleUnFollow(item)}
                                         />
 
                                     </View>
@@ -67,7 +71,7 @@ const FollowUp = () => {
                             source={require('../../assets/new_empty_dark.03ebcaa.png')}
                         />
                         <Text style={{ fontSize: 16, color: '#333' }}>
-                            Bạn chưa theo dõi người dùng nào!
+                            Chưa theo dõi người dùng nào!
                         </Text>
                     </View>
 

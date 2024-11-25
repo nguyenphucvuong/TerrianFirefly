@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+<<<<<<< HEAD
 import {
   Text,
   View,
@@ -16,16 +17,34 @@ import {
   startListeningEmoji,
 } from "../../redux/slices/EmojiSlice";
 import { createNoti, deleteNoti } from "../../redux/slices/NotiSlice";
+=======
+import { Text, View, Animated, StyleSheet, TouchableOpacity } from 'react-native'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { Image } from 'expo-image'
+import { useDispatch, useSelector } from 'react-redux'
+import { createEmoji, deleteEmoji, updateEmojiByField, startListeningEmojiPost } from '../../redux/slices/EmojiSlice'
+import { countCommentsAndSubComments, countCommentsAndSubCommentsRealTime } from '../../redux/slices/CommentSlice'
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
 
 import RowComponent from "../RowComponent";
 import ButtonsComponent from "../ButtonsComponent";
 import { StyleGlobal } from "../../styles/StyleGlobal";
 // import { data } from '../../constains/data'
+<<<<<<< HEAD
 import { ModalPop } from "../../modals";
 import { appInfo } from "../../constains/appInfo";
 import { appcolor } from "../../constains/appcolor";
 import EmojiBoxComponent from "./EmojiBoxComponent";
 import { calculateEmojiCounts } from "../../utils";
+=======
+import { ModalPop } from '../../modals'
+import { appInfo } from '../../constains/appInfo'
+import { appcolor } from '../../constains/appcolor'
+import EmojiBoxComponent from './EmojiBoxComponent'
+import { calculateEmojiCounts } from '../../utils'
+import { sub } from '@tensorflow/tfjs'
+
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
 
 const formatNumber = (num) => {
   // console.log(num)
@@ -58,9 +77,30 @@ const PostButton = ({
 
   const [isShowEmojiBox, setIsShowEmojiBox] = useState(false);
 
+<<<<<<< HEAD
   const translateYEmoji = useState(
     new Animated.Value(appInfo.heightWindows)
   )[0]; // Start offscreen
+=======
+    const dataPostView = formatNumber(post.count_view);
+    const [dataPostCmt, setDataPostCmt] = useState(0); // Sử dụng state để lưu kết quả   
+
+    useEffect(() => {
+        const fetchCommentCount = async () => {
+            const countCmt = await countCommentsAndSubComments({ post_id: post.post_id });
+            setDataPostCmt(formatNumber(countCmt)); // Cập nhật state với kết quả
+        };
+        fetchCommentCount();
+    }, []);
+
+    // useEffect(() => {
+    //     const fetchCommentCount = async () => {
+    //         const countCmt = await countCommentsAndSubCommentsRealTime({ post_id: post.post_id, setTotalCount: setDataPostCmt });
+    //         // setDataPostCmt(formatNumber(countCmt)); // Cập nhật state với kết quả
+    //     };
+    //     fetchCommentCount();
+    // }, []);
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
 
   const [isPressLike, setIsPressLike] = useState("false");
 
@@ -71,10 +111,66 @@ const PostButton = ({
     post_id: post.post_id,
   }).totalCount; // chưa xong
 
+<<<<<<< HEAD
   const findNotiById = ({ post_id, user_id, targetUser_id }) => {
     if (!Array.isArray(notiList) || notiList.length === 0) {
       console.error("Noti array is empty or not an array.");
       return null;
+=======
+    const [isPressLike, setIsPressLike] = useState("false");
+
+
+    const [iconEmoji, setIconEmoji] = useState("default");
+    const emoji = useSelector(state => state.emoji[post.post_id]);
+    const dataPostEmoji = calculateEmojiCounts({ emojiList: emoji, post_id: post.post_id }).totalCount; // chưa xong
+    // useEffect(() => {
+    //     dispatch(startListeningEmoji({ user_id: user.user_id }));
+    // }, [])
+
+    useEffect(() => {
+        const getEmoji = async () => {
+            let foundEmojiType = "default";
+            for (let i = 0; i < emoji.length; i++) {
+                if (emoji[i].user_id !== user.user_id || emoji[i].post_id !== post.post_id) {
+                    continue;
+                }
+                if (emoji[i].count_like > 0) {
+                    foundEmojiType = "like";
+                    break;
+                } else if (emoji[i].count_heart > 0) {
+                    foundEmojiType = "heart";
+                    break;
+                } else if (emoji[i].count_laugh > 0) {
+                    foundEmojiType = "laugh";
+                    break;
+                } else if (emoji[i].count_sad > 0) {
+                    foundEmojiType = "sad";
+                    break;
+                }
+            }
+            setIconEmoji(foundEmojiType);
+        };
+
+        emoji ? getEmoji() : setIconEmoji("default");
+    }, [emoji]);
+
+
+    const getIconImg = (emoji) => {
+        switch (emoji) {
+            case "like":
+                return require("../../../assets/emojiIcons/like-emoji.png");
+            case "heart":
+                return require("../../../assets/emojiIcons/heart-emoji.png");
+            case "laugh":
+                return require("../../../assets/emojiIcons/laugh-emoji.png");
+            case "sad":
+                return require("../../../assets/emojiIcons/sad-emoji.png");
+            case "default":
+                return require("../../../assets/appIcons/like-out-post.png");
+            default:
+                return require("../../../assets/appIcons/like-out-post.png");
+        }
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
     }
 
     const foundNotification = notiList.find(
@@ -85,12 +181,80 @@ const PostButton = ({
         noti.targetUser_id === targetUser_id
     );
 
+<<<<<<< HEAD
     if (foundNotification) {
       console.log("Found notification:", foundNotification);
       return foundNotification.noti_id;
     } else {
       console.log("No matching notification found.");
       return null;
+=======
+        if (existingEmoji) {
+
+            // Nếu người dùng đã tương tác
+            if (existingEmoji[`count_${emojiType}`] > 0) {
+                console.log("deleteEmoji");
+                // Nếu người dùng ấn lại đúng emoji mà họ đã tương tác trước đó -> DELETE
+                await dispatch(deleteEmoji({ post_id: post.post_id, user_id: user.user_id }));
+                setIconEmoji("default");
+            } else {
+                console.log("updateEmojiByField");
+                // Nếu người dùng chọn emoji khác với emoji đã tương tác trước đó -> UPDATE
+                // Xóa emoji hiện tại
+                await dispatch(updateEmojiByField({
+                    post_id: post.post_id,
+                    user_id: user.user_id,
+                    count_like: emojiType === "like" ? 1 : 0,
+                    count_heart: emojiType === "heart" ? 1 : 0,
+                    count_laugh: emojiType === "laugh" ? 1 : 0,
+                    count_sad: emojiType === "sad" ? 1 : 0,
+                }));
+                // await dispatch(startListeningEmoji({ user_id: user.user_id }));
+                setIconEmoji(emojiType);
+            }
+            // await dispatch(startListeningEmoji({ user_id: user.user_id }));
+        } else {
+            console.log("createEmoji");
+            // Nếu người dùng chưa tương tác -> CREATE
+            await dispatch(createEmoji({
+                emoji_id: "",
+                post_id: post.post_id,
+                comment_id: "",
+                sub_comment_id: "",
+                user_id: user.user_id,
+                count_like: emojiType === "like" ? 1 : 0,
+                count_heart: emojiType === "heart" ? 1 : 0,
+                count_laugh: emojiType === "laugh" ? 1 : 0,
+                count_sad: emojiType === "sad" ? 1 : 0,
+            }));
+            setIconEmoji(emojiType);
+        }
+
+        handleHidePop();
+    };
+
+
+
+
+    // const dataEmoji = {
+    //     emoji_id: "",
+    //     post_id: post.post_id,
+    //     user_id: user.user_id,
+    //     isComment: false,
+    //     comment_id: "",
+    //     count_like: count_like,
+    //     count_heart: count_heart,
+    //     count_laugh: count_laugh,
+    //     count_sad: count_sad,
+    // }
+
+
+
+    const setFalse = () => {
+        // setIsVisible(false);
+        setIsShowEmojiBox(false);
+        // setIsPressLike("false");
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
     }
   };
 
@@ -359,6 +523,7 @@ const PostButton = ({
           </Text>
         </View>
 
+<<<<<<< HEAD
         <View
           style={{
             width: "auto",
@@ -395,6 +560,47 @@ const PostButton = ({
           </Text>
         </View>
       </View>
+=======
+                        color: "gray",
+                    }]}> {dataPostView}</Text>
+            </View>
+            <View
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flex: 1,
+                    flexDirection: "row",
+                    right: "5%",
+                }}
+            >
+                <View
+                    style={{
+                        width: "auto",
+                        height: "100%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flexDirection: "row",
+                    }}>
+                    <ButtonsComponent isButton
+                        onPress={handleNagigateDetailPost} //
+                        style={{ marginHorizontal: "10%" }}>
+                        <Image
+                            style={{
+                                width: 20,
+                                height: 20,
+                            }}
+                            source={require('../../../assets/appIcons/comment-out-post.png')}
+                            contentFit="cover"
+                        />
+                    </ButtonsComponent>
+                    <Text
+                        style={[StyleGlobal.text, {
+                            color: "gray",
+                        }]}>{dataPostCmt}</Text>
+                </View>
+>>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
 
       {/* Emoji Box */}
       <ModalPop
