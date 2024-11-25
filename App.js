@@ -26,6 +26,7 @@ import { NotiProvider } from "./src/context/NotiProvider";
 import { useNotification } from "./src/context/NotiProvider";
 import { LogBox } from "react-native";
 import { getAllNoti } from "./src/redux/slices/NotiSlice";
+import { getAllHashtagGroup } from "./src/redux/HashtagGroupSlice";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -47,6 +48,11 @@ const MainApp = () => {
   const { schedulePushNotification } = useNotification();
   const noti = useSelector((state) => state.noti.noti);
   const notiList = useSelector((state) => state.noti.notiList);
+
+  useEffect(() => {
+    const unsubscribe = getAllHashtagGroup(dispatch);
+    return () => unsubscribe();
+  }, [dispatch]);
 
   useEffect(() => {
     const unsubscribe = getAllNoti(dispatch);

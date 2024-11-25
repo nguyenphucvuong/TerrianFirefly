@@ -79,7 +79,7 @@ const CreatePostScreen = () => {
   const handlePickImage = async () => {
     // Gọi hàm chọn ảnh từ ImageProvider
     await selectImage();
-  
+
     // Đợi cho đến khi `predictions` được cập nhật
     if (predictions && predictions.length > 0) {
       // Kiểm tra nếu có dự đoán không phù hợp
@@ -90,10 +90,10 @@ const CreatePostScreen = () => {
           (p.className === "Sexy" && p.probability > 0.5) ||
           (p.className === "Drawing" && p.probability > 0.5) // Thêm điều kiện nếu cần
       );
-  
+
       if (nsfwDetected) {
         alert("Ảnh chứa nội dung không phù hợp và không thể thêm.");
-        setImages([])
+        setImages([]);
       } else {
         // Chỉ thêm ảnh nếu không chứa nội dung không phù hợp
         if (image && image.uri) {
@@ -104,7 +104,6 @@ const CreatePostScreen = () => {
       alert("Dự đoán chưa sẵn sàng. Vui lòng thử lại.");
     }
   };
-  
 
   //xử lý ẩn bảng chủ đề
   const handleHideModal = () => {
@@ -659,7 +658,6 @@ const CreatePostScreen = () => {
                 style={styles.buttonAddImg}
                 // onPress={handlePickImage}
                 onPress={pickImage}
-
               >
                 <Ionicons name="add" size={40} color="white" />
               </TouchableOpacity>

@@ -15,21 +15,6 @@ import vi from "date-fns/locale/vi";
 const ListNotiComponent = ({ targetUser_id }) => {
   const dispatch = useDispatch();
   const notifications = useSelector((state) => state.noti.noti);
-
-  // const newdata = {
-  //   //trạng thái mặc định là false
-  //   check_touch: false, // trạng thái đã nhấn vào thông báo chưa
-  //   checked: false, //trạng thái thông báo đã được gửi chưa
-  //   content: "user_name đã like bài viết của bạn", //user_name của người like
-  //   created_at: Date.now(), 
-  //   //đường dẫn hình ảnh của người like
-  //   imgUser:
-  //     "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/images%2FF3A0F535-95B9-4595-9BAE-7E0DD5436F0F.jpg?alt=media&token=0b05e219-8d77-4544-a95e-ce8f46ccc1fd",
-  //   noti_id: "temp", //id của thông báo
-  //   post_id: "temp", //id của post vừa like
-  //   targetUser_id: "ETFNQWVPt27VqU9Cuyph", //id của người nhận được thông báo lấy từ post vừa like
-  //   user_id: "người like", //id của người like lấy từ user hiện đang đăng nhập
-  // };
   
   // Lọc thông báo theo targetUser_id và sắp xếp theo thời gian
   const userNotifications = notifications
@@ -85,10 +70,10 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
   uncheckedNoti: {
-    backgroundColor: "#eaf2fd", // Màu xanh nhạt cho thông báo chưa đọc
+    backgroundColor: "#eaf2fd",
   },
   checkedNoti: {
-    backgroundColor: "#fff", // Màu trắng cho thông báo đã đọc
+    backgroundColor: "#fff",
   },
   notiContent: {
     flexDirection: "row",

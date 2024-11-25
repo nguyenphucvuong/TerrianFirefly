@@ -36,6 +36,7 @@ import NotiTabScreen from "../views/NotiTabScreen";
 import DetailEventScreen from "../views/DetailEventScreen";
 import NewEventScreen from "../views/NewEventScreen";
 import NotificationScreen from "../views/NotificationScreen";
+import HashtagGroupScreen from "../views/HashtagGroupScreen";
 const Stack = createStackNavigator();
 
 const IconBack = (title) => ({
@@ -228,6 +229,11 @@ const StackNavigator = () => {
         name="NotificationScreen"
         component={NotificationScreen}
         options={() => IconBack("Thông Báo")}
+      />
+      <Stack.Screen
+        name="HashtagGroupScreen"
+        component={HashtagGroupScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

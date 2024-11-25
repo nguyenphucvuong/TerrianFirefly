@@ -115,7 +115,6 @@ export const updateNotiByField = createAsyncThunk(
 export const deleteNoti = createAsyncThunk(
   "data/deleteNoti",
   async ({ noti_id }) => {
-    console.log("Inside deleteNoti function, noti_id:", noti_id); // Thêm log để kiểm tra
     try {
       if (!noti_id) {
         throw new Error("Invalid noti_id: null or undefined");

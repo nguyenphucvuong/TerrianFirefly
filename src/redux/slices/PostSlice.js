@@ -27,53 +27,52 @@ const initialState = {
   postByField: [],
   postByUser: [],
   postFavourite: [],
+  postHashtag: [],
 };
 
-// Tạo async thunk để thêm dữ liệu lên Firestore
+//Lấy dữ liệu posts phù hợp với hashtag
+export const getPostsHashtag = createAsyncThunk(
+  "data/getPostsHashtag",
+  async ({ hashtag }, { rejectWithValue }) => {
+    try {
+      // Tạo query lọc bài viết theo hashtag
+      const postsQuery = query(
+        collection(db, "Posts"),
+        where("hashtag", "array-contains", hashtag), // Điều kiện hashtag
+        orderBy("created_at", "desc") // Sắp xếp theo ngày tạo giảm dần
+      );
 
-// export const createPost = createAsyncThunk(
-//   "data/createPost",
-//   async (newData) => {
-//     try {
-//       // Thêm dữ liệu mới vào Firestore
-//       const docRef = await addDoc(collection(db, "Posts"), newData);
+      const querySnapshot = await getDocs(postsQuery);
 
-//       const imgUrls = [];
+      if (querySnapshot.empty) {
+        return { postHashtag: [] }; // Trả về mảng rỗng nếu không có dữ liệu
+      }
 
-//       // Tải lên từng ảnh trong imgPost
-//       for (const img of newData.imgPost) {
-//         const response = await fetch(img);
-//         const blob = await response.blob(); // Chuyển đổi URL thành dạng nhị phân
-//         console.log("so nhi phan", blob);
-//         const imgRef = ref(storage, `images/${img.split("/").pop()}`); // Đặt tên cho ảnh
-//         await uploadBytes(imgRef, blob); // Tải lên ảnh
+      // Lấy dữ liệu bài viết
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-//         // Lấy URL tải về
-//         const imgUrl = await getDownloadURL(imgRef);
-//         imgUrls.push(imgUrl); // Lưu URL vào mảng
-//       }
+      // Tăng lượt xem (count_view) của mỗi bài viết
+      await Promise.all(
+        querySnapshot.docs.map(async (doc) => {
+          const currentCountView = doc.data().count_view || 0;
+          await updateDoc(doc.ref, {
+            count_view: currentCountView + 1,
+          });
+        })
+      );
 
-//       console.log(imgUrls);
-//       // Lấy tài liệu vừa thêm từ Firestore
-//       const docSnap = await getDoc(docRef);
-
-//       await updateDoc(docRef, {
-//         post_id: docRef.id,
-//         imgPost: imgUrls, // Lưu ID vào tài liệu
-//       });
-
-//       if (docSnap.exists()) {
-//         // Trả về dữ liệu của tài liệu vừa thêm
-//         return { post_id: docSnap.id, ...docSnap.data() };
-//       } else {
-//         throw new Error("No such document!");
-//       }
-//     } catch (error) {
-//       console.error("Error adding document: ", error);
-//       throw error;
-//     }
-//   }
-// );
+      return {
+        postHashtag: postData,
+      };
+    } catch (error) {
+      console.error("Error fetching posts with hashtag:", error);
+      return rejectWithValue(error.message); // Trả lỗi về Redux
+    }
+  }
+);
 
 export const createPost = createAsyncThunk(
   "data/createPost",
@@ -366,14 +365,14 @@ const getFavouriteUserIds = async ({ currentUserId }) => {
   try {
     const favouriteQuery = query(
       collection(db, "Favorite"),
-      where("user_id", "==", currentUserId)  // Lấy bài viết yêu thích của currentUserId
+      where("user_id", "==", currentUserId) // Lấy bài viết yêu thích của currentUserId
     );
 
     const favouriteSnapshot = await getDocs(favouriteQuery);
     // Lấy danh sách post_id từ các bài viết mà người dùng yêu thích
     //console.log('favouriteSnapshot', favouriteSnapshot.docs.map((doc) => doc.data().post_id));
-    
-    return favouriteSnapshot.docs.map((doc) => doc.data().post_id);  // Trả về post_id của bài viết yêu thích
+
+    return favouriteSnapshot.docs.map((doc) => doc.data().post_id); // Trả về post_id của bài viết yêu thích
   } catch (error) {
     console.error("Error fetching favourite post IDs: ", error);
     throw error;
@@ -632,6 +631,11 @@ export const PostSlice = createSlice({
       .addCase(getPostUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+
+      //for hashtag
+      .addCase(getPostsHashtag.fulfilled, (state, action) => {
+        state.postHashtag = action.payload.postHashtag;
       });
   },
 });

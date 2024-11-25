@@ -37,6 +37,7 @@ const PostViewComponent = ({ post, user }) => {
 
     const dispatch = useDispatch();
     const userId = post.user_id; // Lấy user_id từ post
+    
     // const [userPost, setUserPost] = useState(null);
     const userPost = useSelector((state) => state.user[userId]);
     // const [isFollow, setIsFollow] = useState(false);
@@ -75,7 +76,7 @@ const PostViewComponent = ({ post, user }) => {
     const content = post?.body.substring(0, 120);
     const handleAd = () => {
         console.log("toi day");
-
+        
     };
 
     const handleFollowButton = useCallback(() => {
@@ -244,7 +245,7 @@ const PostViewComponent = ({ post, user }) => {
                             width={appInfo.widthWindows - (appInfo.widthWindows * 0.1)}
                         // style={{ marginTop: 5 }}
                         >
-                            <ButtonsComponent color="green" isHashtag onPress={handleAd} hashtag={post?.hashtag} />
+                            <ButtonsComponent color="green" isHashtag hashtag={post?.hashtag} />
                         </RowComponent >
 
                         <AnimatedQuickCmtComponent post={post} userPost={userPost} user={user} handleNagigateDetailPost={handleNagigateDetailPost} />
