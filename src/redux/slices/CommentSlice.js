@@ -184,6 +184,7 @@ export const countCommentsAndSubComments = async ({ post_id }) => {
 
 
 export const startListeningCommentByID = ({ comment_id }) => (dispatch) => {
+    console.log("comment_id", comment_id)
     if (!comment_id) return;
 
     const commentQuery = query(
