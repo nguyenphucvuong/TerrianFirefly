@@ -178,7 +178,7 @@ export const startListeningHashtagById = ({ hashtag_id }) => (dispatch) => {
   // console.log("hashtag_idhashtag_id", hashtag_id)
   const q = query(
     collection(db, "Hashtag"),
-    where("role_id", "==", 1),
+    // where("role_id", "==", 1),
     where("hashtag_id", "==", hashtag_id),
   );
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
