@@ -156,7 +156,7 @@ const HashtagGroupComponent = ({
         <TouchableOpacity
           onPress={handleJoin}
           style={{
-            backgroundColor: isJoin ? "#888" : "#5B9BD5",
+            backgroundColor: isJoin ? "#888" : "#697BEB",
             padding: 10,
             borderRadius: 20,
           }}

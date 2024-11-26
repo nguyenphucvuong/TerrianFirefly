@@ -27,18 +27,14 @@ export const createNoti = createAsyncThunk(
     try {
       // Thêm tài liệu vào Firestore
       const docRef = await addDoc(collection(db, "Noti"), newData);
-
       if (!docRef.id) {
         throw new Error("Document reference does not have a valid ID");
       }
-
       // Cập nhật `noti_id` ngay sau khi thêm
       await updateDoc(docRef, {
         noti_id: docRef.id,
       });
-
       console.log("Document updated successfully with ID:", docRef.id);
-
       // Trả về dữ liệu của thông báo vừa tạo
       return { noti_id: docRef.id, ...newData };
     } catch (error) {
