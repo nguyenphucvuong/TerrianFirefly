@@ -17,7 +17,7 @@ const FollowUp = () => {
     const followUp = useSelector((state) => state.follower.follower);
     const userID = useSelector((state) => state.user.user.user_id);
 
-    //su ly follow
+    //su ly unfollow
     const handleUnFollow = (user) => {
         console.log(`Đã hủy theo dõi: ${user.username}`);
         // Hủy theo dõi
