@@ -45,9 +45,9 @@ export const createHashtag = createAsyncThunk(
       for (const hashtag of newData) {
         const formattedHashtag = {
           hashtag_id: hashtag,
-          hashtag_background: "#ffff",
+          hashtag_background: "#d9e2ff",
           hashtag_color: "#000",
-          hashtag_avatar: "default",
+          hashtag_avatar: "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/clone%2FhashtagDefault.png?alt=media&token=0dfdb9f5-9af5-4957-a64f-c503df666b8a",
           role_id: "0",
         };
 
@@ -155,6 +155,8 @@ export const getHashtag = (dispatch) => {
     console.error("Error setting up real-time event listener: ", error);
   }
 };
+
+
 export const startListeningMembers = ({ currentUserId }) => (dispatch) => {
   if (!currentUserId) return;
 
