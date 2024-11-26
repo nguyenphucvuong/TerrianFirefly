@@ -85,9 +85,9 @@ export const ImageProvider = ({ children }) => {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true, // Cho phép chọn nhiều ảnh
       allowsEditing: false,  // Tắt chế độ chỉnh sửa ảnh
-      //aspect: [4, 3],        // Tùy chọn này không cần thiết khi allowsEditing là false
       quality: 1,            // Giữ nguyên chất lượng ảnh
     });
 

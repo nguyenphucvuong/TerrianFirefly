@@ -16,6 +16,8 @@ import { storage } from "../../firebase/FirebaseConfig"; // Firebase config
 // Trạng thái ban đầu
 const initialState = {
   hashtag: [],
+  members: 0,
+  postCount: 0,
   specical: [],
   statusHashtag: "idle",
   errorHashtag: null,
@@ -43,9 +45,9 @@ export const createHashtag = createAsyncThunk(
       for (const hashtag of newData) {
         const formattedHashtag = {
           hashtag_id: hashtag,
-          hashtag_background: "#ffff",
+          hashtag_background: "#d9e2ff",
           hashtag_color: "#000",
-          hashtag_avatar: "default",
+          hashtag_avatar: "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/clone%2FhashtagDefault.png?alt=media&token=0dfdb9f5-9af5-4957-a64f-c503df666b8a",
           role_id: "0",
         };
 
@@ -154,6 +156,102 @@ export const getHashtag = (dispatch) => {
   }
 };
 
+
+export const startListeningMembers = ({ currentUserId }) => (dispatch) => {
+  if (!currentUserId) return;
+
+  // Lấy danh sách Hashtag mà người dùng hiện tại tham gia
+  const hashtagQuery = query(
+    collection(db, "HashtagGroup"),
+    where("UserID", "==", currentUserId)
+  );
+
+  const unsubscribe = onSnapshot(
+    hashtagQuery,
+    async (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        // Lấy tất cả HashtagID mà người dùng tham gia
+        const hashtagIds = querySnapshot.docs.map((doc) => doc.data().HashtagID);
+        //console.log("hashtagIds:", hashtagIds);
+
+        if (hashtagIds.length > 0) {
+          // Lấy toàn bộ số lượng người tham gia cho từng HashtagID
+          const memberCountsPromises = hashtagIds.map(async (hashtagId) => {
+            const countQuery = query(
+              collection(db, "HashtagGroup"),
+              where("HashtagID", "==", hashtagId)
+            );
+            const countSnapshot = await getDocs(countQuery);
+            return { hashtagId, count: countSnapshot.size }; // Trả về số lượng
+          });
+
+          // Chờ tất cả các promise hoàn thành
+          const memberCounts = await Promise.all(memberCountsPromises);
+
+          //console.log("memberCounts:", memberCounts);
+
+          // Gửi dữ liệu số lượng thành viên vào Redux
+          dispatch(setMembers(memberCounts));
+        }
+      }
+    },
+    (error) => {
+      console.error("Error fetching Hashtag: ", error);
+    }
+  );
+
+  return unsubscribe; // Trả về hàm unsubscribe để dừng lắng nghe
+};
+export const startListeningPostCount = ({ currentUserId }) => (dispatch) => {
+  if (!currentUserId) return;
+
+  // Lấy danh sách Hashtag mà người dùng hiện tại tham gia
+  const hashtagQuery = query(
+    collection(db, "HashtagGroup"),
+    where("UserID", "==", currentUserId)
+  );
+
+  const unsubscribe = onSnapshot(
+    hashtagQuery,
+    async (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        // Lấy tất cả HashtagID mà người dùng tham gia
+        const hashtagIds = querySnapshot.docs.map((doc) => doc.data().HashtagID);
+        //console.log("hashtagIds:", hashtagIds);
+
+        if (hashtagIds.length > 0) {
+          // Lấy toàn bộ số lượng người tham gia cho từng HashtagID
+          const hashtagCountsPromises = hashtagIds.map(async (hashtag) => {
+            const postQuery = query(
+              collection(db, "Posts"),
+              where("hashtag", "array-contains", hashtag) // Tìm bài viết chứa hashtag
+            );
+            const querySnapshot = await getDocs(postQuery);
+            return {
+              hashtag,
+              count: querySnapshot.size, // Đếm số lượng bài viết
+            };
+          });
+
+          // Chờ tất cả các truy vấn hoàn thành
+          const hashtagCounts = await Promise.all(hashtagCountsPromises);
+
+          //console.log("Số lượng bài viết theo hashtag:", hashtagCounts);
+
+          // Gửi dữ liệu số lượng thành viên vào Redux
+          dispatch(setPostCount(hashtagCounts));
+        }
+      }
+    },
+    (error) => {
+      console.error("Error fetching Hashtag: ", error);
+    }
+  );
+
+  return unsubscribe; // Trả về hàm unsubscribe để dừng lắng nghe
+};
+
+
 export const startListeningHashtags = () => (dispatch) => {
   const q = query(
     collection(db, "Hashtag"),
@@ -178,7 +276,7 @@ export const startListeningHashtagById = ({ hashtag_id }) => (dispatch) => {
   // console.log("hashtag_idhashtag_id", hashtag_id)
   const q = query(
     collection(db, "Hashtag"),
-    where("role_id", "==", 1),
+    // where("role_id", "==", 1),
     where("hashtag_id", "==", hashtag_id),
   );
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -192,7 +290,7 @@ export const startListeningHashtagById = ({ hashtag_id }) => (dispatch) => {
     //   dispatch(setHashtagSpecical({ hashtag: hashtag, hashtag_id: hashtag.hashtag_id }));
     // });
     // console.log("hashtagData", hashtagData)
-    dispatch(setHashtagSpecicalById({ hashtag: hashtagData, hashtag_id: hashtag_id }));
+    dispatch(setHashtagSpecicalById({ hashtag: hashtagData[0], hashtag_id: hashtag_id }));
   });
   return unsubscribe;
 };
@@ -205,6 +303,12 @@ export const HashtagSlice = createSlice({
   reducers: {
     sethashtag: (state, action) => {
       state.hashtag = action.payload;
+    },
+    setMembers: (state, action) => {
+      state.members = action.payload;
+    },
+    setPostCount: (state, action) => {
+      state.postCount = action.payload;
     },
     setHashtagSpecical: (state, action) => {
       // const { hashtag, hashtag_id } = action.payload;
@@ -228,6 +332,9 @@ export const HashtagSlice = createSlice({
   },
 });
 
-export const { sethashtag, setHashtagSpecical, setHashtagSpecicalById } = HashtagSlice.actions;
+
+
+export const { sethashtag, setMembers, setPostCount, setHashtagSpecical, setHashtagSpecicalById } = HashtagSlice.actions;
+
 
 export default HashtagSlice.reducer;

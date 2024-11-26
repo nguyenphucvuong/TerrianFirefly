@@ -127,7 +127,7 @@ const UserManagementScreen = () => {
 
             return item.status == selectedStatusValue ? (
 
-              < ReportItem key={item.item_id} item={item} index={index} />
+              < ReportItem key={item.report_id} item={item} index={index} />
 
             ) : null
           }) : null}
@@ -207,6 +207,7 @@ const ReportItem = ({ item, index }) => {
       }
     }
     handleCheckReport();
+    checkUserCountReport();
     // console.log("itemReport", itemReport)
   }, [post, comment, subComment]);
   const handleNagigatePersonScreen = () => {
@@ -214,7 +215,7 @@ const ReportItem = ({ item, index }) => {
   }
 
   const checkUserCountReport = async () => {
-    if (user.report_count >= 2) {
+    if (user.report_count > 2) {
       await dispatch(updateUserState({ user_id: user.user_id, field: "status", value: 2 }));
     } else {
       await (updateUserState({ user_id: user.user_id, field: "report_count", value: user.report_count + 1 }));
@@ -225,11 +226,8 @@ const ReportItem = ({ item, index }) => {
   const handleSendWarning = async () => {
     if (item.status == 0) {
       await dispatch(updateReport({ report_id: item.report_id, field: "status", value: 1 }));
-    } else if (item.status == 1) {
-      await dispatch(updateReport({ report_id: item.report_id, field: "status", value: 2 }));
     }
     await dispatch(updateReport({ report_id: item.report_id, field: "status_changed_at", value: Date.now() }));
-
   }
 
   const handleDeleteReport = async () => {
@@ -259,7 +257,7 @@ const ReportItem = ({ item, index }) => {
       style={{
         padding: 10,
         margin: 10,
-        backgroundColor: item.status_changed_at && item.status_changed_at <= Date.now() - 259200000 ? "red" : itemReport[itemStatus] == 2 ? "green" : "white",
+        backgroundColor: "white",
         flexDirection: 'column',
         borderRadius: 10,
         shadowOffset: {
@@ -468,7 +466,7 @@ const ReportItem = ({ item, index }) => {
             </View> : null}
           </View> : null}
 
-        {/* Comment */}
+        {/* SubComment */}
         {isExpanded && item.item_type == "sub_comment" ?
           <View>
             {itemReport.content ? <View

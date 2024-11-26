@@ -1,21 +1,21 @@
-import { configureStore } from '@reduxjs/toolkit'
-import Post from './slices/PostSlice';
-import HashtagSlice from './slices/HashtagSlice';
-import CommentSlice from './slices/CommentSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import Post from "./slices/PostSlice";
+import HashtagSlice from "./slices/HashtagSlice";
+import CommentSlice from "./slices/CommentSlice";
 
-import BackgroundSlice from './slices/BackgroundSlice';
-import AchievementSlice from './slices/AchievementSlice';
-import UserSlices from './slices/UserSlices';
-import FollowerSlice from './slices/FollowerSlice';
-import FavoriteSlice from './slices/FavoriteSlice';
-import EmojiSlice from './slices/EmojiSlice';
-import EventSlice from './slices/EventSlice';
-import NotiSlice from './slices/NotiSlice';
-import SubCommentSlice from './slices/SubCommentSlice';
-import RequestSlice from './slices/RequestSlice';
-import ReportSlice from './slices/ReportSilce';
-import { sub } from '@tensorflow/tfjs';
-
+import BackgroundSlice from "./slices/BackgroundSlice";
+import AchievementSlice from "./slices/AchievementSlice";
+import UserSlices from "./slices/UserSlices";
+import FollowerSlice from "./slices/FollowerSlice";
+import FavoriteSlice from "./slices/FavoriteSlice";
+import EmojiSlice from "./slices/EmojiSlice";
+import EventSlice from "./slices/EventSlice";
+import HashtagGroupSlice from "./HashtagGroupSlice";
+import NotiSlice from "./slices/NotiSlice";
+import SubCommentSlice from "./slices/SubCommentSlice";
+import RequestSlice from "./slices/RequestSlice";
+import ReportSlice from "./slices/ReportSilce";
+import { sub } from "@tensorflow/tfjs";
 
 export const store = configureStore({
   reducer: {
@@ -33,15 +33,16 @@ export const store = configureStore({
     subComment: SubCommentSlice,
     request: RequestSlice,
     report: ReportSlice,
+    hashtagGroup: HashtagGroupSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['data/getRealtimePostsByStatus/fulfilled', 'data/listenToUserWithStatus/fulfilled'],
-        ignoredPaths: ['payload'],
+        ignoredActions: [
+          "data/getRealtimePostsByStatus/fulfilled",
+          "data/listenToUserWithStatus/fulfilled",
+        ],
+        ignoredPaths: ["payload"],
       },
     }),
-})
-
-
-
+});

@@ -39,6 +39,8 @@ import NotiTabScreen from "../views/NotiTabScreen";
 import DetailEventScreen from "../views/DetailEventScreen";
 import NewEventScreen from "../views/NewEventScreen";
 import NotificationScreen from "../views/NotificationScreen";
+import HashtagGroupScreen from "../views/HashtagGroupScreen";
+import SearchScreen from "../views/SearchScreen";
 const Stack = createStackNavigator();
 
 const IconBack = (title) => ({
@@ -234,6 +236,11 @@ const StackNavigator = () => {
         options={() => IconBack("Thông Báo")}
       />
       <Stack.Screen
+        name="HashtagGroupScreen"
+        component={HashtagGroupScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="CommentScreen"
         component={CommentScreen}
         options={{ headerShown: false }}
@@ -249,6 +256,11 @@ const StackNavigator = () => {
         options={() => IconBack("Yêu Cầu Quản Trị")}
       />
 
+      <Stack.Screen
+        name="SearchScreen"
+        component={SearchScreen}
+        options={() => IconBack("Tìm Kiếm")}
+      />
     </Stack.Navigator>
   );
 };

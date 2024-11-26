@@ -22,6 +22,7 @@ import MoreOptionItemComponent from './MoreOptionItemComponent';
 import { updateCommentByField } from '../../redux/slices/CommentSlice';
 import { updateSubCommentByField } from '../../redux/slices/SubCommentSlice';
 import { createReport } from '../../redux/slices/ReportSilce';
+import { createNoti } from '../../redux/slices/NotiSlice';
 
 
 // const MoreOptionPostComponent = ({ style, post_id, isFollow, user_id, post_user_id }) => {
@@ -78,12 +79,16 @@ const MoreOptionPostComponent = ({ style, post_id, comment_id, sub_comment_id, u
         user_id_reported: isComment ? comment_user_id : isSubCmt ? sub_comment_user_id : post_user_id,
         user_id_reporter: user_id,
     }
+
+
     const handleReport = useCallback(() => {
         if (isComment) {
             console.log("Báo cáo bình luận");
             // dispatch(updateUserState({ user_id: comment_user_id, field: "status_user_id", value: 1 }));
             dispatch(updateCommentByField({ comment_id: comment_id, field: "comment_status_id", value: 1 }));
+            
             dispatch(createReport(dataReport));
+            
         } else if (isSubCmt) {
             console.log("Báo cáo bình luận phụ");
             // dispatch(updateUserState({ user_id: sub_comment_user_id, field: "status_user_id", value: 1 }));
@@ -94,7 +99,22 @@ const MoreOptionPostComponent = ({ style, post_id, comment_id, sub_comment_id, u
             // console.log(comment_user_id, sub_comment_user_id, post_user_id);
             // dispatch(updateUserState({ user_id: post_user_id, field: "status_user_id", value: 1 }));
             dispatch(updatePostsByField({ post_id: post_id, field: "status_post_id", value: 1 }));
-            dispatch(createReport(dataReport));
+            dispatch(createReport(dataReport)); 
+
+            dispatch(
+                createNoti({
+                  post_id: post_id,
+                  user_id: user_id,
+                  targetUser_id: isComment ? comment_user_id : isSubCmt ? sub_comment_user_id : post_user_id,
+                  check_touch: false,
+                  checked: false,
+                  content: `${currentUser.username} đã báo cáo bài viết của bạn`,
+                  created_at: Date.now(),
+                  imgUser: currentUser.imgUser,
+                  role_noti: 2,
+                  noti_id: "temp",
+                })
+              );
         }
         handleHideInput();
     })
@@ -196,7 +216,7 @@ const MoreOptionPostComponent = ({ style, post_id, comment_id, sub_comment_id, u
                             {/* Ẩn bài viết */}
                             {currentUser.status_user_id == 2 ? null :
                                 !isComment && !isSubCmt ?
-                                    user_id === post_user_id ?
+                                    currentUser.user_id === post_user_id || currentUser.roleid == 1 ?
                                         <MoreOptionItemComponent
                                             isRow
                                             styleImg={{ width: 30, height: 30 }}
@@ -208,7 +228,7 @@ const MoreOptionPostComponent = ({ style, post_id, comment_id, sub_comment_id, u
                             {/* Ẩn bình luận */}
                             {currentUser.status_user_id == 2 ? null :
                                 isComment ?
-                                    user_id === comment_user_id ?
+                                    currentUser.user_id === comment_user_id || currentUser.roleid == 1 ?
                                         <MoreOptionItemComponent
                                             isRow
                                             styleImg={{ width: 30, height: 30 }}
@@ -219,7 +239,7 @@ const MoreOptionPostComponent = ({ style, post_id, comment_id, sub_comment_id, u
                             {/* Ẩn bình luận phụ */}
                             {currentUser.status_user_id == 2 ? null :
                                 isSubCmt ?
-                                    user_id === sub_comment_user_id ?
+                                    currentUser.user_id === sub_comment_user_id || currentUser.roleid == 1 ?
                                         <MoreOptionItemComponent
                                             isRow
                                             styleImg={{ width: 30, height: 30 }}

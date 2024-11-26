@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import {
   Text,
   TouchableOpacity,
@@ -5,10 +6,12 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
-import React from "react";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
-
+import { useDispatch, useSelector } from "react-redux";
+import { CryptoDigestAlgorithm } from "expo-crypto";
+import { getPostsHashtag } from "../redux/slices/PostSlice";
+import { startListeningHashtagById } from "../redux/slices/HashtagSlice";
 const ButtonsComponent = ({
   children,
   color,
@@ -24,19 +27,24 @@ const ButtonsComponent = ({
   isNext,
   isNotiButton,
 }) => {
-  // const ButtonsComponent = (infoButton) => {
-  // const [children, color, style, isButton, isPressable, onPress, onLongPress, isHashtag, hashtag, isDetail] = [
-  //   infoButton.children,
-  //   infoButton.color,
-  //   infoButton.style,
-  //   infoButton.isButton,
-  //   infoButton.isPressable,
-  //   infoButton.onPress,
-  //   infoButton.onLongPress,
-  //   infoButton.isHashtag,
-  //   infoButton.hashtag,
-  //   infoButton.isDetail,
-  // ];
+  const navigation = useNavigation();
+  const hashtagDetail = useSelector((state) => state.hashtag.hashtag);
+  const dispatch = useDispatch();
+  const postHashtag = useSelector((state) => state.post.postHashtag);
+  //xử lý chuyển màn hình
+  const handleNagigateHashtag = async (item) => {
+    const findHashtag = hashtagDetail.find(
+      (hashtag) => hashtag.hashtag_id === item
+    );
+
+    const data = await dispatch(getPostsHashtag({ hashtag: item }));
+    navigation.navigate("HashtagGroupScreen", {
+      hashtagID: findHashtag.hashtag_id,
+      hashtag_avatar: findHashtag.hashtag_avatar,
+      hashtag_background: findHashtag.hashtag_background,
+      postHashtag: data.payload.postHashtag,
+    });
+  };
 
   const PressableButton = () => {
     const navigate = useNavigation();
@@ -86,9 +94,16 @@ const ButtonsComponent = ({
 
   const HashtagButtons = () => {
     const RenderHashtagButtons = ({ item }) => {
+      const hashtagById = useSelector((state) => state.hashtag[item]);
+
+      // console.log("item.hashtag_background", hashtagById[0].hashtag_background);
+      useEffect(() => {
+        dispatch(startListeningHashtagById({ hashtag_id: item }));
+      }, [item]);
+
       return (
         <TouchableOpacity
-          onPress={onPress}
+          onPress={() => handleNagigateHashtag(item)}
           style={[
             {
               borderRadius: 30,
@@ -111,7 +126,13 @@ const ButtonsComponent = ({
               height: 15,
             }}
             // eslint-disable-next-line no-undef
-            source={require("../../assets/appIcons/hashtag_icon.png")}
+            source={
+              hashtagById
+                ? hashtagById.role_id == 1
+                  ? { uri: hashtagById.hashtag_avatar }
+                  : require("../../assets/appIcons/hashtag_icon.png")
+                : require("../../assets/appIcons/hashtag_icon.png")
+            }
             contentFit="cover"
           />
           <Text

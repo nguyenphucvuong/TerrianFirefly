@@ -1,4 +1,10 @@
-import React, { useCallback, useRef, useState, useEffect } from "react";
+import React, {
+  useCallback,
+  useRef,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import {
   View,
   Text,
@@ -36,15 +42,13 @@ import {
   getPosts,
   getPostsByField,
 } from "../redux/slices/PostSlice";
-import {
-  createHashtag
-} from "../redux/slices/HashtagSlice";
+import { createHashtag } from "../redux/slices/HashtagSlice";
 import LoadingCompoent from "../component/LoadingComponent";
 // import { getHashtag, createHashtag } from "../redux/slices/HashtagSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { log } from "@tensorflow/tfjs";
 const { height } = Dimensions.get("window");
-
+import { ImageCheckContext } from "../context/ImageProvider";
 const CreatePostScreen = () => {
   //khai bao redux
   const dispatch = useDispatch();
@@ -56,7 +60,7 @@ const CreatePostScreen = () => {
   const navigation = useNavigation();
 
   //khai báo biến
-  const [isLoading, setIsLoading] = useState(false);  // Trạng thái loading
+  const [isLoading, setIsLoading] = useState(false); // Trạng thái loading
   const [showOptions, setShowOptions] = useState(false); // Trạng thái của modal bảng tùy chọn
   const [textTitle, onChangeTextTitle] = React.useState(""); // tiêu đề
   const [textPost, onChangeTextPost] = React.useState(""); // nội dung
@@ -68,6 +72,37 @@ const CreatePostScreen = () => {
   const [images, setImages] = useState([]); //Lưu hình ảnh được chọn từ thư viện
   const [selectedImage, setSelectedImage] = useState(null); // Để lưu ảnh được nhấn vào để hiển fullsize
   const [isModalVisible, setModalVisible] = useState(false); //Trạng thái của modal hình ảnh
+  const { image, selectImage, predictions, modelReady } =
+    useContext(ImageCheckContext);
+
+  // Thêm ảnh sau khi kiểm tra nội dung
+  const handlePickImage = async () => {
+    // Gọi hàm chọn ảnh từ ImageProvider
+    await selectImage();
+
+    // Đợi cho đến khi `predictions` được cập nhật
+    if (predictions && predictions.length > 0) {
+      // Kiểm tra nếu có dự đoán không phù hợp
+      const nsfwDetected = predictions.some(
+        (p) =>
+          (p.className === "Porn" && p.probability > 0.5) ||
+          (p.className === "Hentai" && p.probability > 0.5) ||
+          (p.className === "Sexy" && p.probability > 0.5)
+      );
+
+      if (nsfwDetected) {
+        alert("Ảnh chứa nội dung không phù hợp và không thể thêm.");
+        setImages([]);
+      } else {
+        // Chỉ thêm ảnh nếu không chứa nội dung không phù hợp
+        if (image && image.uri) {
+          setImages((prevImages) => [...prevImages, image.uri]);
+        }
+      }
+    } else {
+      alert("Dự đoán chưa sẵn sàng. Vui lòng thử lại.");
+    }
+  };
 
   //xử lý ẩn bảng chủ đề
   const handleHideModal = () => {
@@ -122,7 +157,7 @@ const CreatePostScreen = () => {
 
   //xử lý đăng bài viết mới
   const handlePost = async () => {
-    setIsLoading(true);  // Bắt đầu loading
+    setIsLoading(true); // Bắt đầu loading
     let body = isEnabled ? link : textPost;
     if (isEnabled) {
       body = extractYouTubeVideoID(body);
@@ -143,23 +178,20 @@ const CreatePostScreen = () => {
       created_at: Date.now(),
     };
 
-    // Nếu có hashtag mới, thêm vào Firestore
+    // Thêm hashtag nếu có hashtag mới
     if (newHashtag.length !== 0) {
       await dispatch(createHashtag(newHashtag)).unwrap();
     }
-
 
     // Thêm bài viết mới vào Firestore
     await dispatch(createPost(newDataPost)).unwrap();
     // console.log("Thêm bài viết thành công");
     handleGoBack();
-    setIsLoading(false);  // Kết thúc loading
+    setIsLoading(false); // Kết thúc loading
   };
 
   //xử lý quay lại màn hình trước
   const handleGoBack = async () => {
-    // const postByF = await dispatch(getPostsByField({ fieldOrderBy: 'created_at', quantity: 3 })).unwrap();
-    // console.log("getPostsByField", postByF);
     //gán lại
     resetData();
     navigation.goBack();
@@ -403,7 +435,6 @@ const CreatePostScreen = () => {
               //   uri: "https://cdn-icons-png.flaticon.com/512/3114/3114883.png",
               // }}
               source={require("../../assets/appIcons/close_icon.png")} //icon #
-
               style={{ width: 25, height: 25, marginTop: "auto" }}
             />
           </ButtonsComponent>
@@ -623,7 +654,11 @@ const CreatePostScreen = () => {
             {/* Hiển thị hình ảnh được chọn  */}
             <ScrollView horizontal={true}>
               {/**Nút chọn ảnh */}
-              <TouchableOpacity style={styles.buttonAddImg} onPress={pickImage}>
+              <TouchableOpacity
+                style={styles.buttonAddImg}
+                // onPress={handlePickImage}
+                onPress={pickImage}
+              >
                 <Ionicons name="add" size={40} color="white" />
               </TouchableOpacity>
 
