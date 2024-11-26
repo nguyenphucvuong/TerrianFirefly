@@ -196,7 +196,7 @@ const MoreOptionPostComponent = ({ style, post_id, comment_id, sub_comment_id, u
                             {/* Ẩn bài viết */}
                             {currentUser.status_user_id == 2 ? null :
                                 !isComment && !isSubCmt ?
-                                    user_id === post_user_id ?
+                                    currentUser.user_id === post_user_id || currentUser.roleid == 1 ?
                                         <MoreOptionItemComponent
                                             isRow
                                             styleImg={{ width: 30, height: 30 }}
@@ -208,7 +208,7 @@ const MoreOptionPostComponent = ({ style, post_id, comment_id, sub_comment_id, u
                             {/* Ẩn bình luận */}
                             {currentUser.status_user_id == 2 ? null :
                                 isComment ?
-                                    user_id === comment_user_id ?
+                                    currentUser.user_id === comment_user_id || currentUser.roleid == 1 ?
                                         <MoreOptionItemComponent
                                             isRow
                                             styleImg={{ width: 30, height: 30 }}
@@ -219,7 +219,7 @@ const MoreOptionPostComponent = ({ style, post_id, comment_id, sub_comment_id, u
                             {/* Ẩn bình luận phụ */}
                             {currentUser.status_user_id == 2 ? null :
                                 isSubCmt ?
-                                    user_id === sub_comment_user_id ?
+                                    currentUser.user_id === sub_comment_user_id || currentUser.roleid == 1 ?
                                         <MoreOptionItemComponent
                                             isRow
                                             styleImg={{ width: 30, height: 30 }}

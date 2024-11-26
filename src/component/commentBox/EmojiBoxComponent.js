@@ -118,7 +118,7 @@ const EmojiBoxComponent = ({ translateYEmoji, handleBtnEmoji, emoji, user, post,
     )
 }
 
-export default EmojiBoxComponent
+export default React.memo(EmojiBoxComponent)
 
 const styles = StyleSheet.create({
     animatedContainer: {
