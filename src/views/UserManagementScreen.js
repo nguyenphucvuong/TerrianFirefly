@@ -127,7 +127,7 @@ const UserManagementScreen = () => {
 
             return item.status == selectedStatusValue ? (
 
-              < ReportItem key={item.item_id} item={item} index={index} />
+              < ReportItem key={item.report_id} item={item} index={index} />
 
             ) : null
           }) : null}

@@ -33,6 +33,7 @@ import { startListeningCommentByPostId, countCommentsAndSubComments } from '../r
 import { startListeningUserByID } from '../redux/slices/UserSlices';
 import { countSubComments, startListeningSubCommentByCommentId } from '../redux/slices/SubCommentSlice';
 import { startListeningPostByID } from '../redux/slices/PostSlice';
+import { startListeningAchieByID } from '../redux/slices/AchievementSlice';
 
 
 
@@ -48,8 +49,6 @@ const DetailPostScreen = () => {
             await dispatch(startListeningPostByID({ post_id: post.post_id }));
         }
         fetchPost();
-
-
     }, []);
 
     // console.log("user.user_id", user.user_id)
@@ -69,6 +68,8 @@ const DetailPostScreen = () => {
     const laughCount = formatNumber({ num: countEmoji.laughCount });
     const sadCount = formatNumber({ num: countEmoji.sadCount });
     const comments = useSelector(state => state.comment[post.post_id])
+    const userAchievement = useSelector((state) => userPost?.achie_id ? state.achievement[userPost.achie_id] : null);
+    const currentAchievementUser = useSelector((state) => state.achievement[user.achie_id]);
 
 
     const [selectedValue, setSelectedValue] = useState('desc'); // Giá trị mặc định của Picker
@@ -293,7 +294,7 @@ const DetailPostScreen = () => {
                                 alignItems: "center",
                                 width: "65%",
                             }}>
-                            <AvatarEx size={30} round={10} url={userPost.imgUser} frame={userPost.frame_user} />
+                            <AvatarEx size={30} round={10} url={userPost.imgUser} frame={currentAchievementUser.nameAchie} />
 
                             <View style={{ width: "auto", flexDirection: "row", paddingHorizontal: "3%", }}>
                                 <Text style={{ fontSize: 15, fontWeight: "bold" }}>{userPost.username}</Text>
@@ -412,7 +413,7 @@ const DetailPostScreen = () => {
                             }}>
 
 
-                            <AvatarEx size={50} round={10} url={userPost.imgUser} frame={userPost.frame_user}
+                            <AvatarEx size={50} round={10} url={userPost.imgUser} frame={userAchievement?.nameAchie}
                                 style={{
                                     marginHorizontal: "3%",
                                 }} />
@@ -741,11 +742,23 @@ export const CommentsPost = React.memo(({ comment }) => {
     const countEmoji = calculateEmojiCounts({ emojiList: emoji, comment_id: comment.comment_id, }).totalCount;
     const subComment = useSelector(state => state.subComment[comment.comment_id]);
     const currentUser = useSelector(state => state.user.user);
+    const currentAchievementUser = useSelector((state) => state.achievement[user.achie_id]);
+
 
     useEffect(() => {
-        if (!user) { dispatch(startListeningUserByID({ user_id: comment.user_id })); }
-        dispatch(startListeningEmojiCmt({ comment_id: comment.comment_id }));
-        dispatch(startListeningSubCommentByCommentId({ comment_id: comment.comment_id }));
+        if (!user) {
+            dispatch(startListeningUserByID({ user_id: comment.user_id }));
+        }
+        if (!emoji) {
+            dispatch(startListeningEmojiCmt({ comment_id: comment.comment_id }));
+        }
+        if (!subComment) {
+            dispatch(startListeningSubCommentByCommentId({ comment_id: comment.comment_id }));
+        }
+        if (!currentAchievementUser) {
+            dispatch(startListeningAchieByID({ achie_id: user?.achie_id }));
+        }
+
         // console.log("emoji Run");
     }, []);
 
@@ -815,7 +828,7 @@ export const CommentsPost = React.memo(({ comment }) => {
                             style={{
                                 flexDirection: "row",
                             }}>
-                            <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                            <AvatarEx size={30} round={30} url={user.imgUser} frame={currentAchievementUser.nameAchie} />
                             <View
                                 style={{
                                     height: "80%",

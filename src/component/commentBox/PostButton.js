@@ -341,4 +341,4 @@ const styles = StyleSheet.create({
 
 })
 
-export default PostButton
+export default React.memo(PostButton)

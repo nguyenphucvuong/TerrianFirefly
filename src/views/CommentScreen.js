@@ -24,6 +24,7 @@ import { getUserByField, startListeningUserByID } from '../redux/slices/UserSlic
 import { startListeningSubCommentByCommentId } from '../redux/slices/SubCommentSlice'
 import { countSubComments } from '../redux/slices/SubCommentSlice'
 import { appcolor } from '../constains/appcolor'
+import { startListeningAchieByID } from '../redux/slices/AchievementSlice'
 
 
 const CommentScreen = () => {
@@ -39,9 +40,14 @@ const CommentScreen = () => {
     const emoji = useSelector(state => state.emoji[comment.comment_id]);
     const countEmoji = calculateEmojiCounts({ emojiList: emoji, comment_id: comment.comment_id, }).totalCount;
     const currentUser = useSelector((state) => state.user.user);
+    const userAchievement = useSelector((state) => state.achievement[user.achie_id]);
+
 
     useEffect(() => {
-        // console.log("currentUser", currentUser)
+        if (!userAchievement) {
+            dispatch(startListeningAchieByID({ achie_id: user?.achie_id }));
+            // console.log("run userAchievement");
+        }
     }, [])
 
 
@@ -190,7 +196,7 @@ const CommentScreen = () => {
                             activeOpacity={0.8}
                             style={{ flexDirection: "row", alignItems: "center", height: "100%" }}
                         >
-                            <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                            <AvatarEx size={30} round={30} url={user.imgUser} frame={userAchievement.nameAchie} />
                             <View
                                 style={{
                                     height: "80%",
@@ -334,6 +340,7 @@ const CommentsPost = React.memo(({ subComment, comment }) => {
 
 
     const userTag = useSelector((state) => state.user[subComment.tag_user_id]);
+    const userAchievement = useSelector((state) => state.achievement[user.achie_id]);
 
 
     useEffect(() => {
@@ -342,6 +349,10 @@ const CommentsPost = React.memo(({ subComment, comment }) => {
         // console.log("subComment", subComment, subComment.tag_user_id);
         // console.log("object", userTag);
         // dispatch(startListeningSubCommentByPostId({ comment_id: subComment.comment_id }));
+        if (!userAchievement) {
+            dispatch(startListeningAchieByID({ achie_id: user?.achie_id }));
+            // console.log("run userAchievement");
+        }
     }, []);
     useEffect(() => {
 
@@ -435,7 +446,7 @@ const CommentsPost = React.memo(({ subComment, comment }) => {
                             activeOpacity={0.8}
                             style={{ flexDirection: "row", alignItems: "center", height: "100%" }}
                         >
-                            <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} />
+                            <AvatarEx size={30} round={30} url={user.imgUser} frame={userAchievement.nameAchie} />
                             <View
                                 style={{
                                     height: "80%",
