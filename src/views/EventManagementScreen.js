@@ -80,7 +80,6 @@ export default function EventManagementScreen() {
   // rightSwipe xóa sự kiện
   const rightSwipe = (id) => {
     // console.log('id', id);
-    
     return (
       <TouchableOpacity
         style={{ alignSelf: "center" }}
@@ -97,7 +96,6 @@ export default function EventManagementScreen() {
   const truncateContent = (content) => {
     return content.length > 50 ? content.substring(0, 50) + "..." : content;
   };
-
   // Hàm kiểm tra trạng thái sự kiện và đặt màu nền phù hợp
   const getStatusStyle = (endDate) => {
     const today = new Date();

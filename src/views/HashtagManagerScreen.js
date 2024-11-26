@@ -82,15 +82,12 @@ const HashtagManagerScreen = () => {
   };
   
   const handleAddHashtag = async () => {
-    console.log("hashtags", hashtag);
-    
     if (!hashtagName) {
       Alert.alert("Lỗi", "Vui lòng nhập tên hashtag.");
       return;
     }
     // Kiểm tra nếu hashtag đã tồn tại
     const hashtagExists = hashtag.some((e) => e.hashtag_id === hashtagName);
-
     if (hashtagExists) {
       setModalVisible(false);
       Alert.alert("Lỗi", "Hashtag đã tồn tại.");

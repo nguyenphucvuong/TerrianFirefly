@@ -42,7 +42,6 @@ function ForgotPassword() {
       console.log("gui ma", code);
       await sendVerificationCode(email, code); // Gửi mã xác nhận qua EmailJS
       navigation.navigate('VerificationCodeScreen', { email, code }); // Chuyển đến màn xác nhận
-      
     } catch (error) {
       setisLoading(false)
       console.error('Lỗi gửi mã xác nhận:', error);
