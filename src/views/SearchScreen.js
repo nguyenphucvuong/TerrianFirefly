@@ -10,6 +10,7 @@ import {
 import { getAllPost, getPostsHashtag } from "../redux/slices/PostSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import { getAllUser } from "../redux/slices/UserSlices";
 
 const SearchScreen = () => {
   const dispatch = useDispatch();
@@ -33,9 +34,13 @@ const SearchScreen = () => {
     }
   }, [activeTab]);
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(getAllPost());
-  },[])
+  }, []);
+
+  useEffect(() => {
+    dispatch(getAllUser());
+  }, []);
   // Hàm lấy tất cả bài viết
   const fetchAllPosts = async () => {
     try {
@@ -122,16 +127,7 @@ const SearchScreen = () => {
 
   const handleGoToDetali = async (item) => {
     if (item.post_id) {
-     
       const postUser = users[item.user_id];
-
-
-      // console.log( "post:", item)
-      // console.log( "user:", user)
-      // console.log( "userPost:", postUser)
-      // console.log( "post_user_id:", item.user_id)
-      // console.log( "comments:", comments)
-
       navigation.navigate("DetailPost", {
         post: item,
         user: user,

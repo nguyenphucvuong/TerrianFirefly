@@ -256,14 +256,12 @@ const StackNavigator = () => {
         options={() => IconBack("Yêu Cầu Quản Trị")}
       />
 
-<Stack.Screen
+      <Stack.Screen
         name="SearchScreen"
         component={SearchScreen}
         options={() => IconBack("Tìm Kiếm")}
       />
     </Stack.Navigator>
-
-
   );
 };
 export default StackNavigator;

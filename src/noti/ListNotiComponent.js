@@ -57,7 +57,15 @@ const ListNotiComponent = ({ targetUser_id }) => {
         comments: comments,
       });
     } else if (noti.role_noti == 1) {
-      console.log("day la comment");
+      const post = allPosts.find((p) => p.post_id === noti.post_id);
+      const postUser = users[user.user_id];
+      navigation.navigate("DetailPost", {
+        post: post,
+        user: user,
+        userPost: postUser,
+        post_user_id: post.user_id,
+        comments: comments,
+      });
 
     } else if (noti.role_noti == 2) {
       const post = allPosts.find((p) => p.post_id === noti.post_id);
