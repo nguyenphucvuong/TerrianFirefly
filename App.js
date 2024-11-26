@@ -230,17 +230,17 @@ async function registerForPushNotificationsAsync() {
 
 const App = () => {
   return (
+    <NavigationContainer>
     <Provider store={store}>
       <ImageProvider>
         <NotiProvider>
           <SafeAreaProvider>
-            <NavigationContainer>
               <MainApp />
-            </NavigationContainer>
           </SafeAreaProvider>
         </NotiProvider>
       </ImageProvider>
     </Provider>
+    </NavigationContainer>
   );
 };
 

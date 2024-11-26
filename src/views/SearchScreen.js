@@ -33,6 +33,9 @@ const SearchScreen = () => {
     }
   }, [activeTab]);
 
+  useEffect(()=>{
+    dispatch(getAllPost());
+  },[])
   // Hàm lấy tất cả bài viết
   const fetchAllPosts = async () => {
     try {
@@ -119,9 +122,16 @@ const SearchScreen = () => {
 
   const handleGoToDetali = async (item) => {
     if (item.post_id) {
-      console.log("bai viet", item);
      
       const postUser = users[item.user_id];
+
+
+      // console.log( "post:", item)
+      // console.log( "user:", user)
+      // console.log( "userPost:", postUser)
+      // console.log( "post_user_id:", item.user_id)
+      // console.log( "comments:", comments)
+
       navigation.navigate("DetailPost", {
         post: item,
         user: user,
