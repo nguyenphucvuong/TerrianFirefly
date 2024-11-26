@@ -27,14 +27,45 @@ const initialState = {
   error: null,
   postByField: [],
   postByUser: [],
-<<<<<<< HEAD
   postFavourite: [],
   postHashtag: [],
-=======
   postReport: [],
   loading: false,
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
+  allPost: [],
 };
+
+//Lấy dữ liệu posts phù hợp với hashtag
+export const getAllPost = createAsyncThunk(
+  "data/getAllPost",
+  async () => {
+    try {
+      // Tạo query lọc bài viết theo hashtag
+      const postsQuery = query(
+        collection(db, "Posts"),
+        orderBy("created_at", "desc") // Sắp xếp theo ngày tạo giảm dần
+      );
+
+      const querySnapshot = await getDocs(postsQuery);
+
+      if (querySnapshot.empty) {
+        return { posts: [] }; // Trả về mảng rỗng nếu không có dữ liệu
+      }
+
+      // Lấy dữ liệu bài viết
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return {
+        allPostData: postData,
+      };
+    } catch (error) {
+      console.error("Error fetching all posts:", error);
+      return error.message; // Trả lỗi về Redux
+    }
+  }
+);
 
 //Lấy dữ liệu posts phù hợp với hashtag
 export const getPostsHashtag = createAsyncThunk(
@@ -166,7 +197,6 @@ export const getPostsFirstTime = createAsyncThunk(
   }
 );
 
-
 // Hàm chính để lấy bài viết mới
 export const getPostsRefresh = createAsyncThunk(
   "data/getPostsRefresh",
@@ -190,9 +220,9 @@ export const getPostsRefresh = createAsyncThunk(
         postsQuery = isFollow
           ? query(postsQuery, where("user_id", "in", followedUserIds))
           : query(
-            postsQuery,
-            where("user_id", "not-in", followedUserIds.slice(0, 10))
-          );
+              postsQuery,
+              where("user_id", "not-in", followedUserIds.slice(0, 10))
+            );
       }
 
       const querySnapshot = await getDocs(postsQuery);
@@ -401,7 +431,6 @@ export const getPostsFromFollowedUsers = createAsyncThunk(
   }
 );
 
-
 // hàm lấy bài đăng của người dùng
 export const getPostUsers = createAsyncThunk(
   "data/getPostUsers",
@@ -437,141 +466,6 @@ export const getPostUsers = createAsyncThunk(
     }
   }
 );
-
-<<<<<<< HEAD
-// Hàm lấy danh sách user ID đã được yêu thích
-const getFavouriteUserIds = async ({ currentUserId }) => {
-  try {
-    const favouriteQuery = query(
-      collection(db, "Favorite"),
-      where("user_id", "==", currentUserId) // Lấy bài viết yêu thích của currentUserId
-    );
-
-    const favouriteSnapshot = await getDocs(favouriteQuery);
-    // Lấy danh sách post_id từ các bài viết mà người dùng yêu thích
-    //console.log('favouriteSnapshot', favouriteSnapshot.docs.map((doc) => doc.data().post_id));
-
-    return favouriteSnapshot.docs.map((doc) => doc.data().post_id); // Trả về post_id của bài viết yêu thích
-  } catch (error) {
-    console.error("Error fetching favourite post IDs: ", error);
-    throw error;
-  }
-};
-
-//hàm lấy bài người dùng đã yêu thích
-export const getPostsFromFavouriteUsers = createAsyncThunk(
-  "data/getPostsFromFavouriteUsers",
-  async ({ field, currentUserId }, { getState }) => {
-    // console.log('currentUserId',currentUserId);
-
-    try {
-      // Lấy danh sách user ID đã được follow
-      const favouriteUserIds = await getFavouriteUserIds({
-        currentUserId: currentUserId,
-      });
-      //console.log('favouriteUserIds', favouriteUserIds);
-
-      // Nếu không có user nào được follow, trả về mảng rỗng
-      if (favouriteUserIds.length === 0) {
-        return { postData: [] };
-      }
-
-      // Tạo query lấy bài đăng từ những người dùng đã được yêu thích
-      let postsQuery = query(
-        collection(db, "Posts"),
-        orderBy(field, "desc"),
-        where("post_id", "in", favouriteUserIds)
-      );
-
-      const querySnapshot = await getDocs(postsQuery);
-
-      // Trả về mảng rỗng nếu không có bài đăng nào
-      if (querySnapshot.empty) {
-        return { postData: [] };
-      }
-
-      const postData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      return {
-        postData: postData,
-      };
-    } catch (error) {
-      console.error("Error fetching posts from favourite users: ", error);
-      throw error;
-    }
-  }
-);
-
-// Hàm lấy bài đăng từ những người dùng đã được follow
-export const getPostsFromFollowedUsers = createAsyncThunk(
-  "data/getPostsFromFollowedUsers",
-  async ({ field, quantity, currentUserId }, { getState }) => {
-    try {
-      // Lấy danh sách user ID đã được follow
-      const followedUserIds = await getFollowedUserIds({
-        currentUserId: currentUserId,
-      });
-
-      // Nếu không có user nào được follow, trả về mảng rỗng
-      if (followedUserIds.length === 0) {
-        return { postData: [], lastVisiblePost: null };
-      }
-
-      // Kiểm tra lastVisiblePostFollower để lấy bài đăng từ trang trước đó
-      const lastVisiblePostId = getState().post.lastVisiblePostFollower;
-      //console.log("currentUserId", getState().post.lastVisiblePostFollower);
-      let lastVisibleDoc = null;
-
-      if (lastVisiblePostId) {
-        const lastVisibleDocRef = doc(db, "Posts", lastVisiblePostId);
-        lastVisibleDoc = await getDoc(lastVisibleDocRef);
-      }
-
-      // Tạo query lấy bài đăng từ những người dùng đã được follow
-      let postsQuery = query(
-        collection(db, "Posts"),
-        orderBy(field, "desc"),
-        limit(quantity),
-        where("user_id", "in", followedUserIds)
-      );
-
-      if (lastVisibleDoc) {
-        postsQuery = query(postsQuery, startAfter(lastVisibleDoc));
-      }
-
-      const querySnapshot = await getDocs(postsQuery);
-
-      // Trả về mảng rỗng nếu không có bài đăng nào
-      if (querySnapshot.empty) {
-        return { postData: [], lastVisiblePost: null };
-      }
-
-      // Cập nhật lượt xem
-      await updatePostViewCount(querySnapshot.docs);
-
-      // Lấy ID của bài đăng cuối cùng để hỗ trợ paginating
-      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-      const postData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      return {
-        postData: postData,
-        lastVisiblePost: lastVisible ? lastVisible.id : null,
-      };
-    } catch (error) {
-      console.error("Error fetching posts from followed users: ", error);
-      throw error;
-    }
-  }
-);
-=======
-
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
 
 export const updatePostsByField = createAsyncThunk(
   "data/updatePostsByField",
@@ -610,7 +504,6 @@ export const getRealtimePostsByStatus = createAsyncThunk(
             querySnapshot.docs.map(async (doc) => {
               const post = { id: doc.id, ...doc.data() };
 
-
               // Lấy thông tin người dùng từ user_id
               const userQuery = query(
                 collection(db, "user"),
@@ -643,31 +536,34 @@ export const getRealtimePostsByStatus = createAsyncThunk(
   }
 );
 
-
 // export const startListeningPostByID = createAsyncThunk(
 //   "data/startListeningPostByID",
 //   async ({ post_id }, { dispatch, rejectWithValue }) => {
-export const startListeningPostByID = ({ post_id }) => (dispatch) => {
-  // console.log("post_id", post_id);
-  const postQuery = query(
-    collection(db, "Posts"),
-    where("post_id", "==", post_id)
-  );
-  const unsubscribe = onSnapshot(postQuery, (querySnapshot) => {
-    const postById = querySnapshot.docs.map(doc => {
-      const data = doc.data(); // Extract post_id from the report content 
-      return { id: doc.id, ...data };
-    });
+export const startListeningPostByID =
+  ({ post_id }) =>
+  (dispatch) => {
+    // console.log("post_id", post_id);
+    const postQuery = query(
+      collection(db, "Posts"),
+      where("post_id", "==", post_id)
+    );
+    const unsubscribe = onSnapshot(
+      postQuery,
+      (querySnapshot) => {
+        const postById = querySnapshot.docs.map((doc) => {
+          const data = doc.data(); // Extract post_id from the report content
+          return { id: doc.id, ...data };
+        });
 
-    // console.log("postById", postById[0]);
-    dispatch(setPostById({ post_id: post_id, postById: postById[0] }));
-  }, (error) => {
-    console.error('Error fetching report: ', error);
-  });
-  return unsubscribe;
-}
-
-
+        // console.log("postById", postById[0]);
+        dispatch(setPostById({ post_id: post_id, postById: postById[0] }));
+      },
+      (error) => {
+        console.error("Error fetching report: ", error);
+      }
+    );
+    return unsubscribe;
+  };
 
 // Tạo slice cho Post
 export const PostSlice = createSlice({
@@ -680,11 +576,11 @@ export const PostSlice = createSlice({
     setPostById: (state, action) => {
       const { post_id, postById } = action.payload;
 
-
       state[post_id] = postById;
 
       state.status = "succeeded";
-    }
+    },
+
   },
   extraReducers: (builder) => {
     builder
@@ -787,15 +683,17 @@ export const PostSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
-
-<<<<<<< HEAD
       //for hashtag
       .addCase(getPostsHashtag.fulfilled, (state, action) => {
         state.postHashtag = action.payload.postHashtag;
-=======
+      })
+      //all post
+      .addCase(getAllPost.fulfilled, (state, action) => {
+        state.allPost = action.payload.allPostData;
+      })
       // Xử lý trạng thái khi lắng nghe thay đổi bài viết thành công
       .addCase(getRealtimePostsByStatus.pending, (state) => {
-        state.loading = true;  // Đang lắng nghe
+        state.loading = true; // Đang lắng nghe
       })
       .addCase(getRealtimePostsByStatus.fulfilled, (state, action) => {
         state.loading = false;
@@ -805,11 +703,10 @@ export const PostSlice = createSlice({
       .addCase(getRealtimePostsByStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
       });
   },
 });
 
-export const { setPostsWithUser, setPostById } = PostSlice.actions;
+export const { setPostsWithUser, setPostById, setGetAllPost } = PostSlice.actions;
 
 export default PostSlice.reducer;

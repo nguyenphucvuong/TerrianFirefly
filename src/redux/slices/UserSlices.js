@@ -21,23 +21,35 @@ const initialState = {
   userByField: {},
   statusUser: "idle",
   errorUser: null,
-<<<<<<< HEAD
-  usersFollowed: [],
-  userpostsFavorites: [],
-  followingUsers: [],
-  userEvent: {},
-=======
   postFavourite: [],
   userReport: [],
   userHashtag: [],
   totalEmoji: 0,
   skipAutoNavigation: false,
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
+  userEvent: {},
+  allUser: [],
 };
 let unsubscribeListener = null; // Biến toàn cục quản lý listener
 let unsubscribeListenerFavourite = null; // Biến toàn cục quản lý listener
 
-<<<<<<< HEAD
+export const getAllUser = (dispatch) => {
+  try {
+    const q = query(collection(db, "user"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const userData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      // console.log("eventdata", userData);
+      dispatch(setAllUser(userData));
+    });
+
+    return unsubscribe;
+  } catch (error) {
+    console.error("Error setting up real-time event listener: ", error);
+  }
+};
+
 export const getUserEvent = (user_id) => (dispatch) => {
   const q = query(collection(db, "user"), where("user_id", "==", user_id));
 
@@ -62,11 +74,9 @@ export const getUserEvent = (user_id) => (dispatch) => {
 };
 
 // Tạo
-
-=======
 let isTest = null;
 let isTestFavourite = null;
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
+
 // Thiết lập listener thời gian thực cho dữ liệu người dùng
 export const listenToUserRealtime = (email) => (dispatch) => {
   const q = query(collection(db, "user"), where("email", "==", email));
@@ -90,6 +100,7 @@ export const listenToUserRealtime = (email) => (dispatch) => {
 
   return unsubscribe; // Trả về hàm unsubscribe để có thể ngừng listener khi không cần thiết
 };
+
 // Thiết lập listener thời gian thực cho dữ liệu người dùng
 export const listenToUserRealtime2 = (email) => (dispatch) => {
   const q = query(collection(db, "user"), where("email", "==", email));
@@ -217,7 +228,6 @@ export const updateUser = createAsyncThunk(
   }
 );
 
-
 export const updateUserPassword = createAsyncThunk(
   "data/updateUserPassword",
   async ({ userId, newPassWord }) => {
@@ -271,52 +281,41 @@ export const uploadImage = createAsyncThunk(
     }
   }
 );
-export const startListeningUserByID = ({ user_id }) => (dispatch) => {
-  if (!user_id) return;
+export const startListeningUserByID =
+  ({ user_id }) =>
+  (dispatch) => {
+    if (!user_id) return;
 
-  const followerQuery = query(
-    collection(db, "user"),
-    where("user_id", "==", user_id)
-  );
-  const unsubscribe = onSnapshot(followerQuery, (querySnapshot) => {
-    // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
-    const userById = {
-      id: querySnapshot.docs[0].id,
-      ...querySnapshot.docs[0].data(),
-    };
-    //console.log("userById00", userById)
-    dispatch(setUserById(userById));
+    const followerQuery = query(
+      collection(db, "user"),
+      where("user_id", "==", user_id)
+    );
+    const unsubscribe = onSnapshot(
+      followerQuery,
+      (querySnapshot) => {
+        // const followers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // const followers = querySnapshot.docs.map(doc => ({ ...doc.data() }));
+        const userById = {
+          id: querySnapshot.docs[0].id,
+          ...querySnapshot.docs[0].data(),
+        };
+        //console.log("userById00", userById)
+        dispatch(setUserById(userById));
 
-    // console.log("followers", followers)
-  }, (error) => {
-    console.error('Error fetching follower: ', error);
-  });
+        // console.log("followers", followers)
+      },
+      (error) => {
+        console.error("Error fetching follower: ", error);
+      }
+    );
 
-  return unsubscribe; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
-};
+    return unsubscribe; // Trả về hàm unsubscribe để có thể dừng lắng nghe khi cần
+  };
 //
 export const listenToUserWithStatus = createAsyncThunk(
   "data/listenToUserWithStatus",
   async (_, { dispatch }) => {
     try {
-<<<<<<< HEAD
-      // Lấy danh sách user ID đã được follow
-      const followedUserIds = await getFollowedUserIds({
-        currentUserId: currentUserId,
-      });
-      // console.log('followedUserIds',followedUserIds);
-
-      // Nếu không có user nào được follow, trả về mảng rỗng
-      if (followedUserIds.length === 0) {
-        return { usersFollowed: [] };
-      }
-      // console.log('followedUserIds2',followedUserIds);
-      // Tạo query lấy bài đăng từ những người dùng đã được follow
-      let userQuery = query(
-        collection(db, "user"),
-        where("user_id", "in", followedUserIds)
-=======
       const q = query(collection(db, "user"), where("status_user_id", "!=", 0));
 
       const unsubscribe = onSnapshot(
@@ -334,314 +333,262 @@ export const listenToUserWithStatus = createAsyncThunk(
           console.error("Error in realtime listener:", error);
           dispatch(setError(error.message));
         }
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
       );
 
-<<<<<<< HEAD
-      const querySnapshot = await getDocs(userQuery);
-      // console.log('querySnapshot1',querySnapshot);
-
-      // Trả về mảng rỗng nếu không có user nào
-      if (querySnapshot.empty) {
-        console.log("empty");
-        return { usersFollowed: [] };
-      }
-      const usersFollowed = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      // console.log('usersFollowed',usersFollowed);
-
-      return {
-        usersFollowed: usersFollowed,
-      };
-=======
-      return unsubscribe;  // Trả về hàm unsubscribe thay vì dispatch trực tiếp trong payload
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
+      return unsubscribe; // Trả về hàm unsubscribe thay vì dispatch trực tiếp trong payload
     } catch (error) {
       console.error("Error listening to users with status:", error);
       throw error;
     }
   }
 );
-export const startListeningFavourite = ({ currentUserId, forceRefresh }) => async (dispatch) => {
-  // console.log('currentUserId', currentUserId);
-  // console.log('isTestFavourite', isTestFavourite);
-  // console.log('forceRefresh',forceRefresh);
-  //Hủy listener cũ nếu đã tồn tại
-  if (unsubscribeListenerFavourite) {
-    // console.log("Hủy listener cũ.");
-    unsubscribeListenerFavourite(); // Dừng lắng nghe
-    unsubscribeListenerFavourite = null;
-    currentUserId = null;
-  }
-  if (isTestFavourite === currentUserId && forceRefresh !== false) {
-    // console.log("Đã lắng nghe User ID này, bỏ qua.");
-    return; // Không làm gì nếu User ID đã được xử lý trước đó
-  }
-  if (!currentUserId) {
-    // console.log("Không có currentUserId.");
-    dispatch(setFavourite([]));
-    return; // Dừng ngay lập tức nếu không có currentUserId
-  }
-
-  try {
-
-    const favouriteQuery = query(
-      collection(db, "Favorite"),
-      where("user_id", "==", currentUserId)
-    );
-    const userSnapshot = await getDocs(favouriteQuery);
-    if (userSnapshot.empty) {
-      console.log("User ID không tồn tại.");
+export const startListeningFavourite =
+  ({ currentUserId, forceRefresh }) =>
+  async (dispatch) => {
+    // console.log('currentUserId', currentUserId);
+    // console.log('isTestFavourite', isTestFavourite);
+    // console.log('forceRefresh',forceRefresh);
+    //Hủy listener cũ nếu đã tồn tại
+    if (unsubscribeListenerFavourite) {
+      // console.log("Hủy listener cũ.");
+      unsubscribeListenerFavourite(); // Dừng lắng nghe
+      unsubscribeListenerFavourite = null;
       currentUserId = null;
-      // Reset Redux 
-      dispatch(setUserHashtag([]));
-      return; // Dừng nếu UserID không tồn tại
-    } else {
-      // console.log("User ID tồn tại.");
-      isTestFavourite = currentUserId;
-      forceRefresh = true;
-      //tiep tuc lang nghe
-      // console.log('currentUserIdcurrentUserId', currentUserId);
+    }
+    if (isTestFavourite === currentUserId && forceRefresh !== false) {
+      // console.log("Đã lắng nghe User ID này, bỏ qua.");
+      return; // Không làm gì nếu User ID đã được xử lý trước đó
+    }
+    if (!currentUserId) {
+      // console.log("Không có currentUserId.");
+      dispatch(setFavourite([]));
+      return; // Dừng ngay lập tức nếu không có currentUserId
+    }
 
+    try {
       const favouriteQuery = query(
         collection(db, "Favorite"),
         where("user_id", "==", currentUserId)
       );
-      unsubscribeListenerFavourite = onSnapshot(favouriteQuery, async (querySnapshot) => {
-        if (!querySnapshot.empty) {
+      const userSnapshot = await getDocs(favouriteQuery);
+      if (userSnapshot.empty) {
+        console.log("User ID không tồn tại.");
+        currentUserId = null;
+        // Reset Redux
+        dispatch(setUserHashtag([]));
+        return; // Dừng nếu UserID không tồn tại
+      } else {
+        // console.log("User ID tồn tại.");
+        isTestFavourite = currentUserId;
+        forceRefresh = true;
+        //tiep tuc lang nghe
+        // console.log('currentUserIdcurrentUserId', currentUserId);
 
+        const favouriteQuery = query(
+          collection(db, "Favorite"),
+          where("user_id", "==", currentUserId)
+        );
+        unsubscribeListenerFavourite = onSnapshot(
+          favouriteQuery,
+          async (querySnapshot) => {
+            if (!querySnapshot.empty) {
+              // Lấy tất cả user_id của những người yêu thích
+              const favouriteUserIds = querySnapshot.docs.map(
+                (doc) => doc.data().post_id
+              );
 
-          // Lấy tất cả user_id của những người yêu thích
-          const favouriteUserIds = querySnapshot.docs.map((doc) => doc.data().post_id);
+              if (favouriteUserIds.length > 0) {
+                // Tạo query để lấy dữ liệu của các user từ bảng Posts
+                const userQuery = query(
+                  collection(db, "Posts"),
+                  where("post_id", "in", favouriteUserIds)
+                );
 
-          if (favouriteUserIds.length > 0) {
+                const userSnapshot = await getDocs(userQuery);
 
-            // Tạo query để lấy dữ liệu của các user từ bảng Posts
-            const userQuery = query(
-              collection(db, "Posts"),
-              where("post_id", "in", favouriteUserIds)
-            );
-
-            const userSnapshot = await getDocs(userQuery);
-
-            if (!userSnapshot.empty) {
-              const favouritesData = userSnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-              }));
-              // console.log("favouritesData", favouritesData);
-              // Gửi dữ liệu vào Redux
-              dispatch(setFavourite(favouritesData));
+                if (!userSnapshot.empty) {
+                  const favouritesData = userSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                  }));
+                  // console.log("favouritesData", favouritesData);
+                  // Gửi dữ liệu vào Redux
+                  dispatch(setFavourite(favouritesData));
+                }
+              }
+            } else {
+              console.log("roong");
             }
+          },
+          (error) => {
+            console.error("Error fetching Favourite: ", error);
           }
-        }
-        else {
-          console.log('roong');
-        }
-      }, (error) => {
-        console.error('Error fetching Favourite: ', error);
-      });
+        );
 
-      return unsubscribeListenerFavourite; // Trả về hàm unsubscribe để dừng lắng nghe khi không cần thiết
+        return unsubscribeListenerFavourite; // Trả về hàm unsubscribe để dừng lắng nghe khi không cần thiết
+      }
+    } catch (error) {
+      console.error("Error in startListeningFavourite: ", error);
+    }
+  };
+
+export const startListeningHashtag =
+  ({ currentUserId, forceRefresh }) =>
+  async (dispatch) => {
+    // console.log("currentUserId", currentUserId);
+
+    //Hủy listener cũ nếu đã tồn tại
+    if (unsubscribeListener) {
+      // console.log("Hủy listener cũ.");
+      unsubscribeListener(); // Dừng lắng nghe
+      unsubscribeListener = null;
+      currentUserId = null;
+    }
+    // console.log('isTest', isTest);
+    // console.log('forceRefresh',forceRefresh);
+
+    if (isTest === currentUserId && forceRefresh !== false) {
+      // console.log("Đã lắng nghe User ID này, bỏ qua.");
+      // dispatch(setUserHashtag([]));
+      return; // Không làm gì nếu User ID đã được xử lý trước đó
+    }
+    // console.log("currentUserId", currentUserId);
+    if (!currentUserId) {
+      // console.log("Không có currentUserId.");
+      dispatch(setUserHashtag([]));
+      return; // Dừng ngay lập tức nếu không có currentUserId
     }
 
-  } catch (error) {
-    console.error("Error in startListeningFavourite: ", error);
-  }
-};
-
-export const startListeningHashtag = ({ currentUserId, forceRefresh }) => async (dispatch) => {
-  // console.log("currentUserId", currentUserId);
-
-  //Hủy listener cũ nếu đã tồn tại
-  if (unsubscribeListener) {
-    // console.log("Hủy listener cũ.");
-    unsubscribeListener(); // Dừng lắng nghe
-    unsubscribeListener = null;
-    currentUserId = null;
-  }
-  // console.log('isTest', isTest);
-  // console.log('forceRefresh',forceRefresh);
-
-  if (isTest === currentUserId && forceRefresh !== false) {
-    // console.log("Đã lắng nghe User ID này, bỏ qua.");
-    // dispatch(setUserHashtag([]));
-    return; // Không làm gì nếu User ID đã được xử lý trước đó
-  }
-  // console.log("currentUserId", currentUserId);
-  if (!currentUserId) {
-    // console.log("Không có currentUserId.");
-    dispatch(setUserHashtag([]));
-    return; // Dừng ngay lập tức nếu không có currentUserId
-  }
-
-  try {
-    // Kiểm tra UserID tồn tại
-    const userExistsQuery = query(
-      collection(db, "HashtagGroup"),
-      where("UserID", "==", currentUserId)
-    );
-
-    const userSnapshot = await getDocs(userExistsQuery);
-
-    if (userSnapshot.empty) {
-      // console.log("User ID không tồn tại.");
-      currentUserId = null;
-      // Reset Redux 
-      dispatch(setUserHashtag([]));
-      return; // Dừng nếu UserID không tồn tại
-    } else {
-      // console.log("User ID tồn tại.");
-      isTest = currentUserId;
-      forceRefresh = true;
-      // Tiếp tục lắng nghe hashtag
-      const hashtagQuery = query(
+    try {
+      // Kiểm tra UserID tồn tại
+      const userExistsQuery = query(
         collection(db, "HashtagGroup"),
         where("UserID", "==", currentUserId)
       );
 
-      unsubscribeListener = onSnapshot(
-        hashtagQuery,
-        async (querySnapshot) => {
-          if (!querySnapshot.empty) {
-            const hashtagUserIds = querySnapshot.docs.map((doc) => doc.data().HashtagID);
+      const userSnapshot = await getDocs(userExistsQuery);
 
-            if (hashtagUserIds.length > 0) {
-              const userQuery = query(
-                collection(db, "Hashtag"),
-                where("hashtag_id", "in", hashtagUserIds)
-              );
-
-              const userSnapshot = await getDocs(userQuery);
-
-              if (!userSnapshot.empty) {
-                const hashtagsData = userSnapshot.docs.map((doc) => ({
-                  id: doc.id,
-                  ...doc.data(),
-                }));
-                //console.log("hashtagsData", hashtagsData);
-                dispatch(setUserHashtag(hashtagsData));
-              }
-            }
-          }
-        },
-        (error) => {
-          console.error("Error fetching Hashtag: ", error);
-          dispatch(setUserHashtag([]));
-        }
-      );
-
-      return unsubscribeListener; // Trả về unsubscribe để dừng lắng nghe khi không cần thiết
-    }
-  } catch (error) {
-    console.error("Error in startListeningHashtag: ", error);
-  }
-};
-
-//Lắng nghe và lấy Emoji
-export const startListeningTotalEmoji = ({ currentUserId }) => (dispatch, getState) => {
-  if (!currentUserId) return;
-
-  // Lắng nghe thay đổi từ bảng Posts
-  const followerQuery = query(
-    collection(db, "Posts"),
-    where("user_id", "==", currentUserId)
-  );
-<<<<<<< HEAD
-  const followerSnapshot = await getDocs(followerQuery);
-  //console.log("followerSnapshot", followerSnapshot.docs.map((doc) => doc.data().follower_user_id));
-  //lấy danh sách follower_user_id từ user_id
-  return followerSnapshot.docs.map((doc) => doc.data().follower_user_id);
-};
-// Hàm lấy người dùng từ những người dùng đã follow
-export const getUserFromFollowingUsers = createAsyncThunk(
-  "data/getUserFromFollowingUsers",
-  async ({ field, currentUserId }, { getState }) => {
-    try {
-      // Lấy danh sách user ID đã được follow
-      const followedUserIds = await getFollowingUsersIds({
-        currentUserId: currentUserId,
-      });
-      //console.log('followedUserIds',followedUserIds);
-=======
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
-
-  const unsubscribePosts = onSnapshot(followerQuery, async (querySnapshot) => {
-    if (!querySnapshot.empty) {
-      // Lấy tất cả post_id từ bảng Posts
-      const emojiUserIds = querySnapshot.docs.map((doc) => doc.data().post_id);
-      //console.log('emojiUserIds', emojiUserIds);
-
-      if (emojiUserIds.length > 0) {
-        // Lắng nghe thay đổi trong bảng Emoji cho các post_id
-        const emojiQuery = query(
-          collection(db, "Emoji"),
-          where("post_id", "in", emojiUserIds)
+      if (userSnapshot.empty) {
+        // console.log("User ID không tồn tại.");
+        currentUserId = null;
+        // Reset Redux
+        dispatch(setUserHashtag([]));
+        return; // Dừng nếu UserID không tồn tại
+      } else {
+        // console.log("User ID tồn tại.");
+        isTest = currentUserId;
+        forceRefresh = true;
+        // Tiếp tục lắng nghe hashtag
+        const hashtagQuery = query(
+          collection(db, "HashtagGroup"),
+          where("UserID", "==", currentUserId)
         );
 
-        const unsubscribeEmoji = onSnapshot(emojiQuery, (emojiSnapshot) => {
-          if (!emojiSnapshot.empty) {
-            // Lấy dữ liệu emoji từ snapshot
-            const totalEmoji = emojiSnapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
+        unsubscribeListener = onSnapshot(
+          hashtagQuery,
+          async (querySnapshot) => {
+            if (!querySnapshot.empty) {
+              const hashtagUserIds = querySnapshot.docs.map(
+                (doc) => doc.data().HashtagID
+              );
 
-            const total = totalLike(totalEmoji);
-            dispatch(setTotalEmoji(total));  // Gửi dữ liệu totalEmoji vào Redux
-          } else {
-            console.log("No emoji data found for the posts.");
+              if (hashtagUserIds.length > 0) {
+                const userQuery = query(
+                  collection(db, "Hashtag"),
+                  where("hashtag_id", "in", hashtagUserIds)
+                );
+
+                const userSnapshot = await getDocs(userQuery);
+
+                if (!userSnapshot.empty) {
+                  const hashtagsData = userSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                  }));
+                  //console.log("hashtagsData", hashtagsData);
+                  dispatch(setUserHashtag(hashtagsData));
+                }
+              }
+            }
+          },
+          (error) => {
+            console.error("Error fetching Hashtag: ", error);
+            dispatch(setUserHashtag([]));
           }
-        }, (error) => {
-          console.error("Error fetching emoji data: ", error);
-        });
+        );
 
-        // Trả về hàm unsubscribe để dừng lắng nghe sự thay đổi trong bảng Emoji khi không cần thiết
-        return unsubscribeEmoji;
-      } else {
-        console.log("No posts found for this user.");
+        return unsubscribeListener; // Trả về unsubscribe để dừng lắng nghe khi không cần thiết
       }
-<<<<<<< HEAD
-      // console.log('followedUserIds2',followedUserIds);
-      // Tạo query lấy bài đăng từ những người dùng đã được follow
-      let userQuery = query(
-        collection(db, "user"),
-        where("user_id", "in", followedUserIds)
-      );
-      // console.log('userQuery',userQuery);
-
-      const querySnapshot = await getDocs(userQuery);
-      // console.log('querySnapshot1',querySnapshot);
-
-      // Trả về mảng rỗng nếu không có user nào
-      if (querySnapshot.empty) {
-        console.log("empty");
-        return { followingUsers: [] };
-      }
-      const followingUsers = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      // console.log('followingUsers',followingUsers);
-
-      return {
-        followingUsers: followingUsers,
-      };
     } catch (error) {
-      console.error("Error fetching user from followed users: ", error);
-      throw error;
-=======
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
+      console.error("Error in startListeningHashtag: ", error);
     }
-  }, (error) => {
-    console.error('Error fetching posts data: ', error);
-  });
+  };
 
-  // Trả về hàm unsubscribe để dừng lắng nghe sự thay đổi trong bảng Posts khi không cần thiết
-  return unsubscribePosts;
-};
+//Lắng nghe và lấy Emoji
+export const startListeningTotalEmoji =
+  ({ currentUserId }) =>
+  (dispatch, getState) => {
+    if (!currentUserId) return;
+
+    // Lắng nghe thay đổi từ bảng Posts
+    const followerQuery = query(
+      collection(db, "Posts"),
+      where("user_id", "==", currentUserId)
+    );
+
+    const unsubscribePosts = onSnapshot(
+      followerQuery,
+      async (querySnapshot) => {
+        if (!querySnapshot.empty) {
+          // Lấy tất cả post_id từ bảng Posts
+          const emojiUserIds = querySnapshot.docs.map(
+            (doc) => doc.data().post_id
+          );
+          //console.log('emojiUserIds', emojiUserIds);
+
+          if (emojiUserIds.length > 0) {
+            // Lắng nghe thay đổi trong bảng Emoji cho các post_id
+            const emojiQuery = query(
+              collection(db, "Emoji"),
+              where("post_id", "in", emojiUserIds)
+            );
+
+            const unsubscribeEmoji = onSnapshot(
+              emojiQuery,
+              (emojiSnapshot) => {
+                if (!emojiSnapshot.empty) {
+                  // Lấy dữ liệu emoji từ snapshot
+                  const totalEmoji = emojiSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                  }));
+
+                  const total = totalLike(totalEmoji);
+                  dispatch(setTotalEmoji(total)); // Gửi dữ liệu totalEmoji vào Redux
+                } else {
+                  console.log("No emoji data found for the posts.");
+                }
+              },
+              (error) => {
+                console.error("Error fetching emoji data: ", error);
+              }
+            );
+
+            // Trả về hàm unsubscribe để dừng lắng nghe sự thay đổi trong bảng Emoji khi không cần thiết
+            return unsubscribeEmoji;
+          } else {
+            console.log("No posts found for this user.");
+          }
+        }
+      },
+      (error) => {
+        console.error("Error fetching posts data: ", error);
+      }
+    );
+
+    // Trả về hàm unsubscribe để dừng lắng nghe sự thay đổi trong bảng Posts khi không cần thiết
+    return unsubscribePosts;
+  };
 
 //Tính tổng
 const totalLike = (item) => {
@@ -650,17 +597,24 @@ const totalLike = (item) => {
     return 0; // Trả về 0 nếu item không phải là mảng
   }
 
-  const totalSum = item.reduce((acc, curr) => {
-    acc.count_heart += curr.count_heart;
-    acc.count_laugh += curr.count_laugh;
-    acc.count_like += curr.count_like;
-    acc.count_sad += curr.count_sad;
+  const totalSum = item.reduce(
+    (acc, curr) => {
+      acc.count_heart += curr.count_heart;
+      acc.count_laugh += curr.count_laugh;
+      acc.count_like += curr.count_like;
+      acc.count_sad += curr.count_sad;
 
-    return acc;
-  }, { count_heart: 0, count_laugh: 0, count_like: 0, count_sad: 0 });
+      return acc;
+    },
+    { count_heart: 0, count_laugh: 0, count_like: 0, count_sad: 0 }
+  );
 
   // Tính tổng các giá trị count_heart, count_laugh, count_like, count_sad
-  const finalTotal = totalSum.count_heart + totalSum.count_laugh + totalSum.count_like + totalSum.count_sad;
+  const finalTotal =
+    totalSum.count_heart +
+    totalSum.count_laugh +
+    totalSum.count_like +
+    totalSum.count_sad;
   return finalTotal;
 };
 
@@ -673,10 +627,9 @@ export const UserSlices = createSlice({
       state.user = action.payload;
       state.errorUser = null; // Reset lỗi khi có dữ liệu người dùng mới
     },
-<<<<<<< HEAD
     setUserEvent: (state, action) => {
       state.userEvent = action.payload;
-=======
+    },
     setError: (state, action) => {
       state.errorUser = action.payload;
     },
@@ -691,7 +644,7 @@ export const UserSlices = createSlice({
       state.errorUser = null; // Reset lỗi khi có dữ liệu người dùng mới
     },
     setUserReport: (state, action) => {
-      state.userReport = action.payload;  // Cập nhật mảng userReport
+      state.userReport = action.payload; // Cập nhật mảng userReport
     },
     setFavourite: (state, action) => {
       state.postFavourite = action.payload;
@@ -704,7 +657,9 @@ export const UserSlices = createSlice({
     },
     setSkipAutoNavigation: (state, action) => {
       state.skipAutoNavigation = action.payload;
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
+    },
+    setAllUser: (state, action) => {
+      state.allUser = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -734,45 +689,22 @@ export const UserSlices = createSlice({
       })
       .addCase(uploadImage.rejected, (state, action) => {
         state.errorUser = action.payload;
-      })
-<<<<<<< HEAD
-      //getUserFromFollowedUsers
-      .addCase(getUserFromFollowedUsers.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(getUserFromFollowedUsers.fulfilled, (state, action) => {
-        state.loading = false;
-        state.usersFollowed = action.payload.usersFollowed;
-        state.status = "succeeded";
-      })
-      .addCase(getUserFromFollowedUsers.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
-      })
-      //getUserFromFollowingUsers
-      .addCase(getUserFromFollowingUsers.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(getUserFromFollowingUsers.fulfilled, (state, action) => {
-        state.loading = false;
-        state.followingUsers = action.payload.followingUsers;
-        state.status = "succeeded";
-      })
-      .addCase(getUserFromFollowingUsers.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
       });
   },
 });
 
-export const { setUser, setError, setUserEvent } = UserSlices.actions;
-=======
-  },
-});
-
-export const { setUser, setError, setUserById, setIUser, setUserReport, setUserHashtag, setFavourite, setTotalEmoji, setSkipAutoNavigation  } = UserSlices.actions;
->>>>>>> 28bf6fcc4501f8b14507595eb7c17df3f24b5113
+export const {
+  setAllUser,
+  setUser,
+  setError,
+  setUserById,
+  setIUser,
+  setUserReport,
+  setUserHashtag,
+  setFavourite,
+  setTotalEmoji,
+  setSkipAutoNavigation,
+  setUserEvent,
+} = UserSlices.actions;
 
 export default UserSlices.reducer;

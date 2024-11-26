@@ -38,7 +38,6 @@ const ButtonsComponent = ({
     );
 
     const data = await dispatch(getPostsHashtag({ hashtag: item }));
-    console.log("dataposthastga", data.payload.postHashtag);
     navigation.navigate("HashtagGroupScreen", {
       hashtagID: findHashtag.hashtag_id,
       hashtag_avatar: findHashtag.hashtag_avatar,

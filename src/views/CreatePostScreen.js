@@ -87,8 +87,7 @@ const CreatePostScreen = () => {
         (p) =>
           (p.className === "Porn" && p.probability > 0.5) ||
           (p.className === "Hentai" && p.probability > 0.5) ||
-          (p.className === "Sexy" && p.probability > 0.5) ||
-          (p.className === "Drawing" && p.probability > 0.5) // Thêm điều kiện nếu cần
+          (p.className === "Sexy" && p.probability > 0.5)
       );
 
       if (nsfwDetected) {

@@ -40,6 +40,7 @@ import DetailEventScreen from "../views/DetailEventScreen";
 import NewEventScreen from "../views/NewEventScreen";
 import NotificationScreen from "../views/NotificationScreen";
 import HashtagGroupScreen from "../views/HashtagGroupScreen";
+import SearchScreen from "../views/SearchScreen";
 const Stack = createStackNavigator();
 
 const IconBack = (title) => ({
@@ -254,7 +255,15 @@ const StackNavigator = () => {
         component={ManageRequestScreen}
         options={() => IconBack("Yêu Cầu Quản Trị")}
       />
+
+<Stack.Screen
+        name="SearchScreen"
+        component={SearchScreen}
+        options={() => IconBack("Tìm Kiếm")}
+      />
     </Stack.Navigator>
+
+
   );
 };
 export default StackNavigator;

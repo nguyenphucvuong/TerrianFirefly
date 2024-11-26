@@ -17,7 +17,7 @@ import "react-native-gesture-handler";
 import StackNavigator from "./src/stacks/StackNavigator";
 import { Provider } from "react-redux";
 import { useDispatch, useSelector } from "react-redux";
-import { listenToUserRealtime, } from "./src/redux/slices/UserSlices";
+import { getAllUser, listenToUserRealtime } from "./src/redux/slices/UserSlices";
 import { LogBox } from "react-native";
 import { auth, db } from "./src/firebase/FirebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
@@ -32,10 +32,8 @@ import Constants from "expo-constants";
 import { Title } from "react-native-paper";
 import { NotiProvider } from "./src/context/NotiProvider";
 import { useNotification } from "./src/context/NotiProvider";
-import { LogBox } from "react-native";
 import { getAllNoti } from "./src/redux/slices/NotiSlice";
 import { getAllHashtagGroup } from "./src/redux/HashtagGroupSlice";
-
 import { SplashScreenComponent } from "./src/views";
 
 const MainApp = () => {
@@ -43,7 +41,9 @@ const MainApp = () => {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState("");
   const [channels, setChannels] = useState([]);
-  const skipAutoNavigation = useSelector((state) => state.user.skipAutoNavigation);
+  const skipAutoNavigation = useSelector(
+    (state) => state.user.skipAutoNavigation
+  );
   const [notification, setNotification] = useState(undefined);
   const notificationListener = useRef();
   const responseListener = useRef();
@@ -55,14 +55,24 @@ const MainApp = () => {
   const notiList = useSelector((state) => state.noti.notiList);
 
   useEffect(() => {
+    const unsubscribe = getAllUser(dispatch);
+    return () => unsubscribe();
+  }, [dispatch]);
+
+
+  useEffect(() => {
     const unsubscribe = getAllHashtagGroup(dispatch);
     return () => unsubscribe();
   }, [dispatch]);
 
   useEffect(() => {
+    const unsubscribeHashtag = getHashtag(dispatch);
+    return () => unsubscribeHashtag();
+  }, [dispatch]);
+
+  useEffect(() => {
     const unsubscribe = getAllNoti(dispatch);
     return () => unsubscribe();
-  
   }, [dispatch]);
 
   const navigation = useNavigation();

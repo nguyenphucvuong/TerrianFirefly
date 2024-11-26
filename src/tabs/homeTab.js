@@ -11,11 +11,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { appcolor } from "../constains/appcolor";
 import { appInfo } from "../constains/appInfo";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { getAllPost } from "../redux/slices/PostSlice";
 
 const HomeTab = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
-
+const dispatch = useDispatch();
   return (
     <>
       {/* Container */}
@@ -33,11 +35,8 @@ const HomeTab = () => {
       >
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("HashtagGroupScreen", {
-              hashtagID: "123",
-              hashtag_avatar: "link_to_avatar",
-              hashtag_background: "link_to_background",
-            });
+            dispatch(getAllPost());
+            navigation.navigate("SearchScreen");
           }}
           activeOpacity={1}
           style={{
