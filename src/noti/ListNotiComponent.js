@@ -11,26 +11,17 @@ import {
 import { updateNotiByField, createNoti } from "../redux/slices/NotiSlice";
 import { formatDistanceToNow } from "date-fns";
 import vi from "date-fns/locale/vi";
+import { getAllPost } from "../redux/slices/PostSlice";
+import { useNavigation } from "@react-navigation/native";
 
 const ListNotiComponent = ({ targetUser_id }) => {
   const dispatch = useDispatch();
   const notifications = useSelector((state) => state.noti.noti);
-
-  // const newdata = {
-  //   //trạng thái mặc định là false
-  //   check_touch: false, // trạng thái đã nhấn vào thông báo chưa
-  //   checked: false, //trạng thái thông báo đã được gửi chưa
-  //   content: "user_name đã like bài viết của bạn", //user_name của người like
-  //   created_at: Date.now(), 
-  //   //đường dẫn hình ảnh của người like
-  //   imgUser:
-  //     "https://firebasestorage.googleapis.com/v0/b/terrianfirefly.appspot.com/o/images%2FF3A0F535-95B9-4595-9BAE-7E0DD5436F0F.jpg?alt=media&token=0b05e219-8d77-4544-a95e-ce8f46ccc1fd",
-  //   noti_id: "temp", //id của thông báo
-  //   post_id: "temp", //id của post vừa like
-  //   targetUser_id: "ETFNQWVPt27VqU9Cuyph", //id của người nhận được thông báo lấy từ post vừa like
-  //   user_id: "người like", //id của người like lấy từ user hiện đang đăng nhập
-  // };
-  
+  const allPosts = useSelector((state) => state.post.allPost || []);
+  const user = useSelector((state) => state.user.user);
+  const users = useSelector((state) => state.user); // Lấy tất cả user
+  const comments = useSelector((state) => state.comment);
+  const navigation = useNavigation();
   // Lọc thông báo theo targetUser_id và sắp xếp theo thời gian
   const userNotifications = notifications
     .filter((noti) => noti.targetUser_id === targetUser_id)
@@ -39,10 +30,60 @@ const ListNotiComponent = ({ targetUser_id }) => {
   // Xử lý khi người dùng nhấn vào thông báo
   const handlePressNoti = (noti) => {
     if (!noti.check_touch) {
-      dispatch(updateNotiByField({ notiID: noti.noti_id, field: "check_touch", value: true }));
-      
+      dispatch(
+        updateNotiByField({
+          notiID: noti.noti_id,
+          field: "check_touch",
+          value: true,
+        })
+      );
+    }
+
+    if (noti.role_noti == 0) {
+      const post = allPosts.find((p) => p.post_id === noti.post_id);
+      const postUser = users[user.user_id];
+
+      // console.log("1t", post)
+      // console.log("2", user)
+      // console.log("3", postUser)
+      // console.log("4", post.user_id)
+      // console.log("5", comments)
+
+      navigation.navigate("DetailPost", {
+        post: post,
+        user: user,
+        userPost: postUser,
+        post_user_id: post.user_id,
+        comments: comments,
+      });
+    } else if (noti.role_noti == 1) {
+      const post = allPosts.find((p) => p.post_id === noti.post_id);
+      const postUser = users[user.user_id];
+      navigation.navigate("DetailPost", {
+        post: post,
+        user: user,
+        userPost: postUser,
+        post_user_id: post.user_id,
+        comments: comments,
+      });
+
+    } else if (noti.role_noti == 2) {
+      const post = allPosts.find((p) => p.post_id === noti.post_id);
+      const postUser = users[user.user_id];
+      console.log("day la bao cao");
+      navigation.navigate("DetailPost", {
+        post: post,
+        user: user,
+        userPost: postUser,
+        post_user_id: post.user_id,
+        comments: comments,
+      });
     }
   };
+
+  useEffect(() => {
+    dispatch(getAllPost());
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -60,7 +101,10 @@ const ListNotiComponent = ({ targetUser_id }) => {
             <View style={styles.eventDetails}>
               <Text style={styles.notiTitle}>{noti.content}</Text>
               <Text style={styles.notiDate}>
-                {formatDistanceToNow(new Date(noti.created_at * 1000), { locale: vi })} trước
+                {formatDistanceToNow(new Date(noti.created_at * 1000), {
+                  locale: vi,
+                })}{" "}
+                trước
               </Text>
             </View>
           </View>
@@ -85,10 +129,10 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
   uncheckedNoti: {
-    backgroundColor: "#eaf2fd", // Màu xanh nhạt cho thông báo chưa đọc
+    backgroundColor: "#eaf2fd",
   },
   checkedNoti: {
-    backgroundColor: "#fff", // Màu trắng cho thông báo đã đọc
+    backgroundColor: "#fff",
   },
   notiContent: {
     flexDirection: "row",
@@ -102,7 +146,6 @@ const styles = StyleSheet.create({
   },
   eventDetails: {
     flex: 1,
-   
   },
   notiTitle: {
     fontSize: 16,

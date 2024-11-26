@@ -12,11 +12,13 @@ import {
   setDoc,
   doc,
   onSnapshot,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/FirebaseConfig";
 
 const initialState = {
   noti: [],
+  notiList: [],
 };
 
 export const createNoti = createAsyncThunk(
@@ -46,6 +48,7 @@ export const createNoti = createAsyncThunk(
   }
 );
 
+
 //tạo 1 hàm lấy danh sách các thông báo bằng trường targetUser_id phù hợp
 export const getNoti = (dispatch, targetUser_id) => {
   const q = query(
@@ -59,11 +62,31 @@ export const getNoti = (dispatch, targetUser_id) => {
       id: doc.id,
       ...doc.data(),
     }));
-    // console.log("logSlice",notiList)
+    // console.log("l",notiList)
     dispatch(setNotifications(notiList));
   });
 
   return unsubscribe; // Trả về hàm hủy
+};
+
+// Tạo hàm lấy danh sách tất cả thông báo
+export const getAllNoti = (dispatch) => {
+  // Tạo truy vấn để lấy 10 thông báo mới nhất
+  const notiQuery = query(
+    collection(db, 'Noti'), 
+  );
+
+  // Đăng ký lắng nghe thay đổi dữ liệu
+  const unsubscribe = onSnapshot(notiQuery, (querySnapshot) => {
+    const notiList = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    // Cập nhật thông báo vào Redux store
+    dispatch(setAllNotifications(notiList));
+  });
+
+  return unsubscribe; // Trả về hàm hủy đăng ký lắng nghe
 };
 
 //tạo 1 hàm update trạng thái checked
@@ -80,8 +103,8 @@ export const updateNotiByField = createAsyncThunk(
         [field]: value,
       });
 
-      console.log(`Field '${field}' updated successfully with value: ${value}`);
-      return { notiID, field, value }; // Return necessary data for updating the state
+      // console.log(`Field '${field}' updated successfully with value: ${value}`);
+      return { notiID, field, value };
     } catch (error) {
       console.error("Error updating notification: ", error);
       throw error;
@@ -89,16 +112,39 @@ export const updateNotiByField = createAsyncThunk(
   }
 );
 
+// Hàm xóa thông báo
+export const deleteNoti = createAsyncThunk(
+  "data/deleteNoti",
+  async ({ noti_id }) => {
+    try {
+      if (!noti_id) {
+        throw new Error("Invalid noti_id: null or undefined");
+      }
+      const notiRef = doc(db, "Noti", noti_id);
+      await deleteDoc(notiRef);
+      console.log("Document deleted successfully");
+      return noti_id;
+    } catch (error) {
+      console.error("Error deleting notification: ", error);
+      throw error;
+    }
+  }
+);
+
+
+
 export const NotiSlice = createSlice({
   name: "noti",
   initialState,
-  reducers: {
+  reducers: { 
     setNotifications: (state, action) => {
       state.noti = action.payload;
     },
+    setAllNotifications: (state, action) => {
+      state.notiList = action.payload;
+    },
   },
-  extraReducers: (builder) => {
-  },
+  extraReducers: (builder) => {},
 });
-export const { setNotifications } = NotiSlice.actions;
+export const { setNotifications, setAllNotifications } = NotiSlice.actions;
 export default NotiSlice.reducer;
