@@ -16,6 +16,7 @@ import { getNoti } from "../redux/slices/NotiSlice";
 import { startListeningReportBySubCommentId, startListeningReportByPostId, startListeningReportByCommentId } from "../redux/slices/ReportSilce";
 import { startListeningRequestAccepted, startListeningRequestPending, startListeningRequestRejected, } from '../redux/slices/RequestSlice';
 import { startListeningSubCommentByCommentId } from "../redux/slices/SubCommentSlice";
+import { startListeningAchieByID } from "../redux/slices/AchievementSlice";
 
 const HomeScreen = () => {
 
@@ -23,6 +24,7 @@ const HomeScreen = () => {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
   const noti = useSelector((state) => state.noti.noti);
+
 
   // console.log(user_id)
 
@@ -53,6 +55,8 @@ const HomeScreen = () => {
         await dispatch(startListeningRequestAccepted({}));
         await dispatch(startListeningRequestPending({}));
         await dispatch(startListeningRequestRejected({}));
+
+        await dispatch(startListeningAchieByID({ achie_id: user.achie_id }));
       }
       fetchData();
     }

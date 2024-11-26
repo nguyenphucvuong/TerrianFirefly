@@ -57,33 +57,26 @@ const PostViewComponent = ({ post, user }) => {
     const isFollow = follower.some(f => f.user_id === post.user_id && f.follower_user_id === user.user_id);
     const comments = useSelector(state => state.comment[post.post_id])
 
-
-    useEffect(() => {
-        dispatch(startListeningEmojiPost({ post_id: post.post_id }));
-        dispatch(startListeningCommentByPostId({ post_id: post.post_id }));
-    }, []);
-
-
-
-    // useEffect(() => {
-    //     const handleGetUserPost = async () => {
-    //         const userResponse = await dispatch(getUserByField({ user_id: userId }));
-    //         const userData = userResponse.payload;
-    //         setUserPost(userData);
-    //         console.log("userData", userData);
-    //     }
-    //     handleGetUserPost();
-    // }, [userId]);
+    const emoji = useSelector((state) => state.emoji[post.post_id]);
 
     useEffect(() => {
         if (!userPost) {
             // dispatch(getUserByField({ user_id: userId }));
             dispatch(startListeningUserByID({ user_id: userId }));
         }
-        if (userPost?.achie_id) {
-            dispatch(startListeningAchieByID({ achie_id: userPost.achie_id }));
+        if (!emoji) {
+            dispatch(startListeningEmojiPost({ post_id: post.post_id }));
+            // console.log("run emoji");
         }
-    }, [userId, userPost?.achie_id, dispatch]);
+        if (!comments) {
+            dispatch(startListeningCommentByPostId({ post_id: post.post_id }));
+            // console.log("run comment");
+        }
+        if (!userAchievement) {
+            dispatch(startListeningAchieByID({ achie_id: userPost?.achie_id }));
+            // console.log("run userAchievement");
+        }
+    }, []);
 
     const userPostCheck = () => {
         if (userId === user.user_id) {

@@ -32,11 +32,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
     const animation = useRef(new Animated.Value(0)).current;
     const dispatch = useDispatch();
 
-    const image = useContext(ImageCheckContext).image
-    const setImage = useContext(ImageCheckContext).setImage
-    const predictions = useContext(ImageCheckContext).predictions
-    const selectImage = useContext(ImageCheckContext).selectImage
-    const modelReady = useContext(ImageCheckContext).modelReady
+    const currentAchievementUser = useSelector((state) => state.achievement[user.achie_id]);
 
 
 
@@ -130,7 +126,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
                         alignContent: "center",
                         justifyContent: "center",
                     }}>
-                    <AvatarEx size={40} round={30} url={user.imgUser} style={{ marginRight: "3%" }} frame={user.frame_user} />
+                    <AvatarEx size={40} round={30} url={user.imgUser} style={{ marginRight: "3%" }} frame={currentAchievementUser.nameAchie} />
                     <Pressable
                         onPress={handleLikePressed}
                         style={{
@@ -187,7 +183,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
                     paddingHorizontal: "3%",
                     width: "100%"
                 }}>
-                {isImgIn ? <AvatarEx size={33} round={30} url={user.imgUser} frame={user.frame_user} style={{ position: "relative", marginRight: "3%" }} /> : <></>}
+                {isImgIn ? <AvatarEx size={33} round={30} url={user.imgUser} frame={currentAchievementUser.nameAchie} style={{ position: "relative", marginRight: "3%" }} /> : <></>}
 
                 <Pressable onPress={handleShowPop} style={{
                     with: "100%",
@@ -203,7 +199,7 @@ const AnimatedQuickCmtComponent = ({ isNomal, isImgIn, post, userPost, style, ha
                     borderColor: !isImgIn ? "" : "#ABABAB",
                 }}
                 >
-                    {!isImgIn ? <AvatarEx size={30} round={30} url={user.imgUser} frame={user.frame_user} style={{ position: "relative", }} /> : <></>}
+                    {!isImgIn ? <AvatarEx size={30} round={30} url={user.imgUser} frame={currentAchievementUser.nameAchie} style={{ position: "relative", }} /> : <></>}
                     <View style={{ width: 10 }} />
                     <TextInput
                         placeholderTextColor={!isImgIn ? "white" : "#ABABAB"}
