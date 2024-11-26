@@ -83,7 +83,7 @@ export const startListeningFavorites = ({ user_id }) => (dispatch) => {
     const favoriteQuery =
         query(
             collection(db, "Favorite"),
-            // where('user_id', "==", user_id),
+            where('user_id', "==", user_id),
         );
     const unFavorite = onSnapshot(favoriteQuery, (querySnapshot) => {
         const favorites = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
