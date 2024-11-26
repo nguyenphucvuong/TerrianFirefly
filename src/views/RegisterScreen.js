@@ -59,7 +59,6 @@ function RegisterScreen() {
   // Thiết lập thông tin client ID của bạn
   const clientId =
     "713889504554-3m9k1n4jtohud708icu3cpkn1srdcder.apps.googleusercontent.com"; // Thay bằng OAuth Client ID của bạn
-
   // Tạo một yêu cầu xác thực
   // Đảm bảo hàm authenticate được khai báo là async
   async function authenticate() {
@@ -70,21 +69,17 @@ function RegisterScreen() {
       scopes: ["profile", "email"],
       responseType: AuthSession.ResponseType.Token,
     };
-    //console.log(authRequestConfig);
     // Tạo AuthRequest từ config
     const authRequest = new AuthSession.AuthRequest(authRequestConfig);
-
     try {
       // Bắt đầu yêu cầu xác thực với discovery
       const result = await authRequest.promptAsync(discovery);
-      //console.log("réult", result.type);
       if (result.type === "success") {
         // Kiểm tra sự tồn tại của access token trong phản hồi
         const { access_token } = result.params;
         if (access_token) {
           // Xử lý thành công\\
           setisLoadingGg(true);
-          //console.log("Access Token:", access_token);
         } else {
           // Không có access token trong phản hồi
           setisLoadingGg(false);
@@ -101,7 +96,6 @@ function RegisterScreen() {
   }
 
   //them du lieu user
-
   const addUser = async (userName, email, password) => {
     try {
       const docRef = await addDoc(collection(db, "user"), {
@@ -169,7 +163,6 @@ function RegisterScreen() {
       setErrorTextPass("Lỗi Mật khẩu không khớp. Vui lòng thử lại.");
       return;
     }
-
     if (
       !validateUsername(name) ||
       !validateEmail(email) ||

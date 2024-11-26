@@ -35,7 +35,6 @@ const ManagePostsScreen = () => {
     dispatch(getRealtimePostsByStatus());
     dispatch(startListeningRequestAccepted(dispatch));
   }, [dispatch]);
-
   // Lọc bài viết theo vai trò người dùng và status_post_id
   const filterPosts = () => {
     let filtered = [];
@@ -53,9 +52,7 @@ const ManagePostsScreen = () => {
     }
     return filtered.filter((post) => post.status_post_id === filterStatus);
   };
-
   const filteredPosts = filterPosts();
-
   const toggleExpand = (id) => {
     setExpandedItems((prev) => ({
       ...prev,

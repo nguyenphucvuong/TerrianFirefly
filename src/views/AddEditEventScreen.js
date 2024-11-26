@@ -40,8 +40,6 @@ export default function AddEditEventScreen({ route, navigation }) {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   const isEditMode = Boolean(dataEvent); // Xác định chế độ: thêm mới hoặc chỉnh sửa
-  
-
   const onSave = async () => {
     if (endDate < startDate) {
       alert("Ngày kết thúc không được nhỏ hơn ngày bắt đầu.");
@@ -57,12 +55,10 @@ export default function AddEditEventScreen({ route, navigation }) {
           uploadImage({ imgEvent: imgEvent, setUploadProgress })
         ).unwrap();
       }
-
       // Chuyển đổi ngày thành số milliseconds
       const startDateMillis = startDate.getTime();
       const endDateMillis = endDate.getTime();
       const createdAtMillis = new Date().getTime();
-
       const eventData = {
         title: title,
         user_id: userId,
@@ -78,7 +74,6 @@ export default function AddEditEventScreen({ route, navigation }) {
           console.error('Invalid event ID');
           return;
         }
-        
         // Chế độ chỉnh sửa sự kiện
         await dispatch(updateEvent({updatedEvent : eventData, event_id :dataEvent.event_id })).unwrap();
       } else {

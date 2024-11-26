@@ -124,9 +124,7 @@ const SetUpAccountScreen = () => {
       setPasswordError("Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại.");
       return;
     }
-
     setIsLoading(true); // Hiển thị trạng thái đang chạy
-
     try {
       if (authUser) {
         const credential = EmailAuthProvider.credential(
@@ -136,7 +134,6 @@ const SetUpAccountScreen = () => {
         await reauthenticateWithCredential(authUser, credential);
         await updatePassword(authUser, newPassword);
       }
-
       const newData = { passWord: newPassword };
       await dispatch(updateUser({ user_id: user.user_id, newData }));
       Alert.alert("Thành công", "Mật khẩu đã được thay đổi.");
