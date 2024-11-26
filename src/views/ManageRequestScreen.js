@@ -23,7 +23,7 @@ const ManageRequestScreen = () => {
     const requestPending = useSelector((state) => state.request.pending);
     const requestAccepted = useSelector((state) => state.request.accepted);
     const requestRejected = useSelector((state) => state.request.rejected);
-    const [request, setRequest] = useState([requestPending]);
+    const [request, setRequest] = useState(null);
 
 
 
@@ -31,7 +31,11 @@ const ManageRequestScreen = () => {
         // dispatch(startListeningRequestAccepted({}));
         // dispatch(startListeningRequestPending({}));
         // dispatch(startListeningRequestRejected({}));
-    }, []);
+        // console.log("requestPending", requestPending)
+        // console.log("requestAccepted", requestAccepted)
+        // console.log("requestRejected", requestRejected)
+        console.log("request", request)
+    }, [request]);
 
     useEffect(() => {
         if (selectedValue == "pending") {
@@ -79,13 +83,16 @@ const RenderRequestItem = ({ item, index }) => {
     const hashtag = useSelector((state) => state.hashtag[item.hashtag_id]);
     useEffect(() => {
         dispatch(startListeningUserByID({ user_id: item.user_id }));
-        if (item.hashtag_id)
+        if (item.hashtag_id) {
             dispatch(startListeningHashtagById({ hashtag_id: item.hashtag_id }));
+        }
     }, [])
 
     useEffect(() => {
         console.log("hashtag", hashtag)
-    }, [item.hashtag_id])
+        // console.log("item", item)
+        // }, [item.hashtag_id])
+    }, [hashtag])
     const newData = {
         roleid: 2,
     }
@@ -180,7 +187,7 @@ const RenderRequestItem = ({ item, index }) => {
                 style={{
                     padding: 10,
                     margin: 10,
-                    backgroundColor: hashtag[0].hashtag_background,
+                    backgroundColor: hashtag.hashtag_background,
                     flexDirection: 'row',
                     borderRadius: 10,
                     shadowOffset: {
@@ -191,14 +198,14 @@ const RenderRequestItem = ({ item, index }) => {
                     elevation: 5,
                 }}>
                 <Image
-                    source={{ uri: hashtag[0].hashtag_avatar }}
+                    source={{ uri: hashtag.hashtag_avatar }}
                     style={{
                         width: 30,
                         height: 30,
                         borderRadius: 50,
                         marginRight: 15,
                     }} />
-                <Text style={{ alignSelf: "center", color: hashtag[0].hashtag_color }}>{hashtag[0].hashtag_id}</Text>
+                <Text style={{ alignSelf: "center", color: hashtag.hashtag_color }}>{hashtag.hashtag_id}</Text>
 
 
             </View> : null}

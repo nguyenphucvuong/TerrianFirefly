@@ -25,6 +25,14 @@ const initialState = {
 };
 
 const addHashtag = async (hashtagData, hashtagId) => {
+  try {
+    const docRef = doc(db, "Hashtag", hashtagId); // Sử dụng hashtagId để làm ID tài liệu
+    await setDoc(docRef, hashtagData);
+    return { id: hashtagId, ...hashtagData }; // Trả về kết quả với ID vừa thêm
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    throw error;
+  }
 };
 
 // Tạo async thunk để thêm dữ liệu lên Firestore
