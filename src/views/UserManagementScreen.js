@@ -150,7 +150,9 @@ const ReportItem = ({ item, index }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
 
-
+  useEffect(() => {
+console.log("userday ",user)
+  }, [user]);
 
   useEffect(() => {
     // console.log("item.item_type", item.item_type, item.item_id)
@@ -216,10 +218,12 @@ const ReportItem = ({ item, index }) => {
 
   const checkUserCountReport = async () => {
     if (user.report_count > 2) {
-      await dispatch(updateUserState({ user_id: user.user_id, field: "status", value: 2 }));
-    } else {
-      await (updateUserState({ user_id: user.user_id, field: "report_count", value: user.report_count + 1 }));
-      await (updateUserState({ user_id: user.user_id, field: "status", value: 1 }));
+      await dispatch(updateUserState({ user_id: user.user_id, field: "status_user_id", value: 2 }));
+    } else
+    {
+      console.log("vo day")
+      await dispatch(updateUserState({ user_id: user.user_id, field: "report_count", value: user.report_count + 1 }));
+      await dispatch(updateUserState({ user_id: user.user_id, field: "status_user_id", value: 1 }));
     }
   }
 

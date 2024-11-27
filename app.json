@@ -12,7 +12,7 @@
       "color": "#000000"
     },
     "splash": {
-      "image": "https://dashboard.dienthoaivui.com.vn/uploads/wp-content/uploads/2023/04/19.jpg",
+      "image": "./assets/splash_app.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

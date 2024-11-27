@@ -38,7 +38,7 @@ const PersonScreen = ({ isAvatar }) => {
     const isFromAvatar = route.params?.isFromAvatar ?? isAvatar;
 
     //firebase
-    const followUp = useSelector((state) => state.follower.follower);
+    const followUp = useSelector((state) => state.follower.userFollower);
     const followingUsers = useSelector((state) => state.follower.following);
     const dataUser = useSelector((state) => state.user.user);
     const iUser = useSelector((state) => state.user.iUser) || {};
@@ -168,6 +168,8 @@ const PersonScreen = ({ isAvatar }) => {
                 await dispatch(startListeningFollowingUsers({ field: "created_at", currentUserId: user?.user_id }));
                 //tổng số biểu cảm
                 await dispatch(startListeningTotalEmoji({ field: "created_at", currentUserId: user?.user_id }));
+                console.log('test');
+                
 
             } catch (error) {
                 console.error("Error during data fetching: ", error);
@@ -175,7 +177,7 @@ const PersonScreen = ({ isAvatar }) => {
         };
 
         fetchData();
-    }, [isFocused, user?.achie_id, user?.user_id, dispatch]);
+    }, [isFocused, user?.achie_id, user?.user_id]);
  
 
     return (
@@ -307,7 +309,7 @@ const PersonScreen = ({ isAvatar }) => {
                                     <TouchableOpacity
                                         // disabled={isFollow}
                                         activeOpacity={0.6}
-                                        onPress={() => handleFollowButton}
+                                        onPress={handleFollowButton}
                                         style={{
                                             borderColor: "rgba(121,141,218,1)",
                                             borderRadius: 100,

@@ -47,7 +47,9 @@ const PostViewComponent = ({ post, user }) => {
     
     // const [userPost, setUserPost] = useState(null);
     const userPost = useSelector((state) => state.user[userId]);
-    const userAchievement = useSelector((state) => userPost?.achie_id ? state.achievement[userPost.achie_id] : null);
+    const userAchievement = useSelector((state) => state.achievement[userPost?.achie_id]) || null;
+
+    // const userAchievement = useSelector((state) => userPost?.achie_id ? state.achievement[userPost.achie_id] : null);
     // const userAchievement = useSelector((state) => state.achievement[userPost.achie_id] || {});
     // console.log('userAchievement', userAchievement); 
     // console.log('userPost.achie_id', userPost.achie_id);
